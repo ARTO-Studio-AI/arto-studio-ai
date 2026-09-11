@@ -4,19 +4,15 @@ import { notFound } from "next/navigation";
 import NewsletterForm from "@/components/NewsletterForm";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ locale: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale: localeParam } = await params;
-  const locale: Locale = isLocale(localeParam) ? localeParam : "en";
-  const dict = getDictionary(locale).agents;
-  return {
-    title: dict.meta_title,
-    description: dict.meta_description,
-  };
+  const { locale } = await params;
+  return pageMetadata("agents", localeOf(locale));
 }
 
 export default async function AgentsPage({ params }: Props) {

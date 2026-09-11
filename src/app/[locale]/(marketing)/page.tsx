@@ -5,6 +5,8 @@ import { getFeaturedPrompts, getStats } from "@/lib/supabase/queries";
 import { getRecentBlogPosts, type RecentBlogPost } from "@/lib/learn-pages";
 import { CATEGORY_STYLES, type Prompt } from "@/types/prompt";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { getDictionary } from "@/i18n/dictionaries";
 
 /* Round a precise prompt count to a tidy marketing-friendly figure.
@@ -37,6 +39,11 @@ const VERTICALS = [
 
 interface Props {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("home", localeOf(locale));
 }
 
 export default async function HomePage({ params }: Props) {
