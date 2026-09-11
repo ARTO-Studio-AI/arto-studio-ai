@@ -28,7 +28,34 @@ vi.mock("postgres", () => ({ default: () => fakeSql }));
 process.env.DATABASE_URL = "postgres://test:test@localhost/test";
 process.env.ARTO_API_KEY_SALT = "test-salt";
 
-const { consumeTrialCall } = await import("./store");
+const { consumeTrialCall, verifyApiKey } = await import("./store");
+
+describe("ARTO_API_KEY_SALT fail-closed", () => {
+  const saved = { salt: process.env.ARTO_API_KEY_SALT, vercel: process.env.VERCEL_ENV };
+  beforeEach(() => {
+    process.env.ARTO_API_KEY_SALT = saved.salt;
+    process.env.VERCEL_ENV = saved.vercel;
+    fakeSql.calls = [];
+    fakeSql.nextRows = [];
+  });
+
+  it("en produccion sin salt lanza antes de tocar la base", async () => {
+    delete process.env.ARTO_API_KEY_SALT;
+    process.env.VERCEL_ENV = "production";
+    await expect(verifyApiKey("arto_live_abc")).rejects.toThrow(/ARTO_API_KEY_SALT/);
+    expect(fakeSql.calls).toHaveLength(0);
+  });
+
+  it("fuera de produccion sin salt usa el default con warning y sigue", async () => {
+    delete process.env.ARTO_API_KEY_SALT;
+    delete process.env.VERCEL_ENV;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fakeSql.nextRows = [];
+    await expect(verifyApiKey("arto_live_abc")).resolves.toBeNull();
+    expect(fakeSql.calls).toHaveLength(1);
+    expect(warn).toHaveBeenCalled();
+  });
+});
 
 describe("consumeTrialCall", () => {
   beforeEach(() => {

@@ -49,8 +49,31 @@ function getDb() {
   return cached;
 }
 
-function getSalt() {
-  return process.env.ARTO_API_KEY_SALT || "arto-dev-salt-v1-change-me";
+const DEV_SALT = "arto-dev-salt-v1-change-me";
+let warnedDevSalt = false;
+
+/**
+ * Salt del HMAC de las API keys. Fail-closed en produccion (2026-09-11, Fase 1B):
+ * si ARTO_API_KEY_SALT falta en Vercel, antes se caia al default publico del repo
+ * y cualquier key firmada con ese salt validaba. Ahora lanza. En dev se conserva
+ * el default con un warning una sola vez. ARTO_API_KEY_SALT existe en prod
+ * (verificado el 10 sep 2026).
+ */
+function getSalt(): string {
+  const salt = process.env.ARTO_API_KEY_SALT;
+  if (salt) return salt;
+  const isProd =
+    process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+  if (isProd) {
+    throw new Error(
+      "ARTO_API_KEY_SALT is not set. Refusing to hash API keys with the dev salt in production."
+    );
+  }
+  if (!warnedDevSalt) {
+    warnedDevSalt = true;
+    console.warn("[clients/store] ARTO_API_KEY_SALT not set; using the dev salt (dev only).");
+  }
+  return DEV_SALT;
 }
 
 function hashKey(rawKey: string): string {
