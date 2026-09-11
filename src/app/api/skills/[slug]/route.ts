@@ -61,6 +61,27 @@ export async function POST(
     request.headers.get("x-real-ip") ??
     "unknown";
 
+  // El body se valida ANTES de autenticar: desde la Fase 1B requireClientAuth consume
+  // una llamada del trial de forma atomica, y un 400 por JSON o campos invalidos
+  // no debe costarle una llamada al cliente.
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" },
+      { status: 400, headers: corsHeaders }
+    );
+  }
+
+  const validation = skill.inputValidator(body);
+  if (!validation.valid) {
+    return NextResponse.json(
+      { error: validation.error, field: validation.field },
+      { status: 400, headers: corsHeaders }
+    );
+  }
+
   let clientId: string | null = null;
 
   if (skill.public) {
@@ -78,24 +99,6 @@ export async function POST(
       return NextResponse.json(body, { status: auth.status, headers: corsHeaders });
     }
     clientId = auth.client.id;
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400, headers: corsHeaders }
-    );
-  }
-
-  const validation = skill.inputValidator(body);
-  if (!validation.valid) {
-    return NextResponse.json(
-      { error: validation.error, field: validation.field },
-      { status: 400, headers: corsHeaders }
-    );
   }
 
   const ctx: SkillContext = { clientId, ip };

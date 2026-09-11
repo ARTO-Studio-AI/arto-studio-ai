@@ -1,7 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { loadKnowledge } from "@/lib/knowledge";
 import { saveSkillTrace } from "@/lib/trace-store";
-import { incrementTrialCallsUsed } from "@/lib/clients/store";
 import { getSkill } from "./registry";
 import type { SkillContext, SkillResponse } from "./types";
 
@@ -136,10 +135,8 @@ export async function runSkill<TIn, TOut>(
       email: null,
     });
 
-    // Misma razon: el contador del trial se espera para que quede escrito.
-    if (ctx.clientId) {
-      await incrementTrialCallsUsed(ctx.clientId);
-    }
+    // El contador del trial ya no se incrementa aqui: requireClientAuth lo consume
+    // de forma atomica (consumeTrialCall) antes de llegar al engine (Fase 1B).
 
     // Structured log for Vercel logs
     console.log(
@@ -202,9 +199,7 @@ async function finishWithFallback<TIn, TOut>(
     email: null,
   });
 
-  if (ctx.clientId) {
-    await incrementTrialCallsUsed(ctx.clientId);
-  }
+  // Contador del trial: consumido en requireClientAuth (ver arriba).
 
   console.log(
     JSON.stringify({

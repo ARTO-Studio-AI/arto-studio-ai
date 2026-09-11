@@ -242,23 +242,45 @@ export async function updateClient(
   }
 }
 
+export type TrialConsumeResult =
+  | { ok: true; used: number; limit: number | null }
+  | { ok: false; reason: "exhausted" | "unavailable" };
+
 /**
- * Atomically increment trial_calls_used for a client. Returns the new value,
- * or null on failure. Used by the skills engine after a successful gated call.
+ * Consume una llamada del trial en un solo UPDATE condicionado (2026-09-11, Fase 1B).
+ *
+ * Antes el flujo era check en requireClientAuth + increment en el engine, en dos
+ * queries separadas: dos requests concurrentes leian trial_calls_used = 4, ambas
+ * pasaban el check y ambas incrementaban (6 llamadas con limite 5). Aqui el WHERE
+ * hace el check y el RETURNING confirma el increment en la misma sentencia; si no
+ * regresa fila, el limite ya estaba agotado (o el cliente no existe / esta inactivo).
+ *
+ * Para clientes sin limite (trial_calls_limit IS NULL) el contador sigue subiendo,
+ * igual que antes, para tener el total de llamadas por cliente.
  */
-export async function incrementTrialCallsUsed(id: string): Promise<number | null> {
+export async function consumeTrialCall(id: string): Promise<TrialConsumeResult> {
   const sql = getDb();
-  if (!sql) return null;
+  if (!sql) return { ok: false, reason: "unavailable" };
   try {
     const [row] = await sql`
       UPDATE clients
       SET trial_calls_used = trial_calls_used + 1
       WHERE id = ${id}
-      RETURNING trial_calls_used
+        AND active = TRUE
+        AND (trial_calls_limit IS NULL OR trial_calls_used < trial_calls_limit)
+      RETURNING trial_calls_used, trial_calls_limit
     `;
-    return row ? (row.trial_calls_used as number) : null;
+    if (!row) return { ok: false, reason: "exhausted" };
+    return {
+      ok: true,
+      used: row.trial_calls_used as number,
+      limit:
+        row.trial_calls_limit === null || row.trial_calls_limit === undefined
+          ? null
+          : (row.trial_calls_limit as number),
+    };
   } catch (error) {
-    console.error("[clients/store] incrementTrialCallsUsed failed:", error);
-    return null;
+    console.error("[clients/store] consumeTrialCall failed:", error);
+    return { ok: false, reason: "unavailable" };
   }
 }
