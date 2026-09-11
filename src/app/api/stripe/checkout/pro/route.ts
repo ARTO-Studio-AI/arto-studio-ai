@@ -25,7 +25,7 @@ export const maxDuration = 30;
  * table (Supabase Auth users). Same Stripe account, same shared webhook,
  * different data model — cleaner as two routes.
  *
- * Stripe webhook (configured at library.artostudio.ai/api/stripe/webhook)
+ * Stripe webhook (configured at NEXT_PUBLIC_SITE_URL/api/stripe/webhook, creative.artostudio.ai)
  * receives the checkout.session.completed event and updates
  * profiles.tier = 'pro'. No webhook changes needed here because both
  * domains write to the same Supabase profiles table.

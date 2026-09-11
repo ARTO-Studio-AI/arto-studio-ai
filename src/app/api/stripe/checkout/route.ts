@@ -84,7 +84,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const origin = absoluteOrigin(request);
+  // D6: los redirects vuelven al dominio canónico; el host de la petición solo
+  // sirve de respaldo cuando NEXT_PUBLIC_SITE_URL no está (dev local).
+  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || absoluteOrigin(request);
 
   // Stripe form-encoded payload (their API expects x-www-form-urlencoded)
   const params = new URLSearchParams();
