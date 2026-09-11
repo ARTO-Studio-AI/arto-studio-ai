@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { Badge, Button, Card } from "@/components/ui";
 
 /* Precios segun la decision D7 de Victor (11 sep 2026): Free $0 con 3 prompts al
@@ -22,13 +23,8 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale: localeParam } = await params;
-  const locale: Locale = isLocale(localeParam) ? localeParam : "en";
-  const dict = getDictionary(locale).pricing;
-  return {
-    title: dict.meta_title,
-    description: dict.meta_description,
-  };
+  const { locale } = await params;
+  return pageMetadata("pricing", localeOf(locale));
 }
 
 function mxn(usd: number): string {

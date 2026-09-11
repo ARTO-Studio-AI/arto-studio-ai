@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import path from "path";
 import { createClient } from "@/lib/clients/store";
 import { sendTrialWelcomeEmail } from "@/lib/email";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -22,36 +23,22 @@ const TRIAL_CALLS = 5;
 const TRIAL_ALLOWED_SKILLS = ["brand-positioning"];
 const TRIAL_RATE_LIMIT = 10; // per hour (still hit by trial limit first at 5 total)
 
-/* ── Trivial in-memory rate limit to prevent signup spam from one IP ── */
+/* ── Rate limit por IP para frenar spam de signups (3/hora, persistente en Postgres) ── */
 
-const signupRateMap = new Map<string, number[]>();
 const SIGNUP_RATE_LIMIT = 3; // 3 signups per hour per IP
-const SIGNUP_WINDOW_MS = 60 * 60 * 1000;
-
-function isSignupRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = signupRateMap.get(ip) ?? [];
-  const recent = timestamps.filter((t) => now - t < SIGNUP_WINDOW_MS);
-  signupRateMap.set(ip, recent);
-  if (recent.length >= SIGNUP_RATE_LIMIT) return true;
-  recent.push(now);
-  return false;
-}
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
 export async function POST(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
+  const ip = getClientIp(request);
 
-  if (isSignupRateLimited(ip)) {
+  const rl = await checkRateLimit(`signup:ip:${ip}`, SIGNUP_RATE_LIMIT);
+  if (rl.limited) {
     return NextResponse.json(
       { error: "Too many signups from this network. Try again in an hour." },
-      { status: 429, headers: corsHeaders }
+      { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.retryAfterSec) } }
     );
   }
 

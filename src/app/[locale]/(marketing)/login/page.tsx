@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import LoginForm from "./LoginForm";
 
-export default async function LoginPage() {
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("login", localeOf(locale));
+}
+
+export default async function LoginPage({ params }: Props) {
+  const { locale: localeParam } = await params;
+  const locale = localeOf(localeParam);
   const sb = await createClient();
   const {
     data: { user },
@@ -16,8 +29,8 @@ export default async function LoginPage() {
         Sign in to save favorites, manage collections, and unlock the Pro
         catalog.
       </p>
-      <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6">
-        <LoginForm />
+      <div className="mt-8 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-6">
+        <LoginForm locale={locale} />
       </div>
     </div>
   );

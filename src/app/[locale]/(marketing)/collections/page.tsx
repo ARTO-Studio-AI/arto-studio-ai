@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { t, type Lang } from "@/lib/i18n";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import CreateCollectionForm from "./CreateCollectionForm";
 
 interface Props {
@@ -10,6 +12,11 @@ interface Props {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("collections", localeOf(locale));
+}
 
 export default async function CollectionsPage({ params }: Props) {
   const { locale: localeParam } = await params;

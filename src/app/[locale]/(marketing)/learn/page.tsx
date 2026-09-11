@@ -6,6 +6,7 @@ import type { LearnPageConfig } from "@/lib/learn-config";
 import { getAllLearnPages } from "@/lib/learn-pages";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { Button, Card } from "@/components/ui";
 
 // Re-fetch dynamic blog posts every 60s so newly published Content
@@ -18,14 +19,8 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale: localeParam } = await params;
-  const locale: Locale = isLocale(localeParam) ? localeParam : "en";
-  const dict = getDictionary(locale).learn;
-  return {
-    title: dict.meta_title,
-    description: dict.meta_description,
-    alternates: { canonical: `/${locale}/learn` },
-  };
+  const { locale } = await params;
+  return pageMetadata("learn", localeOf(locale));
 }
 
 export default async function LearnIndex({ params }: Props) {

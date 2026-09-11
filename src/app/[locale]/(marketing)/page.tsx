@@ -5,6 +5,8 @@ import { getFeaturedPrompts, getStats } from "@/lib/supabase/queries";
 import { getRecentBlogPosts, type RecentBlogPost } from "@/lib/learn-pages";
 import { CATEGORY_STYLES, type Prompt } from "@/types/prompt";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { getDictionary } from "@/i18n/dictionaries";
 import { Badge, Button, Card } from "@/components/ui";
 import Testimonials from "@/components/Testimonials";
@@ -50,6 +52,11 @@ function SectionHead({ eyebrow, title, className = "" }: { eyebrow?: string; tit
       <span className="accent-rule mt-4" />
     </div>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("home", localeOf(locale));
 }
 
 export default async function HomePage({ params }: Props) {

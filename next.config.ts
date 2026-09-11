@@ -10,7 +10,30 @@ const SUPABASE_HOSTNAME = new URL(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
 ).hostname;
 
+/* Canonical domain (decision D6, 10 sep 2026). Every legacy host 301s here
+ * keeping path and query. Vercel preview deployments have hosts like
+ * arto-studio-ai-git-<branch>-<team>.vercel.app which do not match the exact
+ * regexes below, so previews keep working without a redirect. */
+const CANONICAL_HOST = "creative.artostudio.ai";
+const LEGACY_HOSTS = ["arto-studio-ai.vercel.app", "library.artostudio.ai"];
+
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      ...LEGACY_HOSTS.map((host) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value: host.replace(/\./g, "\\.") }],
+        destination: `https://${CANONICAL_HOST}/:path*`,
+        statusCode: 301 as const,
+      })),
+      /* /upgrade era el flujo Starter legacy ($99/$299/$799 y "trial calls") que ya
+       * no se vende (D7, 11 sep 2026). 301 a /pricing; el proxy manda de ahi a
+       * /<locale>/pricing segun el idioma del visitante. El API
+       * /api/stripe/checkout sigue vivo para los clientes existentes. */
+      { source: "/upgrade", destination: "/pricing", statusCode: 301 as const },
+      { source: "/upgrade/:path*", destination: "/pricing", statusCode: 301 as const },
+    ];
+  },
   images: {
     remotePatterns: [
       {
@@ -19,16 +42,6 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
-  },
-  async redirects() {
-    return [
-      /* /upgrade era el flujo Starter legacy ($99/$299/$799 y "trial calls") que ya
-       * no se vende (D7, 11 sep 2026). 301 a /pricing; el proxy manda de ahi a
-       * /<locale>/pricing segun el idioma del visitante. El API
-       * /api/stripe/checkout sigue vivo para los clientes existentes. */
-      { source: "/upgrade", destination: "/pricing", statusCode: 301 },
-      { source: "/upgrade/:path*", destination: "/pricing", statusCode: 301 },
-    ];
   },
 };
 

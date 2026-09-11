@@ -1,19 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AI_GROUPS, AI_TOOLS, AI_TOOLS_UPDATED, type AiGroup } from "@/types/prompt";
 import { isLocale, type Locale } from "@/i18n/config";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { Badge, Button, Card } from "@/components/ui";
-
-export const metadata = {
-  title: "AI Tools Reference — ARTO Studio AI",
-  description: "Reference catalog of generative AI tools, grouped by output modality.",
-};
-
-const ORDER: AiGroup[] = ["text", "image", "video", "music", "voice", "any"];
 
 interface Props {
   params: Promise<{ locale: string }>;
 }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("tools", localeOf(locale));
+}
+
+const ORDER: AiGroup[] = ["text", "image", "video", "music", "voice", "any"];
 
 export default async function ToolsPage({ params }: Props) {
   const { locale: localeParam } = await params;

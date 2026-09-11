@@ -17,9 +17,16 @@ import {
   DIFFICULTY_LABEL_ES,
 } from "@/lib/i18n";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("favorites", localeOf(locale));
 }
 
 export default async function FavoritesPage({ params }: Props) {

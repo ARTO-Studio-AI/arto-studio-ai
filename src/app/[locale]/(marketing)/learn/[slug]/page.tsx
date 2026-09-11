@@ -7,6 +7,7 @@ import { LEARN_PAGES, type LearnPageConfig } from "@/lib/learn-config";
 import { getLearnPageBySlug } from "@/lib/learn-pages";
 import { LOCALES, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
 import { Button, Card } from "@/components/ui";
 
 // Re-fetch dynamic blog posts every 60s. Literal required — segment
@@ -89,16 +90,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: localeParam, slug } = await params;
   const page = await getPage(slug);
   if (!page) return {};
-  const locale: Locale = isLocale(localeParam) ? localeParam : "en";
-  return {
-    title: pickTitle(page, locale),
-    description: pickMeta(page, locale),
-    alternates: { canonical: `/${locale}/learn/${page.slug}` },
-    openGraph: {
-      title: pickTitle(page, locale),
-      description: pickMeta(page, locale),
-    },
-  };
+  const locale = localeOf(localeParam);
+  return buildMetadata({
+    locale,
+    path: `/learn/${page.slug}`,
+    title: withBrand(pickTitle(page, locale)),
+    description: clampDescription(pickMeta(page, locale)),
+  });
 }
 
 export default async function LearnSlugPage({ params }: Props) {

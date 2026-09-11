@@ -25,6 +25,8 @@ import {
   VERTICAL_LABEL_ES,
 } from "@/lib/i18n";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import SmartSearch from "./SmartSearch";
 import DifficultyChip from "@/components/DifficultyChip";
 import { Badge } from "@/components/ui";
@@ -48,6 +50,11 @@ interface SearchParams {
 interface Props {
   params: Promise<{ locale: string }>;
   searchParams: Promise<SearchParams>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("prompts", localeOf(locale));
 }
 
 export default async function CatalogPage({ params, searchParams }: Props) {
