@@ -51,6 +51,15 @@ export default function Button(props: LinkProps | NativeProps) {
         </a>
       );
     }
+    // Las rutas de API (checkout de Stripe, etc.) no son paginas: un <Link> las
+    // prefetcharia como RSC y crearia sesiones de checkout sin clic (H-42, 11 sep 2026).
+    if (href.startsWith("/api/")) {
+      return (
+        <a href={href} className={cls}>
+          {children}
+        </a>
+      );
+    }
     return (
       <Link href={href} className={cls} {...rest}>
         {children}
