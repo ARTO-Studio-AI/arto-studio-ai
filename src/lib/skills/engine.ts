@@ -122,8 +122,10 @@ export async function runSkill<TIn, TOut>(
 
     const latencyMs = Date.now() - startTime;
 
-    // Fire-and-forget persistence
-    void saveSkillTrace({
+    // H-34 (2026-09-11): antes era `void saveSkillTrace(...)`. En Vercel la funcion se
+    // congela al responder y la promesa nunca terminaba: cero trazas en skill_traces.
+    // Se espera; saveSkillTrace nunca lanza (regresa false y loguea).
+    await saveSkillTrace({
       skill_slug: slug,
       client_id: ctx.clientId,
       input: input as unknown,
@@ -132,13 +134,11 @@ export async function runSkill<TIn, TOut>(
       model,
       latency_ms: latencyMs,
       email: null,
-    }).catch(() => {
-      /* silently swallow — console trace remains */
     });
 
-    // Fire-and-forget trial-call increment (for clients with trial_calls_limit != null)
+    // Misma razon: el contador del trial se espera para que quede escrito.
     if (ctx.clientId) {
-      void incrementTrialCallsUsed(ctx.clientId).catch(() => {});
+      await incrementTrialCallsUsed(ctx.clientId);
     }
 
     // Structured log for Vercel logs
@@ -166,13 +166,15 @@ export async function runSkill<TIn, TOut>(
   }
 }
 
-function finishWithFallback<TIn, TOut>(
+// async solo porque ahora se esperan la traza y el contador (H-34); los callers ya
+// hacian `return finishWithFallback(...)` dentro de una funcion async, no cambian.
+async function finishWithFallback<TIn, TOut>(
   slug: string,
   input: TIn,
   ctx: SkillContext,
   startTime: number,
   reason: string
-): SkillResponse<TOut> {
+): Promise<SkillResponse<TOut>> {
   const skill = getSkill(slug)!;
 
   if (!skill.fallbackFn) {
@@ -188,7 +190,8 @@ function finishWithFallback<TIn, TOut>(
 
   const latencyMs = Date.now() - startTime;
 
-  void saveSkillTrace({
+  // H-34: se espera (ver arriba).
+  await saveSkillTrace({
     skill_slug: slug,
     client_id: ctx.clientId,
     input: input as unknown,
@@ -197,10 +200,10 @@ function finishWithFallback<TIn, TOut>(
     model: reason,
     latency_ms: latencyMs,
     email: null,
-  }).catch(() => {});
+  });
 
   if (ctx.clientId) {
-    void incrementTrialCallsUsed(ctx.clientId).catch(() => {});
+    await incrementTrialCallsUsed(ctx.clientId);
   }
 
   console.log(
