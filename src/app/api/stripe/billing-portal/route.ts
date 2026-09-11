@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { SITE_URL } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";

@@ -227,6 +227,8 @@ export default async function AccountPage({ params, searchParams }: Props) {
           </Link>
         )}
         {hasStripeCustomer && (
+          // Ruta API con redirect 303 a Stripe: <Link> la prefetchearia y crearia sesiones del portal.
+          // eslint-disable-next-line @next/next/no-html-link-for-pages
           <a
             href="/api/stripe/billing-portal"
             className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-700 hover:border-neutral-500"
