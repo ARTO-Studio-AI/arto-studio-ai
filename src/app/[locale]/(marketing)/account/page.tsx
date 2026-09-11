@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmailAsync } from "@/lib/auth";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { UpgradePendingNotice } from "./UpgradePendingNotice";
 
 /* Account page. Shows email, plan, subscription state and billing portal.
@@ -68,6 +70,15 @@ const COPY: Record<
 interface Props {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ upgraded?: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("account", localeOf(locale));
 }
 
 export default async function AccountPage({ params, searchParams }: Props) {

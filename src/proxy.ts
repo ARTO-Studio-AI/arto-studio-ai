@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { LOCALES, DEFAULT_LOCALE, type Locale, isLocale } from "@/i18n/config";
+// Request header the root layout reads to set <html lang>. The root layout
+// sits above [locale] so it cannot read the segment param; the proxy sees
+// the path on every request and forwards the resolved locale here.
+import { LOCALE_HEADER } from "@/lib/seo";
 
 /* Next.js 16 renamed middleware → proxy. This file does two things on every
  * request:
@@ -39,6 +43,8 @@ const LOCALE_EXEMPT_PREFIXES = [
   "/brand/",
   "/sitemap.xml",
   "/robots.txt",
+  "/opengraph-image",
+  "/twitter-image",
 ];
 
 function isLocaleExempt(pathname: string): boolean {
@@ -87,13 +93,30 @@ function localeRedirect(request: NextRequest): NextResponse | null {
   return res;
 }
 
+/* Locale of the current request from its first path segment. Routes outside
+ * the [locale] tree (/roast, /admin, ...) resolve to the default locale. */
+function localeOfPath(pathname: string): Locale {
+  const firstSeg = pathname.split("/").filter(Boolean)[0];
+  return isLocale(firstSeg) ? firstSeg : DEFAULT_LOCALE;
+}
+
+/* NextResponse.next() forwarding the (possibly cookie-mutated) request
+ * headers plus the resolved locale header. */
+function nextWithLocale(request: NextRequest, locale: Locale): NextResponse {
+  const headers = new Headers(request.headers);
+  headers.set(LOCALE_HEADER, locale);
+  return NextResponse.next({ request: { headers } });
+}
+
 export async function proxy(request: NextRequest) {
   // 1. Locale redirect (early exit if applicable).
   const localeJump = localeRedirect(request);
   if (localeJump) return localeJump;
 
+  const locale = localeOfPath(request.nextUrl.pathname);
+
   // 2. Supabase session refresh.
-  let response = NextResponse.next({ request });
+  let response = nextWithLocale(request, locale);
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -104,7 +127,7 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = nextWithLocale(request, locale);
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );

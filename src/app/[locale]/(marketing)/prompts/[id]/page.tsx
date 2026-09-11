@@ -20,6 +20,8 @@ import {
   VERTICAL_LABEL_ES,
 } from "@/lib/i18n";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
 import CopyButton from "./CopyButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import FavoriteButton from "./FavoriteButton";
@@ -29,6 +31,48 @@ interface Props {
 }
 
 const TIER_RANK: Record<string, number> = { free: 0, pro: 1, enterprise: 2 };
+
+/* Title and description from the prompt row; the prompt body itself never
+ * goes into the description (Pro content stays behind the gate). ogImage is
+ * null on purpose so the segment's own opengraph-image.tsx / twitter-image.tsx
+ * keep rendering the per-prompt card. */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, id } = await params;
+  const locale = localeOf(localeParam);
+  let prompt: Awaited<ReturnType<typeof getPrompt>> = null;
+  try {
+    prompt = await getPrompt(id);
+  } catch {
+    prompt = null;
+  }
+  if (!prompt) return {};
+
+  const title = locale === "es" ? prompt.title_es : prompt.title_en;
+  const catLabel =
+    locale === "es"
+      ? VERTICAL_LABEL_ES[prompt.category] ?? VERTICALS[prompt.category].label_en
+      : VERTICALS[prompt.category].label_en;
+  const diffLabel =
+    locale === "es"
+      ? DIFFICULTY_LABEL_ES[prompt.difficulty] ?? prompt.difficulty
+      : humanize(prompt.difficulty);
+  // use_case only exists in English in the prompts table, so Spanish gets a
+  // sentence built from the localized title, vertical and difficulty.
+  const fallback =
+    locale === "es"
+      ? `${title}: prompt de IA para ${catLabel} (${diffLabel}) en la biblioteca de ARTO Studio AI.`
+      : `${title}: AI prompt for ${catLabel} (${diffLabel}) in the ARTO Studio AI library.`;
+  const useCase = locale === "en" ? prompt.use_case?.trim() : "";
+  const description = clampDescription(useCase || fallback);
+
+  return buildMetadata({
+    locale,
+    path: `/prompts/${prompt.id}`,
+    title: withBrand(title),
+    description,
+    ogImage: null,
+  });
+}
 
 export default async function PromptDetail({ params }: Props) {
   const { locale: localeParam, id } = await params;

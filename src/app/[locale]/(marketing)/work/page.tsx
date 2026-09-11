@@ -3,19 +3,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { locale: localeParam } = await params;
-  const locale: Locale = isLocale(localeParam) ? localeParam : "en";
-  const dict = getDictionary(locale).work;
-  return {
-    title: dict.meta_title,
-    description: dict.meta_description,
-  };
+  const { locale } = await params;
+  return pageMetadata("work", localeOf(locale));
 }
 
 // Portfolio data from ARTO Portafolio 2026 (Notion).
