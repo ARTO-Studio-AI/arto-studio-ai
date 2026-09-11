@@ -15,6 +15,11 @@ vi.mock("./store", () => ({
   consumeTrialCall: (id: string) => consumeTrialCall(id),
 }));
 
+const checkRateLimit = vi.fn();
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: (key: string, limit: number) => checkRateLimit(key, limit),
+}));
+
 const { requireClientAuth } = await import("./auth");
 
 function client(overrides: Partial<Client> = {}): Client {
@@ -45,6 +50,33 @@ describe("requireClientAuth", () => {
   beforeEach(() => {
     verifyApiKey.mockReset();
     consumeTrialCall.mockReset();
+    checkRateLimit.mockReset();
+    checkRateLimit.mockResolvedValue({ limited: false, count: 1, limit: 100, retryAfterSec: 10 });
+  });
+
+  it("usa el rate limit persistente con la key client:<id> y el limite del cliente", async () => {
+    const c = client({ rate_limit_per_hour: 7 });
+    verifyApiKey.mockResolvedValue(c);
+    consumeTrialCall.mockResolvedValue({ ok: true, used: 1, limit: 5 });
+
+    await requireClientAuth(request(), "brand-positioning");
+
+    expect(checkRateLimit).toHaveBeenCalledWith(`client:${c.id}`, 7);
+  });
+
+  it("un 429 por hora no gasta una llamada del trial", async () => {
+    verifyApiKey.mockResolvedValue(client());
+    checkRateLimit.mockResolvedValue({ limited: true, count: 101, limit: 100, retryAfterSec: 10 });
+
+    const result = await requireClientAuth(request(), "brand-positioning");
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.status).toBe(429);
+      expect(result.error).toMatch(/Rate limit exceeded/);
+      expect(result.upgrade_url).toBeUndefined();
+    }
+    expect(consumeTrialCall).not.toHaveBeenCalled();
   });
 
   it("consume una llamada y regresa el contador actualizado", async () => {

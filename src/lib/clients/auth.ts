@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { verifyApiKey, consumeTrialCall, type Client } from "./store";
 
 /**
@@ -21,22 +22,6 @@ export type AuthResult =
       /** Present on 429 when the limit is a lifetime trial exhaustion, not an hourly rate limit. */
       upgrade_url?: string;
     };
-
-/* In-memory rate limiter, per client. Resets on serverless instance restart.
- * TODO: move to Redis/DB when we need accurate global limits. */
-const clientRateMap = new Map<string, number[]>();
-const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-
-function isRateLimited(clientId: string, limit: number): boolean {
-  const now = Date.now();
-  const timestamps = clientRateMap.get(clientId) ?? [];
-  const recent = timestamps.filter((t) => now - t < RATE_WINDOW_MS);
-  clientRateMap.set(clientId, recent);
-
-  if (recent.length >= limit) return true;
-  recent.push(now);
-  return false;
-}
 
 export async function requireClientAuth(
   request: NextRequest,
@@ -92,9 +77,10 @@ export async function requireClientAuth(
     return exhausted();
   }
 
-  // Rate limit per client (hourly). Va antes del consumo para que un 429 por hora
-  // no gaste una llamada del trial.
-  if (isRateLimited(client.id, client.rate_limit_per_hour)) {
+  // Rate limit per client (hourly, persistente en Postgres). Va antes del consumo
+  // para que un 429 por hora no gaste una llamada del trial.
+  const rl = await checkRateLimit(`client:${client.id}`, client.rate_limit_per_hour);
+  if (rl.limited) {
     return {
       ok: false,
       status: 429,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { config } from "dotenv";
 import path from "path";
 import postgres from "postgres";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -33,7 +34,18 @@ export async function OPTIONS() {
  * Associates an email with a brand roast for lead capture.
  * Stores in DB if available, always logs to console.
  */
+// 10/hora por IP, persistente en Postgres (antes no habia ningun limite aqui).
+const RATE_LIMIT = 10;
+
 export async function POST(request: NextRequest) {
+  const rl = await checkRateLimit(`roast-email:ip:${getClientIp(request)}`, RATE_LIMIT);
+  if (rl.limited) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Try again later.", retryAfter: rl.retryAfterSec },
+      { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.retryAfterSec) } }
+    );
+  }
+
   let body: { email?: string; brandName?: string };
   try {
     body = await request.json();

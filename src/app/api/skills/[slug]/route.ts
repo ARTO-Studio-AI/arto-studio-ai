@@ -5,6 +5,7 @@ import "@/lib/skills"; // side-effect: register all skills
 import { getSkill } from "@/lib/skills/registry";
 import { runSkill, SkillNotFoundError, SkillExecutionError } from "@/lib/skills/engine";
 import { requireClientAuth } from "@/lib/clients/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { SkillContext } from "@/lib/skills/types";
 
 config({
@@ -24,21 +25,9 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
-/* ── Public skill rate limiter (per IP) ────────────────── */
+/* ── Public skill rate limiter (per IP, 10/hora, persistente; ver lib/rate-limit) ── */
 
-const publicRateMap = new Map<string, number[]>();
 const PUBLIC_RATE_LIMIT = 10;
-const PUBLIC_RATE_WINDOW_MS = 60 * 60 * 1000;
-
-function isIpRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = publicRateMap.get(ip) ?? [];
-  const recent = timestamps.filter((t) => now - t < PUBLIC_RATE_WINDOW_MS);
-  publicRateMap.set(ip, recent);
-  if (recent.length >= PUBLIC_RATE_LIMIT) return true;
-  recent.push(now);
-  return false;
-}
 
 /* ── POST /api/skills/{slug} ───────────────────────────── */
 
@@ -56,10 +45,7 @@ export async function POST(
     );
   }
 
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
+  const ip = getClientIp(request);
 
   // El body se valida ANTES de autenticar: desde la Fase 1B requireClientAuth consume
   // una llamada del trial de forma atomica, y un 400 por JSON o campos invalidos
@@ -85,10 +71,11 @@ export async function POST(
   let clientId: string | null = null;
 
   if (skill.public) {
-    if (isIpRateLimited(ip)) {
+    const rl = await checkRateLimit(`skill:${slug}:ip:${ip}`, PUBLIC_RATE_LIMIT);
+    if (rl.limited) {
       return NextResponse.json(
-        { error: "Rate limit exceeded. Try again later.", retryAfter: 3600 },
-        { status: 429, headers: corsHeaders }
+        { error: "Rate limit exceeded. Try again later.", retryAfter: rl.retryAfterSec },
+        { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.retryAfterSec) } }
       );
     }
   } else {
