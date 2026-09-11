@@ -16,16 +16,19 @@ function buildHtml(unsubscribeUrl: string, data: { featured: any[]; topQueries: 
 }
 
 export async function GET(request: NextRequest) {
+  // Auth del cron: Vercel manda `Authorization: Bearer <CRON_SECRET>`. Falla cerrado:
+  // sin CRON_SECRET configurado la ruta responde 401 y no manda nada, en vez de quedar
+  // abierta a cualquiera que la llame. CRON_SECRET se crea en Vercel el 2026-09-11 (D5).
+  const auth = request.headers.get("authorization") ?? "";
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
   }
   const resend = new Resend(process.env.RESEND_API_KEY);
-  // Cron auth: Vercel sends a header with the cron secret. Reject if missing.
-  const auth = request.headers.get("authorization") ?? "";
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
 
   const admin = createAdminClient();
 

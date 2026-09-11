@@ -1,3 +1,9 @@
+> **Nota del 2026-09-11.** Este documento es **histórico** (abril 2026) y ya no es la fuente de
+> verdad. El estado vivo del trabajo está en el hub de Notion **«ARTO Studio AI Web»** y el plan
+> del sprint en Drive (`260910 ASAI plan de trabajo sistema y sprint 1.md`). Las decisiones que el
+> código obedece están en `docs/DECISIONES.md`. Lo de abajo se conserva como referencia de lo que
+> se pensó en abril; no lo uses para saber qué está hecho hoy.
+
 # ARTO Studio AI — Roadmap & session handoff
 
 This document is the source of truth for what's done, what's in progress, and what comes next. Any new Claude session (local, Dispatch, Mac Mini) should read this first to get oriented without needing the previous conversation.

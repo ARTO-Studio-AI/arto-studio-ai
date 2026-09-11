@@ -20,9 +20,9 @@ import { applyVoiceScrub } from "@/lib/voice";
  */
 
 const MAX_COUNT = 10;
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5";
+const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5";
 const PRICING: Record<string, { input: number; output: number }> = {
-  "claude-sonnet-4-5": { input: 3.0, output: 15.0 },
+  "claude-sonnet-5": { input: 2.0, output: 10.0 },
   "claude-haiku-4-5": { input: 0.8, output: 4.0 },
   "claude-opus-4-5": { input: 15.0, output: 75.0 },
 };
@@ -294,7 +294,6 @@ export async function POST(request: NextRequest) {
   const resp = await anth.messages.create({
     model: MODEL,
     max_tokens: 8000,
-    temperature: 0.7,
     system: SYSTEM_BASE,
     messages: [
       {
@@ -322,7 +321,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Claude returned no items array" }, { status: 502 });
   }
 
-  const pricing = PRICING[MODEL] ?? PRICING["claude-sonnet-4-5"];
+  const pricing = PRICING[MODEL] ?? PRICING["claude-sonnet-5"];
   const totalCost =
     (resp.usage.input_tokens / 1_000_000) * pricing.input +
     (resp.usage.output_tokens / 1_000_000) * pricing.output;
