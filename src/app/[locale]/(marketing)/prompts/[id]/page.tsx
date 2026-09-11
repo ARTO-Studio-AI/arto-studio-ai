@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPrompt } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
+import { getSubject, getUsed, isUnlimitedTier, openForTier } from "@/lib/prompt-limit";
+import PromptQuota from "@/components/PromptQuota";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -23,6 +26,7 @@ import { isLocale, type Locale } from "@/i18n/config";
 import CopyButton from "./CopyButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import FavoriteButton from "./FavoriteButton";
+import PromptLimitReached from "./PromptLimitReached";
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -58,6 +62,29 @@ export default async function PromptDetail({ params }: Props) {
 
   const isLocked = (TIER_RANK[prompt.tier] ?? 0) > (TIER_RANK[userTier] ?? 0);
 
+  /* Contador free (D7): abrir un prompt cuenta; 3 al dia para free y anonimos.
+   * Se comprueba en el servidor antes de renderizar el cuerpo. Un prompt Pro
+   * bloqueado para free no cuenta: no se ve el cuerpo. */
+  let limitHit = false;
+  let resetsAtUtc = "";
+  let quotaUsed: number | null = null;
+  if (!isUnlimitedTier(userTier)) {
+    const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
+    const subject = getSubject({
+      vid: cookieStore.get("asai_vid")?.value,
+      userId: user?.id,
+      ip: hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip"),
+    });
+    if (isLocked) {
+      quotaUsed = await getUsed(subject);
+    } else {
+      const res = await openForTier(userTier, subject, prompt.id);
+      limitHit = !res.allowed;
+      resetsAtUtc = res.resetsAtUtc;
+      quotaUsed = res.used;
+    }
+  }
+
   const title = lang === "es" ? prompt.title_es : prompt.title_en;
   const body = lang === "es" ? prompt.prompt_es : prompt.prompt_en;
   const useCase = prompt.use_case;
@@ -77,11 +104,34 @@ export default async function PromptDetail({ params }: Props) {
     : diff.label;
   const aiGroupLabel = lang === "es" ? AI_GROUP_LABEL_ES[aiGroup] ?? aiInfo.label : aiInfo.label;
 
+  if (limitHit) {
+    return (
+      <article className="mx-auto max-w-3xl px-6 py-12">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href={`/${locale}/prompts`} className="text-sm text-neutral-500 hover:text-neutral-900">
+            {dict.back_to_catalog}
+          </Link>
+          {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
+        </div>
+        <PromptLimitReached
+          locale={locale}
+          title={title}
+          promptId={prompt.id}
+          signedIn={!!user}
+          resetsAtUtc={resetsAtUtc}
+        />
+      </article>
+    );
+  }
+
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      <Link href={`/${locale}/prompts`} className="text-sm text-neutral-500 hover:text-neutral-900">
-        {dict.back_to_catalog}
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href={`/${locale}/prompts`} className="text-sm text-neutral-500 hover:text-neutral-900">
+          {dict.back_to_catalog}
+        </Link>
+        {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
+      </div>
 
       <header className="relative mt-6 overflow-hidden rounded-lg bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4">
@@ -142,7 +192,7 @@ export default async function PromptDetail({ params }: Props) {
               </div>
             </>
           ) : (
-            <pre className="whitespace-pre-wrap break-words font-sans text-neutral-700">{body}</pre>
+            <pre className="whitespace-pre-wrap break-words font-sans text-neutral-700" data-testid="prompt-body">{body}</pre>
           )}
         </div>
       </section>

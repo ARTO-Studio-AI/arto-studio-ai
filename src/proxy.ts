@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { LOCALES, DEFAULT_LOCALE, type Locale, isLocale } from "@/i18n/config";
 
-/* Next.js 16 renamed middleware → proxy. This file does two things on every
+/* Next.js 16 renamed middleware → proxy. This file does three things on every
  * request:
  *
  *   1. Locale routing: every public marketing path must live under /<locale>/.
@@ -16,7 +16,12 @@ import { LOCALES, DEFAULT_LOCALE, type Locale, isLocale } from "@/i18n/config";
  *        b. Accept-Language header (first match in LOCALES)
  *        c. DEFAULT_LOCALE
  *
- *   2. Supabase session refresh: createServerClient with the cookie adapter
+ *   2. Visitor id: anonymous visitors get an `asai_vid` cookie (uuid v4,
+ *      httpOnly, SameSite=Lax, 1 year). It is the subject of the free daily
+ *      prompt counter (src/lib/prompt-limit.ts) until they sign in; on sign-in
+ *      the day's opens are adopted by the user (src/app/auth/callback).
+ *
+ *   3. Supabase session refresh: createServerClient with the cookie adapter
  *      keeps the auth cookies valid for Server Components.
  *
  * Order matters: locale redirect runs first because Supabase doesn't care
@@ -40,6 +45,9 @@ const LOCALE_EXEMPT_PREFIXES = [
   "/sitemap.xml",
   "/robots.txt",
 ];
+
+export const VISITOR_COOKIE = "asai_vid";
+const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 año
 
 function isLocaleExempt(pathname: string): boolean {
   return LOCALE_EXEMPT_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
@@ -92,7 +100,15 @@ export async function proxy(request: NextRequest) {
   const localeJump = localeRedirect(request);
   if (localeJump) return localeJump;
 
-  // 2. Supabase session refresh.
+  // 2. Visitor id. Set on the request too so the Server Components of this
+  //    same request already see it (same trick Supabase uses for its cookies).
+  let newVisitorId: string | null = null;
+  if (!request.cookies.get(VISITOR_COOKIE)?.value) {
+    newVisitorId = crypto.randomUUID();
+    request.cookies.set(VISITOR_COOKIE, newVisitorId);
+  }
+
+  // 3. Supabase session refresh.
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -114,6 +130,16 @@ export async function proxy(request: NextRequest) {
   );
 
   await supabase.auth.getUser();
+
+  if (newVisitorId) {
+    response.cookies.set(VISITOR_COOKIE, newVisitorId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: VISITOR_COOKIE_MAX_AGE,
+    });
+  }
   return response;
 }
 

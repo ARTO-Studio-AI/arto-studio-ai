@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies, headers } from "next/headers";
 import { listPrompts } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
+import { getSubject, getUsed, isUnlimitedTier } from "@/lib/prompt-limit";
+import PromptQuota from "@/components/PromptQuota";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -68,6 +72,30 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     page,
   );
 
+  /* Indicador del contador free (D7): "Te quedan N de 3 prompts hoy". Solo
+   * para free y anonimos; el listado en si no cuenta como apertura. */
+  let quotaUsed: number | null = null;
+  try {
+    const sb = await createClient();
+    const { data: { user } } = await sb.auth.getUser();
+    let tier: string | null = null;
+    if (user) {
+      const { data: profile } = await sb.from("profiles").select("tier").eq("id", user.id).maybeSingle();
+      tier = (profile?.tier as string | null) ?? "free";
+    }
+    if (!isUnlimitedTier(tier)) {
+      const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
+      const subject = getSubject({
+        vid: cookieStore.get("asai_vid")?.value,
+        userId: user?.id,
+        ip: hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip"),
+      });
+      quotaUsed = await getUsed(subject);
+    }
+  } catch {
+    quotaUsed = null;
+  }
+
   // qs() preserves filter state across links. Locale lives in the path,
   // not the query, so the language toggle moved to the Nav LangSwitcher.
   const qs = (overrides: Partial<SearchParams>) => {
@@ -86,11 +114,14 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{dict.catalog}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {total.toLocaleString()} prompts · {dict.page_label(page, totalPages || 1)}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">{dict.catalog}</h1>
+          <p className="mt-1 font-mono text-sm text-neutral-500">
+            {total.toLocaleString()} prompts · {dict.page_label(page, totalPages || 1)}
+          </p>
+        </div>
+        {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
       </div>
 
       <div className="mt-6"><SmartSearch lang={lang} /></div>
