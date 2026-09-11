@@ -9,12 +9,13 @@ import { localeOf, pageMetadata } from "@/lib/seo";
    When /prompts, /collections, /favorites migrate (Phase C), expand here:
    add favorites count, search history, billing portal link. */
 
+/* Chips monocromos: el plan lo dice el texto; los pagados van en tinta inversa. */
 const TIER_LABELS: Record<string, { label: string; chip: string }> = {
-  free: { label: "Free", chip: "bg-neutral-100 text-neutral-700" },
-  pro: { label: "Prompts Pro", chip: "bg-emerald-100 text-emerald-800" },
-  skills: { label: "Skills Studio", chip: "bg-blue-100 text-blue-800" },
-  agents: { label: "AI Agents", chip: "bg-purple-100 text-purple-800" },
-  enterprise: { label: "Enterprise", chip: "bg-amber-100 text-amber-800" },
+  free: { label: "Free", chip: "bg-zinc-100 text-zinc-700" },
+  pro: { label: "Pro", chip: "bg-zinc-900 text-white" },
+  skills: { label: "Studio", chip: "bg-zinc-900 text-white" },
+  agents: { label: "AI Agents", chip: "bg-zinc-900 text-white" },
+  enterprise: { label: "Enterprise", chip: "bg-zinc-900 text-white" },
 };
 
 export async function generateMetadata({
@@ -56,14 +57,14 @@ export default async function AccountPage() {
     <section className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
 
-      <div className="mt-8 rounded-lg border border-neutral-200 bg-white p-6">
+      <div className="mt-8 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-6">
         <dl className="space-y-4 text-sm">
           <div className="flex items-center justify-between">
-            <dt className="text-neutral-500">Email</dt>
+            <dt className="text-zinc-500">Email</dt>
             <dd className="font-medium">{profile?.email ?? user.email}</dd>
           </div>
           <div className="flex items-center justify-between">
-            <dt className="text-neutral-500">Plan</dt>
+            <dt className="text-zinc-500">Plan</dt>
             <dd>
               <span className={`rounded-full ${tierStyle.chip} px-2.5 py-0.5 text-xs font-medium`}>
                 {tierStyle.label}
@@ -72,7 +73,7 @@ export default async function AccountPage() {
           </div>
           {memberSince && (
             <div className="flex items-center justify-between">
-              <dt className="text-neutral-500">Member since</dt>
+              <dt className="text-zinc-500">Member since</dt>
               <dd className="font-medium">{memberSince}</dd>
             </div>
           )}
@@ -82,26 +83,26 @@ export default async function AccountPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <Link
           href="/prompts"
-          className="rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-400"
+          className="rounded-[var(--radius-md)] border border-zinc-200 bg-white p-5 transition hover:border-zinc-400"
         >
-          <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
             Browse
           </p>
           <p className="mt-2 font-semibold">Prompt Library</p>
-          <p className="mt-1 text-sm text-neutral-500">
-            3,000 prompts across 12 verticals. Bilingual EN / ES, smart search,
+          <p className="mt-1 text-sm text-zinc-500">
+            3,000+ prompts across 12 verticals. Bilingual EN / ES, smart search,
             collections, favorites.
           </p>
         </Link>
         <Link
           href="/roast"
-          className="rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-400"
+          className="rounded-[var(--radius-md)] border border-zinc-200 bg-white p-5 transition hover:border-zinc-400"
         >
-          <p className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
             Try
           </p>
           <p className="mt-2 font-semibold">Brand Roast</p>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-zinc-500">
             Free brand analysis across Strategy / Creativity / Narrative / Digital.
           </p>
         </Link>
@@ -111,13 +112,13 @@ export default async function AccountPage() {
         <div className="mt-6">
           <Link
             href="/admin"
-            className="block rounded-lg border border-amber-300 bg-amber-50 p-5 transition hover:border-amber-400"
+            className="block rounded-[var(--radius-md)] border border-zinc-900 bg-zinc-50 p-5 transition hover:bg-white"
           >
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
+            <p className="text-eyebrow text-zinc-500">
               Admin
             </p>
-            <p className="mt-2 font-semibold text-amber-900">Admin panel</p>
-            <p className="mt-1 text-sm text-amber-800">
+            <p className="mt-2 font-semibold text-zinc-900">Admin panel</p>
+            <p className="mt-1 text-sm text-zinc-600">
               Roast traces, clients, skill traces, engine observability. Needs
               the admin API key on entry.
             </p>
@@ -129,7 +130,7 @@ export default async function AccountPage() {
         {tierKey === "free" && (
           <Link
             href="/pricing"
-            className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+            className="rounded-[var(--radius-sm)] bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
           >
             Upgrade to Pro
           </Link>
@@ -137,7 +138,7 @@ export default async function AccountPage() {
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-neutral-700 hover:border-neutral-500"
+            className="rounded-[var(--radius-sm)] border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:border-zinc-500"
           >
             Sign out
           </button>

@@ -55,15 +55,15 @@ export default async function FavoritesPage({ params }: Props) {
       <div className="flex items-baseline justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{dict.favorites_title}</h1>
-          <p className="mt-2 text-sm text-neutral-500">{dict.favorites_subtitle}</p>
+          <p className="mt-2 text-sm text-zinc-500">{dict.favorites_subtitle}</p>
         </div>
-        <Link href={`/${locale}/account`} className="text-sm text-neutral-500 hover:text-neutral-900">
+        <Link href={`/${locale}/account`} className="text-sm text-zinc-500 hover:text-zinc-900">
           ← {dict.nav_account}
         </Link>
       </div>
 
       {prompts.length === 0 ? (
-        <p className="mt-12 rounded-lg border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
+        <p className="mt-12 rounded-lg border border-dashed border-zinc-300 bg-white p-8 text-center text-zinc-500">
           {dict.favorites_empty}
         </p>
       ) : (
@@ -84,10 +84,10 @@ export default async function FavoritesPage({ params }: Props) {
               <li key={p.id}>
                 <Link
                   href={`/${locale}/prompts/${p.id}`}
-                  className="group relative block h-full overflow-hidden rounded-lg border border-neutral-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-sm"
+                  className="group relative block h-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-sm"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-neutral-400">{p.id}</span>
+                    <span className="font-mono text-zinc-400">{p.id}</span>
                     <span className={`rounded-full ${tier.chip} px-2 py-0.5 text-[11px] font-medium`}>
                       {tier.label}
                     </span>

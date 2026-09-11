@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { buttonClass } from "@/components/ui";
 
-/* Lightweight newsletter signup. POSTs to /api/waitlist (already exists in
-   arto-studio-ai). The waitlist table accepts arbitrary tier/source labels,
-   so the same table holds both "skills" and "agents" waitlist sign-ups. */
+/* Aviso de lanzamiento de Skills Studio y Agentes. POSTea a /api/waitlist,
+ * que ya existe y guarda email + source en la tabla waitlist. Es solo un
+ * "avisame cuando abra": no promete acceso anticipado ni descuentos. */
 
 interface Props {
   source?: "skills" | "agents" | "general";
@@ -28,7 +29,7 @@ export default function NewsletterForm({ source = "general", cta = "Notify me" }
       });
       if (res.ok) {
         setStatus("ok");
-        setMessage("You're on the list. We'll be in touch.");
+        setMessage("Saved. We will email you when it opens.");
         setEmail("");
       } else {
         const data = await res.json().catch(() => ({}));
@@ -49,22 +50,14 @@ export default function NewsletterForm({ source = "general", cta = "Notify me" }
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@company.com"
-        className="flex-1 rounded-md border border-neutral-300 px-4 py-2.5 text-sm focus:border-neutral-900 focus:outline-none"
+        className="flex-1 rounded-[var(--radius-sm)] border border-zinc-300 bg-white px-4 py-2.5 text-sm focus:border-zinc-900 focus:outline-none"
         disabled={status === "loading" || status === "ok"}
       />
-      <button
-        type="submit"
-        disabled={status === "loading" || status === "ok"}
-        className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
-      >
-        {status === "loading" ? "Adding..." : status === "ok" ? "Added" : cta}
+      <button type="submit" disabled={status === "loading" || status === "ok"} className={buttonClass("primary", "md")}>
+        {status === "loading" ? "Saving..." : status === "ok" ? "Saved" : cta}
       </button>
       {message && (
-        <p
-          className={`text-xs ${
-            status === "ok" ? "text-green-600" : status === "error" ? "text-red-600" : "text-neutral-500"
-          }`}
-        >
+        <p className={`text-xs ${status === "error" ? "text-[var(--bad)]" : "text-zinc-600"}`} role="status">
           {message}
         </p>
       )}

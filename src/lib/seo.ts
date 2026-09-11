@@ -176,12 +176,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "ARTO Studio AI · The creative studio that never sleeps",
         description:
-          "3,000 prompts, AI creative skills and autonomous agents built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years with Google, Nike and Uber, now self-serve.",
+          "3,000+ bilingual prompts built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years with Google, Nike and Uber, now self-serve. Skills and agents coming soon.",
       },
       es: {
         title: "ARTO Studio AI · El estudio creativo que nunca duerme",
         description:
-          "3,000 prompts, skills creativas con IA y agentes autónomos con la metodología real de ARTO: estrategia, creatividad, narrativa y producción. 15+ años con Google, Nike y Uber, ahora en autoservicio.",
+          "3,000+ prompts bilingües con la metodología real de ARTO: estrategia, creatividad, narrativa y producción. 15+ años con Google, Nike y Uber, ahora en autoservicio. Skills y agentes, próximamente.",
       },
     },
   },
@@ -191,12 +191,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "Prompt Library · ARTO Studio AI",
         description:
-          "Browse 3,000 curated AI prompts across branding, design, copywriting, photography, video, UX and more. Filter by vertical, tool, difficulty and tier, in English and Spanish.",
+          "Browse 3,000+ curated AI prompts across branding, design, copywriting, photography, video, UX and more. Filter by vertical, tool, difficulty and tier, in English and Spanish.",
       },
       es: {
         title: "Biblioteca de prompts · ARTO Studio AI",
         description:
-          "Explora 3,000 prompts de IA curados para branding, diseño, copywriting, fotografía, video, UX y más. Filtra por vertical, herramienta, dificultad y plan, en español e inglés.",
+          "Explora 3,000+ prompts de IA curados para branding, diseño, copywriting, fotografía, video, UX y más. Filtra por vertical, herramienta, dificultad y plan, en español e inglés.",
       },
     },
   },
@@ -206,12 +206,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "Pricing · ARTO Studio AI",
         description:
-          "Start free. Unlock the full prompt library for $9 a month. Skills Studio and AI Agents are coming soon.",
+          "Start free with 3 prompts a day. Unlock all 3,001 prompts for $9 USD a month. Studio and AI Agents are coming soon.",
       },
       es: {
         title: "Precios · ARTO Studio AI",
         description:
-          "Empieza gratis. Desbloquea la biblioteca completa de prompts por $9 al mes. Skills Studio y Agentes de IA llegan pronto.",
+          "Empieza gratis con 3 prompts al día. Desbloquea los 3,001 prompts por $9 USD al mes. Studio y Agentes de IA, próximamente.",
       },
     },
   },
@@ -251,12 +251,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "AI Agents · ARTO Studio AI",
         description:
-          "Autonomous creative agents that plan, produce and iterate on brand work using ARTO's methodology. Join the waitlist.",
+          "Autonomous creative agents that plan, produce and iterate on brand work using ARTO's methodology. Coming soon.",
       },
       es: {
         title: "Agentes de IA · ARTO Studio AI",
         description:
-          "Agentes creativos autónomos que planean, producen e iteran trabajo de marca con la metodología de ARTO. Únete a la lista de espera.",
+          "Agentes creativos autónomos que planean, producen e iteran trabajo de marca con la metodología de ARTO. Próximamente.",
       },
     },
   },

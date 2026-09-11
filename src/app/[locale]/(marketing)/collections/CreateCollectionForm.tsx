@@ -44,24 +44,24 @@ export default function CreateCollectionForm({ lang }: { lang: Lang }) {
         type="text" required value={name} onChange={(e) => setName(e.target.value)}
         placeholder={labels.name_placeholder}
         maxLength={80}
-        className="block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+        className="block w-full rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
       />
       <textarea
         value={description} onChange={(e) => setDescription(e.target.value)}
         placeholder={labels.desc} rows={2} maxLength={500}
-        className="block w-full resize-none rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+        className="block w-full resize-none rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
       />
       <div className="flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 text-xs text-neutral-600">
+        <label className="flex items-center gap-2 text-xs text-zinc-600">
           <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
           {labels.public_label}
         </label>
         <button type="submit" disabled={busy || !name.trim()}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50">
+          className="rounded-[var(--radius-sm)] bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50">
           {busy ? labels.creating : labels.create}
         </button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--bad)]">{error}</p>}
     </form>
   );
 }

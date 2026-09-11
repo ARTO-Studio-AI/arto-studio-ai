@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPrompt } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
+import { getSubject, getUsed, isUnlimitedTier, openForTier } from "@/lib/prompt-limit";
+import PromptQuota from "@/components/PromptQuota";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -25,6 +28,9 @@ import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo"
 import CopyButton from "./CopyButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import FavoriteButton from "./FavoriteButton";
+import PromptLimitReached from "./PromptLimitReached";
+import DifficultyChip from "@/components/DifficultyChip";
+import { Badge, Button } from "@/components/ui";
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
@@ -102,6 +108,29 @@ export default async function PromptDetail({ params }: Props) {
 
   const isLocked = (TIER_RANK[prompt.tier] ?? 0) > (TIER_RANK[userTier] ?? 0);
 
+  /* Contador free (D7): abrir un prompt cuenta; 3 al dia para free y anonimos.
+   * Se comprueba en el servidor antes de renderizar el cuerpo. Un prompt Pro
+   * bloqueado para free no cuenta: no se ve el cuerpo. */
+  let limitHit = false;
+  let resetsAtUtc = "";
+  let quotaUsed: number | null = null;
+  if (!isUnlimitedTier(userTier)) {
+    const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
+    const subject = getSubject({
+      vid: cookieStore.get("asai_vid")?.value,
+      userId: user?.id,
+      ip: hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip"),
+    });
+    if (isLocked) {
+      quotaUsed = await getUsed(subject);
+    } else {
+      const res = await openForTier(userTier, subject, prompt.id);
+      limitHit = !res.allowed;
+      resetsAtUtc = res.resetsAtUtc;
+      quotaUsed = res.used;
+    }
+  }
+
   const title = lang === "es" ? prompt.title_es : prompt.title_en;
   const body = lang === "es" ? prompt.prompt_es : prompt.prompt_en;
   const useCase = prompt.use_case;
@@ -109,6 +138,7 @@ export default async function PromptDetail({ params }: Props) {
 
   const cat = CATEGORY_STYLES[prompt.category];
   const diff = DIFFICULTY_STYLES[prompt.difficulty];
+  void diff;
   const tier = TIER_STYLES[prompt.tier];
   const aiGroup = aiGroupOf(prompt.ai_model);
   const aiInfo = AI_GROUPS[aiGroup];
@@ -121,28 +151,52 @@ export default async function PromptDetail({ params }: Props) {
     : diff.label;
   const aiGroupLabel = lang === "es" ? AI_GROUP_LABEL_ES[aiGroup] ?? aiInfo.label : aiInfo.label;
 
+  if (limitHit) {
+    return (
+      <article className="mx-auto max-w-3xl px-6 py-12">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
+            {dict.back_to_catalog}
+          </Link>
+          {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
+        </div>
+        <PromptLimitReached
+          locale={locale}
+          title={title}
+          promptId={prompt.id}
+          signedIn={!!user}
+          resetsAtUtc={resetsAtUtc}
+        />
+      </article>
+    );
+  }
+
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      <Link href={`/${locale}/prompts`} className="text-sm text-neutral-500 hover:text-neutral-900">
-        {dict.back_to_catalog}
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
+          {dict.back_to_catalog}
+        </Link>
+        {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
+      </div>
 
-      <header className="relative mt-6 overflow-hidden rounded-lg bg-white p-6 shadow-sm">
+      <header className="relative mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 shadow-[var(--shadow-sm)]">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 text-[11px]">
-              <span className="font-mono text-neutral-400">{prompt.id}</span>
-              <span className={`rounded-full ${tier.chip} px-2 py-0.5 font-medium`}>{tier.label}</span>
+              <span className="font-mono text-zinc-400">{prompt.id}</span>
+              <Badge tone={prompt.tier === "free" ? "tier" : "inverse"}>{tier.label}</Badge>
             </div>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-h1 mt-3">{title}</h1>
+            <span className="accent-rule mt-3" />
             <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
               <span className={`rounded-full ${cat.chip} px-2 py-0.5 font-medium`}>{catLabel}</span>
-              <span className={`rounded-full ${diff.chip} px-2 py-0.5`}>{diffLabel}</span>
+              <DifficultyChip level={prompt.difficulty} label={diffLabel} />
               <span className={`rounded-full ${aiInfo.chip} px-2 py-0.5`}>
                 {aiGroupLabel} · {aiModelLabel(prompt.ai_model)}
               </span>
             </div>
-            <p className="mt-3 text-xs text-neutral-500">{humanize(prompt.subcategory)}</p>
+            <p className="mt-3 text-xs text-zinc-500">{humanize(prompt.subcategory)}</p>
             {/* Inline EN/ES switcher removed — the global LangSwitcher in the
               * Nav handles locale toggling for the whole site. */}
           </div>
@@ -157,9 +211,9 @@ export default async function PromptDetail({ params }: Props) {
         </div>
       </header>
 
-      <section className="mt-6 rounded-lg border border-neutral-200 bg-white p-6">
+      <section className="mt-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6">
         <div className="flex items-start justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">{dict.prompt_label}</h2>
+          <h2 className="text-eyebrow text-zinc-500">{dict.prompt_label}</h2>
           {!isLocked && (
             <div className="flex items-center gap-2">
               <AddToCollectionButton promptId={prompt.id} lang={lang} signedIn={!!user} />
@@ -170,23 +224,21 @@ export default async function PromptDetail({ params }: Props) {
         <div className="relative mt-3">
           {isLocked ? (
             <>
-              <pre className="select-none whitespace-pre-wrap break-words font-sans text-neutral-700 blur-sm">
+              <pre className="select-none whitespace-pre-wrap break-words font-sans text-zinc-700 blur-sm">
                 {body.slice(0, 400)}…
               </pre>
               <div className="absolute inset-0 flex flex-col items-center justify-center rounded bg-white/80 backdrop-blur-sm">
-                <p className="text-sm font-medium text-neutral-900">
+                <p className="text-sm font-medium text-zinc-900">
                   {prompt.tier === "pro" ? dict.pro_prompt : dict.enterprise_prompt}
                 </p>
-                <p className="mt-1 text-xs text-neutral-500">
+                <p className="mt-1 text-xs text-zinc-500">
                   {user ? dict.upgrade_to_unlock : dict.sign_in_to_unlock}
                 </p>
-                <Link href={`/${locale}/pricing`} className="mt-3 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700">
-                  {dict.see_pricing}
-                </Link>
+                <Button href={`/${locale}/pricing`} className="mt-3">{dict.see_pricing}</Button>
               </div>
             </>
           ) : (
-            <pre className="whitespace-pre-wrap break-words font-sans text-neutral-700">{body}</pre>
+            <pre className="whitespace-pre-wrap break-words font-sans text-zinc-700" data-testid="prompt-body">{body}</pre>
           )}
         </div>
       </section>
@@ -194,15 +246,15 @@ export default async function PromptDetail({ params }: Props) {
       {(useCase || expectedOutput) && !isLocked && (
         <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {useCase && (
-            <div className="rounded-lg border border-neutral-200 bg-white p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">{dict.when_to_use}</h3>
-              <p className="mt-2 text-sm text-neutral-700">{useCase}</p>
+            <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5">
+              <h3 className="text-eyebrow text-zinc-500">{dict.when_to_use}</h3>
+              <p className="mt-2 text-sm text-zinc-700">{useCase}</p>
             </div>
           )}
           {expectedOutput && (
-            <div className="rounded-lg border border-neutral-200 bg-white p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">{dict.expected_output}</h3>
-              <p className="mt-2 text-sm text-neutral-700">{expectedOutput}</p>
+            <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5">
+              <h3 className="text-eyebrow text-zinc-500">{dict.expected_output}</h3>
+              <p className="mt-2 text-sm text-zinc-700">{expectedOutput}</p>
             </div>
           )}
         </section>
@@ -210,10 +262,10 @@ export default async function PromptDetail({ params }: Props) {
 
       {prompt.tags?.length > 0 && (
         <section className="mt-8">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">{dict.tags}</h3>
+          <h3 className="text-eyebrow text-zinc-500">{dict.tags}</h3>
           <div className="mt-2 flex flex-wrap gap-2 text-xs">
             {prompt.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-neutral-100 px-2 py-1 text-neutral-600">{tag}</span>
+              <span key={tag} className="rounded-full bg-zinc-100 px-2 py-1 text-zinc-600">{tag}</span>
             ))}
           </div>
         </section>

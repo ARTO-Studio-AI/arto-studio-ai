@@ -49,7 +49,7 @@ export default async function MarketingLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
         <Nav
           user={userEmail ? { email: userEmail } : null}
           locale={locale}

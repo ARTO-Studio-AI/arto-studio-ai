@@ -25,11 +25,11 @@ export default async function LoginPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-md px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Sign in</h1>
-      <p className="mt-2 text-sm text-neutral-500">
+      <p className="mt-2 text-sm text-zinc-500">
         Sign in to save favorites, manage collections, and unlock the Pro
         catalog.
       </p>
-      <div className="mt-8 rounded-lg border border-neutral-200 bg-white p-6">
+      <div className="mt-8 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-6">
         <LoginForm locale={locale} />
       </div>
     </div>
