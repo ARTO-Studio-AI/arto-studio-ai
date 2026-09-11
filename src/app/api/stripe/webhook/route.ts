@@ -5,6 +5,13 @@ import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { getClientById, updateClient } from "@/lib/clients/store";
 import { sendUpgradeConfirmationEmail } from "@/lib/email";
+import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  processStripeEvent,
+  type ProfilePatch,
+  type ProfileRef,
+  type WebhookDeps,
+} from "@/lib/stripe-webhook";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -18,13 +25,14 @@ export const maxDuration = 30;
 /* ── POST /api/stripe/webhook ─ handle Stripe events ──
  *
  * Stripe posts events here. We verify the signature against
- * STRIPE_WEBHOOK_SECRET, then react to the events we care about.
+ * STRIPE_WEBHOOK_SECRET, record the event id in `stripe_events` (idempotency)
+ * and hand the event to processStripeEvent (src/lib/stripe-webhook.ts):
  *
- * On checkout.session.completed (subscription mode):
- *   - extract client_id from session.metadata
- *   - update the client: tier='starter', trial_calls_limit=null,
- *     rate_limit_per_hour=1000
- *   - fire-and-forget confirmation email
+ *   checkout.session.completed      metadata.user_id + tier=pro → profiles.tier='pro'
+ *                                   metadata.client_id           → clients.tier='starter'
+ *   customer.subscription.updated   profiles.subscription_status / subscription_ends_at
+ *   customer.subscription.deleted   profiles.tier='free' / clients.tier='trial'
+ *   invoice.payment_failed          profiles.subscription_status='past_due'
  */
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
@@ -34,7 +42,7 @@ export async function POST(request: NextRequest) {
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error("[stripe/webhook] STRIPE_WEBHOOK_SECRET missing — cannot verify");
+    console.error("[stripe/webhook] STRIPE_WEBHOOK_SECRET missing, cannot verify");
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 503 });
   }
 
@@ -67,79 +75,65 @@ export async function POST(request: NextRequest) {
   );
 
   try {
-    switch (event.type) {
-      case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object);
-        break;
-
-      case "customer.subscription.deleted":
-      case "customer.subscription.updated":
-        // Out of scope for Session 6. Log and ignore.
-        console.log(
-          JSON.stringify({ event: "stripe_webhook_ignored", type: event.type })
-        );
-        break;
-
-      default:
-        // Unknown event type — acknowledge so Stripe doesn't retry, but log.
-        console.log(
-          JSON.stringify({ event: "stripe_webhook_unhandled", type: event.type })
-        );
-        break;
+    const outcome = await processStripeEvent(event, buildDeps());
+    if (outcome.status === "already_processed") {
+      return NextResponse.json({ received: true, status: "already processed" }, { status: 200 });
     }
+    return NextResponse.json({ received: true, status: outcome.status }, { status: 200 });
   } catch (err) {
     console.error(`[stripe/webhook] Error handling ${event.type}:`, err);
     // Return 500 so Stripe retries. Only do this for transient failures.
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
-
-  return NextResponse.json({ received: true }, { status: 200 });
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const clientId =
-    session.metadata?.client_id ||
-    (session.client_reference_id ? String(session.client_reference_id) : "");
+const PROFILE_COLUMNS = "id, email, tier";
 
-  if (!clientId) {
-    console.warn(
-      "[stripe/webhook] checkout.session.completed without client_id",
-      { session_id: session.id }
-    );
-    return;
-  }
+function buildDeps(): WebhookDeps {
+  const admin = createAdminClient();
 
-  const client = await getClientById(clientId);
-  if (!client) {
-    console.warn("[stripe/webhook] client not found for session", {
-      session_id: session.id,
-      client_id: clientId,
-    });
-    return;
-  }
+  const findProfile = async (column: string, value: string): Promise<ProfileRef | null> => {
+    const { data, error } = await admin
+      .from("profiles")
+      .select(PROFILE_COLUMNS)
+      .eq(column, value)
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(`profiles lookup by ${column} failed: ${error.message}`);
+    return data ? (data as ProfileRef) : null;
+  };
 
-  const ok = await updateClient(clientId, {
-    tier: "starter",
-    trial_calls_limit: null, // unlimited
-    rate_limit_per_hour: 1000,
-    notes:
-      (client.notes ? client.notes + "\n" : "") +
-      `Upgraded via Stripe checkout session ${session.id} at ${new Date().toISOString()}`,
-  });
-
-  console.log(
-    JSON.stringify({
-      event: "client_upgraded_to_starter",
-      client_id: clientId,
-      email: client.email,
-      session_id: session.id,
-      ok,
-    })
-  );
-
-  // Fire-and-forget confirmation email. Don't await — we want to ack the webhook fast.
-  void sendUpgradeConfirmationEmail({ to: client.email, name: client.name });
+  return {
+    async recordEvent(id, type) {
+      // INSERT ... ON CONFLICT DO NOTHING RETURNING id, vía PostgREST:
+      // ignoreDuplicates + select devuelve fila solo si el insert entró.
+      const { data, error } = await admin
+        .from("stripe_events")
+        .upsert({ id, type }, { onConflict: "id", ignoreDuplicates: true })
+        .select("id");
+      if (error) throw new Error(`stripe_events insert failed: ${error.message}`);
+      return (data?.length ?? 0) > 0;
+    },
+    async forgetEvent(id) {
+      await admin.from("stripe_events").delete().eq("id", id);
+    },
+    findProfileById: (id) => findProfile("id", id),
+    findProfileBySubscription: (subscriptionId) =>
+      findProfile("stripe_subscription_id", subscriptionId),
+    findProfileByCustomer: (customerId) => findProfile("stripe_customer_id", customerId),
+    async updateProfile(id, patch: ProfilePatch) {
+      const { error } = await admin
+        .from("profiles")
+        .update({ ...patch, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) {
+        console.error("[stripe/webhook] profiles update failed:", error.message);
+        return false;
+      }
+      return true;
+    },
+    getClientById,
+    updateClient,
+    sendUpgradeConfirmationEmail,
+  };
 }
