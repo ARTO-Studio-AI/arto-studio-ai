@@ -1,0 +1,58 @@
+# CI de ARTO Studio AI.
+#
+# Por qué existe: hasta el 11 de septiembre de 2026 este repo no tenía CI. Cada merge a main
+# se iba a producción (creative.artostudio.ai) sin que nadie corriera lint, typecheck ni build
+# antes. Este workflow es el primer candado de la Fase 0 del Sprint 1: nada llega a main sin
+# pasar los tres pasos en verde.
+#
+# El build usa variables falsas: Next.js solo necesita que existan para compilar, no las usa
+# para hablar con ningún servicio. Los secretos reales viven en Vercel.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: x
+      SUPABASE_SERVICE_ROLE_KEY: x
+      DATABASE_URL: postgres://x:x@localhost/x
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
