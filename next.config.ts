@@ -20,6 +20,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      /* /upgrade era el flujo Starter legacy ($99/$299/$799 y "trial calls") que ya
+       * no se vende (D7, 11 sep 2026). 301 a /pricing; el proxy manda de ahi a
+       * /<locale>/pricing segun el idioma del visitante. El API
+       * /api/stripe/checkout sigue vivo para los clientes existentes. */
+      { source: "/upgrade", destination: "/pricing", statusCode: 301 },
+      { source: "/upgrade/:path*", destination: "/pricing", statusCode: 301 },
+    ];
+  },
 };
 
 export default nextConfig;
