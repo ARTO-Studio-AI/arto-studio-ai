@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site-url";
 import { Resend } from "resend";
 
 /**
@@ -75,7 +76,7 @@ ${apiKey}
 
 Quick start:
 
-curl -X POST https://arto-studio-ai.vercel.app/api/skills/brand-positioning \\
+curl -X POST ${SITE_URL}/api/skills/brand-positioning \\
   -H "Content-Type: application/json" \\
   -H "x-arto-api-key: ${apiKey}" \\
   -d '{"brandName":"Your Brand","industry":"your industry","targetAudience":"who you serve","competitors":["competitor1","competitor2"]}'
@@ -97,7 +98,7 @@ ${upgradeUrl}
   <code style="display: block; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 13px; word-break: break-all;">${escapeHtml(apiKey)}</code>
 
   <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-top: 32px;">Quick start</h2>
-  <pre style="padding: 12px 16px; background: #f5f5f5; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">curl -X POST https://arto-studio-ai.vercel.app/api/skills/brand-positioning \\
+  <pre style="padding: 12px 16px; background: #f5f5f5; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">curl -X POST ${SITE_URL}/api/skills/brand-positioning \\
   -H "Content-Type: application/json" \\
   -H "x-arto-api-key: ${escapeHtml(apiKey)}" \\
   -d '{"brandName":"Your Brand","industry":"your industry","targetAudience":"who you serve","competitors":["competitor1","competitor2"]}'</pre>
