@@ -63,7 +63,7 @@ export default function LangSwitcher({ current }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-sm text-neutral-700 transition hover:border-neutral-400"
+        className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-sm text-zinc-700 transition hover:border-zinc-400"
         aria-label={`Language: ${LOCALE_META[current].label}`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -87,7 +87,7 @@ export default function LangSwitcher({ current }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
         >
           {LOCALES.map((loc) => {
             const meta = LOCALE_META[loc];
@@ -105,14 +105,14 @@ export default function LangSwitcher({ current }: Props) {
                   setOpen(false);
                 }}
                 className={`flex items-center gap-2 px-3 py-2 text-sm ${
-                  active ? "bg-neutral-50 font-semibold text-neutral-900" : "text-neutral-700 hover:bg-neutral-50"
+                  active ? "bg-zinc-50 font-semibold text-zinc-900" : "text-zinc-700 hover:bg-zinc-50"
                 }`}
               >
                 <span className="text-base leading-none" aria-hidden>
                   {meta.flag}
                 </span>
                 <span>{meta.nativeName}</span>
-                {active && <span className="ml-auto text-xs text-neutral-400">●</span>}
+                {active && <span className="ml-auto text-xs text-zinc-400">●</span>}
               </Link>
             );
           })}

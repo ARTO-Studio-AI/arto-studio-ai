@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import LangSwitcher from "@/components/LangSwitcher";
+import { Badge, buttonClass } from "@/components/ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -38,6 +40,8 @@ function initialsOf(email?: string | null): string {
   return local.slice(0, 2).toUpperCase();
 }
 
+const NAV_LINK = "text-zinc-700 transition hover:text-zinc-900";
+
 export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -70,11 +74,48 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
     };
   }, [productsOpen]);
 
+  const products = [
+    { href: LIBRARY_HREF, title: nav.prompt_library, blurb: nav.prompt_library_blurb, badge: nav.badge_live, tone: "live" as const },
+    { href: lp("/skills"), title: nav.skills_studio, blurb: nav.skills_studio_blurb, badge: nav.badge_soon, tone: "soon" as const },
+    { href: lp("/agents"), title: nav.ai_agents, blurb: nav.ai_agents_blurb, badge: nav.badge_soon, tone: "soon" as const },
+  ];
+
+  const AccountLink = ({ mobile = false }: { mobile?: boolean }) =>
+    signedIn ? (
+      <Link
+        href={lp("/account")}
+        onClick={() => setMobileOpen(false)}
+        className={`flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-700 transition hover:border-zinc-400 ${mobile ? "mt-1 justify-center" : ""}`}
+        title={user?.email || undefined}
+      >
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 font-mono text-[11px] font-medium text-white">
+          {initialsOf(user?.email)}
+        </span>
+        <span className="text-xs">{nav.account}</span>
+      </Link>
+    ) : (
+      <Link href={lp("/login")} onClick={() => setMobileOpen(false)} className={buttonClass("primary", "sm", mobile ? "mt-1 w-full" : "")}>
+        {nav.sign_in}
+      </Link>
+    );
+
+  const AdminLink = ({ mobile = false }: { mobile?: boolean }) =>
+    isAdmin && signedIn ? (
+      <Link
+        href="/admin"
+        onClick={() => setMobileOpen(false)}
+        className={`rounded-[var(--radius-sm)] border border-zinc-300 bg-zinc-50 px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-700 transition hover:border-zinc-900 ${mobile ? "mt-1 text-center" : ""}`}
+        title="Admin panel"
+      >
+        Admin
+      </Link>
+    ) : null;
+
   return (
     <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
       <Link href={lp("/")} className="flex items-baseline gap-2">
-        <img src="/brand/arto-logo-black.png" alt="ARTO Creative 24/7" className="h-6 w-auto" />
-        <span className="hidden text-sm font-medium tracking-tight text-neutral-500 sm:inline">
+        <Image src="/brand/arto-logo-black.png" alt="ARTO Creative 24/7" width={96} height={24} className="h-6 w-auto" priority />
+        <span className="hidden font-mono text-[11px] font-medium tracking-[0.08em] text-zinc-500 sm:inline">
           {nav.tagline}
         </span>
       </Link>
@@ -83,7 +124,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
         <div className="relative" ref={productsRef}>
           <button
             type="button"
-            className="flex items-center gap-1 text-neutral-700 hover:text-neutral-900"
+            className={`flex items-center gap-1 ${NAV_LINK}`}
             onClick={() => setProductsOpen(!productsOpen)}
             aria-haspopup="menu"
             aria-expanded={productsOpen}
@@ -101,106 +142,47 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
           </button>
 
           {productsOpen && (
-            <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-neutral-200 bg-white p-2 shadow-lg">
-              <Link
-                href={LIBRARY_HREF}
-                className="block rounded-md px-3 py-2.5 hover:bg-neutral-50"
-                onClick={() => setProductsOpen(false)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-neutral-900">{nav.prompt_library}</span>
-                  <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
-                    {nav.badge_live}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-xs text-neutral-500">{nav.prompt_library_blurb}</p>
-              </Link>
-              <Link
-                href={lp("/skills")}
-                className="block rounded-md px-3 py-2.5 hover:bg-neutral-50"
-                onClick={() => setProductsOpen(false)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-neutral-900">{nav.skills_studio}</span>
-                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-                    {nav.badge_soon}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-xs text-neutral-500">{nav.skills_studio_blurb}</p>
-              </Link>
-              <Link
-                href={lp("/agents")}
-                className="block rounded-md px-3 py-2.5 hover:bg-neutral-50"
-                onClick={() => setProductsOpen(false)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-neutral-900">{nav.ai_agents}</span>
-                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-                    {nav.badge_soon}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-xs text-neutral-500">{nav.ai_agents_blurb}</p>
-              </Link>
-              <div className="mt-1 border-t border-neutral-100 pt-1">
+            <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-2 shadow-[var(--shadow-md)]">
+              {products.map((p) => (
                 <Link
-                  href={ROAST_HREF}
-                  className="block rounded-md px-3 py-2.5 hover:bg-neutral-50"
+                  key={p.href}
+                  href={p.href}
+                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-zinc-50"
                   onClick={() => setProductsOpen(false)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-neutral-900">{nav.brand_roast}</span>
-                    <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
-                      {nav.badge_free}
-                    </span>
+                    <span className="font-semibold text-zinc-900">{p.title}</span>
+                    <Badge tone={p.tone}>{p.badge}</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-neutral-500">{nav.brand_roast_blurb}</p>
+                  <p className="mt-0.5 text-xs text-zinc-500">{p.blurb}</p>
+                </Link>
+              ))}
+              <div className="mt-1 border-t border-zinc-100 pt-1">
+                <Link
+                  href={ROAST_HREF}
+                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-zinc-50"
+                  onClick={() => setProductsOpen(false)}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-zinc-900">{nav.brand_roast}</span>
+                    <Badge tone="live">{nav.badge_free}</Badge>
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-500">{nav.brand_roast_blurb}</p>
                 </Link>
               </div>
             </div>
           )}
         </div>
 
-        <Link href={lp("/work")} className="text-neutral-700 hover:text-neutral-900">
-          {nav.work}
-        </Link>
-        <Link href={lp("/learn")} className="text-neutral-700 hover:text-neutral-900">
-          {nav.learn}
-        </Link>
-        <Link href={lp("/pricing")} className="text-neutral-700 hover:text-neutral-900">
-          {nav.pricing}
-        </Link>
+        <Link href={lp("/work")} className={NAV_LINK}>{nav.work}</Link>
+        <Link href={lp("/learn")} className={NAV_LINK}>{nav.learn}</Link>
+        <Link href={lp("/pricing")} className={NAV_LINK}>{nav.pricing}</Link>
         <LangSwitcher current={locale} />
-        {isAdmin && signedIn && (
-          <Link
-            href="/admin"
-            className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 transition hover:border-amber-400"
-            title="Admin panel"
-          >
-            Admin
-          </Link>
-        )}
-        {signedIn ? (
-          <Link
-            href={lp("/account")}
-            className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-neutral-700 transition hover:border-neutral-400"
-            title={user?.email || undefined}
-          >
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
-              {initialsOf(user?.email)}
-            </span>
-            <span className="text-xs">{nav.account}</span>
-          </Link>
-        ) : (
-          <Link
-            href={lp("/login")}
-            className="rounded-md bg-neutral-900 px-3 py-1.5 text-white transition hover:bg-neutral-700"
-          >
-            {nav.sign_in}
-          </Link>
-        )}
+        <AdminLink />
+        <AccountLink />
       </div>
 
-      <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label={nav.menu}>
+      <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label={nav.menu} aria-expanded={mobileOpen}>
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           {mobileOpen ? (
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -211,90 +193,27 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
       </button>
 
       {mobileOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-neutral-200 bg-white px-6 py-4 md:hidden">
+        <div className="absolute left-0 right-0 top-full z-50 border-b border-zinc-200 bg-white px-6 py-4 md:hidden">
           <div className="flex flex-col gap-3 text-sm">
-            <p className="text-xs font-semibold uppercase text-neutral-400">{nav.products}</p>
-            <Link
-              href={LIBRARY_HREF}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 text-neutral-700"
-            >
-              {nav.prompt_library}
-              <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
-                {nav.badge_live}
-              </span>
-            </Link>
-            <Link
-              href={lp("/skills")}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 text-neutral-700"
-            >
-              {nav.skills_studio}
-              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-                {nav.badge_soon}
-              </span>
-            </Link>
-            <Link
-              href={lp("/agents")}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 text-neutral-700"
-            >
-              {nav.ai_agents}
-              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-                {nav.badge_soon}
-              </span>
-            </Link>
-            <Link
-              href={ROAST_HREF}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 text-neutral-700"
-            >
+            <p className="text-eyebrow text-zinc-400">{nav.products}</p>
+            {products.map((p) => (
+              <Link key={p.href} href={p.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-zinc-700">
+                {p.title}
+                <Badge tone={p.tone}>{p.badge}</Badge>
+              </Link>
+            ))}
+            <Link href={ROAST_HREF} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-zinc-700">
               {nav.brand_roast}
-              <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
-                {nav.badge_free}
-              </span>
+              <Badge tone="live">{nav.badge_free}</Badge>
             </Link>
-            <div className="my-1 border-t border-neutral-100" />
-            <Link href={lp("/work")} onClick={() => setMobileOpen(false)} className="text-neutral-700">
-              {nav.work}
-            </Link>
-            <Link href={lp("/learn")} onClick={() => setMobileOpen(false)} className="text-neutral-700">
-              {nav.learn}
-            </Link>
-            <Link href={lp("/pricing")} onClick={() => setMobileOpen(false)} className="text-neutral-700">
-              {nav.pricing}
-            </Link>
-            <div className="my-1 border-t border-neutral-100" />
+            <div className="my-1 border-t border-zinc-100" />
+            <Link href={lp("/work")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.work}</Link>
+            <Link href={lp("/learn")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.learn}</Link>
+            <Link href={lp("/pricing")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.pricing}</Link>
+            <div className="my-1 border-t border-zinc-100" />
             <LangSwitcher current={locale} />
-            {isAdmin && signedIn && (
-              <Link
-                href="/admin"
-                onClick={() => setMobileOpen(false)}
-                className="mt-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-800"
-              >
-                Admin
-              </Link>
-            )}
-            {signedIn ? (
-              <Link
-                href={lp("/account")}
-                onClick={() => setMobileOpen(false)}
-                className="mt-1 flex items-center justify-center gap-2 rounded-md border border-neutral-300 bg-white px-3 py-2 text-center text-neutral-700"
-              >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
-                  {initialsOf(user?.email)}
-                </span>
-                <span>{nav.account}</span>
-              </Link>
-            ) : (
-              <Link
-                href={lp("/login")}
-                onClick={() => setMobileOpen(false)}
-                className="mt-1 rounded-md bg-neutral-900 px-3 py-2 text-center text-white"
-              >
-                {nav.sign_in}
-              </Link>
-            )}
+            <AdminLink mobile />
+            <AccountLink mobile />
           </div>
         </div>
       )}
