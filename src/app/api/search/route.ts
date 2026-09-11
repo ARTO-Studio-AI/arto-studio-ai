@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       : `A user describes what they need:\n"${query}"\n\nYou have 20 catalog prompts closest by semantic similarity:\n\n${candidatesText}\n\nPick the 4 to 6 most useful for their case and respond as a coach. Structure the answer like this (all inside "explanation", separate each block with a blank line):\n\n1. **Project read** (1 sentence) — what you understood from their need.\n2. **Why these prompts** (2-3 sentences) — what problem they solve together. Mention specific IDs in bold (**BR-0023**) when referencing a particular prompt.\n3. **Suggested order** (3-4 sentences or numbered list) — what to do first, second, third, with which prompts. Be specific.\n4. **Key tip** (1-2 sentences) — one actionable insight to get the most from the set.\n\nReply with ONLY a JSON object:\n{\n  "explanation": "Full text following the structure above. Use **bold** with asterisks where it makes sense (IDs, phases, key concepts). Keep coach tone: direct, specific.",\n  "recommended_ids": ["BR-0023", "..."]\n}`;
 
     const claudeResp = await getAnthropic().messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
       max_tokens: 2048,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
