@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmailAsync } from "@/lib/auth";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 
 /* Minimal Account page for Phase B. Shows tier + email + sign-out.
    When /prompts, /collections, /favorites migrate (Phase C), expand here:
@@ -14,6 +16,15 @@ const TIER_LABELS: Record<string, { label: string; chip: string }> = {
   agents: { label: "AI Agents", chip: "bg-purple-100 text-purple-800" },
   enterprise: { label: "Enterprise", chip: "bg-amber-100 text-amber-800" },
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("account", localeOf(locale));
+}
 
 export default async function AccountPage() {
   const sb = await createClient();

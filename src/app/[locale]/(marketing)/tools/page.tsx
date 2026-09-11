@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AI_GROUPS, AI_TOOLS, type AiGroup } from "@/types/prompt";
+import { localeOf, pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "AI Tools Reference — ARTO Studio AI",
-  description: "Reference catalog of generative AI tools, grouped by output modality.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata("tools", localeOf(locale));
+}
 
 const ORDER: AiGroup[] = ["text", "image", "video", "music", "voice", "any"];
 

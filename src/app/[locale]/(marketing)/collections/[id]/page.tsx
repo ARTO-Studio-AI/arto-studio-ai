@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Lang } from "@/lib/i18n";
 import { isLocale, type Locale } from "@/i18n/config";
+import type { Metadata } from "next";
+import { localeOf, pageMetadata } from "@/lib/seo";
 import { AI_GROUPS, CATEGORY_STYLES, DIFFICULTY_STYLES, TIER_STYLES, VERTICALS, aiGroupOf, type Prompt } from "@/types/prompt";
 import RemovePromptButton from "./RemovePromptButton";
 
@@ -11,6 +13,11 @@ interface Props {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, id } = await params;
+  return pageMetadata("collection", localeOf(locale), `/collections/${id}`);
+}
 
 export default async function CollectionDetail({ params }: Props) {
   const { locale: localeParam, id } = await params;
