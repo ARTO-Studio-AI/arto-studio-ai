@@ -135,7 +135,6 @@ export async function GET(request: NextRequest) {
         event: "stripe_pro_session_created",
         session_id: sessionData.id,
         user_id: user.id,
-        email: userEmail,
       })
     );
 

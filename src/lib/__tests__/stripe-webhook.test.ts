@@ -37,8 +37,8 @@ function harness(overrides: { profileTier?: string; subscriptionId?: string | nu
 
   profiles.set(USER_ID, {
     id: USER_ID,
-    email: "pro@example.com",
     tier: overrides.profileTier ?? "free",
+    stripe_subscription_id: overrides.subscriptionId ?? null,
     patches: [],
   });
   if (overrides.subscriptionId) subIndex.set(overrides.subscriptionId, USER_ID);
@@ -78,7 +78,10 @@ function harness(overrides: { profileTier?: string; subscriptionId?: string | nu
       if (!p) return false;
       p.patches.push(patch);
       if (patch.tier) p.tier = patch.tier;
-      if (patch.stripe_subscription_id) subIndex.set(patch.stripe_subscription_id, id);
+      if (patch.stripe_subscription_id) {
+        p.stripe_subscription_id = patch.stripe_subscription_id;
+        subIndex.set(patch.stripe_subscription_id, id);
+      }
       return true;
     },
     async getClientById(id) {
@@ -300,6 +303,60 @@ describe("processStripeEvent", () => {
     const outcome = await processStripeEvent(event("charge.refunded", { id: "ch_1" }), h.deps);
     expect(outcome.status).toBe("unhandled");
     expect(h.events.has("evt_charge.refunded_1")).toBe(true);
+  });
+});
+
+describe("suscripciones viejas (auditoría de Fable)", () => {
+  // Perfil Pro ligado a sub_new (volvió a pagar); llegan eventos rezagados
+  // de sub_old, que comparte customer y metadata.user_id.
+  const oldSub = (overrides: Partial<Stripe.Subscription> = {}) =>
+    subscription({ id: "sub_old", ...overrides });
+
+  it("deleted de sub_old no baja el perfil ligado a sub_new", async () => {
+    const h = harness({ profileTier: "pro", subscriptionId: "sub_new" });
+    const outcome = await processStripeEvent(
+      event("customer.subscription.deleted", oldSub({ status: "canceled", ended_at: PERIOD_END })),
+      h.deps
+    );
+    expect(outcome).toEqual({ status: "ignored", detail: "stale subscription" });
+    const profile = h.profiles.get(USER_ID)!;
+    expect(profile.tier).toBe("pro");
+    expect(profile.stripe_subscription_id).toBe("sub_new");
+    expect(profile.patches).toHaveLength(0);
+  });
+
+  it("updated de sub_old no pisa el stripe_subscription_id del perfil", async () => {
+    const h = harness({ profileTier: "pro", subscriptionId: "sub_new" });
+    const outcome = await processStripeEvent(
+      event("customer.subscription.updated", oldSub({ cancel_at_period_end: true })),
+      h.deps
+    );
+    expect(outcome.status).toBe("ignored");
+    const profile = h.profiles.get(USER_ID)!;
+    expect(profile.tier).toBe("pro");
+    expect(profile.stripe_subscription_id).toBe("sub_new");
+    expect(profile.patches).toHaveLength(0);
+  });
+
+  it("deleted de sub_new sí baja el perfil a free", async () => {
+    const h = harness({ profileTier: "pro", subscriptionId: "sub_new" });
+    const outcome = await processStripeEvent(
+      event(
+        "customer.subscription.deleted",
+        subscription({ id: "sub_new", status: "canceled", ended_at: PERIOD_END })
+      ),
+      h.deps
+    );
+    expect(outcome.status).toBe("processed");
+    const profile = h.profiles.get(USER_ID)!;
+    expect(profile.tier).toBe("free");
+    expect(profile.patches[0]).toMatchObject({ tier: "free", subscription_status: "canceled" });
+  });
+
+  it("perfil sin suscripción registrada sigue aceptando el evento", async () => {
+    const h = harness({ profileTier: "free" });
+    await processStripeEvent(event("customer.subscription.updated", subscription()), h.deps);
+    expect(h.profiles.get(USER_ID)!.stripe_subscription_id).toBe("sub_test");
   });
 });
 

@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-const PROFILE_COLUMNS = "id, email, tier";
+const PROFILE_COLUMNS = "id, tier, stripe_subscription_id";
 
 function buildDeps(): WebhookDeps {
   const admin = createAdminClient();

@@ -139,7 +139,6 @@ export async function POST(request: NextRequest) {
         event: "stripe_checkout_session_created",
         session_id: data.id,
         client_id: client.id,
-        email: client.email,
       })
     );
 

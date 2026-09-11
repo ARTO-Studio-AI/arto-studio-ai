@@ -21,8 +21,8 @@ export type ProfileTier = "free" | "pro";
 
 export interface ProfileRef {
   id: string;
-  email: string | null;
   tier: string;
+  stripe_subscription_id: string | null;
 }
 
 export interface ProfilePatch {
@@ -149,7 +149,6 @@ async function activateProfileFromCheckout(
 
   log("profile_upgraded_to_pro", {
     user_id: userId,
-    email: profile.email,
     session_id: session.id,
     subscription_id: subscriptionId,
   });
@@ -192,7 +191,6 @@ async function upgradeClientFromCheckout(
 
   log("client_upgraded_to_starter", {
     client_id: clientId,
-    email: client.email,
     session_id: session.id,
     ok,
   });
@@ -219,6 +217,7 @@ async function handleSubscriptionUpdated(
     });
     return { status: "ignored", detail: "no profile for subscription" };
   }
+  if (isStaleSubscription(profile, sub)) return ignoreStale(profile, sub);
 
   const status = mapSubscriptionStatus(sub.status);
   const patch: ProfilePatch = {
@@ -260,6 +259,7 @@ async function handleSubscriptionDeleted(
 ): Promise<WebhookOutcome> {
   const profile = await findProfileForSubscription(sub, deps);
   if (profile) {
+    if (isStaleSubscription(profile, sub)) return ignoreStale(profile, sub);
     const ok = await deps.updateProfile(profile.id, {
       tier: "free",
       subscription_status: "canceled",
@@ -268,7 +268,6 @@ async function handleSubscriptionDeleted(
     if (!ok) throw new Error(`profiles update failed for ${profile.id}`);
     log("profile_downgraded_to_free", {
       user_id: profile.id,
-      email: profile.email,
       subscription_id: sub.id,
     });
     return { status: "processed" };
@@ -296,7 +295,6 @@ async function handleSubscriptionDeleted(
     });
     log("client_downgraded_to_trial", {
       client_id: clientId,
-      email: client.email,
       subscription_id: sub.id,
       ok,
     });
@@ -340,7 +338,6 @@ async function handleInvoicePaymentFailed(
 
   log("profile_payment_failed", {
     user_id: profile.id,
-    email: profile.email,
     invoice_id: invoice.id,
     subscription_id: subscriptionId,
   });
@@ -363,6 +360,25 @@ async function findProfileForSubscription(
   const customerId = refId(sub.customer);
   if (customerId) return deps.findProfileByCustomer(customerId);
   return null;
+}
+
+/**
+ * Auditoría de Fable (11-sep-2026): si el perfil ya está ligado a otra
+ * suscripción (p. ej. canceló sub_old y volvió a pagar con sub_new), los
+ * eventos rezagados de la vieja no pueden bajarlo a free ni pisar su id.
+ * Solo se sincroniza la suscripción que el perfil tiene registrada.
+ */
+function isStaleSubscription(profile: ProfileRef, sub: Stripe.Subscription): boolean {
+  return Boolean(profile.stripe_subscription_id) && profile.stripe_subscription_id !== sub.id;
+}
+
+function ignoreStale(profile: ProfileRef, sub: Stripe.Subscription): WebhookOutcome {
+  log("stripe_subscription_stale_ignored", {
+    user_id: profile.id,
+    profile_subscription_id: profile.stripe_subscription_id,
+    event_subscription_id: sub.id,
+  });
+  return { status: "ignored", detail: "stale subscription" };
 }
 
 export function mapSubscriptionStatus(
