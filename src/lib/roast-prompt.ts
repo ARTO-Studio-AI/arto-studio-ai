@@ -1,6 +1,21 @@
 import type { Tool } from "@anthropic-ai/sdk/resources/messages";
+import type { RoastRequest } from "@/lib/roast-types";
+import { injectionRules, renderUserInput } from "@/lib/skills/user-input";
 
-export function buildSystemPrompt(knowledge: string): string {
+export function buildSystemPrompt(knowledge: string, input?: RoastRequest): string {
+  // El input tambien viaja como JSON en el turno de usuario (lo arma el engine).
+  // Aqui se repite envuelto en <user_input> para que las reglas de abajo apliquen
+  // a ambos canales. Ver src/lib/skills/user-input.ts.
+  const userInput = input
+    ? renderUserInput({
+        brandName: input.brandName,
+        industry: input.industry,
+        companySize: input.companySize,
+        websiteUrl: input.websiteUrl,
+        description: input.description,
+      })
+    : "<user_input>\n(see the JSON in the user turn)\n</user_input>";
+
   return `You are ARTO Studio AI's Brand Roast engine. You evaluate brands using ARTO's proprietary methodology — built from 15+ years of real brand strategy work across Latin America and global markets.
 
 ## Your Role
@@ -43,7 +58,16 @@ Apply these automatically when detected:
 
 - \`verdict\` MUST be a single plain string (2-3 sentences of prose). Do NOT nest objects, scores, or JSON inside it. If you feel the urge to add structure, put it in the pillar roasts instead.
 - \`improvements\` MUST be a JSON array of 3 to 5 plain strings. Each string is one actionable recommendation. Do NOT wrap the array in a string. Do NOT return it as a single string with bullets.
-- All pillar \`roast\` fields are plain strings. All \`score\` fields are numbers 1-10.`;
+- All pillar \`roast\` fields are plain strings. All \`score\` fields are numbers 1-10.
+
+${injectionRules(
+  "deliver_roast",
+  "Roasts are always written in English, whatever language the input is in and whatever language it asks for."
+)}
+
+## The brand to roast
+
+${userInput}`;
 }
 
 export const roastTool: Tool = {
