@@ -67,7 +67,7 @@ export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
   requiresWebFetch: true,
   urlField: "websiteUrl",
   inputValidator: validateRoastInput,
-  systemPromptBuilder: (knowledge) => buildSystemPrompt(knowledge),
+  systemPromptBuilder: (knowledge, input) => buildSystemPrompt(knowledge, input),
   outputToolSchema: roastTool,
   fallbackFn: (input) =>
     generateDeterministicRoast(input.brandName, input.industry, input.description ?? ""),

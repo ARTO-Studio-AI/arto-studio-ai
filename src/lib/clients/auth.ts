@@ -1,36 +1,27 @@
 import { NextRequest } from "next/server";
-import { verifyApiKey, type Client } from "./store";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { verifyApiKey, consumeTrialCall, type Client } from "./store";
 
 /**
  * Client authentication + rate limiting for gated skill endpoints.
  * Public skills (e.g. brand-roast) bypass this.
+ *
+ * Desde el 2026-09-11 (Fase 1B) esta funcion tambien CONSUME la llamada del trial
+ * de forma atomica (ver consumeTrialCall en store.ts). El engine ya no incrementa
+ * el contador; llamar a requireClientAuth con ok:true equivale a haber gastado
+ * una llamada. Por eso la ruta valida el body antes de llamar aqui: un 400 no
+ * debe costar una llamada.
  */
 
 export type AuthResult =
   | { ok: true; client: Client }
   | {
       ok: false;
-      status: 401 | 403 | 429;
+      status: 401 | 403 | 429 | 503;
       error: string;
       /** Present on 429 when the limit is a lifetime trial exhaustion, not an hourly rate limit. */
       upgrade_url?: string;
     };
-
-/* In-memory rate limiter, per client. Resets on serverless instance restart.
- * TODO: move to Redis/DB when we need accurate global limits. */
-const clientRateMap = new Map<string, number[]>();
-const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-
-function isRateLimited(clientId: string, limit: number): boolean {
-  const now = Date.now();
-  const timestamps = clientRateMap.get(clientId) ?? [];
-  const recent = timestamps.filter((t) => now - t < RATE_WINDOW_MS);
-  clientRateMap.set(clientId, recent);
-
-  if (recent.length >= limit) return true;
-  recent.push(now);
-  return false;
-}
 
 export async function requireClientAuth(
   request: NextRequest,
@@ -70,21 +61,26 @@ export async function requireClientAuth(
     };
   }
 
-  // Lifetime trial-call cap check (takes precedence over hourly rate limit).
+  const exhausted = (): AuthResult => ({
+    ok: false,
+    status: 429,
+    error: `Trial exhausted — you've used all ${client.trial_calls_limit} free calls. Upgrade to continue.`,
+    upgrade_url: `/upgrade?client_id=${client.id}`,
+  });
+
+  // Pre-check barato con la fila que ya leimos: mensaje claro y sin tocar el
+  // rate limit cuando el trial ya esta agotado. La garantia real es el UPDATE de abajo.
   if (
     client.trial_calls_limit !== null &&
     client.trial_calls_used >= client.trial_calls_limit
   ) {
-    return {
-      ok: false,
-      status: 429,
-      error: `Trial exhausted — you've used all ${client.trial_calls_limit} free calls. Upgrade to continue.`,
-      upgrade_url: `/upgrade?client_id=${client.id}`,
-    };
+    return exhausted();
   }
 
-  // Rate limit per client (hourly).
-  if (isRateLimited(client.id, client.rate_limit_per_hour)) {
+  // Rate limit per client (hourly, persistente en Postgres). Va antes del consumo
+  // para que un 429 por hora no gaste una llamada del trial.
+  const rl = await checkRateLimit(`client:${client.id}`, client.rate_limit_per_hour);
+  if (rl.limited) {
     return {
       ok: false,
       status: 429,
@@ -92,5 +88,17 @@ export async function requireClientAuth(
     };
   }
 
-  return { ok: true, client };
+  // Consumo atomico: UPDATE ... WHERE trial_calls_used < trial_calls_limit RETURNING.
+  // Cierra la carrera entre el check y el increment (antes eran dos queries).
+  const consumed = await consumeTrialCall(client.id);
+  if (!consumed.ok) {
+    if (consumed.reason === "exhausted") return exhausted();
+    return {
+      ok: false,
+      status: 503,
+      error: "Could not register the call. Try again in a few seconds.",
+    };
+  }
+
+  return { ok: true, client: { ...client, trial_calls_used: consumed.used } };
 }

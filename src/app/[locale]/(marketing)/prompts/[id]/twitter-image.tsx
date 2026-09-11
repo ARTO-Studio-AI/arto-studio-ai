@@ -1,3 +1,4 @@
+import { SITE_HOST } from "@/lib/site-url";
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VERTICALS } from "@/types/prompt";
@@ -78,7 +79,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             {prompt.ai_model}
           </div>
           <div style={{ marginLeft: "auto", fontSize: 18, color: "#a3a3a3" }}>
-            arto-studio-ai.vercel.app
+            {SITE_HOST}
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import path from "path";
 import "@/lib/skills"; // side-effect: register all skills
 import { getSkill } from "@/lib/skills/registry";
 import { runSkill } from "@/lib/skills/engine";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
 
@@ -26,36 +27,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-/* ── Rate limiter (per IP) ─────────────────────────────── */
+/* ── Rate limiter (per IP, 10/hora, persistente en Postgres; ver lib/rate-limit) ── */
 
-const rateMap = new Map<string, number[]>();
 const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60 * 60 * 1000;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateMap.get(ip) ?? [];
-  const recent = timestamps.filter((t) => now - t < RATE_WINDOW_MS);
-  rateMap.set(ip, recent);
-  if (recent.length >= RATE_LIMIT) return true;
-  recent.push(now);
-  return false;
-}
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
 export async function POST(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
+  const ip = getClientIp(request);
 
-  if (isRateLimited(ip)) {
+  const rl = await checkRateLimit(`roast:ip:${ip}`, RATE_LIMIT);
+  if (rl.limited) {
     return NextResponse.json(
-      { error: "Rate limit exceeded. Try again later.", retryAfter: 3600 },
-      { status: 429, headers: corsHeaders }
+      { error: "Rate limit exceeded. Try again later.", retryAfter: rl.retryAfterSec },
+      { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.retryAfterSec) } }
     );
   }
 
