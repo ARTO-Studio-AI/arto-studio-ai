@@ -41,7 +41,7 @@ export async function runSkill<TIn, TOut>(
   if (!skill) throw new SkillNotFoundError(slug);
 
   const startTime = Date.now();
-  const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+  const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 
   // If no API key, go straight to fallback (or fail if none)
   if (!process.env.ANTHROPIC_API_KEY) {
