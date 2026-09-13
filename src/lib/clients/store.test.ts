@@ -28,7 +28,7 @@ vi.mock("postgres", () => ({ default: () => fakeSql }));
 process.env.DATABASE_URL = "postgres://test:test@localhost/test";
 process.env.ARTO_API_KEY_SALT = "test-salt";
 
-const { consumeTrialCall, verifyApiKey } = await import("./store");
+const { consumeTrialCall, refundTrialCall, verifyApiKey } = await import("./store");
 
 describe("ARTO_API_KEY_SALT fail-closed", () => {
   const saved = { salt: process.env.ARTO_API_KEY_SALT, vercel: process.env.VERCEL_ENV };
@@ -92,5 +92,36 @@ describe("consumeTrialCall", () => {
     fakeSql.fail = true;
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await consumeTrialCall("client-1")).toEqual({ ok: false, reason: "unavailable" });
+  });
+});
+
+describe("refundTrialCall (H-39)", () => {
+  beforeEach(() => {
+    fakeSql.calls = [];
+    fakeSql.nextRows = [];
+    fakeSql.fail = false;
+  });
+
+  it("resta una llamada solo a clientes con tope y nunca baja de 0", async () => {
+    fakeSql.nextRows = [{ trial_calls_used: 1 }];
+    expect(await refundTrialCall("client-1")).toBe(1);
+    expect(fakeSql.calls).toHaveLength(1);
+    const text = fakeSql.calls[0].text.replace(/\s+/g, " ");
+    expect(text).toContain("UPDATE clients");
+    expect(text).toContain("GREATEST(trial_calls_used - 1, 0)");
+    expect(text).toContain("trial_calls_limit IS NOT NULL");
+    expect(text).toContain("RETURNING trial_calls_used");
+    expect(fakeSql.calls[0].values).toEqual(["client-1"]);
+  });
+
+  it("regresa null cuando el WHERE no encuentra fila (cliente sin tope)", async () => {
+    fakeSql.nextRows = [];
+    expect(await refundTrialCall("client-2")).toBeNull();
+  });
+
+  it("regresa null si la base falla, sin lanzar", async () => {
+    fakeSql.fail = true;
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await refundTrialCall("client-1")).toBeNull();
   });
 });
