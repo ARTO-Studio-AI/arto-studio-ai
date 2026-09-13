@@ -6,6 +6,7 @@ import { adoptOpens } from "@/lib/prompt-limit";
 import { captureServer } from "@/lib/analytics-server";
 import { splitName, upsertAudienceContact } from "@/lib/resend-audience";
 import { isLocale } from "@/i18n/config";
+import { safeNextPath } from "@/lib/safe-next";
 import {
   SIGNUP_COOKIE,
   UTM_COOKIE,
@@ -152,12 +153,14 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") || "/";
 
   // Use the public site URL from env (configured per Vercel project),
-  // NOT url.origin — Vercel rewrite proxies can leak the standalone host.
+  // NOT url.origin: Vercel rewrite proxies can leak the standalone host.
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || url.origin).replace(/\/+$/, "");
-  const target = next === "/" ? `${siteUrl}/` : `${siteUrl}${next}`;
+  // H-46 (13 sep 2026): `next` viene de la peticion. Sin validar, `next=@evil.com`
+  // o `next=.evil.com` sacaban al usuario del dominio ya con sesion iniciada.
+  const next = safeNextPath(url.searchParams.get("next"), "/", siteUrl);
+  const target = `${siteUrl}${next}`;
 
   if (code) {
     const sb = await createClient();

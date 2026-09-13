@@ -116,6 +116,10 @@ export function initAnalytics(): Promise<PostHog | null> {
         capture_pageleave: true,
         // Solo eventos tipados; el autocapture de clics mete ruido sin nombre.
         autocapture: false,
+        // H-47 (13 sep 2026): grabacion de sesiones apagada de forma explicita, sin
+        // depender del ajuste del proyecto en PostHog. Se enciende solo por decision
+        // de Victor y despues de tener aviso de cookies (H-48). D9 en docs/DECISIONES.md.
+        disable_session_recording: true,
         respect_dnt: true,
         persistence: "localStorage+cookie",
       });
