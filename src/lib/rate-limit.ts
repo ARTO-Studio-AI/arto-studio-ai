@@ -77,3 +77,21 @@ export function getClientIp(request: { headers: { get(name: string): string | nu
     "unknown"
   );
 }
+
+/**
+ * Borra las ventanas de rate_limits mas viejas que `days` dias (H-40, 2026-09-13).
+ *
+ * bump_rate_limit solo lee la ventana de la hora en curso; las filas viejas no
+ * sirven para nada y la tabla crecia sin tope (una fila por key y por hora). La
+ * llama el cron diario /api/cron/purge. Regresa cuantas filas borro; si la base
+ * falla, lanza para que el cron responda 500 y quede en los logs de Vercel.
+ */
+export async function purgeOldRateLimits(days = 7): Promise<number> {
+  const sql = getDb();
+  if (!sql) throw new Error("DATABASE_URL not set; cannot purge rate_limits");
+  const result = await sql`
+    DELETE FROM rate_limits
+    WHERE window_start < now() - make_interval(days => ${days})
+  `;
+  return result.count ?? 0;
+}

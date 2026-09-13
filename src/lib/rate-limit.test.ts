@@ -11,10 +11,13 @@ type FakeSql = ((strings: TemplateStringsArray, ...values: unknown[]) => Promise
   fail: boolean;
 };
 
+/* Como postgres-js: las filas van en el array y las filas afectadas en `.count`. */
 const fakeSql = (async (strings: TemplateStringsArray, ...values: unknown[]) => {
   fakeSql.calls.push({ text: strings.join("$"), values });
   if (fakeSql.fail) throw new Error("db down");
-  return [{ count: fakeSql.nextCount }];
+  const rows = [{ count: fakeSql.nextCount }] as unknown[] & { count?: number };
+  rows.count = fakeSql.nextCount;
+  return rows;
 }) as FakeSql;
 fakeSql.calls = [];
 fakeSql.nextCount = 1;
@@ -23,7 +26,7 @@ fakeSql.fail = false;
 vi.mock("postgres", () => ({ default: () => fakeSql }));
 process.env.DATABASE_URL = "postgres://test:test@localhost/test";
 
-const { checkRateLimit, getClientIp } = await import("./rate-limit");
+const { checkRateLimit, getClientIp, purgeOldRateLimits } = await import("./rate-limit");
 
 describe("checkRateLimit", () => {
   beforeEach(() => {
@@ -66,5 +69,32 @@ describe("getClientIp", () => {
   it("cae a x-real-ip y luego a unknown", () => {
     expect(getClientIp(req({ "x-real-ip": "8.8.8.8" }))).toBe("8.8.8.8");
     expect(getClientIp(req({}))).toBe("unknown");
+  });
+});
+
+describe("purgeOldRateLimits (H-40)", () => {
+  beforeEach(() => {
+    fakeSql.calls = [];
+    fakeSql.fail = false;
+  });
+
+  it("borra las ventanas mas viejas que N dias y regresa el conteo", async () => {
+    fakeSql.nextCount = 11;
+    expect(await purgeOldRateLimits(7)).toBe(11);
+    const text = fakeSql.calls[0].text.replace(/\s+/g, " ");
+    expect(text).toContain("DELETE FROM rate_limits");
+    expect(text).toContain("window_start < now() - make_interval(days => $");
+    expect(fakeSql.calls[0].values).toEqual([7]);
+  });
+
+  it("el default es 7 dias", async () => {
+    fakeSql.nextCount = 0;
+    expect(await purgeOldRateLimits()).toBe(0);
+    expect(fakeSql.calls[0].values).toEqual([7]);
+  });
+
+  it("si la base falla, lanza (el cron responde 500)", async () => {
+    fakeSql.fail = true;
+    await expect(purgeOldRateLimits()).rejects.toThrow(/db down/);
   });
 });
