@@ -1,11 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { SITE_URL } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://library.artostudio.ai").replace(/\/+$/, "");
-
 export async function GET() {
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
