@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import path from "path";
 import postgres from "postgres";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { upsertAudienceContact } from "@/lib/resend-audience";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -85,6 +86,11 @@ export async function POST(request: NextRequest) {
       brand: brandName,
     })
   );
+
+  // Audiencia de Resend (Fase 1C): el contacto se da de alta aunque la traza no
+  // aparezca; el usuario dejo su correo a proposito. No manda ningun correo y
+  // es no-op sin RESEND_AUDIENCE_ID.
+  await upsertAudienceContact({ email });
 
   const sql = getDb();
   if (!sql) {
