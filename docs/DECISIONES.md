@@ -75,15 +75,15 @@ siguiente sesión.
 | **Qué NO hacer** | No poner `arto-studio-ai.vercel.app` en correos, OG, sitemap ni copys nuevos. Pendiente: `src/app/api/cron/digest/route.ts` todavía lo usa en el HTML del digest |
 | **Dónde** | `NEXT_PUBLIC_SITE_URL`, `src/app/robots.ts` |
 
-### D7 · Pricing: investigar antes de decidir
+### D7 · Pricing de lanzamiento: Free con tope de 3 prompts al día
 
 | | |
 |---|---|
-| **Quién** | Victor, 2026-09-10 |
-| **Qué se decidió** | No se cambia el pricing hasta tener la ficha comparativa. La ficha se entregó; la decisión sigue **pendiente** |
-| **Por qué** | Cambiar precios con clientes que ya pagan es una decisión de negocio, no técnica |
-| **Qué NO hacer** | No tocar `STRIPE_PRICE_ID_*`, los precios en `/pricing` ni los tiers en código hasta que Victor decida |
-| **Dónde** | Ficha en Drive; Notion hub «ARTO Studio AI Web» |
+| **Quién** | Victor, 2026-09-10 (investigar antes de decidir); decidió el 2026-09-11 |
+| **Qué se decidió** | Free con 3 prompts abiertos al día y búsquedas libres; Pro $9 USD al mes; Studio $29 USD al mes, próximamente; Agents sin precio y próximamente; precios de lanzamiento |
+| **Por qué** | Texto literal de Victor: «la decisión va a ser free y dejar que nomás puedan buscar tres prompts al día, y hay que agregar el contador, obviamente. Dejaré los precios que tenemos: 9 29, y el de agente hay que dejarlo sin precio y dejarlo como coming soon. La idea es que hagamos estos precios de lanzamiento y luego los podemos ir subiendo». Aclaración suya: «solo tres abiertos por día no busquedas» |
+| **Qué NO hacer** | No subir precios ni cambiar productos de Stripe sin decisión escrita de Victor. No contar búsquedas en el tope |
+| **Dónde** | `src/lib/prompt-limit.ts`, página de pricing, migración `0009_prompt_opens` |
 
 ### D8 · Testimonios y secuencia de emails ASAP, sin inventar testimonios
 

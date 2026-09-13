@@ -23,6 +23,9 @@ rama de trabajo ──PR──▶ main ──▶ producción
 
 Stripe, auth, DDL de producción y email. Analiza, propón en el PR y espera el go de Victor.
 Todo lo que toque dinero o seguridad lo revisa Fable antes del merge.
+Desde el 2026-09-13 Code (Claude Opus 5) hace el trabajo y Fable solo audita, como subagente de
+Code en solo lectura: obligatorio antes del merge en dinero, auth, DDL o email, con veredicto
+PASA / FALLA / NO VERIFICABLE anclado al hash del commit, que Code revisa antes de registrarlo.
 
 ## 3 · Base de datos
 
