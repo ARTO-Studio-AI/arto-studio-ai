@@ -3,17 +3,37 @@
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Locale } from "@/i18n/config";
+import {
+  SIGNUP_COOKIE,
+  SIGNUP_COOKIE_MAX_AGE,
+  UTM_COOKIE,
+  parseFirstTouch,
+  readBrowserCookie,
+  signupMetadata,
+  writeBrowserCookie,
+} from "@/lib/attribution";
 
 /* Form copy per locale. The email label used to wrap the input AND sit
  * right next to the submit button, so screen readers and crawlers read it
  * as "EmailSend magic link". The label now points at the input by id and
- * the button stays a sibling. */
+ * the button stays a sibling.
+ *
+ * Captacion (Fase 1C, 13 sep 2026): Empresa y Rol son opcionales y nunca
+ * bloquean. Van con los UTM de la cookie asai_utm en options.data del magic
+ * link (raw_user_meta_data → trigger handle_new_user → profiles). Google no
+ * admite options.data, asi que antes de redirigir se dejan en la cookie corta
+ * asai_signup y /auth/callback completa el perfil desde ahi. */
 const COPY: Record<Locale, {
   google: string;
   redirecting: string;
   divider: string;
   email_label: string;
   email_placeholder: string;
+  company_label: string;
+  company_placeholder: string;
+  role_label: string;
+  role_placeholder: string;
+  optional: string;
   send: string;
   sending: string;
   sent_title: string;
@@ -26,6 +46,11 @@ const COPY: Record<Locale, {
     divider: "or continue with email",
     email_label: "Email",
     email_placeholder: "you@example.com",
+    company_label: "Company",
+    company_placeholder: "Where do you work?",
+    role_label: "Role",
+    role_placeholder: "Founder, creative director, marketer…",
+    optional: "optional",
     send: "Send magic link",
     sending: "Sending…",
     sent_title: "Check your email.",
@@ -38,6 +63,11 @@ const COPY: Record<Locale, {
     divider: "o continúa con tu correo",
     email_label: "Correo electrónico",
     email_placeholder: "tu@ejemplo.com",
+    company_label: "Empresa",
+    company_placeholder: "¿Dónde trabajas?",
+    role_label: "Rol",
+    role_placeholder: "Fundador, director creativo, marketing…",
+    optional: "opcional",
     send: "Enviar enlace mágico",
     sending: "Enviando…",
     sent_title: "Revisa tu correo.",
@@ -47,16 +77,29 @@ const COPY: Record<Locale, {
 };
 
 const EMAIL_INPUT_ID = "login-email";
+const COMPANY_INPUT_ID = "login-company";
+const ROLE_INPUT_ID = "login-role";
+const FIELD_CLASS =
+  "mt-1 block w-full rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none";
 
 export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
   const c = COPY[locale] ?? COPY.en;
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   function siteUrl(): string {
     return (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/+$/, "");
+  }
+
+  /* UTM y referrer de la primera visita (cookie asai_utm que pone src/proxy.ts)
+   * mas lo que el usuario escribio. Solo claves con valor. */
+  function captureData(): Record<string, string> {
+    const firstTouch = parseFirstTouch(readBrowserCookie(UTM_COOKIE));
+    return signupMetadata(firstTouch, { company, role, locale });
   }
 
   async function onSubmit(e: FormEvent) {
@@ -68,7 +111,7 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
     const sb = createClient();
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: redirectTo },
+      options: { emailRedirectTo: redirectTo, data: captureData() },
     });
     if (error) {
       setStatus("error");
@@ -82,6 +125,17 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
     setGoogleLoading(true);
     setErrorMsg(null);
     const redirectTo = `${siteUrl()}/auth/callback`;
+    // signInWithOAuth no lleva options.data: los campos viajan en una cookie
+    // corta que /auth/callback lee y borra. Los UTM ya estan en asai_utm.
+    try {
+      writeBrowserCookie(
+        SIGNUP_COOKIE,
+        JSON.stringify({ company: company.trim(), role: role.trim(), locale }),
+        SIGNUP_COOKIE_MAX_AGE,
+      );
+    } catch {
+      /* sin cookie no pasa nada: el perfil queda sin empresa ni rol */
+    }
     const sb = createClient();
     const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
@@ -142,9 +196,45 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+            className={FIELD_CLASS}
             placeholder={c.email_placeholder}
           />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label htmlFor={COMPANY_INPUT_ID} className="block text-sm font-medium text-zinc-700">
+              {c.company_label}{" "}
+              <span className="font-normal text-zinc-400">({c.optional})</span>
+            </label>
+            <input
+              id={COMPANY_INPUT_ID}
+              name="company"
+              type="text"
+              autoComplete="organization"
+              maxLength={200}
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className={FIELD_CLASS}
+              placeholder={c.company_placeholder}
+            />
+          </div>
+          <div>
+            <label htmlFor={ROLE_INPUT_ID} className="block text-sm font-medium text-zinc-700">
+              {c.role_label}{" "}
+              <span className="font-normal text-zinc-400">({c.optional})</span>
+            </label>
+            <input
+              id={ROLE_INPUT_ID}
+              name="role"
+              type="text"
+              autoComplete="organization-title"
+              maxLength={200}
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className={FIELD_CLASS}
+              placeholder={c.role_placeholder}
+            />
+          </div>
         </div>
         <button
           type="submit"

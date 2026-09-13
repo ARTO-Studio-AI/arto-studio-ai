@@ -5,8 +5,9 @@ import { LOCALES, DEFAULT_LOCALE, type Locale, isLocale } from "@/i18n/config";
 // sits above [locale] so it cannot read the segment param; the proxy sees
 // the path on every request and forwards the resolved locale here.
 import { LOCALE_HEADER } from "@/lib/seo";
+import { UTM_COOKIE, UTM_COOKIE_MAX_AGE, buildFirstTouch, serializeFirstTouch } from "@/lib/attribution";
 
-/* Next.js 16 renamed middleware → proxy. This file does three things on every
+/* Next.js 16 renamed middleware → proxy. This file does four things on every
  * request:
  *
  *   1. Locale routing: every public marketing path must live under /<locale>/.
@@ -28,6 +29,12 @@ import { LOCALE_HEADER } from "@/lib/seo";
  *   3. Supabase session refresh: createServerClient with the cookie adapter
  *      keeps the auth cookies valid for Server Components.
  *
+ *   4. First-touch attribution: the first request of a browser without the
+ *      `asai_utm` cookie stores its utm_* params, external referrer and landing
+ *      path for 30 days (src/lib/attribution.ts). It is set on the locale
+ *      redirect too, so `/?utm_source=x` → `/en?utm_source=x` records the
+ *      first hop and the second one finds the cookie already there.
+ *
  * Order matters: locale redirect runs first because Supabase doesn't care
  * about pathname; redirecting cheaply avoids an auth call when we already
  * know we're sending the user elsewhere.
@@ -44,6 +51,7 @@ const LOCALE_EXEMPT_PREFIXES = [
   "/welcome",
   "/roast",
   "/_next/",
+  "/_vercel/", // scripts de Vercel Analytics y Speed Insights (Fase 1C)
   "/favicon",
   "/brand/",
   "/sitemap.xml",
@@ -57,6 +65,38 @@ const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 año
 
 function isLocaleExempt(pathname: string): boolean {
   return LOCALE_EXEMPT_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
+}
+
+/* Rutas que no son "una visita": llamadas de API, callbacks de auth, assets de
+ * Next. Ahi no tiene sentido abrir la atribucion de primer toque. */
+const ATTRIBUTION_SKIP_PREFIXES = ["/api/", "/auth/", "/_next/", "/_vercel/", "/favicon", "/brand/", "/opengraph-image", "/twitter-image"];
+
+function isAttributionSkipped(pathname: string): boolean {
+  return (
+    ATTRIBUTION_SKIP_PREFIXES.some((p) => pathname === p || pathname.startsWith(p)) ||
+    /\.(?:xml|txt|ico|svg|png|jpg|jpeg|gif|webp|js|css|map)$/i.test(pathname)
+  );
+}
+
+/* Guarda la primera visita (utm_*, referrer externo, landing) en asai_utm si el
+ * navegador aun no la trae. Primera atribucion: una vez puesta no se toca. */
+function attachFirstTouch(request: NextRequest, response: NextResponse): void {
+  if (request.cookies.get(UTM_COOKIE)?.value) return;
+  const pathname = request.nextUrl.pathname;
+  if (isAttributionSkipped(pathname)) return;
+  const firstTouch = buildFirstTouch({
+    params: request.nextUrl.searchParams,
+    referer: request.headers.get("referer"),
+    host: request.headers.get("host") ?? request.nextUrl.host,
+    pathname,
+  });
+  response.cookies.set(UTM_COOKIE, serializeFirstTouch(firstTouch), {
+    httpOnly: false, // LoginForm la lee desde document.cookie
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: UTM_COOKIE_MAX_AGE,
+  });
 }
 
 function pickLocaleFromAcceptLanguage(header: string | null): Locale | null {
@@ -98,6 +138,7 @@ function localeRedirect(request: NextRequest): NextResponse | null {
   // header for the redirect response automatically when set via headers.
   const res = NextResponse.redirect(url, 307);
   res.headers.set("Vary", "Accept-Language, Cookie");
+  attachFirstTouch(request, res);
   return res;
 }
 
@@ -163,12 +204,15 @@ export async function proxy(request: NextRequest) {
       maxAge: VISITOR_COOKIE_MAX_AGE,
     });
   }
+
+  // 4. Atribucion de primera visita.
+  attachFirstTouch(request, response);
   return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|_vercel/|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
 
