@@ -47,7 +47,7 @@ interface Props {
 function SectionHead({ eyebrow, title, className = "" }: { eyebrow?: string; title: string; className?: string }) {
   return (
     <div className={className}>
-      {eyebrow && <p className="text-eyebrow text-zinc-400">{eyebrow}</p>}
+      {eyebrow && <p className="text-eyebrow text-zinc-500">{eyebrow}</p>}
       <h2 className="text-h2 mt-2">{title}</h2>
       <span className="accent-rule mt-4" />
     </div>
@@ -99,11 +99,11 @@ export default async function HomePage({ params }: Props) {
       <section className="py-16 sm:py-24">
         <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
           <div className="max-w-2xl">
-            <p className="text-eyebrow mb-4 text-zinc-400">{t.eyebrow}</p>
+            <p className="text-eyebrow mb-4 text-zinc-500">{t.eyebrow}</p>
             <h1 className="text-display tracking-tight">
               {t.hero_h1_line1}
               <br />
-              <span className="text-zinc-400">{t.hero_h1_line2}</span>
+              <span className="text-zinc-500">{t.hero_h1_line2}</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg font-medium text-zinc-800">
               <span className="font-mono text-zinc-900">{promptsTotal}</span> {t.hero_count_label}
@@ -122,8 +122,8 @@ export default async function HomePage({ params }: Props) {
             <Image
               src="/brand/arto-character-01.png"
               alt="ARTO"
-              width={280}
-              height={280}
+              width={290}
+              height={273}
               priority
               className="h-auto w-[260px] lg:w-[300px]"
             />
@@ -174,7 +174,7 @@ export default async function HomePage({ params }: Props) {
               return (
                 <Card key={p.id} href={lp(`/prompts/${p.id}`)} padding="sm">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] text-zinc-400">{p.id}</span>
+                    <span className="font-mono text-[10px] text-zinc-500">{p.id}</span>
                     {style && <Badge tone="neutral" mono={false} className="capitalize">{catLabel}</Badge>}
                   </div>
                   <p className="mt-2 line-clamp-2 text-sm font-semibold text-zinc-900">{promptTitle(p)}</p>
@@ -197,10 +197,10 @@ export default async function HomePage({ params }: Props) {
               className="flex items-center justify-between rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-3 transition hover:border-zinc-400 hover:shadow-[var(--shadow-sm)]"
             >
               <div>
-                <p className="font-mono text-[11px] font-medium text-zinc-400">{v.code}</p>
+                <p className="font-mono text-[11px] font-medium text-zinc-500">{v.code}</p>
                 <p className="text-sm font-medium text-zinc-900">{t.verticals_labels[v.category]}</p>
               </div>
-              <p className="font-mono text-xs text-zinc-400">{v.count}</p>
+              <p className="font-mono text-xs text-zinc-500">{v.count}</p>
             </Link>
           ))}
         </div>
@@ -247,7 +247,7 @@ export default async function HomePage({ params }: Props) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {t.method_pillars.map((p) => (
             <Card key={p.n} padding="sm" className="p-5">
-              <span className="font-mono text-xs font-medium text-zinc-400">{p.n}</span>
+              <span className="font-mono text-xs font-medium text-zinc-500">{p.n}</span>
               <h3 className="mt-1 font-bold">{p.title}</h3>
               <p className="mt-1 text-sm text-zinc-500">{p.desc}</p>
             </Card>
@@ -352,7 +352,7 @@ export default async function HomePage({ params }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-400">
+              <tr className="border-b border-zinc-200 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-500">
                 {t.compare_th.map((h) => (
                   <th key={h} className="py-3 pr-4 font-medium">
                     {h}
@@ -381,7 +381,7 @@ export default async function HomePage({ params }: Props) {
             <details key={item.q} className="group py-4">
               <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-zinc-900 marker:content-none">
                 {item.q}
-                <span className="text-zinc-400 transition group-open:rotate-45">+</span>
+                <span className="text-zinc-500 transition group-open:rotate-45">+</span>
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-zinc-600">{item.a}</p>
             </details>

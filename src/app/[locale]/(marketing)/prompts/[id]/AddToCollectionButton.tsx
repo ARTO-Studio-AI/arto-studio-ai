@@ -109,10 +109,10 @@ export default function AddToCollectionButton({
                         <button
                           onClick={() => !already && addTo(c.id)}
                           disabled={already}
-                          className="block w-full rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-sm hover:bg-zinc-100 disabled:cursor-default disabled:bg-zinc-50 disabled:text-zinc-400"
+                          className="block w-full rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-sm hover:bg-zinc-100 disabled:cursor-default disabled:bg-zinc-50 disabled:text-zinc-500"
                         >
                           <span className="line-clamp-1">{c.name}</span>
-                          {already && <span className="text-[10px] text-zinc-400">{labels.in}</span>}
+                          {already && <span className="text-[10px] text-zinc-500">{labels.in}</span>}
                         </button>
                       </li>
                     );

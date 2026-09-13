@@ -168,7 +168,7 @@ export default async function LearnSlugPage({ params }: Props) {
       </ul>
 
       <Card className="mt-12 sm:p-8">
-        <p className="text-eyebrow text-zinc-400">{t.catalog_eyebrow}</p>
+        <p className="text-eyebrow text-zinc-500">{t.catalog_eyebrow}</p>
         <h2 className="mt-2 text-xl font-bold tracking-tight">{t.catalog_h2}</h2>
         <p className="mt-2 text-sm text-zinc-600">{t.catalog_body}</p>
         <div className="mt-5 flex flex-wrap gap-3">

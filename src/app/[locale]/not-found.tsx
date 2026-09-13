@@ -22,7 +22,7 @@ export default async function LocaleNotFound() {
         <Nav user={null} locale={locale} nav={dict.nav} />
       </header>
       <main className="mx-auto flex max-w-3xl flex-1 flex-col items-center px-6 py-24 text-center">
-        <Image src="/brand/arto-character-01.png" alt="ARTO" width={160} height={160} className="h-auto w-36" priority />
+        <Image src="/brand/arto-character-01.png" alt="ARTO" width={160} height={151} className="h-auto w-36" priority />
         <p className="text-eyebrow mt-8 text-zinc-400">404</p>
         <h1 className="text-h1 mt-2">{es ? "Esta página no existe." : "This page does not exist."}</h1>
         <span className="accent-rule mx-auto mt-4" />

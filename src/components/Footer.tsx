@@ -21,18 +21,18 @@ export default function Footer({ locale, footer }: Props) {
         <div className="grid gap-8 sm:grid-cols-4">
           <div>
             <Image src="/brand/arto-logo-black.png" alt="ARTO" width={80} height={20} className="h-5 w-auto" />
-            <p className="mt-2 text-xs text-zinc-400">{footer.copyright}</p>
+            <p className="mt-2 text-xs text-zinc-500">{footer.copyright}</p>
           </div>
 
           <div>
-            <p className="text-eyebrow mb-2 text-zinc-400">{footer.product}</p>
+            <p className="text-eyebrow mb-2 text-zinc-500">{footer.product}</p>
             <div className="flex flex-col gap-1.5 text-sm">
               <Link href={lp("/prompts")} className={link}>{footer.prompts}</Link>
-              <Link href={lp("/skills")} className="flex items-center gap-1.5 text-zinc-400 hover:text-zinc-600">
+              <Link href={lp("/skills")} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-600">
                 {footer.skills}
                 <Badge tone="soon">Soon</Badge>
               </Link>
-              <Link href={lp("/agents")} className="flex items-center gap-1.5 text-zinc-400 hover:text-zinc-600">
+              <Link href={lp("/agents")} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-600">
                 {footer.agents}
                 <Badge tone="soon">Soon</Badge>
               </Link>
@@ -41,7 +41,7 @@ export default function Footer({ locale, footer }: Props) {
           </div>
 
           <div>
-            <p className="text-eyebrow mb-2 text-zinc-400">{footer.company}</p>
+            <p className="text-eyebrow mb-2 text-zinc-500">{footer.company}</p>
             <div className="flex flex-col gap-1.5 text-sm">
               <Link href={lp("/pricing")} className={link}>{footer.pricing}</Link>
               <Link href={lp("/learn")} className={link}>{footer.learn}</Link>
@@ -51,7 +51,7 @@ export default function Footer({ locale, footer }: Props) {
           </div>
 
           <div>
-            <p className="text-eyebrow mb-2 text-zinc-400">{footer.legal}</p>
+            <p className="text-eyebrow mb-2 text-zinc-500">{footer.legal}</p>
             <div className="flex flex-col gap-1.5 text-sm">
               <Link href={lp("/privacy")} className={link}>{footer.privacy}</Link>
               <Link href={lp("/terms")} className={link}>{footer.terms}</Link>

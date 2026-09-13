@@ -34,7 +34,7 @@ export default async function WorkPage({ params }: PageProps) {
       {/* Header */}
       <section className="border-b border-zinc-200">
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
-          <p className="text-eyebrow mb-2 text-zinc-400">{t.eyebrow}</p>
+          <p className="text-eyebrow mb-2 text-zinc-500">{t.eyebrow}</p>
           <h1 className="text-h1">{t.h1}</h1>
           <span className="accent-rule mt-4" />
           <p className="mt-4 max-w-xl text-lg text-zinc-500">{t.sub}</p>
@@ -98,7 +98,7 @@ export default async function WorkPage({ params }: PageProps) {
                   />
                 </div>
                 <div className="p-6">
-                  <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-zinc-400">
+                  <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-zinc-500">
                     <span>{project.year}</span>
                     <span>{project.location}</span>
                   </div>

@@ -63,7 +63,7 @@ export default async function LearnIndex({ params }: Props) {
               </div>
             )}
             <div className="p-6">
-              <p className="text-eyebrow text-zinc-400">{t.card_eyebrow}</p>
+              <p className="text-eyebrow text-zinc-500">{t.card_eyebrow}</p>
               <h2 className="mt-2 text-lg font-semibold text-zinc-900">{heroOf(page)}</h2>
               <p className="mt-2 line-clamp-3 text-sm text-zinc-600">{introOf(page)}</p>
               <p className="mt-4 text-xs font-medium text-zinc-500 group-hover:text-zinc-900">

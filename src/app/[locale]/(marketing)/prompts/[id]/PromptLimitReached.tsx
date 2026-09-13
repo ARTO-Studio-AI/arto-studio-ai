@@ -56,7 +56,7 @@ export default function PromptLimitReached({ locale, title, promptId, signedIn, 
     >
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{copy.eyebrow}</p>
       <h2 className="mt-2 text-xl font-bold tracking-tight text-zinc-900">{title}</h2>
-      <p className="mt-1 font-mono text-[11px] text-zinc-400">{promptId}</p>
+      <p className="mt-1 font-mono text-[11px] text-zinc-500">{promptId}</p>
       <p className="mt-4 max-w-xl text-sm text-zinc-700">{copy.body}</p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <TrackedLink

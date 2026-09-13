@@ -139,7 +139,7 @@ export default async function PricingPage({ params }: Props) {
         <span className="accent-rule mx-auto mt-4" />
         <p className="mx-auto mt-4 max-w-lg text-zinc-600">{t.sub}</p>
         <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-500">{t.value_note}</p>
-        <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-zinc-400">{t.launch_note}</p>
+        <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-zinc-500">{t.launch_note}</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -165,7 +165,7 @@ export default async function PricingPage({ params }: Props) {
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
                   <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (
-                    <p className="mt-1 font-mono text-[11px] text-zinc-400">
+                    <p className="mt-1 font-mono text-[11px] text-zinc-500">
                       {t.mxn_note.replace("{mxn}", mxn(tier.usd))}
                     </p>
                   )}
@@ -194,7 +194,7 @@ export default async function PricingPage({ params }: Props) {
       </div>
 
       <div className="mx-auto mt-12 max-w-2xl text-center">
-        <p className="text-xs text-zinc-400">{t.footnote}</p>
+        <p className="text-xs text-zinc-500">{t.footnote}</p>
       </div>
 
       <div className="mt-16 border-t border-zinc-200 pt-16">
@@ -205,7 +205,7 @@ export default async function PricingPage({ params }: Props) {
             <thead>
               <tr className="border-b border-zinc-200 text-left">
                 {t.compare_th.map((h) => (
-                  <th key={h} className="py-3 pr-4 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-400">
+                  <th key={h} className="py-3 pr-4 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">
                     {h}
                   </th>
                 ))}
@@ -218,11 +218,11 @@ export default async function PricingPage({ params }: Props) {
                   {tiers.map((val, i) => (
                     <td key={i} className="py-2.5 pr-4 font-mono text-xs">
                       {val === "yes" ? (
-                        <span className="inline-block h-2 w-2 rounded-full bg-[var(--accent)]" aria-label="yes" />
+                        <span role="img" aria-label={t.compare_yes} className="inline-block h-2 w-2 rounded-full bg-[var(--accent)]" />
                       ) : val === "no" ? (
                         <span className="text-zinc-300">&mdash;</span>
                       ) : val === "soon" ? (
-                        <span className="text-zinc-400">{t.compare_soon}</span>
+                        <span className="text-zinc-500">{t.compare_soon}</span>
                       ) : (
                         val
                       )}
@@ -244,7 +244,7 @@ export default async function PricingPage({ params }: Props) {
             <details key={item.q} className="group py-4">
               <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-zinc-900 marker:content-none">
                 {item.q}
-                <span className="text-zinc-400 transition group-open:rotate-45">+</span>
+                <span className="text-zinc-500 transition group-open:rotate-45">+</span>
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-zinc-600">{item.a}</p>
             </details>
