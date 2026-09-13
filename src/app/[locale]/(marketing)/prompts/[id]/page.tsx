@@ -205,7 +205,7 @@ export default async function PromptDetail({ params }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 text-[11px]">
-              <span className="font-mono text-zinc-400">{prompt.id}</span>
+              <span className="font-mono text-zinc-500">{prompt.id}</span>
               <Badge tone={prompt.tier === "free" ? "tier" : "inverse"}>{tier.label}</Badge>
             </div>
             <h1 className="text-h1 mt-3">{title}</h1>

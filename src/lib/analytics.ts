@@ -120,6 +120,9 @@ export function initAnalytics(): Promise<PostHog | null> {
         // depender del ajuste del proyecto en PostHog. Se enciende solo por decision
         // de Victor y despues de tener aviso de cookies (H-48). D9 en docs/DECISIONES.md.
         disable_session_recording: true,
+        // Lighthouse Fase 6 (13 sep 2026): sin encuestas. Si no, posthog-js baja
+        // surveys.js (34 KiB) en cada visita y no usamos encuestas de PostHog.
+        disable_surveys: true,
         respect_dnt: true,
         persistence: "localStorage+cookie",
       });

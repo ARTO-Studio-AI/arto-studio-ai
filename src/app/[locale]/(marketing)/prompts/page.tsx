@@ -146,7 +146,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               ? `inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white`
               : `rounded-full ${style.chip} px-3 py-1 text-xs hover:bg-zinc-200`;
             return (
-              <Link key={v} href={next} className={cls} aria-pressed={active}>
+              <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {labelCategory(v)}
               </Link>
@@ -164,7 +164,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
               : `rounded-full ${meta.chip} px-3 py-1 text-xs hover:bg-zinc-100`;
             return (
-              <Link key={v} href={next} className={cls} aria-pressed={active}>
+              <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {labelAiGroup(v)}
               </Link>
@@ -181,7 +181,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
               : "inline-flex rounded-full text-xs hover:opacity-80";
             return (
-              <Link key={v} href={next} className={cls} aria-pressed={active}>
+              <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active ? (
                   <>
                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
@@ -205,7 +205,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
               : `rounded-full ${style.chip} px-3 py-1 text-xs hover:opacity-80`;
             return (
-              <Link key={v} href={next} className={cls} aria-pressed={active}>
+              <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {style.label}
               </Link>
@@ -239,7 +239,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                   className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)]"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-zinc-400">{p.id}</span>
+                    <span className="font-mono text-zinc-500">{p.id}</span>
                     <div className="flex items-center gap-1.5">
                       {p.is_featured && <span title="Editor's pick" className="text-[var(--accent)]" aria-label="Featured">★</span>}
                       <Badge tone={p.tier === "free" ? "tier" : "inverse"}>{tier.label}</Badge>

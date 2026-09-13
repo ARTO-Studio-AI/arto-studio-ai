@@ -177,7 +177,7 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
         {googleLoading ? c.redirecting : c.google}
       </button>
 
-      <div className="flex items-center gap-3 text-xs text-zinc-400">
+      <div className="flex items-center gap-3 text-xs text-zinc-500">
         <div className="h-px flex-1 bg-zinc-200" />
         <span>{c.divider}</span>
         <div className="h-px flex-1 bg-zinc-200" />
@@ -204,7 +204,7 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
           <div>
             <label htmlFor={COMPANY_INPUT_ID} className="block text-sm font-medium text-zinc-700">
               {c.company_label}{" "}
-              <span className="font-normal text-zinc-400">({c.optional})</span>
+              <span className="font-normal text-zinc-500">({c.optional})</span>
             </label>
             <input
               id={COMPANY_INPUT_ID}
@@ -221,7 +221,7 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
           <div>
             <label htmlFor={ROLE_INPUT_ID} className="block text-sm font-medium text-zinc-700">
               {c.role_label}{" "}
-              <span className="font-normal text-zinc-400">({c.optional})</span>
+              <span className="font-normal text-zinc-500">({c.optional})</span>
             </label>
             <input
               id={ROLE_INPUT_ID}

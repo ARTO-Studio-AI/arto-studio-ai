@@ -662,6 +662,7 @@ function BrandRoastInner() {
         )}
       </nav>
 
+      <main className="flex flex-1 flex-col">
       {/* Hero */}
       <section className="border-b border-border bg-foreground text-white">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-24">
@@ -1069,6 +1070,8 @@ function BrandRoastInner() {
           )}
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border bg-foreground text-white">

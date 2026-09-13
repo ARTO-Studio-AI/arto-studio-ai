@@ -32,7 +32,7 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "B2B", "Digital", "Identidad Visual"],
     description:
       "Branding and web development for Grupo Proeza. Strengthened the brand system and translated it into a clear, responsive web experience that communicates the group's platform and business units.",
-    image: "/work/grupo-proeza-2025.webp",
+    image: "/work/grupo-proeza-2025-1200.webp",
   },
   {
     slug: "gse-biomedical",

@@ -179,7 +179,7 @@ export default function SmartSearch({ lang = "en" }: { lang?: Lang }) {
                       className="block h-full rounded-[var(--radius-md)] border border-zinc-200 bg-white p-3 transition hover:border-zinc-400 hover:shadow-sm"
                     >
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-mono text-zinc-400">{p.id}</span>
+                        <span className="font-mono text-zinc-500">{p.id}</span>
                         <span className={`rounded-full ${tier.chip} px-2 py-0.5 text-[11px] font-medium`}>
                           {tier.label}
                         </span>
