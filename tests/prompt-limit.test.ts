@@ -14,11 +14,13 @@ import {
 } from "@/lib/prompt-limit";
 
 /* Contador free de 3 prompts abiertos al dia (D7).
- * Las cinco pruebas del diseno corren contra la base real por DATABASE_URL con
- * sujetos `test:<fecha>:<random>` que se borran al final. Sin DATABASE_URL (CI)
- * se saltan y solo corren las puras. */
+ * Las cinco pruebas del diseno corren contra una base real con sujetos
+ * `test:<fecha>:<random>` que se borran al final. Solo se activan con
+ * ASAI_INTEGRATION_DB_URL explicita en la linea de comandos (H-45, ver
+ * tests/setup.ts); una DATABASE_URL en .env.local ya no basta. Sin esa
+ * variable (CI, dev normal) se saltan y solo corren las puras. */
 
-const HAS_DB = !!process.env.DATABASE_URL && !/localhost\/x$/.test(process.env.DATABASE_URL);
+const HAS_DB = !!process.env.ASAI_INTEGRATION_DB_URL;
 const DAY = "2030-01-15"; // dia forzado, lejos del real, para no chocar con trafico
 const NEXT_DAY = "2030-01-16";
 const stamp = `${utcDay()}:${Math.random().toString(36).slice(2, 8)}`;
@@ -56,7 +58,7 @@ describe("prompt-limit (puro)", () => {
   });
 });
 
-describe.skipIf(!HAS_DB)("prompt-limit (integracion contra DATABASE_URL)", () => {
+describe.skipIf(!HAS_DB)("prompt-limit (integracion contra ASAI_INTEGRATION_DB_URL)", () => {
   afterAll(async () => {
     for (const s of subjects) await deleteOpens(s);
     await closeDb();

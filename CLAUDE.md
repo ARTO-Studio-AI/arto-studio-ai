@@ -104,6 +104,26 @@ CI esté en verde.
 → flujo real. **No reportes «listo» sin haber visto la respuesta correcta.** Si no se puede
 observar, se dice explícitamente.
 
+### Pruebas (`npm test`)
+
+- `npm test` corre vitest. En CI y en dev normal **no toca ninguna base**: `tests/setup.ts` carga
+  `.env.local` y luego **borra `DATABASE_URL`** del entorno de las pruebas. Las unitarias que usan
+  postgres lo mockean y ponen su propia URL falsa.
+- Las pruebas de integración (hoy `tests/prompt-limit.test.ts`, que escribe y borra filas en
+  `prompt_opens`) **solo corren con `ASAI_INTEGRATION_DB_URL` explícita en la línea de comandos**
+  (H-45, 2026-09-13). Antes bastaba un `.env.local` con `DATABASE_URL` de producción para escribir
+  filas reales:
+
+  ```bash
+  ASAI_INTEGRATION_DB_URL='postgres://usuario:clave@host:5432/base' npm test
+  ```
+
+- Ponerla en `.env.local` **no la activa**: se lee antes de cargar ese archivo. Úsala de
+  preferencia contra una base desechable; contra producción solo con permiso de Victor y
+  sabiendo que la prueba escribe y luego borra sujetos `test:<fecha>:<random>`.
+- Una prueba nueva que necesite base real se salta con
+  `describe.skipIf(!process.env.ASAI_INTEGRATION_DB_URL)`. Nunca la condiciones a `DATABASE_URL`.
+
 ### Nota fechada en el registro
 
 Cada avance deja **nota con fecha en el cuerpo del task o hallazgo de Notion**: qué se descubrió,
