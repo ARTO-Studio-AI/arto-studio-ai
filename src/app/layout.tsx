@@ -1,20 +1,38 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Archivo, Manrope } from "next/font/google";
+import { Archivo, JetBrains_Mono, Manrope } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
 import { DEFAULT_OG_IMAGE_PATH, LOCALE_HEADER, SITE_NAME, absoluteUrl, siteUrl } from "@/lib/seo";
+import { createClient } from "@/lib/supabase/server";
+import PostHogProvider from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
+/* Tipografia del sistema (Fase 2, tokens en globals.css). Solo los pesos que
+ * usan los tokens: Archivo para headings (500/700/800), Manrope para cuerpo
+ * (400/500/700) y JetBrains Mono para eyebrows, IDs, conteos y scores (400/500).
+ * Las tres se cargan aqui, en el root, para que /roast, /admin y /studio
+ * (fuera de [locale]) tengan las mismas variables CSS que el arbol marketing. */
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["500", "700", "800"],
+  display: "swap",
 });
 
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 /* Global defaults. Every page under [locale] overrides title, description,
@@ -50,15 +68,37 @@ async function requestLocale(): Promise<string> {
   return isLocale(value) ? value : DEFAULT_LOCALE;
 }
 
+/* Id de Supabase del usuario con sesion (o null) para identify() de PostHog.
+ * Solo el id: el email nunca sale hacia PostHog. Si faltan las env de Supabase
+ * (build de CI) se renderiza como anonimo. */
+async function currentUserId(): Promise<string | null> {
+  try {
+    const sb = await createClient();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const lang = await requestLocale();
+  const [lang, userId] = await Promise.all([requestLocale(), currentUserId()]);
   return (
-    <html lang={lang} className={`${archivo.variable} ${manrope.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang={lang}
+      className={`${archivo.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        <PostHogProvider userId={userId}>{children}</PostHogProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

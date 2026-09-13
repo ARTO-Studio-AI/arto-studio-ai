@@ -3,8 +3,9 @@ import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPrompt } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
-import { getSubject, getUsed, isUnlimitedTier, openForTier } from "@/lib/prompt-limit";
+import { FREE_DAILY_OPENS, getSubject, getUsed, isUnlimitedTier, openForTier } from "@/lib/prompt-limit";
 import PromptQuota from "@/components/PromptQuota";
+import TrackOnMount from "@/components/analytics/TrackOnMount";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -151,9 +152,16 @@ export default async function PromptDetail({ params }: Props) {
     : diff.label;
   const aiGroupLabel = lang === "es" ? AI_GROUP_LABEL_ES[aiGroup] ?? aiInfo.label : aiInfo.label;
 
+  /* Tier para analitica: "anon" sin sesion, si no el del perfil. */
+  const analyticsTier = user ? userTier : "anon";
+
   if (limitHit) {
     return (
       <article className="mx-auto max-w-3xl px-6 py-12">
+        <TrackOnMount
+          event="free_limit_reached"
+          props={{ prompt_id: prompt.id, tier: analyticsTier, signed_in: !!user, locale }}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
             {dict.back_to_catalog}
@@ -173,6 +181,19 @@ export default async function PromptDetail({ params }: Props) {
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
+      {!isLocked && (
+        <TrackOnMount
+          event="prompt_opened"
+          props={{
+            prompt_id: prompt.id,
+            prompt_tier: prompt.tier,
+            used: quotaUsed ?? 0,
+            limit: FREE_DAILY_OPENS,
+            tier: analyticsTier,
+            locale,
+          }}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
           {dict.back_to_catalog}
@@ -217,7 +238,14 @@ export default async function PromptDetail({ params }: Props) {
           {!isLocked && (
             <div className="flex items-center gap-2">
               <AddToCollectionButton promptId={prompt.id} lang={lang} signedIn={!!user} />
-              <CopyButton text={body} labelCopy={dict.copy} labelCopied={dict.copied} />
+              <CopyButton
+                text={body}
+                labelCopy={dict.copy}
+                labelCopied={dict.copied}
+                promptId={prompt.id}
+                promptTier={prompt.tier}
+                locale={locale}
+              />
             </div>
           )}
         </div>

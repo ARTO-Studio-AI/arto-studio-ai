@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { track } from "@/lib/analytics";
 
 export default function FavoriteButton({
   promptId,
@@ -46,7 +47,9 @@ export default function FavoriteButton({
         setFavorited(!next);
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? "Error");
+        return;
       }
+      if (next) track("favorite_added", { prompt_id: promptId });
     });
   }
 

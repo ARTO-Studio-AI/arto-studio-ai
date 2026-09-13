@@ -1,10 +1,12 @@
-import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import { FREE_DAILY_OPENS } from "@/lib/prompt-limit";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 /* Pantalla de tope del contador free. No renderiza el cuerpo del prompt.
  * Copy fijo en ES/EN; la hora local de Madrid y Hermosillo se calcula con
- * Intl para que no quede mal cuando cambia el horario de verano. */
+ * Intl para que no quede mal cuando cambia el horario de verano.
+ * Los tres CTAs mandan limit_cta_clicked (pricing | library | signup); el
+ * free_limit_reached lo dispara la pagina al montar. */
 
 interface Props {
   locale: Locale;
@@ -57,24 +59,33 @@ export default function PromptLimitReached({ locale, title, promptId, signedIn, 
       <p className="mt-1 font-mono text-[11px] text-zinc-400">{promptId}</p>
       <p className="mt-4 max-w-xl text-sm text-zinc-700">{copy.body}</p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Link
+        <TrackedLink
+          event="limit_cta_clicked"
+          props={{ cta: "pricing", prompt_id: promptId, locale }}
           href={`/${locale}/pricing`}
           className="inline-flex items-center rounded-[6px] bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
         >
           {copy.primary}
-        </Link>
-        <Link
+        </TrackedLink>
+        <TrackedLink
+          event="limit_cta_clicked"
+          props={{ cta: "library", prompt_id: promptId, locale }}
           href={`/${locale}/prompts`}
           className="inline-flex items-center rounded-[6px] border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
         >
           {copy.secondary}
-        </Link>
+        </TrackedLink>
       </div>
       {!signedIn && (
         <p className="mt-5 text-xs text-zinc-500">
-          <Link href={`/${locale}/login`} className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900">
+          <TrackedLink
+            event="limit_cta_clicked"
+            props={{ cta: "signup", prompt_id: promptId, locale }}
+            href={`/${locale}/login`}
+            className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+          >
             {copy.signup}
-          </Link>{" "}
+          </TrackedLink>{" "}
           {copy.signupNote}
         </p>
       )}

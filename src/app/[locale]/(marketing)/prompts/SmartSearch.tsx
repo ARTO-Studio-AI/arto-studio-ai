@@ -12,6 +12,7 @@ import {
   type Prompt,
 } from "@/types/prompt";
 import { t, type Lang, AI_GROUP_LABEL_ES, DIFFICULTY_LABEL_ES, VERTICAL_LABEL_ES } from "@/lib/i18n";
+import { track } from "@/lib/analytics";
 
 interface SearchResult {
   explanation: string;
@@ -68,12 +69,19 @@ export default function SmartSearch({ lang = "en" }: { lang?: Lang }) {
         body: JSON.stringify({ query: query.trim(), lang }),
       });
       const data = await resp.json();
+      track("search_performed", {
+        lang,
+        query_length: query.trim().length,
+        results_count: resp.ok && Array.isArray(data?.prompts) ? data.prompts.length : 0,
+        ok: resp.ok,
+      });
       if (!resp.ok) {
         setError(data.error || "Search failed");
       } else {
         setResult(data);
       }
     } catch {
+      track("search_performed", { lang, query_length: query.trim().length, results_count: 0, ok: false });
       setError(lang === "es" ? "Error de red. Intenta otra vez." : "Network error. Try again.");
     } finally {
       setLoading(false);
