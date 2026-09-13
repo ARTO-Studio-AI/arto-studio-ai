@@ -107,6 +107,8 @@ describe("analytics (cliente)", () => {
       // H-47: sin grabacion de sesiones ni autocapture hasta decision de Victor (D9, H-48).
       expect(config.disable_session_recording).toBe(true);
       expect(config.autocapture).toBe(false);
+      // Lighthouse Fase 6: surveys.js no se descarga.
+      expect(config.disable_surveys).toBe(true);
       expect(config.api_host).toBe("https://us.i.posthog.com");
       a.track("pricing_viewed", { locale: "es", signed_in: true });
       expect(captureMock).toHaveBeenCalledWith("pricing_viewed", { locale: "es", signed_in: true });
