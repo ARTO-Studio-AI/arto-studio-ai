@@ -8,6 +8,7 @@ import { getLearnPageBySlug } from "@/lib/learn-pages";
 import { LOCALES, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
+import { Button, Card } from "@/components/ui";
 
 // Re-fetch dynamic blog posts every 60s. Literal required — segment
 // configs must be statically analyzable.
@@ -113,18 +114,19 @@ export default async function LearnSlugPage({ params }: Props) {
     <section className="mx-auto max-w-3xl px-6 py-16">
       <Link
         href={lp("/learn")}
-        className="text-xs font-medium text-neutral-500 hover:text-neutral-700"
+        className="text-xs font-medium text-zinc-500 hover:text-zinc-700"
       >
         {t.back_link}
       </Link>
 
-      <h1 className="mt-6 text-4xl font-semibold tracking-tight">{pickHero(page, locale)}</h1>
+      <h1 className="text-h1 mt-6">{pickHero(page, locale)}</h1>
+      <span className="accent-rule mt-4" />
 
       {/* Hero image — content_items blog_posts always carry an image_url
         * written by the publisher. Hardcoded vertical guides usually
         * don't, so we only render this block when the field is set. */}
       {page.image_url && (
-        <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+        <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
           <Image
             src={page.image_url}
             alt={pickHero(page, locale)}
@@ -136,7 +138,7 @@ export default async function LearnSlugPage({ params }: Props) {
         </div>
       )}
 
-      <p className="mt-8 text-neutral-700">{pickIntro(page, locale)}</p>
+      <p className="mt-8 text-zinc-700">{pickIntro(page, locale)}</p>
 
       {/* Long body (500-800 words). Rendered only for Content Factory
         * blog_posts. Each blank-line-separated chunk becomes a <p>. */}
@@ -145,7 +147,7 @@ export default async function LearnSlugPage({ params }: Props) {
         if (!body) return null;
         const paras = splitParagraphs(body);
         return (
-          <div className="mt-6 space-y-4 text-neutral-700">
+          <div className="mt-6 space-y-4 text-zinc-700">
             {paras.map((para, i) => (
               <p key={i} className="leading-relaxed">
                 {renderWithBold(para)}
@@ -155,49 +157,37 @@ export default async function LearnSlugPage({ params }: Props) {
         );
       })()}
 
-      <h2 className="mt-12 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
-        {t.use_cases_h2}
-      </h2>
+      <h2 className="text-eyebrow mt-12 text-zinc-500">{t.use_cases_h2}</h2>
       <ul className="mt-4 space-y-2 text-sm">
         {pickUseCases(page, locale).map((uc) => (
           <li key={uc} className="flex items-start gap-2">
-            <span className="mt-1 text-neutral-400">•</span>
-            <span className="text-neutral-700">{uc}</span>
+            <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden="true" />
+            <span className="text-zinc-700">{uc}</span>
           </li>
         ))}
       </ul>
 
-      <div className="mt-12 rounded-xl border border-neutral-200 bg-white p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
-          {t.catalog_eyebrow}
-        </p>
+      <Card className="mt-12 sm:p-8">
+        <p className="text-eyebrow text-zinc-400">{t.catalog_eyebrow}</p>
         <h2 className="mt-2 text-xl font-bold tracking-tight">{t.catalog_h2}</h2>
-        <p className="mt-2 text-sm text-neutral-600">{t.catalog_body}</p>
+        <p className="mt-2 text-sm text-zinc-600">{t.catalog_body}</p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            href={libraryHref}
-            className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700"
-          >
+          <Button href={libraryHref}>
             {t.catalog_browse_prefix} {page.slug.replace("-", " ")} {t.catalog_browse_suffix}
-          </Link>
-          <Link
-            href={lp("/pricing")}
-            className="rounded-md border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:border-neutral-400"
-          >
-            {t.cta_pricing}
-          </Link>
+          </Button>
+          <Button href={lp("/pricing")} variant="secondary">{t.cta_pricing}</Button>
         </div>
-      </div>
+      </Card>
 
-      <div className="mt-16 border-t border-neutral-200 pt-12">
+      <div className="mt-16 border-t border-zinc-200 pt-12">
         <h2 className="text-lg font-bold tracking-tight">{t.related_h2}</h2>
-        <p className="mt-2 text-sm text-neutral-500">{t.related_body}</p>
+        <p className="mt-2 text-sm text-zinc-500">{t.related_body}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {LEARN_PAGES.filter((p) => p.slug !== page.slug).slice(0, 6).map((p) => (
             <Link
               key={p.slug}
               href={lp(`/learn/${p.slug}`)}
-              className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs text-neutral-700 hover:border-neutral-400"
+              className="rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[11px] text-zinc-700 transition hover:border-zinc-900"
             >
               {p.slug.replace("-", " ")}
             </Link>

@@ -87,19 +87,19 @@ export default function AddToCollectionButton({
     <div ref={wrapperRef} className="relative inline-block">
       <button
         onClick={toggleClick}
-        className="rounded-md border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700 hover:border-neutral-500"
+        className="rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-500"
       >
         {labels.add}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-2 w-72 rounded-lg border border-neutral-200 bg-white p-3 shadow-lg">
+        <div className="absolute right-0 z-10 mt-2 w-72 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-3 shadow-lg">
           {loading ? (
-            <p className="text-xs text-neutral-500">…</p>
+            <p className="text-xs text-zinc-500">…</p>
           ) : (
             <>
               {collections.length === 0 ? (
-                <p className="px-2 py-1 text-xs text-neutral-500">{labels.noCollections}</p>
+                <p className="px-2 py-1 text-xs text-zinc-500">{labels.noCollections}</p>
               ) : (
                 <ul className="max-h-56 overflow-y-auto">
                   {collections.map((c) => {
@@ -109,25 +109,25 @@ export default function AddToCollectionButton({
                         <button
                           onClick={() => !already && addTo(c.id)}
                           disabled={already}
-                          className="block w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-neutral-100 disabled:cursor-default disabled:bg-neutral-50 disabled:text-neutral-400"
+                          className="block w-full rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-sm hover:bg-zinc-100 disabled:cursor-default disabled:bg-zinc-50 disabled:text-zinc-400"
                         >
                           <span className="line-clamp-1">{c.name}</span>
-                          {already && <span className="text-[10px] text-neutral-400">{labels.in}</span>}
+                          {already && <span className="text-[10px] text-zinc-400">{labels.in}</span>}
                         </button>
                       </li>
                     );
                   })}
                 </ul>
               )}
-              <div className="mt-2 border-t border-neutral-200 pt-2">
+              <div className="mt-2 border-t border-zinc-200 pt-2">
                 <input
                   type="text" value={newName} onChange={(e) => setNewName(e.target.value)}
                   placeholder={labels.placeholder} maxLength={80}
-                  className="block w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs focus:border-neutral-900 focus:outline-none"
+                  className="block w-full rounded-[var(--radius-sm)] border border-zinc-300 px-2 py-1.5 text-xs focus:border-zinc-900 focus:outline-none"
                   onKeyDown={(e) => { if (e.key === "Enter") createAndAdd(); }}
                 />
                 <button onClick={createAndAdd} disabled={!newName.trim() || creating}
-                  className="mt-1.5 block w-full rounded-md bg-neutral-900 px-2 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 disabled:opacity-50">
+                  className="mt-1.5 block w-full rounded-[var(--radius-sm)] bg-zinc-900 px-2 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50">
                   {creating ? "…" : labels.create}
                 </button>
               </div>

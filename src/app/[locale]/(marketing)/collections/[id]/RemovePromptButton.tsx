@@ -29,7 +29,7 @@ export default function RemovePromptButton({
       onClick={onClick}
       disabled={busy}
       title={lang === "es" ? "Quitar" : "Remove"}
-      className="rounded-full bg-white/90 px-2 py-0.5 text-[11px] text-neutral-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+      className="rounded-full bg-white/90 px-2 py-0.5 text-[11px] text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50"
     >
       ✕
     </button>

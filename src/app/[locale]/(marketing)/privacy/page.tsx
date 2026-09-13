@@ -14,11 +14,11 @@ export async function generateMetadata({
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-6 py-16">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">Legal</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Legal</p>
       <h1 className="mt-3 text-4xl font-semibold tracking-tight">Privacy Policy</h1>
-      <p className="mt-3 text-sm text-neutral-500">Last updated: 14 May 2026</p>
+      <p className="mt-3 text-sm text-zinc-500">Last updated: 14 May 2026</p>
 
-      <div className="prose prose-neutral mt-10 max-w-none text-neutral-800">
+      <div className="prose prose-neutral mt-10 max-w-none text-zinc-800">
         <p>
           This is the privacy policy for ARTO Studio AI · Prompt Library (the
           &quot;Service&quot;), operated by ARTO Group (&quot;we&quot;, &quot;us&quot;). It
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
         </p>
 
         <hr />
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-zinc-500">
           See also: <Link href="/terms">Terms of Service</Link>
         </p>
       </div>

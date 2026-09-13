@@ -1,3 +1,4 @@
+import { SITE_HOST } from "@/lib/site-url";
 import { ImageResponse } from "next/og";
 import { type NextRequest } from "next/server";
 
@@ -197,7 +198,7 @@ export async function GET(req: NextRequest) {
           }}
         >
           <span style={{ fontSize: isVertical ? "18px" : "13px", color: "#52525b" }}>
-            arto-studio-ai.vercel.app/roast
+            {SITE_HOST}/roast
           </span>
           <span style={{ fontSize: isVertical ? "18px" : "13px", color: "#52525b" }}>
             Free · Instant · No signup

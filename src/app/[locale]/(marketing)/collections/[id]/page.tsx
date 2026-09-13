@@ -67,25 +67,25 @@ export default async function CollectionDetail({ params }: Props) {
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
-      <Link href={`/${locale}/collections`} className="text-sm text-neutral-500 hover:text-neutral-900">
+      <Link href={`/${locale}/collections`} className="text-sm text-zinc-500 hover:text-zinc-900">
         {labels.back}
       </Link>
 
       <header className="mt-6">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600">{labels.prompts}</span>
-          <span className={`rounded-full px-2 py-0.5 ${collection.is_public ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-neutral-600"}`}>
+          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-600">{labels.prompts}</span>
+          <span className={`rounded-full px-2 py-0.5 ${collection.is_public ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600"}`}>
             {collection.is_public ? (lang === "es" ? "Pública" : "Public") : (lang === "es" ? "Privada" : "Private")}
           </span>
         </div>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">{collection.name}</h1>
         {collection.description && (
-          <p className="mt-2 text-neutral-600">{collection.description}</p>
+          <p className="mt-2 text-zinc-600">{collection.description}</p>
         )}
       </header>
 
       {prompts.length === 0 ? (
-        <p className="mt-12 text-neutral-500">{labels.empty}</p>
+        <p className="mt-12 text-zinc-500">{labels.empty}</p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {prompts.map((p) => {
@@ -98,10 +98,10 @@ export default async function CollectionDetail({ params }: Props) {
               <li key={p.id} className="relative">
                 <Link
                   href={`/${locale}/prompts/${p.id}`}
-                  className="block h-full rounded-lg border border-neutral-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-sm"
+                  className="block h-full rounded-lg border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-sm"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-neutral-400">{p.id}</span>
+                    <span className="font-mono text-zinc-400">{p.id}</span>
                     <span className={`rounded-full ${tier.chip} px-2 py-0.5 text-[11px] font-medium`}>
                       {tier.label}
                     </span>

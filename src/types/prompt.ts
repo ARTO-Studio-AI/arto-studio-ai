@@ -57,7 +57,10 @@ export const VERTICALS: Record<Category, { code: string; label_en: string; label
   creative_productivity: { code: "CP", label_en: "Creative Productivity", label_es: "Productividad Creativa" },
 };
 
-const NEUTRAL_CAT = { chip: "bg-neutral-100 text-neutral-700", ring: "ring-neutral-300", dot: "bg-neutral-200" };
+/* Chips monocromos (Fase 2, 11 sep 2026): solo zinc + un punto de acento.
+ * El significado lo lleva el texto, no el color. Los semanticos (ok/warn/bad)
+ * quedan reservados a los scores del Brand Roast. */
+const NEUTRAL_CAT = { chip: "bg-zinc-100 text-zinc-700", ring: "ring-zinc-400", dot: "bg-zinc-300" };
 export const CATEGORY_STYLES: Record<Category, { chip: string; ring: string; dot: string }> = {
   branding: NEUTRAL_CAT, graphic_design: NEUTRAL_CAT, copywriting: NEUTRAL_CAT,
   photography: NEUTRAL_CAT, video: NEUTRAL_CAT, ux_ui: NEUTRAL_CAT,
@@ -65,17 +68,18 @@ export const CATEGORY_STYLES: Record<Category, { chip: string; ring: string; dot
   architecture: NEUTRAL_CAT, fashion: NEUTRAL_CAT, creative_productivity: NEUTRAL_CAT,
 };
 
-export const DIFFICULTY_STYLES: Record<Difficulty, { chip: string; label: string }> = {
-  beginner: { chip: "bg-green-100 text-green-700", label: "Beginner" },
-  intermediate: { chip: "bg-yellow-100 text-yellow-800", label: "Intermediate" },
-  advanced: { chip: "bg-orange-100 text-orange-700", label: "Advanced" },
-  expert: { chip: "bg-neutral-900 text-white", label: "Expert" },
+/* Dificultad: mismo chip, el nivel lo marca el numero de puntos (1 a 4). */
+export const DIFFICULTY_STYLES: Record<Difficulty, { chip: string; label: string; dots: number }> = {
+  beginner: { chip: "bg-zinc-100 text-zinc-700", label: "Beginner", dots: 1 },
+  intermediate: { chip: "bg-zinc-100 text-zinc-700", label: "Intermediate", dots: 2 },
+  advanced: { chip: "bg-zinc-100 text-zinc-700", label: "Advanced", dots: 3 },
+  expert: { chip: "bg-zinc-900 text-white", label: "Expert", dots: 4 },
 };
 
 export const TIER_STYLES: Record<Tier, { chip: string; label: string }> = {
-  free: { chip: "bg-neutral-100 text-neutral-700", label: "Free" },
-  pro: { chip: "bg-neutral-500 text-white", label: "Pro" },
-  enterprise: { chip: "bg-neutral-900 text-white", label: "Enterprise" },
+  free: { chip: "bg-zinc-100 text-zinc-700", label: "Free" },
+  pro: { chip: "bg-zinc-700 text-white", label: "Pro" },
+  enterprise: { chip: "bg-zinc-900 text-white", label: "Enterprise" },
 };
 
 // ──────────────────────────────────────────────────────────────────
@@ -85,14 +89,20 @@ export const TIER_STYLES: Record<Tier, { chip: string; label: string }> = {
 
 export type AiGroup = "text" | "image" | "video" | "music" | "voice" | "any";
 
+/* Grupos de herramienta: monocromo con punto de acento; el texto distingue. */
+const GROUP_CHIP = "bg-white text-zinc-700 ring-1 ring-inset ring-zinc-200";
 export const AI_GROUPS: Record<AiGroup, { label: string; chip: string }> = {
-  text: { label: "Text", chip: "bg-violet-100 text-violet-700" },
-  image: { label: "Image", chip: "bg-sky-100 text-sky-700" },
-  video: { label: "Video", chip: "bg-red-100 text-red-700" },
-  music: { label: "Music", chip: "bg-pink-100 text-pink-700" },
-  voice: { label: "Voice", chip: "bg-fuchsia-100 text-fuchsia-700" },
-  any: { label: "Any", chip: "bg-neutral-100 text-neutral-700" },
+  text: { label: "Text", chip: GROUP_CHIP },
+  image: { label: "Image", chip: GROUP_CHIP },
+  video: { label: "Video", chip: GROUP_CHIP },
+  music: { label: "Music", chip: GROUP_CHIP },
+  voice: { label: "Voice", chip: GROUP_CHIP },
+  any: { label: "Any", chip: "bg-zinc-100 text-zinc-700" },
 };
+
+/* Fecha del ultimo cambio a este catalogo. Se actualiza a mano al tocar AI_TOOLS
+ * y la muestra /tools como "Last updated". */
+export const AI_TOOLS_UPDATED = "2026-09-11";
 
 export interface AiTool {
   key: string;            // internal key (matches ai_model values in DB)

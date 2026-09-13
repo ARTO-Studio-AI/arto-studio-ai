@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies, headers } from "next/headers";
 import { listPrompts } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
+import { getSubject, getUsed, isUnlimitedTier } from "@/lib/prompt-limit";
+import PromptQuota from "@/components/PromptQuota";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -24,6 +28,8 @@ import { isLocale, type Locale } from "@/i18n/config";
 import type { Metadata } from "next";
 import { localeOf, pageMetadata } from "@/lib/seo";
 import SmartSearch from "./SmartSearch";
+import DifficultyChip from "@/components/DifficultyChip";
+import { Badge } from "@/components/ui";
 
 const CATEGORIES: Category[] = [
   "branding","graphic_design","copywriting","photography","video","ux_ui","illustration","marketing","music","architecture","fashion","creative_productivity",
@@ -75,6 +81,30 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     page,
   );
 
+  /* Indicador del contador free (D7): "Te quedan N de 3 prompts hoy". Solo
+   * para free y anonimos; el listado en si no cuenta como apertura. */
+  let quotaUsed: number | null = null;
+  try {
+    const sb = await createClient();
+    const { data: { user } } = await sb.auth.getUser();
+    let tier: string | null = null;
+    if (user) {
+      const { data: profile } = await sb.from("profiles").select("tier").eq("id", user.id).maybeSingle();
+      tier = (profile?.tier as string | null) ?? "free";
+    }
+    if (!isUnlimitedTier(tier)) {
+      const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
+      const subject = getSubject({
+        vid: cookieStore.get("asai_vid")?.value,
+        userId: user?.id,
+        ip: hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip"),
+      });
+      quotaUsed = await getUsed(subject);
+    }
+  } catch {
+    quotaUsed = null;
+  }
+
   // qs() preserves filter state across links. Locale lives in the path,
   // not the query, so the language toggle moved to the Nav LangSwitcher.
   const qs = (overrides: Partial<SearchParams>) => {
@@ -93,27 +123,31 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{dict.catalog}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {total.toLocaleString()} prompts · {dict.page_label(page, totalPages || 1)}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-h1">{dict.catalog}</h1>
+          <p className="mt-1 font-mono text-sm text-zinc-500">
+            {total.toLocaleString()} prompts · {dict.page_label(page, totalPages || 1)}
+          </p>
+        </div>
+        {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
       </div>
 
       <div className="mt-6"><SmartSearch lang={lang} /></div>
 
-      <div className="mt-4 space-y-3 rounded-lg border border-neutral-200 bg-white p-4 text-sm">
+      <div className="mt-4 space-y-3 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-neutral-500">{dict.category}</span>
+          <span className="w-24 shrink-0 text-zinc-500">{dict.category}</span>
           {CATEGORIES.map((v) => {
             const active = sp.category === v;
             const style = CATEGORY_STYLES[v];
             const next = qs({ category: active ? "" : v, page: "1" });
             const cls = active
-              ? `rounded-full ${style.chip} px-3 py-1 text-xs font-semibold ring-2 ${style.ring}`
-              : `rounded-full ${style.chip} px-3 py-1 text-xs opacity-70 hover:opacity-100`;
+              ? `inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white`
+              : `rounded-full ${style.chip} px-3 py-1 text-xs hover:bg-zinc-200`;
             return (
-              <Link key={v} href={next} className={cls}>
+              <Link key={v} href={next} className={cls} aria-pressed={active}>
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {labelCategory(v)}
               </Link>
             );
@@ -121,16 +155,17 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-neutral-500">{dict.ai_tool}</span>
+          <span className="w-24 shrink-0 text-zinc-500">{dict.ai_tool}</span>
           {AI_GROUP_LIST.map((v) => {
             const active = sp.group === v;
             const meta = AI_GROUPS[v];
             const next = qs({ group: active ? "" : v, page: "1" });
             const cls = active
-              ? `rounded-full ${meta.chip} px-3 py-1 text-xs font-semibold`
-              : `rounded-full ${meta.chip} px-3 py-1 text-xs opacity-60 hover:opacity-100`;
+              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
+              : `rounded-full ${meta.chip} px-3 py-1 text-xs hover:bg-zinc-100`;
             return (
-              <Link key={v} href={next} className={cls}>
+              <Link key={v} href={next} className={cls} aria-pressed={active}>
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {labelAiGroup(v)}
               </Link>
             );
@@ -138,33 +173,40 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-neutral-500">{dict.difficulty}</span>
+          <span className="w-24 shrink-0 text-zinc-500">{dict.difficulty}</span>
           {DIFFICULTIES.map((v) => {
             const active = sp.difficulty === v;
-            const style = DIFFICULTY_STYLES[v];
             const next = qs({ difficulty: active ? "" : v, page: "1" });
             const cls = active
-              ? `rounded-full ${style.chip} px-3 py-1 text-xs font-semibold`
-              : `rounded-full ${style.chip} px-3 py-1 text-xs opacity-60 hover:opacity-100`;
+              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
+              : "inline-flex rounded-full text-xs hover:opacity-80";
             return (
-              <Link key={v} href={next} className={cls}>
-                {labelDifficulty(v)}
+              <Link key={v} href={next} className={cls} aria-pressed={active}>
+                {active ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
+                    {labelDifficulty(v)}
+                  </>
+                ) : (
+                  <DifficultyChip level={v} label={labelDifficulty(v)} />
+                )}
               </Link>
             );
           })}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-neutral-500">{dict.tier}</span>
+          <span className="w-24 shrink-0 text-zinc-500">{dict.tier}</span>
           {TIERS.map((v) => {
             const active = sp.tier === v;
             const style = TIER_STYLES[v];
             const next = qs({ tier: active ? "" : v, page: "1" });
             const cls = active
-              ? `rounded-full ${style.chip} px-3 py-1 text-xs font-semibold`
-              : `rounded-full ${style.chip} px-3 py-1 text-xs opacity-60 hover:opacity-100`;
+              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
+              : `rounded-full ${style.chip} px-3 py-1 text-xs hover:opacity-80`;
             return (
-              <Link key={v} href={next} className={cls}>
+              <Link key={v} href={next} className={cls} aria-pressed={active}>
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
                 {style.label}
               </Link>
             );
@@ -173,7 +215,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
         {(sp.category || sp.difficulty || sp.tier || sp.group || sp.q) && (
           <div>
-            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="text-xs text-neutral-500 underline">
+            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="text-xs text-zinc-500 underline">
               {dict.clear_filters}
             </Link>
           </div>
@@ -181,13 +223,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       </div>
 
       {prompts.length === 0 ? (
-        <p className="mt-12 text-neutral-500">{dict.no_match}</p>
+        <p className="mt-12 text-zinc-500">{dict.no_match}</p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {prompts.map((p) => {
             const title = lang === "es" ? p.title_es : p.title_en;
             const cat = CATEGORY_STYLES[p.category];
-            const diff = DIFFICULTY_STYLES[p.difficulty];
             const tier = TIER_STYLES[p.tier];
             const aiGroup = aiGroupOf(p.ai_model);
             const aiInfo = AI_GROUPS[aiGroup];
@@ -195,15 +236,13 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               <li key={p.id}>
                 <Link
                   href={`/${locale}/prompts/${p.id}`}
-                  className="group relative block h-full overflow-hidden rounded-lg border border-neutral-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-neutral-400 hover:shadow-sm"
+                  className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)]"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-neutral-400">{p.id}</span>
+                    <span className="font-mono text-zinc-400">{p.id}</span>
                     <div className="flex items-center gap-1.5">
-                      {p.is_featured && <span title="Editor's pick" className="text-amber-500" aria-label="Featured">★</span>}
-                      <span className={`rounded-full ${tier.chip} px-2 py-0.5 text-[11px] font-medium`}>
-                        {tier.label}
-                      </span>
+                      {p.is_featured && <span title="Editor's pick" className="text-[var(--accent)]" aria-label="Featured">★</span>}
+                      <Badge tone={p.tier === "free" ? "tier" : "inverse"}>{tier.label}</Badge>
                     </div>
                   </div>
                   <h3 className="mt-2 line-clamp-2 font-medium">{title}</h3>
@@ -211,9 +250,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     <span className={`rounded-full ${cat.chip} px-2 py-0.5 font-medium`}>
                       {labelCategory(p.category)}
                     </span>
-                    <span className={`rounded-full ${diff.chip} px-2 py-0.5`}>
-                      {labelDifficulty(p.difficulty)}
-                    </span>
+                    <DifficultyChip level={p.difficulty} label={labelDifficulty(p.difficulty)} />
                     <span className={`rounded-full ${aiInfo.chip} px-2 py-0.5`}>
                       {labelAiGroup(aiGroup)}
                     </span>
@@ -229,12 +266,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         <nav className="mt-10 flex items-center justify-between text-sm">
           <Link
             href={qs({ page: String(Math.max(1, page - 1)) })}
-            className={`rounded-md border border-neutral-300 px-3 py-1.5 ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-neutral-500"}`}
+            className={`rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1.5 ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-zinc-900"}`}
           >{dict.previous}</Link>
-          <span className="text-neutral-500">{dict.page_label(page, totalPages)}</span>
+          <span className="text-zinc-500">{dict.page_label(page, totalPages)}</span>
           <Link
             href={qs({ page: String(Math.min(totalPages, page + 1)) })}
-            className={`rounded-md border border-neutral-300 px-3 py-1.5 ${page >= totalPages ? "pointer-events-none opacity-40" : "hover:border-neutral-500"}`}
+            className={`rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1.5 ${page >= totalPages ? "pointer-events-none opacity-40" : "hover:border-zinc-900"}`}
           >{dict.next}</Link>
         </nav>
       )}

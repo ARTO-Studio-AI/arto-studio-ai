@@ -1,5 +1,5 @@
+import { SITE_URL } from "@/lib/site-url";
 import { Resend } from "resend";
-import { SITE_URL } from "@/lib/site";
 
 /**
  * Resend wrapper + transactional email templates for ARTO Studio AI.
