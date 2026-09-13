@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 /**
- * POST /api/skills/[slug] (H-39): la llamada del trial se cobra al autenticar; si el
- * engine cae a fallback, la ruta la devuelve solo a clientes con tope. Todo lo que
- * toca base o Claude se mockea.
+ * POST /api/skills/[slug] (H-39, H-43): la llamada del trial se cobra al autenticar; si el
+ * engine cae a fallback o la peticion termina en error, la ruta la devuelve una sola vez y
+ * solo a clientes con tope. Todo lo que toca base o Claude se mockea.
  */
 
 vi.mock("@/lib/skills", () => ({}));
@@ -35,6 +35,7 @@ vi.mock("@/lib/rate-limit", () => ({
 }));
 
 const { POST } = await import("./route");
+const { SkillExecutionError, SkillNotFoundError } = await import("@/lib/skills/engine");
 
 const gatedSkill = {
   slug: "brand-positioning",
@@ -118,5 +119,51 @@ describe("POST /api/skills/[slug] devolucion del trial en fallback (H-39)", () =
     expect(res.status).toBe(429);
     expect(runSkill).not.toHaveBeenCalled();
     expect(refundTrialCall).not.toHaveBeenCalled();
+  });
+
+  it("503 por SkillExecutionError con cliente de trial: devuelve exactamente una llamada (H-43)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    requireClientAuth.mockResolvedValue({ ok: true, client: client(2) });
+    runSkill.mockRejectedValue(new SkillExecutionError("Claude caido y sin fallback"));
+    const res = await post();
+    expect(res.status).toBe(503);
+    expect(refundTrialCall).toHaveBeenCalledTimes(1);
+    expect(refundTrialCall).toHaveBeenCalledWith("client-1");
+  });
+
+  it("503 por SkillExecutionError con cliente sin tope: no devuelve nada (H-43)", async () => {
+    requireClientAuth.mockResolvedValue({ ok: true, client: client(null) });
+    runSkill.mockRejectedValue(new SkillExecutionError("Claude caido y sin fallback"));
+    const res = await post();
+    expect(res.status).toBe(503);
+    expect(refundTrialCall).not.toHaveBeenCalled();
+  });
+
+  it("404 por SkillNotFoundError despues de cobrar: devuelve exactamente una llamada (H-43)", async () => {
+    requireClientAuth.mockResolvedValue({ ok: true, client: client(2) });
+    runSkill.mockRejectedValue(new SkillNotFoundError("no existe"));
+    const res = await post();
+    expect(res.status).toBe(404);
+    expect(refundTrialCall).toHaveBeenCalledTimes(1);
+  });
+
+  it("500 inesperado con cliente de trial: devuelve exactamente una llamada (H-43)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    requireClientAuth.mockResolvedValue({ ok: true, client: client(2) });
+    runSkill.mockRejectedValue(new Error("boom"));
+    const res = await post();
+    expect(res.status).toBe(500);
+    expect(refundTrialCall).toHaveBeenCalledTimes(1);
+  });
+
+  it("error despues de un fallback ya devuelto: no devuelve otra vez (H-43)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    requireClientAuth.mockResolvedValue({ ok: true, client: client(2) });
+    // Un BigInt en el output hace que NextResponse.json lance al serializar, ya con la
+    // devolucion del fallback hecha: el catch no debe devolver una segunda vez.
+    runSkill.mockResolvedValue({ skill: "brand-positioning", source: "fallback", output: { n: BigInt(1) }, latencyMs: 1, model: "ai-error" });
+    const res = await post();
+    expect(res.status).toBe(500);
+    expect(refundTrialCall).toHaveBeenCalledTimes(1);
   });
 });

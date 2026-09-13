@@ -70,7 +70,8 @@ export async function POST(
   }
 
   let clientId: string | null = null;
-  // H-39: solo los clientes con tope de trial reciben devolucion si el skill cae a fallback.
+  // H-39/H-43: solo los clientes con tope de trial reciben devolucion si el skill no entrega
+  // un resultado de Claude (fallback generico o error).
   let refundable = false;
 
   if (skill.public) {
@@ -94,19 +95,28 @@ export async function POST(
 
   const ctx: SkillContext = { clientId, ip };
 
+  // H-39 (2026-09-13): requireClientAuth ya cobro la llamada del trial. Si Claude fallo y el
+  // engine respondio con el fallback generico, se la devolvemos al cliente con tope.
+  // H-43 (2026-09-13): lo mismo cuando la peticion termina en error (503 por
+  // SkillExecutionError, 404 o 500) sin entregar resultado. La bandera `refunded` garantiza
+  // una sola devolucion por peticion aunque un error llegue despues de un fallback ya devuelto.
+  // Los clientes sin tope (trial_calls_limit null) no se tocan.
+  let refunded = false;
+  const maybeRefund = async () => {
+    if (refunded || !refundable || !clientId) return;
+    refunded = true;
+    const left = await refundTrialCall(clientId);
+    console.log(
+      JSON.stringify({ event: "trial_refund", skill_slug: slug, client_id: clientId, trial_calls_used: left })
+    );
+  };
+
   try {
     const result = await runSkill(slug, validation.data, ctx);
-    // H-39 (2026-09-13): requireClientAuth ya cobro la llamada del trial. Si Claude
-    // fallo y el engine respondio con el fallback generico, se la devolvemos al
-    // cliente con tope. Los clientes sin tope (trial_calls_limit null) no se tocan.
-    if (result.source === "fallback" && refundable && clientId) {
-      const left = await refundTrialCall(clientId);
-      console.log(
-        JSON.stringify({ event: "trial_refund", skill_slug: slug, client_id: clientId, trial_calls_used: left })
-      );
-    }
+    if (result.source === "fallback") await maybeRefund();
     return NextResponse.json(result, { headers: corsHeaders });
   } catch (error) {
+    await maybeRefund();
     if (error instanceof SkillNotFoundError) {
       return NextResponse.json(
         { error: error.message },
