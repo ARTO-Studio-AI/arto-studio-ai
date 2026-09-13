@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { localeOf, pageMetadata } from "@/lib/seo";
+import { createClient } from "@/lib/supabase/server";
 import { Badge, Button, Card } from "@/components/ui";
+import TrackOnMount from "@/components/analytics/TrackOnMount";
+import ProCheckoutButton from "./ProCheckoutButton";
 
 /* Precios segun la decision D7 de Victor (11 sep 2026): Free $0 con 3 prompts al
  * dia, Pro $9 USD, Studio $29 USD marcado como proximamente (no existe checkout:
@@ -40,6 +43,19 @@ export default async function PricingPage({ params }: Props) {
   const faqDict = getDictionary(locale).home;
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const showMxn = locale === "es" && t.mxn_note.length > 0;
+
+  /* Solo para las propiedades de pricing_viewed y checkout_started; la pagina
+   * se ve igual con o sin sesion. Sin env de Supabase (build) cuenta como anonimo. */
+  let signedIn = false;
+  try {
+    const sb = await createClient();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    signedIn = !!user;
+  } catch {
+    signedIn = false;
+  }
 
   type TierCard = {
     key: string;
@@ -117,6 +133,7 @@ export default async function PricingPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
+      <TrackOnMount event="pricing_viewed" props={{ locale, signed_in: signedIn }} />
       <div className="mb-12 text-center">
         <h1 className="text-h1 tracking-tight">{t.h1}</h1>
         <span className="accent-rule mx-auto mt-4" />
@@ -163,9 +180,15 @@ export default async function PricingPage({ params }: Props) {
                 </li>
               ))}
             </ul>
-            <Button href={tier.ctaHref} variant={tier.ctaVariant} className="mt-6 w-full">
-              {tier.cta}
-            </Button>
+            {tier.key === "pro" ? (
+              <ProCheckoutButton href={tier.ctaHref} locale={locale} signedIn={signedIn} className="mt-6 w-full">
+                {tier.cta}
+              </ProCheckoutButton>
+            ) : (
+              <Button href={tier.ctaHref} variant={tier.ctaVariant} className="mt-6 w-full">
+                {tier.cta}
+              </Button>
+            )}
           </Card>
         ))}
       </div>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { RoastResult } from "@/lib/roast-types";
+import { track } from "@/lib/analytics";
 import {
   generateDeterministicRoast,
   hash,
@@ -287,6 +288,8 @@ async function downloadImage(url: string, filename: string) {
   }
 }
 
+type ShareChannel = "x" | "linkedin" | "whatsapp" | "copy_link" | "download_square" | "download_story";
+
 function SocialSharePanel({ brand, result }: { brand: string; result: RoastResult }) {
   const [copied, setCopied] = useState(false);
 
@@ -295,7 +298,10 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
 
+  const shared = (channel: ShareChannel) => track("roast_shared", { channel, overall: result.overall });
+
   async function copyLink() {
+    shared("copy_link");
     try {
       await navigator.clipboard.writeText(shareUrl);
     } catch {
@@ -310,9 +316,10 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const socials = [
+  const socials: { label: string; channel: ShareChannel; color: string; href: string; icon: ReactNode }[] = [
     {
       label: "X / Twitter",
+      channel: "x",
       color: "hover:bg-black hover:text-white hover:border-black",
       href: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
       icon: (
@@ -323,6 +330,7 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
     },
     {
       label: "LinkedIn",
+      channel: "linkedin",
       color: "hover:bg-[#0077b5] hover:text-white hover:border-[#0077b5]",
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
       icon: (
@@ -333,6 +341,7 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
     },
     {
       label: "WhatsApp",
+      channel: "whatsapp",
       color: "hover:bg-[#25d366] hover:text-white hover:border-[#25d366]",
       href: `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
       icon: (
@@ -356,6 +365,7 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
             href={s.href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => shared(s.channel)}
             className={`inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors ${s.color}`}
           >
             {s.icon}
@@ -386,7 +396,10 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
       <div className="flex flex-wrap justify-center gap-2">
         <p className="w-full text-center text-xs text-zinc-400">Download image for Instagram</p>
         <button
-          onClick={() => downloadImage(`${ogBase}&format=square`, `roast-${brand}-square.png`)}
+          onClick={() => {
+            shared("download_square");
+            downloadImage(`${ogBase}&format=square`, `roast-${brand}-square.png`);
+          }}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-50"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -395,7 +408,10 @@ function SocialSharePanel({ brand, result }: { brand: string; result: RoastResul
           Feed 1:1
         </button>
         <button
-          onClick={() => downloadImage(`${ogBase}&format=story`, `roast-${brand}-story.png`)}
+          onClick={() => {
+            shared("download_story");
+            downloadImage(`${ogBase}&format=story`, `roast-${brand}-story.png`);
+          }}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-50"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -462,6 +478,12 @@ function BrandRoastInner() {
     setResult(null);
     setAnalyzing(true);
     setStage(0);
+    track("roast_started", {
+      industry,
+      company_size: companySize || "unspecified",
+      has_url: websiteUrl.trim().length > 0,
+      has_description: description.trim().length > 0,
+    });
 
     // Run loading animation and API call in parallel
     let currentStage = 0;
@@ -490,12 +512,14 @@ function BrandRoastInner() {
 
         // Normalize response — tolerant of Claude tool-schema drift
         const roastResult: RoastResult = normalizeRoastResult(data?.result);
+        const source = typeof data?.source === "string" ? data.source : "unknown";
 
         // Wait for minimum display time so animation completes
         setTimeout(() => {
           clearInterval(stageInterval);
           setAnalyzing(false);
           setResult(roastResult);
+          track("roast_completed", { industry, overall: roastResult.overall, source });
           const updated = saveToHistory({
             brandName,
             industry,
@@ -519,6 +543,7 @@ function BrandRoastInner() {
           setAnalyzing(false);
           const roastResult = generateDeterministicRoast(brandName, industry, description);
           setResult(roastResult);
+          track("roast_completed", { industry, overall: roastResult.overall, source: "client_fallback" });
           const updated = saveToHistory({
             brandName,
             industry,
@@ -921,6 +946,7 @@ function BrandRoastInner() {
                         setEmailError("");
                         localStorage.setItem("arto_roast_email", value);
                         setEmailUnlocked(true);
+                        track("roast_email_submitted", { industry, overall: result.overall });
                         // Send email to server for trace association
                         fetch("/api/roast/email", {
                           method: "POST",
