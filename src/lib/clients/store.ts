@@ -307,3 +307,35 @@ export async function consumeTrialCall(id: string): Promise<TrialConsumeResult> 
     return { ok: false, reason: "unavailable" };
   }
 }
+
+/**
+ * Devuelve una llamada del trial (H-39, 2026-09-13).
+ *
+ * requireClientAuth consume la llamada ANTES de correr el skill. Si Claude falla y
+ * el engine responde con source "fallback", el cliente pago una llamada por una
+ * respuesta generica. La ruta /api/skills/[slug] llama aqui en ese caso.
+ *
+ * Solo aplica a clientes con tope (trial_calls_limit IS NOT NULL): en los que no
+ * tienen tope el contador es un total historico de llamadas y no se toca.
+ * GREATEST(..., 0) garantiza que nunca queda negativo. Regresa el contador que
+ * quedo, o null si no habia fila que devolver (sin tope, inexistente) o si la
+ * base fallo. Nunca lanza.
+ */
+export async function refundTrialCall(id: string): Promise<number | null> {
+  const sql = getDb();
+  if (!sql) return null;
+  try {
+    const [row] = await sql`
+      UPDATE clients
+      SET trial_calls_used = GREATEST(trial_calls_used - 1, 0)
+      WHERE id = ${id}
+        AND trial_calls_limit IS NOT NULL
+      RETURNING trial_calls_used
+    `;
+    if (!row) return null;
+    return row.trial_calls_used as number;
+  } catch (error) {
+    console.error("[clients/store] refundTrialCall failed:", error);
+    return null;
+  }
+}

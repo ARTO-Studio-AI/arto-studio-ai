@@ -5,6 +5,7 @@ import "@/lib/skills"; // side-effect: register all skills
 import { getSkill } from "@/lib/skills/registry";
 import { runSkill, SkillNotFoundError, SkillExecutionError } from "@/lib/skills/engine";
 import { requireClientAuth } from "@/lib/clients/auth";
+import { refundTrialCall } from "@/lib/clients/store";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { SkillContext } from "@/lib/skills/types";
 
@@ -69,6 +70,8 @@ export async function POST(
   }
 
   let clientId: string | null = null;
+  // H-39: solo los clientes con tope de trial reciben devolucion si el skill cae a fallback.
+  let refundable = false;
 
   if (skill.public) {
     const rl = await checkRateLimit(`skill:${slug}:ip:${ip}`, PUBLIC_RATE_LIMIT);
@@ -86,12 +89,22 @@ export async function POST(
       return NextResponse.json(body, { status: auth.status, headers: corsHeaders });
     }
     clientId = auth.client.id;
+    refundable = auth.client.trial_calls_limit !== null;
   }
 
   const ctx: SkillContext = { clientId, ip };
 
   try {
     const result = await runSkill(slug, validation.data, ctx);
+    // H-39 (2026-09-13): requireClientAuth ya cobro la llamada del trial. Si Claude
+    // fallo y el engine respondio con el fallback generico, se la devolvemos al
+    // cliente con tope. Los clientes sin tope (trial_calls_limit null) no se tocan.
+    if (result.source === "fallback" && refundable && clientId) {
+      const left = await refundTrialCall(clientId);
+      console.log(
+        JSON.stringify({ event: "trial_refund", skill_slug: slug, client_id: clientId, trial_calls_used: left })
+      );
+    }
     return NextResponse.json(result, { headers: corsHeaders });
   } catch (error) {
     if (error instanceof SkillNotFoundError) {
