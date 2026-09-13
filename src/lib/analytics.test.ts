@@ -104,6 +104,9 @@ describe("analytics (cliente)", () => {
       const [key, config] = initMock.mock.calls[0];
       expect(key).toBe("phc_prueba");
       expect(config.person_profiles).toBe("identified_only");
+      // H-47: sin grabacion de sesiones ni autocapture hasta decision de Victor (D9, H-48).
+      expect(config.disable_session_recording).toBe(true);
+      expect(config.autocapture).toBe(false);
       expect(config.api_host).toBe("https://us.i.posthog.com");
       a.track("pricing_viewed", { locale: "es", signed_in: true });
       expect(captureMock).toHaveBeenCalledWith("pricing_viewed", { locale: "es", signed_in: true });
