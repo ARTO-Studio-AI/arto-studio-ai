@@ -9,7 +9,12 @@ import { Resend } from "resend";
  * domain is verified in the Resend dashboard.
  */
 
-const FROM = process.env.EMAIL_FROM || "ARTO Studio AI <onboarding@resend.dev>";
+/**
+ * Remitente unico de todo correo que mande la app. Exportado desde el
+ * 2026-09-13 (H-44) para que el cron del digest use el mismo en vez de uno
+ * escrito a mano. Mismo valor y mismo default que antes.
+ */
+export const EMAIL_FROM = process.env.EMAIL_FROM || "ARTO Studio AI <onboarding@resend.dev>";
 
 function getResend(): Resend | null {
   const key = process.env.RESEND_API_KEY;
@@ -35,7 +40,7 @@ async function send(params: {
   }
   try {
     const { data, error } = await resend.emails.send({
-      from: FROM,
+      from: EMAIL_FROM,
       to: params.to,
       subject: params.subject,
       html: params.html,

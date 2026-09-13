@@ -39,6 +39,10 @@ hay una persona detrás.
 `npm run lint`, `npm run typecheck`, `npm run build` en verde, CI verde, curl al preview. No
 reportes «listo» sin haberlo visto responder.
 
+`npm test` no toca ninguna base. Las pruebas de integración solo corren con
+`ASAI_INTEGRATION_DB_URL` explícita en la línea de comandos (nunca en `.env.local`); una prueba
+nueva que pegue a la base se condiciona a esa variable, nunca a `DATABASE_URL` (H-45).
+
 ## 6 · Secretos
 
 Nunca en el repo ni en el chat. Viven en Vercel. La lista está en `.env.example`.
