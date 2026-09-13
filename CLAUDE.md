@@ -46,7 +46,7 @@ PR**; una decisión que solo vive en el chat se pierde en la siguiente sesión.
 
 | Qué | Dónde |
 |---|---|
-| Estado vivo del trabajo (tareas, hallazgos, decisiones abiertas) | Hub de Notion **«ARTO Studio AI Web»**. Cowork y Code comparten tablero: releer antes de republicar |
+| Estado vivo del trabajo (tareas, hallazgos, decisiones abiertas) | Hub de Notion **«ASAI Studio»**. Cowork y Code comparten tablero: releer antes de republicar |
 | Plan del sprint | Drive, carpeta del proyecto (`260910 ASAI plan de trabajo sistema y sprint 1.md`) |
 | Decisiones cerradas que el código obedece | `docs/DECISIONES.md` en este repo |
 | Esquema de la base | `supabase/schema.sql` (volcado de producción) y `supabase/migrations/` |
@@ -86,6 +86,15 @@ Un agente **no corrige por su cuenta** nada de esto. Analiza, propone en el PR y
 
 **Fable revisa obligatoriamente todo lo que toque dinero o seguridad** antes del merge, aunque el
 CI esté en verde.
+
+### Quién hace qué: Code (Opus) y Fable
+
+**2026-09-13.** Code corre en Claude Opus 5 y hace el trabajo, incluida la edición de código.
+Fable solo audita y verifica: se lanza como subagente desde Code, en solo lectura, y no edita. Su
+auditoría es obligatoria antes del merge en todo lo que toque dinero, auth, DDL o email, y su
+veredicto es **PASA / FALLA / NO VERIFICABLE**, anclado al hash del commit que revisó. Code revisa
+el reporte de Fable antes de registrarlo. El reparto viene del protocolo de NORO OE; Victor lo
+pidió así: «Más que todo en NORO, Fable audita, no yo puse Opus».
 
 ### Base de datos
 
