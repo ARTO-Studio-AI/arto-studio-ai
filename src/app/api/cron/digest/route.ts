@@ -1,6 +1,7 @@
 import { SITE_URL, SITE_HOST } from "@/lib/site-url";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { EMAIL_FROM } from "@/lib/email";
 import { Resend } from "resend";
 
 export const runtime = "nodejs";
@@ -61,7 +62,8 @@ export async function GET(request: NextRequest) {
     const unsubscribeUrl = `${SITE_URL}/api/newsletter/unsubscribe?token=${encodeURIComponent(sub.unsubscribe_token)}`;
     try {
       await resend.emails.send({
-        from: "ARTO Studio AI <noreply@artostudio.ai>",
+        // Mismo remitente que src/lib/email.ts (H-44); antes estaba escrito a mano.
+        from: EMAIL_FROM,
         to: sub.email,
         subject: "Weekly digest — ARTO Studio AI · Prompt Library",
         html: buildHtml(unsubscribeUrl, { featured: featured ?? [], topQueries, gap }),
