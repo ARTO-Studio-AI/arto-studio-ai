@@ -47,6 +47,30 @@ export async function runSkill<TIn, TOut>(
     return finishWithFallback<TIn, TOut>(slug, input, ctx, startTime, "no-api-key");
   }
 
+  if (skill.customRun) {
+    try {
+      const run = await skill.customRun(input as unknown as never, ctx);
+      const latencyMs = Date.now() - startTime;
+      await saveSkillTrace({
+        skill_slug: slug,
+        client_id: ctx.clientId,
+        input: input as unknown,
+        output: run.output as unknown,
+        source: "ai",
+        model: run.model,
+        latency_ms: latencyMs,
+        email: null,
+      });
+      console.log(
+        JSON.stringify({ event: "skill_trace", skill_slug: slug, client_id: ctx.clientId, source: "ai", model: run.model, latency_ms: latencyMs })
+      );
+      return { skill: slug, source: "ai", output: run.output as TOut, latencyMs, model: run.model };
+    } catch (error) {
+      console.error(`[skills/engine] ${slug} customRun error:`, error);
+      return finishWithFallback<TIn, TOut>(slug, input, ctx, startTime, "ai-error");
+    }
+  }
+
   try {
     const anthropic = new Anthropic();
     const knowledge = loadKnowledge(skill.knowledgeKeys);

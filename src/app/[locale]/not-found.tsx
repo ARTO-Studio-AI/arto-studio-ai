@@ -35,7 +35,7 @@ export default async function LocaleNotFound() {
           <Button href={`/${locale}/prompts`}>{es ? "Ir a la biblioteca" : "Go to the library"}</Button>
           <Button href={`/${locale}`} variant="secondary">{es ? "Inicio" : "Home"}</Button>
         </div>
-        <Link href="/roast" className="mt-6 text-sm text-zinc-500 hover:text-zinc-900">
+        <Link href={`/roast?lang=${locale}`} className="mt-6 text-sm text-zinc-500 hover:text-zinc-900">
           {es ? "O prueba el Brand Roast gratis →" : "Or try the free Brand Roast →"}
         </Link>
       </main>

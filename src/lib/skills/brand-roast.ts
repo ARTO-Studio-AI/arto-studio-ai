@@ -1,5 +1,6 @@
-import { buildSystemPrompt, roastTool } from "@/lib/roast-prompt";
+import { buildRoastSystemPrompt, legacyRoastTool } from "@/lib/roast-prompt";
 import { generateDeterministicRoast } from "@/lib/roast-fallback";
+import { runBrandRoast, weightedOverall } from "@/lib/roast-runner";
 import type { RoastRequest, RoastResult } from "@/lib/roast-types";
 import { registerSkill } from "./registry";
 import type { SkillDefinition, InputValidationResult } from "./types";
@@ -32,7 +33,11 @@ function validateRoastInput(body: unknown): InputValidationResult<RoastRequest> 
   if (description && description.length > 500)
     return { valid: false, error: "Description must be 500 characters or less", field: "description" };
 
-  const companySize = typeof b.companySize === "string" ? b.companySize.trim() : undefined;
+  const companySize = typeof b.companySize === "string" ? b.companySize.trim().slice(0, 40) : undefined;
+
+  // v2 (2026-10-06): idioma de salida. Sin `lang` se queda en ingles, como antes,
+  // para no cambiarle el idioma a quien ya llama al API; la pagina /roast lo manda.
+  const lang = b.lang === "es" ? "es" : "en";
 
   return {
     valid: true,
@@ -42,20 +47,9 @@ function validateRoastInput(body: unknown): InputValidationResult<RoastRequest> 
       ...(websiteUrl && { websiteUrl }),
       ...(companySize && { companySize }),
       ...(description && { description }),
+      lang,
     },
   };
-}
-
-function weightedOverall(out: RoastResult): number {
-  return (
-    Math.round(
-      (out.strategy.score * 0.3 +
-        out.creativity.score * 0.25 +
-        out.narrative.score * 0.25 +
-        out.digital.score * 0.2) *
-        10
-    ) / 10
-  );
 }
 
 export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
@@ -67,8 +61,14 @@ export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
   requiresWebFetch: true,
   urlField: "websiteUrl",
   inputValidator: validateRoastInput,
-  systemPromptBuilder: (knowledge, input) => buildSystemPrompt(knowledge, input),
-  outputToolSchema: roastTool,
+  // El roast corre por customRun (roast-runner.ts). Estos dos campos solo los usa el
+  // catalogo y la ruta generica del engine, que con customRun ya no se ejecuta.
+  systemPromptBuilder: (knowledge, input) => buildRoastSystemPrompt(knowledge, input.lang === "es" ? "es" : "en"),
+  outputToolSchema: legacyRoastTool,
+  customRun: async (input) => {
+    const run = await runBrandRoast(input);
+    return { output: run.output, model: run.model };
+  },
   fallbackFn: (input) =>
     generateDeterministicRoast(input.brandName, input.industry, input.description ?? ""),
   computeDerived: (out) => ({
@@ -76,7 +76,7 @@ export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
     overall: weightedOverall(out),
     improvements: out.improvements.slice(0, 5),
   }),
-  maxTokens: 4500,
+  maxTokens: 8000,
 };
 
 registerSkill(brandRoastSkill);
