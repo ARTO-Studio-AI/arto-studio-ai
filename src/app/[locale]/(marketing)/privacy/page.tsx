@@ -59,6 +59,12 @@ export default function PrivacyPage() {
           <li>To identify catalog gaps and generate new prompts where there is real demand.</li>
           <li>To prevent abuse via rate limits.</li>
           <li>To process payments (when you choose a paid plan).</li>
+          <li>
+            To send you promotions, new prompts and skill launches by email, only if you
+            ticked the consent box when you created your account. You can unsubscribe from
+            any of those emails or by writing to us; transactional emails (sign-in links,
+            receipts) are not affected.
+          </li>
         </ul>
 
         <h2>Third parties we share data with</h2>
@@ -70,7 +76,8 @@ export default function PrivacyPage() {
             <strong>Vercel</strong> — hosting and edge delivery.
           </li>
           <li>
-            <strong>Resend</strong> — transactional email (magic link, confirmations).
+            <strong>Resend</strong> — transactional email (magic link, confirmations) and,
+            only for people who opted in, our promotional email list.
           </li>
           <li>
             <strong>OpenAI</strong> — generates the embedding of your search query so we

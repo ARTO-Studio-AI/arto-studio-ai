@@ -47,6 +47,8 @@ export interface AnalyticsEvents {
   };
   free_limit_reached: { prompt_id: string; tier: AnalyticsTier; signed_in: boolean; locale: string };
   limit_cta_clicked: { cta: "pricing" | "library" | "signup"; prompt_id: string; locale: string };
+  signup_wall_viewed: { prompt_id: string; locale: string };
+  signup_wall_clicked: { prompt_id: string; locale: string };
   prompt_copied: { prompt_id: string; prompt_tier: string; locale: string };
   search_performed: { lang: string; query_length: number; results_count: number; ok: boolean };
   favorite_added: { prompt_id: string };

@@ -8,8 +8,11 @@ import { splitName, upsertAudienceContact } from "@/lib/resend-audience";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
 import {
+  MARKETING_CONSENT_VERSION,
+  NEXT_COOKIE,
   SIGNUP_COOKIE,
   UTM_COOKIE,
+  parseMarketing,
   UTM_KEYS,
   cleanValue,
   parseFirstTouch,
@@ -83,6 +86,22 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   }
   const referrer = cleanValue(meta.referrer) ?? firstTouch?.referrer ?? null;
   const signupSource = cleanValue(meta.signup_source) ?? signupSourceOf(firstTouch);
+  // Consentimiento de correos de promocion (2026-10-06). Sin respuesta explicita = no.
+  const marketing = parseMarketing(meta.marketing_opt_in) ?? extra?.marketing ?? "no";
+  const consentAt = new Date().toISOString();
+  // Google no manda options.data: se deja el consentimiento en user_metadata para que la
+  // lista de correo se pueda sacar de auth.users igual para los dos proveedores.
+  if (!parseMarketing(meta.marketing_opt_in)) {
+    const { error } = await admin.auth.admin.updateUserById(user.id, {
+      user_metadata: {
+        ...meta,
+        marketing_opt_in: marketing,
+        marketing_consent_version: MARKETING_CONSENT_VERSION,
+        marketing_consent_at: consentAt,
+      },
+    });
+    if (error) console.error("[auth/callback] no se pudo guardar el consentimiento:", error.message);
+  }
 
   // Completa el perfil solo en las columnas que el trigger dejo vacias.
   const { data: profile } = await admin
@@ -128,6 +147,9 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
       locale,
       company,
       role,
+      marketing_opt_in: marketing,
+      marketing_consent_version: MARKETING_CONSENT_VERSION,
+      marketing_consent_at: consentAt,
     },
   });
   if (attrError) console.error("[auth/callback] attribution_events fallo:", attrError.message);
@@ -143,7 +165,8 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
     has_role: !!role,
   });
 
-  if (user.email) {
+  // Solo quien marco la casilla entra a la audiencia de correos (antes entraban todos).
+  if (user.email && marketing === "yes") {
     const fullName =
       cleanValue(profile?.full_name) ?? cleanValue(meta.full_name) ?? cleanValue(meta.name) ?? null;
     await upsertAudienceContact({ email: user.email, ...splitName(fullName) });
@@ -159,7 +182,12 @@ export async function GET(request: NextRequest) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || url.origin).replace(/\/+$/, "");
   // H-46 (13 sep 2026): `next` viene de la peticion. Sin validar, `next=@evil.com`
   // o `next=.evil.com` sacaban al usuario del dominio ya con sesion iniciada.
-  const next = safeNextPath(url.searchParams.get("next"), "/", siteUrl);
+  // El destino llega por query (flujos viejos) o por la cookie asai_next del registro free.
+  const next = safeNextPath(
+    url.searchParams.get("next") ?? request.cookies.get(NEXT_COOKIE)?.value ?? null,
+    "/",
+    siteUrl,
+  );
   const target = `${siteUrl}${next}`;
 
   if (code) {
@@ -186,6 +214,7 @@ export async function GET(request: NextRequest) {
       const res = NextResponse.redirect(target);
       // La cookie corta de empresa/rol ya cumplio; se borra siempre.
       res.cookies.set(SIGNUP_COOKIE, "", { path: "/", maxAge: 0 });
+      res.cookies.set(NEXT_COOKIE, "", { path: "/", maxAge: 0 });
       return res;
     }
     return NextResponse.redirect(`${siteUrl}/login?error=${encodeURIComponent(error.message)}`);

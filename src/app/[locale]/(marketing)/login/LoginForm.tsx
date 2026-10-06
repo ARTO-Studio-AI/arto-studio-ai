@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Locale } from "@/i18n/config";
 import {
+  NEXT_COOKIE,
+  NEXT_COOKIE_MAX_AGE,
   SIGNUP_COOKIE,
   SIGNUP_COOKIE_MAX_AGE,
   UTM_COOKIE,
@@ -39,6 +42,7 @@ const COPY: Record<Locale, {
   sent_title: string;
   sent_body_before: string;
   sent_body_after: string;
+  consent: string;
 }> = {
   en: {
     google: "Sign in with Google",
@@ -56,6 +60,7 @@ const COPY: Record<Locale, {
     sent_title: "Check your email.",
     sent_body_before: "We sent a magic link to ",
     sent_body_after: ". Click it to sign in.",
+    consent: "Send me ARTO's promotions, new prompts and skills by email. I can unsubscribe anytime.",
   },
   es: {
     google: "Inicia sesión con Google",
@@ -73,17 +78,25 @@ const COPY: Record<Locale, {
     sent_title: "Revisa tu correo.",
     sent_body_before: "Te enviamos un enlace mágico a ",
     sent_body_after: ". Ábrelo para iniciar sesión.",
+    consent: "Quiero recibir por correo promociones, prompts nuevos y skills de ARTO. Puedo darme de baja cuando quiera.",
   },
 };
 
 const EMAIL_INPUT_ID = "login-email";
 const COMPANY_INPUT_ID = "login-company";
 const ROLE_INPUT_ID = "login-role";
+const CONSENT_INPUT_ID = "login-marketing";
 const FIELD_CLASS =
   "mt-1 block w-full rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none";
 
-export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
+/* Registro free (2026-10-06, decision de Victor): abrir un prompt pide cuenta. La casilla
+ * de correos de promocion va SIN marcar: el consentimiento tiene que ser expreso (LFPDPPP
+ * en Mexico, RGPD para visitantes de la UE). Viaja en options.data (magic link) o en la
+ * cookie asai_signup (Google) y el callback solo da de alta en Resend a quien dijo que si.
+ * `next` (ya validado en el servidor) se guarda en la cookie asai_next. */
+export default function LoginForm({ locale = "en", next }: { locale?: Locale; next?: string }) {
   const c = COPY[locale] ?? COPY.en;
+  const [marketing, setMarketing] = useState(false);
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
@@ -99,13 +112,23 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
    * mas lo que el usuario escribio. Solo claves con valor. */
   function captureData(): Record<string, string> {
     const firstTouch = parseFirstTouch(readBrowserCookie(UTM_COOKIE));
-    return signupMetadata(firstTouch, { company, role, locale });
+    return signupMetadata(firstTouch, { company, role, locale, marketing: marketing ? "yes" : "no" });
+  }
+
+  function rememberNext() {
+    if (!next) return;
+    try {
+      writeBrowserCookie(NEXT_COOKIE, next, NEXT_COOKIE_MAX_AGE);
+    } catch {
+      /* sin cookie se vuelve al inicio */
+    }
   }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setStatus("sending");
     setErrorMsg(null);
+    rememberNext();
 
     const redirectTo = `${siteUrl()}/auth/callback`;
     const sb = createClient();
@@ -124,13 +147,14 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
   async function onGoogle() {
     setGoogleLoading(true);
     setErrorMsg(null);
+    rememberNext();
     const redirectTo = `${siteUrl()}/auth/callback`;
     // signInWithOAuth no lleva options.data: los campos viajan en una cookie
     // corta que /auth/callback lee y borra. Los UTM ya estan en asai_utm.
     try {
       writeBrowserCookie(
         SIGNUP_COOKIE,
-        JSON.stringify({ company: company.trim(), role: role.trim(), locale }),
+        JSON.stringify({ company: company.trim(), role: role.trim(), locale, marketing: marketing ? "yes" : "no" }),
         SIGNUP_COOKIE_MAX_AGE,
       );
     } catch {
@@ -162,6 +186,23 @@ export default function LoginForm({ locale = "en" }: { locale?: Locale }) {
 
   return (
     <div className="space-y-4">
+      <label htmlFor={CONSENT_INPUT_ID} className="flex items-start gap-2.5 text-sm text-zinc-600">
+        <input
+          id={CONSENT_INPUT_ID}
+          name="marketing"
+          type="checkbox"
+          checked={marketing}
+          onChange={(e) => setMarketing(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300"
+        />
+        <span>
+          {c.consent}{" "}
+          <Link href={`/${locale}/privacy`} className="underline underline-offset-2">
+            {locale === "es" ? "Aviso de privacidad" : "Privacy policy"}
+          </Link>
+        </span>
+      </label>
+
       <button
         type="button"
         onClick={onGoogle}

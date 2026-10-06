@@ -90,6 +90,8 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `login_completed` | cualquier otro login | `provider` | `src/app/auth/callback/route.ts` (servidor) |
 | `prompt_opened` | al renderizar el cuerpo de un prompt (no cuenta el bloqueado por tier ni el tope) | `prompt_id`, `prompt_tier`, `used`, `limit`, `tier` (`anon` \| `free` \| `pro` \| `enterprise`), `locale` | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` |
 | `free_limit_reached` | al renderizar la pantalla de tope | `prompt_id`, `tier`, `signed_in`, `locale` | misma página, rama `limitHit` |
+| `signup_wall_viewed` | al renderizar un prompt free sin sesion (registro free, 2026-10-06) | `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` |
+| `signup_wall_clicked` | clic en "Crear cuenta gratis" del muro | `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/SignupWall.tsx` |
 | `limit_cta_clicked` | clic en un CTA de la pantalla de tope | `cta` (`pricing` \| `library` \| `signup`), `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/PromptLimitReached.tsx` |
 | `prompt_copied` | clic en Copiar | `prompt_id`, `prompt_tier`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/CopyButton.tsx` |
 | `search_performed` | respuesta de `/api/search` (ok o error) | `lang`, `query_length`, `results_count`, `ok` | `src/app/[locale]/(marketing)/prompts/SmartSearch.tsx` |

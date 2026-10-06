@@ -67,7 +67,8 @@ const T = {
     gate_ph: "tu@empresa.com",
     gate_btn: "Ver reporte completo",
     gate_err: "Escribe un correo válido.",
-    gate_note: "Cero spam. Te podemos mandar ideas de marca y novedades de ARTO.",
+    gate_note: "Usamos tu correo solo para este reporte, salvo que marques la casilla.",
+    gate_consent: "Quiero recibir por correo promociones, prompts nuevos y skills de ARTO. Puedo darme de baja cuando quiera.",
     verdict: "El veredicto",
     evidence: "En qué nos basamos",
     start: "Por dónde empezar",
@@ -134,7 +135,8 @@ const T = {
     gate_ph: "you@company.com",
     gate_btn: "Unlock full report",
     gate_err: "Please enter a valid email address.",
-    gate_note: "No spam. We may send you branding ideas and ARTO updates.",
+    gate_note: "We only use your email for this report unless you tick the box.",
+    gate_consent: "Send me ARTO's promotions, new prompts and skills by email. I can unsubscribe anytime.",
     verdict: "The verdict",
     evidence: "What we based it on",
     start: "Where to start",
@@ -609,6 +611,7 @@ function BrandRoastInner() {
   const [email, setEmail] = useState("");
   const [emailUnlocked, setEmailUnlocked] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailMarketing, setEmailMarketing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [history, setHistory] = useState<RoastHistoryEntry[]>([]);
   const t = T[lang];
@@ -1102,7 +1105,7 @@ function BrandRoastInner() {
                           fetch("/api/roast/email", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: value, brandName }),
+                            body: JSON.stringify({ email: value, brandName, marketing: emailMarketing }),
                           }).catch(() => {});
                         }}
                         className="mt-6"
@@ -1126,6 +1129,21 @@ function BrandRoastInner() {
                             {t.gate_btn}
                           </button>
                         </div>
+                        <label htmlFor="roast-marketing" className="mt-4 flex items-start gap-2.5 text-left text-xs text-muted">
+                          <input
+                            id="roast-marketing"
+                            type="checkbox"
+                            checked={emailMarketing}
+                            onChange={(e) => setEmailMarketing(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300"
+                          />
+                          <span>
+                            {t.gate_consent}{" "}
+                            <Link href={`/${lang}/privacy`} className="underline underline-offset-2">
+                              {lang === "es" ? "Aviso de privacidad" : "Privacy policy"}
+                            </Link>
+                          </span>
+                        </label>
                         {emailError && <p className="mt-2 text-xs text-red-500">{emailError}</p>}
                       </form>
                       <p className="mt-4 text-xs text-zinc-400">{t.gate_note}</p>
