@@ -83,3 +83,11 @@ describe("roast-runner: validacion de salida", () => {
     expect(() => validateRoastOutput({ ...base, improvements: ["solo una"] }, "es")).toThrow();
   });
 });
+
+describe("site-snapshot: IPv4 compatible (auditoria)", () => {
+  it("bloquea ::7f00:1 y ::a9fe:a9fe", () => {
+    expect(isBlockedIp("::7f00:1")).toBe(true);
+    expect(isBlockedIp("::a9fe:a9fe")).toBe(true);
+    expect(normalizeUrl("http://[::7f00:1]/")).toBeNull();
+  });
+});

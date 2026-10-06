@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, Component, type ErrorInfo, type ReactNode } from "react";
+import { useState, useEffect, Suspense, Component, type ErrorInfo, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -217,6 +217,14 @@ const INDUSTRIES: Array<{ group: [string, string]; items: Array<[string, string,
   },
 ];
 
+function industryLabel(value: string, lang: Lang): string {
+  for (const g of INDUSTRIES) {
+    const hit = g.items.find(([v]) => v === value);
+    if (hit) return lang === "es" ? hit[1] : hit[2];
+  }
+  return value === "Other" && lang === "es" ? "Otro" : value;
+}
+
 const SIZES: Array<[string, string, string]> = [
   ["solo", "Solo / Freelance (1)", "Solo / Freelancer (1)"],
   ["micro", "Micro (2 a 10 personas)", "Micro (2–10 people)"],
@@ -263,24 +271,26 @@ function normalizeRoastResult(raw: unknown): RoastResult | null {
 /* ── Animated counter hook ───────────────────────────── */
 
 function useCountUp(target: number, duration = 1200) {
+  // Antes se marcaba "ya empezo" en el primer render, cuando ScoreBar todavia pasa 0
+  // (aun no es visible): al llegar el score real ya no animaba y el pilar se quedaba
+  // en 0/10. Ahora anima cada vez que cambia el objetivo.
   const [value, setValue] = useState(0);
-  const started = useRef(false);
 
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
+    if (target === 0) return;
+    let frame = 0;
     const start = performance.now();
     function tick(now: number) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.round(eased * target * 10) / 10);
-      if (progress < 1) requestAnimationFrame(tick);
+      if (progress < 1) frame = requestAnimationFrame(tick);
     }
-    requestAnimationFrame(tick);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [target, duration]);
 
-  return value;
+  return target === 0 ? 0 : value;
 }
 
 /* ── Score bar component (animated) ──────────────────── */
@@ -403,19 +413,18 @@ function buildShareUrl(brand: string, result: RoastResult, lang: Lang): string {
     d: String(result.digital.score),
     lang,
   });
-  if (result.headline) params.set("h", result.headline.slice(0, 160));
   return `${window.location.origin}/roast?${params.toString()}`;
 }
 
-/* El enlace compartido solo trae calificaciones (y la frase de cabecera). No se
- * inventa ningun texto de analisis. */
+/* El enlace compartido solo trae calificaciones. No se inventa ningun texto de
+ * analisis, y no lleva la frase de cabecera: sin firma, cualquiera podria fabricar
+ * un enlace con una frase ofensiva bajo la marca de ARTO (auditoria de Fable). */
 function parseSharedResult(params: URLSearchParams): { brand: string; result: RoastResult } | null {
   const brand = params.get("brand");
   const nums = ["score", "s", "c", "n", "d"].map((k) => params.get(k));
   if (!brand || nums.some((v) => v === null)) return null;
   const [overall, s, c, n, d] = nums.map(Number);
   if ([overall, s, c, n, d].some((v) => isNaN(v) || v < 0 || v > 10)) return null;
-  const headline = params.get("h")?.slice(0, 160) || undefined;
   return {
     brand: brand.slice(0, 100),
     result: {
@@ -426,7 +435,6 @@ function parseSharedResult(params: URLSearchParams): { brand: string; result: Ro
       digital: { score: d, roast: "" },
       verdict: "",
       improvements: [],
-      headline,
     },
   };
 }
@@ -976,7 +984,7 @@ function BrandRoastInner() {
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium truncate">{entry.brandName}</p>
                               <p className="text-xs text-muted">
-                                {entry.industry} &middot;{" "}
+                                {industryLabel(entry.industry, lang)} &middot;{" "}
                                 {new Date(entry.date).toLocaleDateString(lang === "es" ? "es-MX" : "en-US", {
                                   month: "short",
                                   day: "numeric",
@@ -1045,7 +1053,7 @@ function BrandRoastInner() {
                 <div className="mb-12 text-center">
                   <p className="text-sm font-medium uppercase tracking-widest text-muted">{t.score_for}</p>
                   <h2 className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">{brandName}</h2>
-                  {!isSharedView && <p className="mt-1 text-sm text-muted">{industry}</p>}
+                  {!isSharedView && <p className="mt-1 text-sm text-muted">{industryLabel(industry, lang)}</p>}
                   <OverallScoreDisplay score={result.overall} />
                   {result.headline && (
                     <p className="mx-auto mt-6 max-w-2xl text-xl font-semibold leading-snug tracking-tight md:text-2xl">

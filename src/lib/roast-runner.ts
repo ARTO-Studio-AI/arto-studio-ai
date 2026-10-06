@@ -17,11 +17,15 @@ import type { RoastLang, RoastRequest, RoastResult } from "@/lib/roast-types";
  */
 
 export const ROAST_DEFAULT_MODEL = "claude-opus-5-5";
-const ROAST_DEFAULT_EFFORT = "low";
+const ROAST_DEFAULT_EFFORT = "low" as const;
 const KNOWLEDGE_KEYS = ["strategy", "narrative", "rubric", "trends"];
 
-/** Tiempo maximo para la llamada al modelo; la funcion tiene maxDuration 60. */
-const MODEL_TIMEOUT_MS = 40_000;
+/**
+ * Tiempo maximo para la llamada al modelo, sin reintentos del SDK (que reintenta
+ * timeouts): 7 s de sitio + 45 s caben en el maxDuration de 60. Auditoria de Fable.
+ */
+const MODEL_TIMEOUT_MS = 45_000;
+const EFFORTS = ["low", "medium", "high"] as const;
 
 export class RoastGenerationError extends Error {
   constructor(message: string) {
@@ -99,14 +103,20 @@ export async function runBrandRoast(input: RoastRequest): Promise<RoastRun> {
 
   const lang: RoastLang = input.lang === "es" ? "es" : "en";
   const model = process.env.ROAST_MODEL || ROAST_DEFAULT_MODEL;
-  const effort = (process.env.ROAST_EFFORT || ROAST_DEFAULT_EFFORT) as "low" | "medium" | "high";
+  const envEffort = process.env.ROAST_EFFORT as (typeof EFFORTS)[number] | undefined;
+  const effort = envEffort && EFFORTS.includes(envEffort) ? envEffort : ROAST_DEFAULT_EFFORT;
 
   const snapshot = input.websiteUrl ? await fetchSiteSnapshot(input.websiteUrl) : null;
   const snapshotBlock = snapshot && input.websiteUrl ? renderSnapshot(snapshot, input.websiteUrl) : null;
 
-  const client = new Anthropic({ timeout: MODEL_TIMEOUT_MS, maxRetries: 1 });
-  const response = await client.messages.create({
+  const client = new Anthropic({ timeout: MODEL_TIMEOUT_MS, maxRetries: 0 });
+  // `fallbacks: "default"`: si el clasificador de seguridad declina (p. ej. "cyber" con
+  // una marca de ciberseguridad), Anthropic reintenta en el modelo que recomienda para
+  // esa categoria dentro de la misma llamada. El SDK 0.87 no tipa el campo.
+  const params = {
     model,
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
     max_tokens: 8000,
     thinking: { type: "adaptive" },
     output_config: {
@@ -121,13 +131,16 @@ export async function runBrandRoast(input: RoastRequest): Promise<RoastRun> {
       },
     ],
     messages: [{ role: "user", content: buildRoastUserMessage(input, snapshotBlock) }],
-  });
+  };
+  const response = (await client.beta.messages.create(
+    params as unknown as Parameters<typeof client.beta.messages.create>[0]
+  )) as Anthropic.Beta.BetaMessage;
 
   if (response.stop_reason === "refusal") throw new RoastGenerationError("refusal");
   if (response.stop_reason === "max_tokens") throw new RoastGenerationError("max_tokens");
 
   const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
     .map((b) => b.text)
     .join("");
   let parsed: unknown;
@@ -139,7 +152,8 @@ export async function runBrandRoast(input: RoastRequest): Promise<RoastRun> {
 
   return {
     output: validateRoastOutput(parsed, lang),
-    model,
+    // response.model dice que modelo respondio de verdad (cambia si hubo fallback).
+    model: response.model || model,
     siteRead: snapshot?.ok === true,
     siteReason: snapshot && !snapshot.ok ? snapshot.reason : undefined,
   };

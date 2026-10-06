@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import path from "path";
 import "@/lib/skills"; // side-effect: register all skills
 import { getSkill } from "@/lib/skills/registry";
-import { runSkill } from "@/lib/skills/engine";
+import { runSkill, SkillExecutionError } from "@/lib/skills/engine";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
@@ -97,6 +97,12 @@ export async function POST(request: NextRequest) {
     };
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {
+    if (error instanceof SkillExecutionError) {
+      return NextResponse.json(
+        { error: "The roast could not be generated right now. Please try again.", code: "roast_unavailable" },
+        { status: 503, headers: { ...corsHeaders, "Retry-After": "10" } }
+      );
+    }
     console.error("[/api/roast] error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

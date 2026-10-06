@@ -1,5 +1,4 @@
 import { buildRoastSystemPrompt, legacyRoastTool } from "@/lib/roast-prompt";
-import { generateDeterministicRoast } from "@/lib/roast-fallback";
 import { runBrandRoast, weightedOverall } from "@/lib/roast-runner";
 import type { RoastRequest, RoastResult } from "@/lib/roast-types";
 import { registerSkill } from "./registry";
@@ -69,8 +68,8 @@ export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
     const run = await runBrandRoast(input);
     return { output: run.output, model: run.model };
   },
-  fallbackFn: (input) =>
-    generateDeterministicRoast(input.brandName, input.industry, input.description ?? ""),
+  // Sin fallbackFn desde el v2: el roast de plantilla no habla de la marca. Si el modelo
+  // falla, el engine lanza SkillExecutionError y las rutas responden 503.
   computeDerived: (out) => ({
     ...out,
     overall: weightedOverall(out),

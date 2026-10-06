@@ -94,6 +94,13 @@ export function isBlockedIp(ip: string): boolean {
     return isBlockedIp(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
   }
   if (lower === "::" || lower === "::1") return true;
+  // IPv4 compatible en hex (::7f00:1, ::a9fe:a9fe): los primeros 96 bits en cero.
+  const compatHex = lower.match(/^::([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (compatHex) {
+    const hi = parseInt(compatHex[1], 16);
+    const lo = parseInt(compatHex[2], 16);
+    return isBlockedIp(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+  }
   const first = parseInt(lower.split(":")[0] || "0", 16);
   if ((first & 0xfe00) === 0xfc00) return true; // fc00::/7 unique local
   if ((first & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
@@ -202,6 +209,10 @@ function requestOnce(url: URL, deadline: number): Promise<{ status: number; loca
         stream.on("error", (e) => (done ? undefined : reject(e)));
       }
     );
+    // `timeout` de http.request es de inactividad: un servidor que manda un byte cada
+    // segundo nunca lo dispara. Este temporizador corta al llegar al tope total.
+    const hardStop = setTimeout(() => req.destroy(new Error("timeout")), remaining);
+    req.on("close", () => clearTimeout(hardStop));
     req.on("timeout", () => req.destroy(new Error("timeout")));
     req.on("error", reject);
     req.end();
@@ -348,7 +359,22 @@ export async function fetchSiteSnapshot(rawUrl: string): Promise<SnapshotResult>
 /** Bloque de texto que va al modelo. El contenido es de un tercero: se marca como datos. */
 export function renderSnapshot(s: SnapshotResult, requestedUrl: string): string {
   if (!s.ok) {
-    return `<website_snapshot url="${requestedUrl.replace(/[<>"]/g, "")}" status="unavailable" reason="${s.reason}">\nThe website could not be read. Evaluate from the other inputs and say plainly in the digital roast that the site could not be loaded (a site that fails to load for a basic crawler is itself a digital weakness only if the reason is a timeout or an error, not if the URL was invalid).\n</website_snapshot>`;
+    const url = requestedUrl.replace(/[<>"]/g, "").slice(0, 200);
+    // Que el modelo sepa POR QUE no hay sitio: un 403 de una marca grande es su
+    // proteccion contra bots, no un sitio caido, y no debe castigar el pilar Digital.
+    let note: string;
+    if (/ENOTFOUND|EAI_AGAIN/.test(s.reason)) {
+      note = "The domain does not resolve (DNS lookup failed). It may be a typo by the user. Mention briefly that the URL given did not load and do not assume the brand has no website.";
+    } else if (/^http-(401|403|429)$/.test(s.reason)) {
+      note = "The site blocked our automated reader (bot protection, common on large brands). This says nothing about the site's quality: do NOT penalize Digital for it and do not say the site is down. Evaluate from what you reliably know about the brand.";
+    } else if (s.reason === "invalid-or-blocked-url") {
+      note = "The URL given is not a valid public website address. Do not penalize the brand for it; evaluate from the other inputs.";
+    } else if (s.reason === "empty-page") {
+      note = "The page loaded but its content is rendered entirely by JavaScript, so no text was readable. Do not treat it as empty; evaluate from the other inputs.";
+    } else {
+      note = `The site could not be read (${s.reason}). Evaluate from the other inputs and do not invent anything about the site.`;
+    }
+    return `<website_snapshot url="${url}" status="unavailable">\n${note}\n</website_snapshot>`;
   }
   const esc = (t: string) => t.replace(/</g, "&lt;");
   const lines = [
