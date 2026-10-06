@@ -113,15 +113,16 @@ export async function runBrandRoast(input: RoastRequest): Promise<RoastRun> {
   // `fallbacks: "default"`: si el clasificador de seguridad declina (p. ej. "cyber" con
   // una marca de ciberseguridad), Anthropic reintenta en el modelo que recomienda para
   // esa categoria dentro de la misma llamada. El SDK 0.87 no tipa el campo.
-  const params = {
+  // Se tipa la peticion completa y solo se ensancha `fallbacks` (auditoria de Fable: un
+  // cast doble apagaba la verificacion de todos los campos).
+  const params: Anthropic.Beta.MessageCreateParamsNonStreaming = {
     model,
     betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
     max_tokens: 8000,
     thinking: { type: "adaptive" },
     output_config: {
       effort,
-      format: { type: "json_schema", schema: roastOutputSchema as unknown as Record<string, unknown> },
+      format: { type: "json_schema", schema: roastOutputSchema as unknown as { [key: string]: unknown } },
     },
     system: [
       {
@@ -132,9 +133,10 @@ export async function runBrandRoast(input: RoastRequest): Promise<RoastRun> {
     ],
     messages: [{ role: "user", content: buildRoastUserMessage(input, snapshotBlock) }],
   };
-  const response = (await client.beta.messages.create(
-    params as unknown as Parameters<typeof client.beta.messages.create>[0]
-  )) as Anthropic.Beta.BetaMessage;
+  const response = await client.beta.messages.create({
+    ...params,
+    fallbacks: "default",
+  } as Anthropic.Beta.MessageCreateParamsNonStreaming);
 
   if (response.stop_reason === "refusal") throw new RoastGenerationError("refusal");
   if (response.stop_reason === "max_tokens") throw new RoastGenerationError("max_tokens");

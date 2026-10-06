@@ -82,7 +82,9 @@ export async function POST(request: NextRequest) {
       validation.data as RoastRequest,
       ctx
     );
-    // v2: si el modelo fallo, el engine trae el roast de plantilla. Ese texto no habla de
+    // v2: brand-roast ya no tiene fallbackFn (el engine lanza SkillExecutionError, ver
+    // abajo); esta rama queda como defensa si alguien se lo vuelve a poner.
+    // Si el modelo fallo, el engine traeria el roast de plantilla. Ese texto no habla de
     // la marca y no se le debe mostrar a nadie como si fuera un analisis: se responde 503
     // y la pagina ofrece reintentar.
     if (skillResp.source === "fallback") {

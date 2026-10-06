@@ -66,6 +66,10 @@ export const brandRoastSkill: SkillDefinition<RoastRequest, RoastResult> = {
   outputToolSchema: legacyRoastTool,
   customRun: async (input) => {
     const run = await runBrandRoast(input);
+    // Cuantos roasts corren sin sitio y por que (403 anti-bots, DNS, SPA vacia).
+    if (input.websiteUrl) {
+      console.log(JSON.stringify({ event: "roast_site", ok: run.siteRead, reason: run.siteReason ?? null }));
+    }
     return { output: run.output, model: run.model };
   },
   // Sin fallbackFn desde el v2: el roast de plantilla no habla de la marca. Si el modelo
