@@ -40,6 +40,22 @@ export interface SignupExtra {
   company?: string;
   role?: string;
   locale?: string;
+  /** Consentimiento de correos de promocion (2026-10-06): "yes" | "no". */
+  marketing?: "yes" | "no";
+}
+
+/** Version del texto de consentimiento que vio la persona; cambia si cambia el texto. */
+export const MARKETING_CONSENT_VERSION = "v1-2026-10-06";
+
+/** Cookie corta con la ruta a la que se vuelve despues del login (validada en el callback).
+ *  Va en cookie y no en la query del emailRedirectTo para no depender de la lista de
+ *  redirecciones de Supabase (H-50). */
+export const NEXT_COOKIE = "asai_next";
+export const NEXT_COOKIE_MAX_AGE = 60 * 60; // 1 h, lo que dura el magic link
+
+/** "yes" | "no" | undefined a partir de lo que venga (cookie o metadata). */
+export function parseMarketing(value: unknown): "yes" | "no" | undefined {
+  return value === "yes" || value === "no" ? value : undefined;
 }
 
 const MAX_LEN = 200;
@@ -157,6 +173,8 @@ export function parseSignupExtra(raw: string | null | undefined): SignupExtra | 
   if (role) extra.role = role;
   const locale = cleanValue(obj.locale);
   if (locale) extra.locale = locale;
+  const marketing = parseMarketing(obj.marketing);
+  if (marketing) extra.marketing = marketing;
   return extra;
 }
 
@@ -194,6 +212,10 @@ export function signupMetadata(
   put("company", extra.company);
   put("role", extra.role);
   put("signup_locale", extra.locale);
+  if (extra.marketing) {
+    out.marketing_opt_in = extra.marketing;
+    out.marketing_consent_version = MARKETING_CONSENT_VERSION;
+  }
   put("signup_source", signupSourceOf(ft));
   for (const key of UTM_KEYS) put(key, ft?.[key]);
   put("referrer", ft?.referrer);

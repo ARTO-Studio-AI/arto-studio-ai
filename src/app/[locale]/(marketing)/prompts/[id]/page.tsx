@@ -30,6 +30,7 @@ import CopyButton from "./CopyButton";
 import AddToCollectionButton from "./AddToCollectionButton";
 import FavoriteButton from "./FavoriteButton";
 import PromptLimitReached from "./PromptLimitReached";
+import SignupWall from "./SignupWall";
 import DifficultyChip from "@/components/DifficultyChip";
 import { Badge, Button } from "@/components/ui";
 
@@ -38,6 +39,15 @@ interface Props {
 }
 
 const TIER_RANK: Record<string, number> = { free: 0, pro: 1, enterprise: 2 };
+
+/** Primeras ~280 letras del prompt, cortadas en una palabra, para el muro de registro. */
+function teaserOf(body: string): string {
+  const clean = body.trim();
+  if (clean.length <= 280) return clean.slice(0, Math.max(60, Math.floor(clean.length / 2))) + "…";
+  const cut = clean.slice(0, 280);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${cut.slice(0, lastSpace > 200 ? lastSpace : 280)}…`;
+}
 
 /* Title and description from the prompt row; the prompt body itself never
  * goes into the description (Pro content stays behind the gate). ogImage is
@@ -108,6 +118,9 @@ export default async function PromptDetail({ params }: Props) {
   }
 
   const isLocked = (TIER_RANK[prompt.tier] ?? 0) > (TIER_RANK[userTier] ?? 0);
+  /* Registro free (2026-10-06): sin sesion, un prompt free muestra solo el inicio y pide
+   * crear la cuenta gratis. No pasa por el contador (no es una apertura). */
+  const needsSignup = !user && !isLocked;
 
   /* Contador free (D7): abrir un prompt cuenta; 3 al dia para free y anonimos.
    * Se comprueba en el servidor antes de renderizar el cuerpo. Un prompt Pro
@@ -115,7 +128,7 @@ export default async function PromptDetail({ params }: Props) {
   let limitHit = false;
   let resetsAtUtc = "";
   let quotaUsed: number | null = null;
-  if (!isUnlimitedTier(userTier)) {
+  if (user && !isUnlimitedTier(userTier)) {
     const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
     const subject = getSubject({
       vid: cookieStore.get("asai_vid")?.value,
@@ -181,7 +194,10 @@ export default async function PromptDetail({ params }: Props) {
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      {!isLocked && (
+      {needsSignup && (
+        <TrackOnMount event="signup_wall_viewed" props={{ prompt_id: prompt.id, locale }} />
+      )}
+      {!isLocked && !needsSignup && (
         <TrackOnMount
           event="prompt_opened"
           props={{
@@ -235,7 +251,7 @@ export default async function PromptDetail({ params }: Props) {
       <section className="mt-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6">
         <div className="flex items-start justify-between">
           <h2 className="text-eyebrow text-zinc-500">{dict.prompt_label}</h2>
-          {!isLocked && (
+          {!isLocked && !needsSignup && (
             <div className="flex items-center gap-2">
               <AddToCollectionButton promptId={prompt.id} lang={lang} signedIn={!!user} />
               <CopyButton
@@ -250,7 +266,9 @@ export default async function PromptDetail({ params }: Props) {
           )}
         </div>
         <div className="relative mt-3">
-          {isLocked ? (
+          {needsSignup ? (
+            <SignupWall locale={locale} promptId={prompt.id} teaser={teaserOf(body)} />
+          ) : isLocked ? (
             <>
               <pre className="select-none whitespace-pre-wrap break-words font-sans text-zinc-700 blur-sm">
                 {body.slice(0, 400)}…
@@ -271,7 +289,7 @@ export default async function PromptDetail({ params }: Props) {
         </div>
       </section>
 
-      {(useCase || expectedOutput) && !isLocked && (
+      {(useCase || expectedOutput) && !isLocked && !needsSignup && (
         <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {useCase && (
             <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5">

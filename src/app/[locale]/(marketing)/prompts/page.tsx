@@ -84,15 +84,18 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   /* Indicador del contador free (D7): "Te quedan N de 3 prompts hoy". Solo
    * para free y anonimos; el listado en si no cuenta como apertura. */
   let quotaUsed: number | null = null;
+  let signedIn = false;
   try {
     const sb = await createClient();
     const { data: { user } } = await sb.auth.getUser();
+    signedIn = !!user;
     let tier: string | null = null;
     if (user) {
       const { data: profile } = await sb.from("profiles").select("tier").eq("id", user.id).maybeSingle();
       tier = (profile?.tier as string | null) ?? "free";
     }
-    if (!isUnlimitedTier(tier)) {
+    // Sin sesion no hay contador: abrir un prompt pide cuenta gratis (2026-10-06).
+    if (user && !isUnlimitedTier(tier)) {
       const [cookieStore, hdrs] = await Promise.all([cookies(), headers()]);
       const subject = getSubject({
         vid: cookieStore.get("asai_vid")?.value,
@@ -131,6 +134,15 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           </p>
         </div>
         {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
+        {!signedIn && (
+          <Link
+            href={`/${locale}/login?next=${encodeURIComponent(`/${locale}/prompts`)}`}
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 transition hover:border-zinc-900"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
+            {locale === "es" ? "Crea tu cuenta gratis para abrir los prompts" : "Create your free account to open the prompts"}
+          </Link>
+        )}
       </div>
 
       <div className="mt-6"><SmartSearch lang={lang} /></div>
