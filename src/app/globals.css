@@ -45,31 +45,34 @@
   --radius-lg: var(--radius-lg);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
-  --font-sans: var(--font-manrope), system-ui, sans-serif;
-  --font-display: var(--font-archivo), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
-  --font-archivo: var(--font-archivo);
-  --font-manrope: var(--font-manrope);
+  --font-sans: var(--font-brand-text), system-ui, sans-serif;
+  --font-display: var(--font-brand-display), system-ui, sans-serif;
+  /* Sin mono de marca: los IDs, conteos y scores usan Inter Tight con cifras tabulares. */
+  --font-mono: var(--font-brand-text), system-ui, sans-serif;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-brand-text), system-ui, sans-serif;
+}
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Escala tipografica unica: Display / H1 / H2 / eyebrow / body / caption.
- * Los headings van en Archivo; el mono (JetBrains) es para eyebrows, IDs
- * (BR-0001), conteos y scores. */
+ * Headings en Manrope (titulos del manual ARTO); eyebrows en Inter Tight en
+ * mayusculas con tracking, como los metadatos del sistema de diseno de ARTO. */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-brand-display), system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 
 @utility text-display { font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1.02; font-weight: 800; }
 @utility text-h1 { font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.08; font-weight: 700; }
 @utility text-h2 { font-size: clamp(1.5rem, 2.6vw, 1.875rem); line-height: 1.15; font-weight: 700; }
-@utility text-eyebrow { font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; }
+@utility text-eyebrow { font-family: var(--font-brand-text), system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
 @utility text-body { font-size: 1rem; line-height: 1.6; }
 @utility text-caption { font-size: 0.75rem; line-height: 1.4; }
 

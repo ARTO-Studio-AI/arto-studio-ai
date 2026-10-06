@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Archivo, JetBrains_Mono, Manrope } from "next/font/google";
+import { Inter_Tight, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
@@ -9,29 +9,22 @@ import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
-/* Tipografia del sistema (Fase 2, tokens en globals.css). Solo los pesos que
- * usan los tokens: Archivo para headings (500/700/800), Manrope para cuerpo
- * (400/500/700) y JetBrains Mono para eyebrows, IDs, conteos y scores (400/500).
- * Las tres se cargan aqui, en el root, para que /roast, /admin y /studio
- * (fuera de [locale]) tengan las mismas variables CSS que el arbol marketing. */
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["500", "700", "800"],
-  display: "swap",
-});
-
+/* Tipografia de marca (manual ARTO 2024, Deliverables/02 Typography; 2026-10-06):
+ * Manrope para titulos e Inter Tight para texto y etiquetas. Victor pidio quitar la
+ * mono (JetBrains) de eyebrows y detalles: se veia "de plantilla". El sistema de diseno
+ * de ARTO tambien retiro PP Fraktion Mono y usa sans en mayusculas con tracking para
+ * metadatos. Se cargan en el root para que /admin y /studio compartan variables. */
 const manrope = Manrope({
-  variable: "--font-manrope",
+  variable: "--font-brand-display",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
+const interTight = Inter_Tight({
+  variable: "--font-brand-text",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -92,7 +85,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${archivo.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${manrope.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>

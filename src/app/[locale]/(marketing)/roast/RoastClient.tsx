@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, Suspense, Component, type ErrorInfo, type ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { RoastLang, RoastResult } from "@/lib/roast-types";
 import { track } from "@/lib/analytics";
 
 /* Brand Roast v2 (2026-10-06)
- * - Bilingue: espanol por defecto, ingles con ?lang=en o por el navegador.
+ * - Vive en /[locale]/roast dentro del layout de marketing: mismo menu y footer que el
+ *   resto del sitio (pedido de Victor). El idioma viene de la ruta.
  * - Nunca muestra un roast de plantilla. Antes, si el API fallaba (504 con cualquier
  *   URL), la pagina inventaba un roast con frases al azar y lo presentaba como
  *   analisis; lo mismo en los enlaces compartidos y en el historial. Ahora hay un
@@ -363,7 +363,6 @@ interface RoastHistoryEntry {
 }
 
 const HISTORY_KEY = "arto_roast_history";
-const LANG_KEY = "arto_roast_lang";
 
 function loadHistory(): RoastHistoryEntry[] {
   try {
@@ -413,9 +412,8 @@ function buildShareUrl(brand: string, result: RoastResult, lang: Lang): string {
     c: String(result.creativity.score),
     n: String(result.narrative.score),
     d: String(result.digital.score),
-    lang,
   });
-  return `${window.location.origin}/roast?${params.toString()}`;
+  return `${window.location.origin}/${lang}/roast?${params.toString()}`;
 }
 
 /* El enlace compartido solo trae calificaciones. No se inventa ningun texto de
@@ -594,9 +592,8 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
 
 type ErrorKind = "failed" | "rate";
 
-function BrandRoastInner() {
+function BrandRoastInner({ lang }: { lang: Lang }) {
   const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>("es");
   const [brandName, setBrandName] = useState("");
   const [industry, setIndustry] = useState("");
   const [companySize, setCompanySize] = useState("");
@@ -612,29 +609,8 @@ function BrandRoastInner() {
   const [emailUnlocked, setEmailUnlocked] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [emailMarketing, setEmailMarketing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [history, setHistory] = useState<RoastHistoryEntry[]>([]);
   const t = T[lang];
-
-  // Idioma: ?lang= manda; si no, lo ultimo que eligio la persona; si no, el navegador.
-  useEffect(() => {
-    const fromUrl = searchParams.get("lang");
-    const stored = storageGet(LANG_KEY);
-    const nav = typeof navigator !== "undefined" ? navigator.language.toLowerCase() : "es";
-    const next: Lang =
-      fromUrl === "en" || fromUrl === "es"
-        ? fromUrl
-        : stored === "en" || stored === "es"
-        ? stored
-        : nav.startsWith("en")
-        ? "en"
-        : "es";
-    setLang(next);
-  }, [searchParams]);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
 
   useEffect(() => {
     const savedEmail = storageGet("arto_roast_email");
@@ -653,11 +629,6 @@ function BrandRoastInner() {
       setIsSharedView(true);
     }
   }, [searchParams]);
-
-  function switchLang(next: Lang) {
-    setLang(next);
-    storageSet(LANG_KEY, next);
-  }
 
   function runRoast() {
     if (!brandName.trim() || !industry.trim()) return;
@@ -743,109 +714,16 @@ function BrandRoastInner() {
     setDescription("");
     setStage(0);
     setIsSharedView(false);
-    window.history.replaceState({}, "", `/roast?lang=${lang}`);
+    window.history.replaceState({}, "", `/${lang}/roast`);
   }
 
   const contactHref = `mailto:contact@artogroup.com?subject=${encodeURIComponent(
     `${t.contact_subject}${brandName ? ` (${brandName})` : ""}`
   )}`;
 
-  const LangToggle = (
-    <div className="inline-flex rounded-full border border-border p-0.5 text-xs font-medium" role="group" aria-label="Idioma / Language">
-      {(["es", "en"] as const).map((l) => (
-        <button
-          key={l}
-          type="button"
-          onClick={() => switchLang(l)}
-          aria-pressed={lang === l}
-          className={`rounded-full px-3 py-1 transition-colors ${lang === l ? "bg-foreground text-white" : "text-muted hover:text-foreground"}`}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  );
-
   return (
     <div className="flex flex-col flex-1 bg-white">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-white/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href={`/${lang}`} className="flex items-center gap-3">
-            <Image src="/brand/arto-logo-black.png" alt="ARTO" width={80} height={24} className="h-6 w-auto" />
-            <span className="text-sm font-medium tracking-wide text-muted">Creative 24/7</span>
-          </Link>
-
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href={`/${lang}/work`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_work}
-            </Link>
-            <Link href={`/${lang}/prompts`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_prompts}
-            </Link>
-            <Link href={`/${lang}/pricing`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_pricing}
-            </Link>
-            {LangToggle}
-            <Link
-              href={`/${lang}/prompts`}
-              className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              {t.nav_cta}
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3 md:hidden">
-            {LangToggle}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-zinc-100"
-              aria-label="Menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="4" y1="8" x2="20" y2="8" />
-                    <line x1="4" y1="16" x2="20" y2="16" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="border-t border-border px-6 py-4 md:hidden">
-            <div className="flex flex-col gap-4">
-              <Link href={`/${lang}/work`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_work}
-              </Link>
-              <Link href={`/${lang}/prompts`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_prompts}
-              </Link>
-              <Link href={`/${lang}/pricing`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_pricing}
-              </Link>
-              <Link
-                href={`/${lang}/prompts`}
-                className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t.nav_cta}
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      <main className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col">
         {/* Hero */}
         <section className="border-b border-border bg-foreground text-white">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-24">
@@ -1244,19 +1122,7 @@ function BrandRoastInner() {
             )}
           </div>
         </section>
-      </main>
-
-      <footer className="border-t border-border bg-foreground text-white">
-        <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <Image src="/brand/arto-logo-black.png" alt="ARTO" width={60} height={18} className="h-4 w-auto invert" />
-              <span className="text-xs tracking-wide text-zinc-500">Creative 24/7</span>
-            </div>
-            <p className="text-xs text-zinc-500">{t.footer}</p>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
@@ -1286,7 +1152,7 @@ class RoastErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
             type="button"
             onClick={() => {
               this.setState({ hasError: false, error: "" });
-              window.location.href = "/roast";
+              window.location.href = "/es/roast";
             }}
             className="mt-6 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-white"
           >
@@ -1299,11 +1165,11 @@ class RoastErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
-export default function BrandRoast() {
+export default function BrandRoast({ lang }: { lang: Lang }) {
   return (
     <RoastErrorBoundary>
       <Suspense fallback={null}>
-        <BrandRoastInner />
+        <BrandRoastInner lang={lang} />
       </Suspense>
     </RoastErrorBoundary>
   );

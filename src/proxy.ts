@@ -49,7 +49,7 @@ const LOCALE_EXEMPT_PREFIXES = [
   "/studio",
   "/upgrade",
   "/welcome",
-  "/roast",
+  "/roast/og", // imagen OG del roast; /roast en si vive en /[locale]/roast
   "/_next/",
   "/_vercel/", // scripts de Vercel Analytics y Speed Insights (Fase 1C)
   "/favicon",
@@ -121,6 +121,17 @@ function localeRedirect(request: NextRequest): NextResponse | null {
   // Already under a known locale? Let it through.
   const firstSeg = pathname.split("/").filter(Boolean)[0];
   if (firstSeg && isLocale(firstSeg)) return null;
+
+  // /roast?lang=xx (enlaces viejos y compartidos del roast) respeta el idioma pedido.
+  const langParam = request.nextUrl.searchParams.get("lang");
+  if (pathname === "/roast" && isLocale(langParam)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${langParam}/roast`;
+    url.searchParams.delete("lang");
+    const res = NextResponse.redirect(url, 307);
+    attachFirstTouch(request, res);
+    return res;
+  }
 
   // Resolve target locale.
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;

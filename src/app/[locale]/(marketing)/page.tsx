@@ -112,7 +112,7 @@ export default async function HomePage({ params }: Props) {
             <p className="mt-4 max-w-xl text-base text-zinc-600">{t.hero_body}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button href={lp("/prompts")}>{t.hero_cta_free}</Button>
-              <Button href={`/roast?lang=${locale}`} variant="secondary">{t.hero_cta_roast}</Button>
+              <Button href={`/${locale}/roast`} variant="secondary">{t.hero_cta_roast}</Button>
               <Button href={lp("/pricing")} variant="ghost">{t.hero_cta_pricing}</Button>
             </div>
             <p className="mt-3 text-xs text-zinc-500">{t.hero_microcopy}</p>
@@ -153,7 +153,7 @@ export default async function HomePage({ params }: Props) {
             <div className="mb-3"><Badge tone="live">{dict.nav.badge_free}</Badge></div>
             <h3 className="text-lg font-bold">{t.roast_h2}</h3>
             <p className="mt-1 flex-1 text-sm text-zinc-500">{t.roast_body}</p>
-            <Button href={`/roast?lang=${locale}`} variant="secondary" className="mt-5 w-full">{t.roast_cta}</Button>
+            <Button href={`/${locale}/roast`} variant="secondary" className="mt-5 w-full">{t.roast_cta}</Button>
           </Card>
         </div>
       </section>
@@ -395,7 +395,7 @@ export default async function HomePage({ params }: Props) {
         <span className="accent-rule mt-4" />
         <p className="mt-4 max-w-xl text-zinc-600">{t.final_body}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button href={`/roast?lang=${locale}`}>{t.final_cta_roast}</Button>
+          <Button href={`/${locale}/roast`}>{t.final_cta_roast}</Button>
           <Button href={lp("/pricing")} variant="secondary">{t.final_cta_pricing}</Button>
         </div>
       </section>

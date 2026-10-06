@@ -277,11 +277,11 @@ export const DICTIONARIES = {
       meta_description: "Start free with 3 prompts a day. Unlock all 3,001 prompts for $9 USD a month. Studio and AI Agents coming soon.",
     },
     skills: {
-      badge: "Coming soon",
+      badge: "Next week",
       h1: "Skills Studio",
       hero_body:
         "AI-powered creative tools built on ARTO's real methodology. Each skill encodes a specific workflow that took years to develop, now available on demand.",
-      hero_pricing: "$29 USD a month when it ships. Includes everything in Pro. No date yet.",
+      hero_pricing: "The first ARTO Brand Strategy pack ships the week of October 12. Create your free account and you'll be the first to know.",
       status_in_dev: "In development",
       status_planned: "Planned",
       list: [
@@ -692,11 +692,11 @@ export const DICTIONARIES = {
       meta_description: "Empieza gratis con 3 prompts al día. Desbloquea los 3,001 prompts por $9 USD al mes. Studio y Agentes de IA, próximamente.",
     },
     skills: {
-      badge: "Pronto",
+      badge: "La próxima semana",
       h1: "Skills Studio",
       hero_body:
         "Herramientas creativas con IA construidas sobre la metodología real de ARTO. Cada skill encapsula un flujo específico que tomó años desarrollar, ahora disponible bajo demanda.",
-      hero_pricing: "$29 USD al mes cuando salga. Incluye todo Pro. Todavía sin fecha.",
+      hero_pricing: "El primer pack ARTO de Estrategia de Marca sale la semana del 12 de octubre. Crea tu cuenta gratis y te avisamos primero.",
       status_in_dev: "En desarrollo",
       status_planned: "En plan",
       list: [
