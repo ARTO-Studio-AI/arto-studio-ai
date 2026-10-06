@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Locale } from "@/i18n/config";
@@ -194,7 +195,12 @@ export default function LoginForm({ locale = "en", next }: { locale?: Locale; ne
           onChange={(e) => setMarketing(e.target.checked)}
           className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300"
         />
-        <span>{c.consent}</span>
+        <span>
+          {c.consent}{" "}
+          <Link href={`/${locale}/privacy`} className="underline underline-offset-2">
+            {locale === "es" ? "Aviso de privacidad" : "Privacy policy"}
+          </Link>
+        </span>
       </label>
 
       <button

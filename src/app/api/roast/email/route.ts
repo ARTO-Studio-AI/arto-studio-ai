@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { email?: string; brandName?: string };
+  let body: { email?: string; brandName?: string; marketing?: boolean };
   try {
     body = await request.json();
   } catch {
@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
     })
   );
 
-  // Audiencia de Resend (Fase 1C): el contacto se da de alta aunque la traza no
-  // aparezca; el usuario dejo su correo a proposito. No manda ningun correo y
-  // es no-op sin RESEND_AUDIENCE_ID.
-  await upsertAudienceContact({ email });
+  // Audiencia de Resend: solo con consentimiento expreso (casilla del roast, 2026-10-06;
+  // auditoria de Fable del PR #75). Dejar el correo para ver el reporte no es aceptar
+  // promociones. No manda ningun correo y es no-op sin RESEND_AUDIENCE_ID.
+  if (body.marketing === true) await upsertAudienceContact({ email });
 
   const sql = getDb();
   if (!sql) {
