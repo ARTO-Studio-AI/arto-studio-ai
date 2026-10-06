@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Inter_Tight, Manrope } from "next/font/google";
+import { Geist, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
@@ -9,11 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
-/* Tipografia de marca (manual ARTO 2024, Deliverables/02 Typography; 2026-10-06):
- * Manrope para titulos e Inter Tight para texto y etiquetas. Victor pidio quitar la
- * mono (JetBrains) de eyebrows y detalles: se veia "de plantilla". El sistema de diseno
- * de ARTO tambien retiro PP Fraktion Mono y usa sans en mayusculas con tracking para
- * metadatos. Se cargan en el root para que /admin y /studio compartan variables. */
+/* Tipografia de marca (design system de ARTO en Claude Design, opcion C elegida por
+ * Victor el 2026-10-06): Manrope para titulos y Geist para texto, menus, etiquetas y
+ * numeros. Sin mono: Victor pidio quitar JetBrains Mono ("se nota de Claude") y el design
+ * system ya habia retirado PP Fraktion Mono. El manual de Drive de 2024 NO es la fuente:
+ * la ultima version del manual es el design system. Se cargan en el root para que
+ * /admin y /studio compartan variables. */
 const manrope = Manrope({
   variable: "--font-brand-display",
   subsets: ["latin"],
@@ -21,10 +22,10 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const interTight = Inter_Tight({
+const geist = Geist({
   variable: "--font-brand-text",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -85,7 +86,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${manrope.variable} ${interTight.variable} h-full antialiased`}
+      className={`${manrope.variable} ${geist.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>
