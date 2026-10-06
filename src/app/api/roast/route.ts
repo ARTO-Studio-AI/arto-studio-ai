@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import path from "path";
 import "@/lib/skills"; // side-effect: register all skills
 import { getSkill } from "@/lib/skills/registry";
-import { runSkill } from "@/lib/skills/engine";
+import { runSkill, SkillExecutionError } from "@/lib/skills/engine";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
@@ -19,7 +19,9 @@ config({
   override: true,
 });
 
-export const maxDuration = 30;
+// v2 (2026-10-06): lectura del sitio (max 7 s) + modelo (max 40 s). Con 30 s la version
+// anterior daba 504 con cualquier URL.
+export const maxDuration = 60;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,12 +82,29 @@ export async function POST(request: NextRequest) {
       validation.data as RoastRequest,
       ctx
     );
+    // v2: brand-roast ya no tiene fallbackFn (el engine lanza SkillExecutionError, ver
+    // abajo); esta rama queda como defensa si alguien se lo vuelve a poner.
+    // Si el modelo fallo, el engine traeria el roast de plantilla. Ese texto no habla de
+    // la marca y no se le debe mostrar a nadie como si fuera un analisis: se responde 503
+    // y la pagina ofrece reintentar.
+    if (skillResp.source === "fallback") {
+      return NextResponse.json(
+        { error: "The roast could not be generated right now. Please try again.", code: "roast_unavailable" },
+        { status: 503, headers: { ...corsHeaders, "Retry-After": "10" } }
+      );
+    }
     const legacy: RoastResponse = {
       source: skillResp.source,
       result: skillResp.output,
     };
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {
+    if (error instanceof SkillExecutionError) {
+      return NextResponse.json(
+        { error: "The roast could not be generated right now. Please try again.", code: "roast_unavailable" },
+        { status: 503, headers: { ...corsHeaders, "Retry-After": "10" } }
+      );
+    }
     console.error("[/api/roast] error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

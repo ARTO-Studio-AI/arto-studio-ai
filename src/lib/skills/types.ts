@@ -78,6 +78,14 @@ export interface SkillDefinition<TInput = unknown, TOutput = unknown> {
 
   /** Max tokens for the Claude call. Default 4000. */
   maxTokens?: number;
+
+  /**
+   * Optional: el skill trae su propia ejecucion y el engine solo pone trazas y
+   * fallback alrededor. Lo usa el Brand Roast v2 (2026-10-06), que lee el sitio en el
+   * servidor y usa salida estructurada en vez de tool_choice forzado. Si lanza, el
+   * engine responde con `fallbackFn` igual que con la ruta normal.
+   */
+  customRun?: (input: TInput, ctx: SkillContext) => Promise<{ output: TOutput; model: string }>;
 }
 
 /**

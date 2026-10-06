@@ -128,3 +128,13 @@ siguiente sesión.
 | **Por qué** | Mejor calidad a menor costo que `claude-sonnet-4-5`; los defaults viejos ya apuntaban a modelos con fecha |
 | **Qué NO hacer** | **No pasar `temperature`** en ninguna llamada: Sonnet 5 lo rechaza con 400. No volver a poner defaults con fecha (`claude-sonnet-4-20250514`) |
 | **Dónde** | `src/lib/skills/engine.ts`, `src/app/api/admin/content/generate/route.ts`, `src/app/api/admin/outreach/drafts/route.ts` |
+
+### Brand Roast v2: Opus 5.5 solo para el roast, lectura del sitio en el servidor y nunca un roast de plantilla
+
+| | |
+|---|---|
+| **Quién** | Victor pidió el 2026-10-06 que el roast «funcione a la perfección» y autorizó cambiar el modelo. Midió y propuso Code; **pendiente de su firma en el PR** |
+| **Qué se decidió** | El roast usa `ROAST_MODEL` (default `claude-opus-5-5`) con `ROAST_EFFORT` (default `low`), independiente de `ANTHROPIC_MODEL`. El servidor lee el sitio (`src/lib/site-snapshot.ts`) y hace **una** llamada con `output_config.format` (JSON Schema). Si el modelo falla, `/api/roast` responde **503** y la página ofrece reintentar. El roast sale en español con `lang: "es"`; sin `lang` el API sigue en inglés |
+| **Por qué** | Medido en producción el 2026-10-06: con URL daba **504** siempre (web_fetch en varias vueltas pasaba de los 30 s); sin URL un pilar llegó sin score y la página mostró 5. Al fallar, la página inventaba un roast con frases al azar y lo presentaba como análisis. Comparativa con Oatly, Grupo Bimbo y Kavak: Sonnet 5 15 s, Sonnet 5.5 12-15 s, Opus 5.5 low ~16 s, Opus 5.5 medium 18-23 s. Opus 5.5 low da las observaciones más concretas (cita el copy real) por unos 7 centavos de dólar por roast |
+| **Qué NO hacer** | No apuntar `ANTHROPIC_MODEL` a Opus 5.5 o Sonnet 5.5 sin migrar los demás skills: usan `tool_choice` forzado y esos modelos lo rechazan con 400. No volver a mostrar `roast-fallback.ts` como si fuera un análisis. No quitar las guardas de SSRF de `site-snapshot.ts` (IP validada al conectar, redirecciones revalidadas) |
+| **Dónde** | `src/lib/roast-runner.ts`, `src/lib/roast-prompt.ts`, `src/lib/site-snapshot.ts`, `src/lib/skills/engine.ts` (`customRun`), `src/app/api/roast/route.ts`, `src/app/roast/page.tsx` |
