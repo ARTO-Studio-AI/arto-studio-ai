@@ -182,6 +182,11 @@ export async function GET(req: NextRequest) {
         {cta}
       </div>
     ),
-    { ...size, fonts },
+    {
+      ...size,
+      fonts,
+      // Determinista por query: que el CDN la guarde y no se recalcule en cada visita.
+      headers: { "Cache-Control": "public, max-age=86400, s-maxage=604800, immutable" },
+    },
   );
 }

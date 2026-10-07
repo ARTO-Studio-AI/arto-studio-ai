@@ -22,7 +22,7 @@ function first(v: string | string[] | undefined): string | undefined {
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const [{ locale: l }, sp] = await Promise.all([params, searchParams]);
   const locale = localeOf(l);
-  const share = readShareParams((k) => first(sp[k]));
+  const share = readShareParams((k) => first(sp[k]), locale);
   if (!share) return pageMetadata("roast", locale);
   const q = new URLSearchParams({
     brand: share.brand,
@@ -56,6 +56,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function RoastPage({ params, searchParams }: Props) {
   const [{ locale }, sp] = await Promise.all([params, searchParams]);
-  const share = readShareParams((k) => first(sp[k]));
-  return <RoastClient lang={localeOf(locale)} verifiedHeadline={share?.h || undefined} />;
+  const lang = localeOf(locale);
+  const share = readShareParams((k) => first(sp[k]), lang);
+  return <RoastClient lang={lang} verifiedHeadline={share?.h || undefined} />;
 }

@@ -38,8 +38,23 @@ describe("roast-share", () => {
     const forged = readShareParams((k) => q.get(k));
     expect(forged?.h).toBe("");
     expect(forged?.score).toBe("4.6");
-    q.set("score", "11");
-    expect(readShareParams((k) => q.get(k))).toBeNull();
+    for (const bad of ["11", "0x9", "1e1", "9." + "9".repeat(50), "-1", "4.66"]) {
+      q.set("score", bad);
+      expect(readShareParams((k) => q.get(k)), bad).toBeNull();
+    }
+  });
+
+  it("insertar | en la frase rompe la firma", () => {
+    const sig = signShare(base);
+    expect(verifyShare({ ...base, h: "Una fra|se del roast" }, sig)).toBe(false);
+  });
+
+  it("sin lang usa el idioma de la ruta", () => {
+    const en = { ...base, lang: "en" };
+    const sig = signShare(en)!;
+    const q = new URLSearchParams({ ...en, sig });
+    q.delete("lang");
+    expect(readShareParams((k) => q.get(k), "en")?.h).toBe(base.h);
   });
 
   it("sin clave no firma", () => {

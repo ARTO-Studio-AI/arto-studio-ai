@@ -24,8 +24,14 @@ function key(): string | null {
 }
 
 function canonical(p: SharePayload): string {
-  return [p.brand, p.score, p.s, p.c, p.n, p.d, p.h, p.lang].map((v) => v.replace(/\|/g, "")).join("|");
+  // JSON en vez de unir con "|": no hay forma de insertar separadores sin romper la firma
+  // (auditoria de Fable, 309269d).
+  return JSON.stringify([p.brand, p.score, p.s, p.c, p.n, p.d, p.h, p.lang]);
 }
+
+/* Solo "0" a "10" con un decimal opcional ("4.6", "7"). Cualquier otra forma (5000
+ * digitos, "0x9", "1e1") se rechaza antes de pintar titulo o imagen. */
+const SCORE_RE = /^(10(\.0)?|\d(\.\d)?)$/;
 
 export function signShare(p: SharePayload): string | null {
   const k = key();
@@ -41,14 +47,19 @@ export function verifyShare(p: SharePayload, sig: string | null | undefined): bo
 }
 
 /** Lee y valida los parametros de un enlace compartido. Devuelve null si no son validos. */
-export function readShareParams(get: (k: string) => string | null | undefined): (SharePayload & { verified: boolean }) | null {
+export function readShareParams(
+  get: (k: string) => string | null | undefined,
+  fallbackLang: "es" | "en" = "es",
+): (SharePayload & { verified: boolean }) | null {
   const brand = (get("brand") ?? "").slice(0, 100);
   const vals = ["score", "s", "c", "n", "d"].map((k) => get(k) ?? "");
-  if (!brand || vals.some((v) => v === "" || isNaN(Number(v)) || Number(v) < 0 || Number(v) > 10)) return null;
+  if (!brand || vals.some((v) => !SCORE_RE.test(v))) return null;
   const [score, s, c, n, d] = vals;
   const h = (get("h") ?? "").slice(0, 160);
+  // Sin lang (enlaces viejos /roast?lang=en que el proxy redirige quitando el parametro)
+  // se usa el idioma de la ruta.
   const langRaw = get("lang");
-  const lang = langRaw === "en" ? "en" : "es";
+  const lang = langRaw === "en" || langRaw === "es" ? langRaw : fallbackLang;
   const payload = { brand, score, s, c, n, d, h, lang };
   const verified = h ? verifyShare(payload, get("sig")) : false;
   return { ...payload, h: verified ? h : "", verified };
