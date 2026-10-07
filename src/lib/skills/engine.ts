@@ -51,7 +51,7 @@ export async function runSkill<TIn, TOut>(
     try {
       const run = await skill.customRun(input as unknown as never, ctx);
       const latencyMs = Date.now() - startTime;
-      await saveSkillTrace({
+      const traceId = await saveSkillTrace({
         skill_slug: slug,
         client_id: ctx.clientId,
         input: input as unknown,
@@ -64,7 +64,7 @@ export async function runSkill<TIn, TOut>(
       console.log(
         JSON.stringify({ event: "skill_trace", skill_slug: slug, client_id: ctx.clientId, source: "ai", model: run.model, latency_ms: latencyMs })
       );
-      return { skill: slug, source: "ai", output: run.output as TOut, latencyMs, model: run.model };
+      return { skill: slug, source: "ai", output: run.output as TOut, latencyMs, model: run.model, traceId };
     } catch (error) {
       console.error(`[skills/engine] ${slug} customRun error:`, error);
       return finishWithFallback<TIn, TOut>(slug, input, ctx, startTime, "ai-error");

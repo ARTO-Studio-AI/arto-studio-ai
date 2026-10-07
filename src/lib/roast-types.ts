@@ -31,4 +31,6 @@ export interface RoastResponse {
   result: RoastResult;
   /** v2 (2026-10-07): datos firmados para el enlace compartido (ver roast-share.ts). */
   share?: { brand: string; h: string; lang: RoastLang; sig: string | null };
+  /** Token firmado para pedir el reporte por correo (ver roast-share.ts). */
+  report_token?: string | null;
 }

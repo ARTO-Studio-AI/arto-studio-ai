@@ -64,3 +64,25 @@ export function readShareParams(
   const verified = h ? verifyShare(payload, get("sig")) : false;
   return { ...payload, h: verified ? h : "", verified };
 }
+
+/* Token del reporte por correo (2026-10-07, auditoria de Fable del PR #76). El id de la
+ * traza es un entero adivinable; el token lo firma para que solo quien hizo el roast
+ * pueda pedir que se lo manden por correo. Formato "<id>.<firma>". */
+function reportKey(): string | null {
+  const k = process.env.ROAST_SHARE_SECRET || process.env.ARTO_API_KEY_SALT;
+  return k ? `roast-report-v1:${k}` : null;
+}
+
+export function signReportToken(traceId: number): string | null {
+  const k = reportKey();
+  if (!k || !Number.isInteger(traceId) || traceId <= 0) return null;
+  return `${traceId}.${createHmac("sha256", k).update(String(traceId)).digest("base64url").slice(0, 22)}`;
+}
+
+export function verifyReportToken(token: unknown): number | null {
+  if (typeof token !== "string" || !/^\d{1,12}\.[A-Za-z0-9_-]{22}$/.test(token)) return null;
+  const id = Number(token.split(".")[0]);
+  const expected = signReportToken(id);
+  if (!expected || expected.length !== token.length) return null;
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(token)) ? id : null;
+}

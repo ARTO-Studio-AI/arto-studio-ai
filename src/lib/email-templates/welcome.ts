@@ -86,7 +86,7 @@ function abs(url: string, lang: "es" | "en"): string {
 
 export function welcomeEmail(content: WelcomeContent, lang: "es" | "en", unsubscribeUrl?: string) {
   const es = lang === "es";
-  const L = <K extends "es" | "en">(a: string, b: string) => (es ? a : b) as string;
+  const L = (a: string, b: string): string => (es ? a : b);
   const reason = es
     ? "Recibes este correo porque te inscribiste a la lista de ARTO Studio AI."
     : "You're receiving this because you joined the ARTO Studio AI list.";

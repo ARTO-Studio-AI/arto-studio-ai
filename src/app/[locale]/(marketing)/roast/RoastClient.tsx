@@ -32,6 +32,8 @@ const T = {
     steps: ["Escribe tu marca y su sitio", "Leemos tu sitio con la metodología de ARTO", "Recibe tu score y compártelo"],
     preview_caption: "Así se ve tu resultado",
     share_preview: "Así se verá en redes",
+    mail_sent: "Te mandamos el reporte completo a tu correo, con las imágenes para descargar.",
+    mail_confirm: "Para recibir promociones, confirma tu inscripción con el botón del correo que te llegó.",
     form_h2: "Cuéntanos de tu marca",
     form_sub: "Entre más contexto, más afilado el roast. Con la URL leemos tu sitio real.",
     brand: "Nombre de la marca *",
@@ -104,6 +106,8 @@ const T = {
     steps: ["Enter your brand and website", "We read your site with ARTO's methodology", "Get your score and share it"],
     preview_caption: "This is what your result looks like",
     share_preview: "How it will look on social",
+    mail_sent: "We sent the full report to your inbox, with the images to download.",
+    mail_confirm: "To receive promotions, confirm your subscription with the button in the email we sent.",
     form_h2: "Tell us about your brand",
     form_sub: "The more context, the sharper the roast. With the URL we read your actual site.",
     brand: "Brand name *",
@@ -688,6 +692,8 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<RoastResult | null>(null);
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
+  const [reportToken, setReportToken] = useState<string | null>(null);
+  const [mailNote, setMailNote] = useState<null | { confirm: boolean }>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<ErrorKind | null>(null);
   const [stage, setStage] = useState(0);
@@ -760,6 +766,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
         if (!roastResult) throw new Error("invalid");
         setResult(roastResult);
         setShareInfo(data?.share && typeof data.share === "object" ? (data.share as ShareInfo) : null);
+        setReportToken(typeof data?.report_token === "string" ? data.report_token : null);
         track("roast_completed", { industry, overall: roastResult.overall, source: "ai" });
         setHistory(
           saveToHistory({
@@ -1053,6 +1060,11 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                   t={t}
                 />
                 {!isSharedView && <SocialSharePanel brand={brandName} result={result} share={shareInfo} lang={lang} t={t} />}
+                {mailNote && (
+                  <p className="mt-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700" role="status">
+                    {t.mail_sent} {mailNote.confirm ? t.mail_confirm : ""}
+                  </p>
+                )}
                 <div className="mb-10" />
 
                 {isSharedView ? (
@@ -1093,8 +1105,13 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                           fetch("/api/roast/email", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: value, brandName, marketing: emailMarketing }),
-                          }).catch(() => {});
+                            body: JSON.stringify({ email: value, reportToken, marketing: emailMarketing }),
+                          })
+                            .then((r) => (r.ok ? r.json() : null))
+                            .then((d) => {
+                              if (d?.report_sent) setMailNote({ confirm: !!d.confirmation_sent });
+                            })
+                            .catch(() => {});
                         }}
                         className="mt-6"
                       >

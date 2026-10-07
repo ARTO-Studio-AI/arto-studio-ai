@@ -98,6 +98,8 @@ export interface SkillResponse<TOutput = unknown> {
   output: TOutput;
   latencyMs: number;
   model: string;
+  /** Id de la traza guardada (solo en la ruta customRun, 2026-10-07). */
+  traceId?: number | null;
 }
 
 /** Entry in the public skills catalog. */

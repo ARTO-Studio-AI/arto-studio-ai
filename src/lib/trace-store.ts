@@ -119,11 +119,13 @@ export interface SkillTrace {
   created_at?: string;
 }
 
-export async function saveSkillTrace(trace: SkillTrace): Promise<boolean> {
+/** Devuelve el id de la traza (o null si no se pudo guardar). Desde 2026-10-07 el id se
+ *  usa para el token del correo del roast; los demas llamadores ignoran el valor. */
+export async function saveSkillTrace(trace: SkillTrace): Promise<number | null> {
   const sql = getDb();
-  if (!sql) return false;
+  if (!sql) return null;
   try {
-    await sql`
+    const [row] = await sql`
       INSERT INTO skill_traces (
         skill_slug, client_id, input, output, source, model, latency_ms, email
       ) VALUES (
@@ -131,11 +133,12 @@ export async function saveSkillTrace(trace: SkillTrace): Promise<boolean> {
         ${sql.json(trace.input as never)}, ${sql.json(trace.output as never)},
         ${trace.source}, ${trace.model}, ${trace.latency_ms}, ${trace.email}
       )
+      RETURNING id
     `;
-    return true;
+    return typeof row?.id === "number" ? row.id : null;
   } catch (error) {
     console.error("[trace-store] Failed to save skill trace:", error);
-    return false;
+    return null;
   }
 }
 

@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/site-url";
 import { getWelcomeContent } from "@/lib/email-config";
 import { welcomeEmail } from "@/lib/email-templates/welcome";
 import { roastReportEmail, type RoastReportInput } from "@/lib/email-templates/roast-report";
+import { listConfirmationEmail } from "@/lib/email-templates/confirm";
 
 /* Envio de los correos de marca (2026-10-07). Nunca lanza: el correo es best-effort y no
  * debe tumbar el roast ni el login. El de bienvenida es de promociones y lleva
@@ -37,8 +38,15 @@ async function deliver(p: { to: string; subject: string; html: string; text: str
   }
 }
 
-export function unsubscribeUrl(token: string): string {
-  return `${SITE_URL}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}`;
+export function unsubscribeUrl(token: string, lang: "es" | "en" = "es"): string {
+  return `${SITE_URL}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}&lang=${lang}`;
+}
+
+/** Doble opt-in del roast: correo con el boton para confirmar la inscripcion. */
+export async function sendListConfirmation(to: string, lang: "es" | "en", token: string): Promise<boolean> {
+  const url = `${SITE_URL}/api/newsletter/confirm?token=${encodeURIComponent(token)}&lang=${lang}`;
+  const m = listConfirmationEmail(lang, url);
+  return deliver({ to, ...m, tag: "list_confirmation" });
 }
 
 export async function sendRoastReport(to: string, input: RoastReportInput): Promise<boolean> {
@@ -47,7 +55,7 @@ export async function sendRoastReport(to: string, input: RoastReportInput): Prom
 }
 
 export async function sendWelcome(to: string, lang: "es" | "en", unsubscribeToken: string | null): Promise<boolean> {
-  const unsub = unsubscribeToken ? unsubscribeUrl(unsubscribeToken) : undefined;
+  const unsub = unsubscribeToken ? unsubscribeUrl(unsubscribeToken, lang) : undefined;
   const m = welcomeEmail(await getWelcomeContent(), lang, unsub);
   return deliver({
     to,

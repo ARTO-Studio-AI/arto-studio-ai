@@ -7,7 +7,7 @@ import { runSkill, SkillExecutionError } from "@/lib/skills/engine";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
-import { signShare } from "@/lib/roast-share";
+import { signReportToken, signShare } from "@/lib/roast-share";
 
 /**
  * Legacy alias: /api/roast → brand-roast skill.
@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
       source: skillResp.source,
       result: out,
       share: { brand: input.brandName.slice(0, 100), h, lang, sig },
+      report_token: skillResp.traceId ? signReportToken(skillResp.traceId) : null,
     };
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {
