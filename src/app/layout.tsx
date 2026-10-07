@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Cormorant_Garamond, Geist, Inter_Tight, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
@@ -19,32 +19,33 @@ import "./globals.css";
  *   Inter Tight      texto corrido                     --font-brand-text (font-sans)
  * Sin mono: Victor pidio quitar JetBrains Mono. Se cargan en el root para que /admin y
  * /studio compartan variables. */
-const manrope = Manrope({
+// Archivos en src/app/fonts (woff2 variables, subconjunto latin, licencia OFL). Se alojan
+// en el repo para que el build no dependa de Google Fonts: el 06 y el 07-oct una descarga
+// fallida de next/font/google tumbo un build de CI y uno de Vercel.
+const manrope = localFont({
   variable: "--font-brand-display",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  src: [{ path: "./fonts/Manrope-latin-var.woff2", weight: "600 800", style: "normal" }],
   display: "swap",
 });
 
-const interTight = Inter_Tight({
+const interTight = localFont({
   variable: "--font-brand-text",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  src: [{ path: "./fonts/InterTight-latin-var.woff2", weight: "400 700", style: "normal" }],
   display: "swap",
 });
 
-const geist = Geist({
+const geist = localFont({
   variable: "--font-brand-meta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  src: [{ path: "./fonts/Geist-latin-var.woff2", weight: "400 600", style: "normal" }],
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
+const cormorant = localFont({
   variable: "--font-brand-serif",
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
+  src: [
+    { path: "./fonts/CormorantGaramond-latin-var.woff2", weight: "500 600", style: "normal" },
+    { path: "./fonts/CormorantGaramond-Italic-latin-var.woff2", weight: "500 600", style: "italic" },
+  ],
   display: "swap",
 });
 
