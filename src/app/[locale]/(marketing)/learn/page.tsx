@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import BlogCover from "@/components/BlogCover";
 import { notFound } from "next/navigation";
 import type { LearnPageConfig } from "@/lib/learn-config";
 import { getAllLearnPages } from "@/lib/learn-pages";
@@ -47,24 +47,11 @@ export default async function LearnIndex({ params }: Props) {
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {pages.map((page) => (
           <Card key={page.slug} href={lp(`/learn/${page.slug}`)} padding="none" className="group overflow-hidden">
-            {/* Brand image — rendered if the page has an image_url
-              * (Content Factory blog_posts or merged hardcoded+dynamic
-              * verticals). Falls back to gracefully omitting the
-              * thumbnail when the entry has no image yet. */}
-            {page.image_url && (
-              <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100">
-                <Image
-                  src={page.image_url}
-                  alt={heroOf(page)}
-                  fill
-                  sizes="(min-width: 1024px) 320px, (min-width: 640px) 45vw, 90vw"
-                  className="object-cover transition group-hover:scale-[1.02]"
-                />
-              </div>
-            )}
+            {/* Portada de marca por vertical (2026-10-07): sustituye las imagenes generadas. */}
+            <BlogCover category={page.category} locale={locale} className="border-b border-zinc-200" />
             <div className="p-6">
               <p className="text-eyebrow text-zinc-500">{t.card_eyebrow}</p>
-              <h2 className="mt-2 text-lg font-semibold text-zinc-900">{heroOf(page)}</h2>
+              <h2 className="mt-2 text-xl font-extrabold leading-tight tracking-[-0.02em] text-zinc-900">{heroOf(page)}</h2>
               <p className="mt-2 line-clamp-3 text-sm text-zinc-600">{introOf(page)}</p>
               <p className="mt-4 text-xs font-medium text-zinc-500 group-hover:text-zinc-900">
                 {t.read_guide}

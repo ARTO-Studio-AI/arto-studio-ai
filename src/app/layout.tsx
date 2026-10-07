@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Geist, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Geist, Inter_Tight, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
@@ -9,12 +9,16 @@ import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
-/* Tipografia de marca (design system de ARTO en Claude Design, opcion C elegida por
- * Victor el 2026-10-06): Manrope para titulos y Geist para texto, menus, etiquetas y
- * numeros. Sin mono: Victor pidio quitar JetBrains Mono ("se nota de Claude") y el design
- * system ya habia retirado PP Fraktion Mono. El manual de Drive de 2024 NO es la fuente:
- * la ultima version del manual es el design system. Se cargan en el root para que
- * /admin y /studio compartan variables. */
+/* Tipografia (propuesta aprobada por Victor el 2026-10-07, design system de ARTO con la
+ * linea visual del sitio publico). Cuatro voces con trabajos distintos, para que haya
+ * jerarquia:
+ *   Manrope 800      titulares grandes y scores        --font-brand-display
+ *   Cormorant        palabra clave, citas, roast       --font-brand-serif (en lugar de
+ *                    Garamond                          Romana, que aun no esta en el DS)
+ *   Geist            menu, etiquetas, IDs, eyebrows    --font-brand-meta (font-mono)
+ *   Inter Tight      texto corrido                     --font-brand-text (font-sans)
+ * Sin mono: Victor pidio quitar JetBrains Mono. Se cargan en el root para que /admin y
+ * /studio compartan variables. */
 const manrope = Manrope({
   variable: "--font-brand-display",
   subsets: ["latin"],
@@ -22,10 +26,25 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const geist = Geist({
+const interTight = Inter_Tight({
   variable: "--font-brand-text",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const geist = Geist({
+  variable: "--font-brand-meta",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-brand-serif",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -86,7 +105,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${manrope.variable} ${geist.variable} h-full antialiased`}
+      className={`${manrope.variable} ${interTight.variable} ${geist.variable} ${cormorant.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>

@@ -937,7 +937,7 @@ function BrandRoastInner({ lang }: { lang: Lang }) {
                   {!isSharedView && <p className="mt-1 text-sm text-muted">{industryLabel(industry, lang)}</p>}
                   <OverallScoreDisplay score={result.overall} />
                   {result.headline && (
-                    <p className="mx-auto mt-6 max-w-2xl text-xl font-semibold leading-snug tracking-tight md:text-2xl">
+                    <p className="mx-auto mt-6 max-w-2xl font-serif text-2xl font-medium italic leading-snug md:text-3xl">
                       {result.headline}
                     </p>
                   )}

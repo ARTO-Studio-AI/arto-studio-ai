@@ -171,16 +171,16 @@ export { REVALIDATE_SECONDS };
  *
  * Returns the N most recent rows ordered by published_at desc. Each
  * entry includes the image_url + image_provider written by the
- * Content Factory's generateAndStoreImage helper. Image is REQUIRED:
- * rows missing image_url are filtered out so the home grid never
- * shows a broken thumbnail. */
+ * Content Factory's generateAndStoreImage helper. Desde 2026-10-07 la imagen ya
+ * no es obligatoria: el home y /learn pintan una portada de marca (BlogCover) a
+ * partir de la vertical, asi que un post sin imagen tambien aparece. */
 export interface RecentBlogPost {
   slug: string;
   title_en: string;
   title_es: string;
   meta_description_en: string;
   meta_description_es: string;
-  image_url: string;
+  image_url: string | null;
   published_at: string | null;
   category: Category | null;
 }
@@ -201,8 +201,6 @@ export async function getRecentBlogPosts(limit = 6): Promise<RecentBlogPost[]> {
       const p = row.payload as Record<string, unknown>;
       if (
         typeof p.slug !== "string" ||
-        typeof p.image_url !== "string" ||
-        !p.image_url ||
         typeof p.title_en !== "string" ||
         typeof p.title_es !== "string"
       ) continue;
@@ -212,7 +210,7 @@ export async function getRecentBlogPosts(limit = 6): Promise<RecentBlogPost[]> {
         title_es: p.title_es,
         meta_description_en: typeof p.meta_description_en === "string" ? p.meta_description_en : "",
         meta_description_es: typeof p.meta_description_es === "string" ? p.meta_description_es : "",
-        image_url: p.image_url,
+        image_url: typeof p.image_url === "string" && p.image_url ? p.image_url : null,
         published_at: (row.published_at as string) ?? null,
         category: (typeof p.category === "string" ? (p.category as Category) : null),
       });

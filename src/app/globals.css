@@ -14,6 +14,10 @@
   --ink-3: #a1a1aa;      /* zinc-400 */
   --line: #e4e4e7;       /* zinc-200 */
   --accent: #ff4d00;
+  --accent-soft: #fff1ea;
+  /* Superficies calidas del design system de ARTO, solo para graficos (hero y portadas). */
+  --paper: #f4f2ee;
+  --sand: #e9e3d8;
   --ok: #16a34a;
   --warn: #d97706;
   --bad: #dc2626;
@@ -47,9 +51,9 @@
   --shadow-md: var(--shadow-md);
   --font-sans: var(--font-brand-text), system-ui, sans-serif;
   --font-display: var(--font-brand-display), system-ui, sans-serif;
-  /* Sin mono de marca: los IDs, conteos y scores usan Geist con cifras tabulares, como el
-     --font-mono del design system de ARTO. */
-  --font-mono: var(--font-brand-text), system-ui, sans-serif;
+  --font-serif: var(--font-brand-serif), "Noto Serif Display", Georgia, serif;
+  /* Sin mono de marca: IDs, conteos y etiquetas van en Geist con cifras tabulares. */
+  --font-mono: var(--font-brand-meta), system-ui, sans-serif;
 }
 
 body {
@@ -58,22 +62,31 @@ body {
   font-family: var(--font-brand-text), system-ui, sans-serif;
 }
 
+/* Palabra clave del titular: serif italica, un poco mas grande, en acento. */
+.serif-accent {
+  font-family: var(--font-brand-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.12em;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+
 .font-mono {
   font-variant-numeric: tabular-nums;
 }
 
-/* Escala tipografica unica: Display / H1 / H2 / eyebrow / body / caption.
- * Headings en Manrope; eyebrows en Geist en mayusculas con tracking (--tr-wide 0.08em
- * del design system de ARTO). */
+/* Escala tipografica: titulares en Manrope 800 con tracking apretado (la jerarquia
+ * viene del contraste de tamano con el texto en Inter Tight y las etiquetas en Geist). */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-brand-display), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
-@utility text-display { font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1.02; font-weight: 800; }
-@utility text-h1 { font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.08; font-weight: 700; }
-@utility text-h2 { font-size: clamp(1.5rem, 2.6vw, 1.875rem); line-height: 1.15; font-weight: 700; }
-@utility text-eyebrow { font-family: var(--font-brand-text), system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+@utility text-display { font-size: clamp(2.5rem, 6.4vw, 4.75rem); line-height: 1; font-weight: 800; letter-spacing: -0.035em; }
+@utility text-h1 { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.04; font-weight: 800; letter-spacing: -0.03em; }
+@utility text-h2 { font-size: clamp(1.75rem, 3.6vw, 2.625rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; }
+@utility text-eyebrow { font-family: var(--font-brand-meta), system-ui, sans-serif; font-size: 0.71875rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
 @utility text-body { font-size: 1rem; line-height: 1.6; }
 @utility text-caption { font-size: 0.75rem; line-height: 1.4; }
 
