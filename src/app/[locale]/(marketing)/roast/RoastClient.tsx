@@ -34,6 +34,7 @@ const T = {
     share_preview: "Así se verá en redes",
     mail_sent: "Te mandamos el reporte completo a tu correo, con las imágenes para descargar.",
     mail_confirm: "Para recibir promociones, confirma tu inscripción con el botón del correo que te llegó.",
+    mail_error: "No pudimos mandarte el reporte por correo. Puedes verlo completo aquí abajo; si quieres el correo, haz el roast de nuevo.",
     form_h2: "Cuéntanos de tu marca",
     form_sub: "Entre más contexto, más afilado el roast. Con la URL leemos tu sitio real.",
     brand: "Nombre de la marca *",
@@ -108,6 +109,7 @@ const T = {
     share_preview: "How it will look on social",
     mail_sent: "We sent the full report to your inbox, with the images to download.",
     mail_confirm: "To receive promotions, confirm your subscription with the button in the email we sent.",
+    mail_error: "We couldn't email you the report. You can see it in full below; if you want the email, run the roast again.",
     form_h2: "Tell us about your brand",
     form_sub: "The more context, the sharper the roast. With the URL we read your actual site.",
     brand: "Brand name *",
@@ -693,7 +695,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
   const [result, setResult] = useState<RoastResult | null>(null);
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
   const [reportToken, setReportToken] = useState<string | null>(null);
-  const [mailNote, setMailNote] = useState<null | { confirm: boolean }>(null);
+  const [mailNote, setMailNote] = useState<null | { confirm: boolean; error?: boolean }>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<ErrorKind | null>(null);
   const [stage, setStage] = useState(0);
@@ -1062,7 +1064,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                 {!isSharedView && <SocialSharePanel brand={brandName} result={result} share={shareInfo} lang={lang} t={t} />}
                 {mailNote && (
                   <p className="mt-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700" role="status">
-                    {t.mail_sent} {mailNote.confirm ? t.mail_confirm : ""}
+                    {mailNote.error ? t.mail_error : `${t.mail_sent} ${mailNote.confirm ? t.mail_confirm : ""}`}
                   </p>
                 )}
                 <div className="mb-10" />
@@ -1109,9 +1111,9 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                           })
                             .then((r) => (r.ok ? r.json() : null))
                             .then((d) => {
-                              if (d?.report_sent) setMailNote({ confirm: !!d.confirmation_sent });
+                              setMailNote(d?.report_sent ? { confirm: !!d.confirmation_sent } : { confirm: false, error: true });
                             })
-                            .catch(() => {});
+                            .catch(() => setMailNote({ confirm: false, error: true }));
                         }}
                         className="mt-6"
                       >

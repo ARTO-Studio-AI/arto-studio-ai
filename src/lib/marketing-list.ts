@@ -44,6 +44,17 @@ export async function addToMarketingList(input: {
     if (before?.status === "active") {
       return { ok: true, newlyActive: false, needsConfirmation: false, unsubscribeToken: before.unsubscribe_token ?? null };
     }
+    // Doble opt-in sobre una fila existente (por ejemplo, alguien que se dio de baja):
+    // solo pasa a "pending"; no se borra la fecha de la baja ni el user_id original hasta
+    // que la persona confirme (auditoria de Fable, H8).
+    if (input.requireConfirm && before) {
+      const { error: pendError } = await admin.from("newsletter_subscribers").update({ status: "pending" }).eq("email", email);
+      if (pendError) {
+        console.error("[marketing-list] pending fallo:", pendError.message);
+        return FAIL;
+      }
+      return { ok: true, newlyActive: false, needsConfirmation: true, unsubscribeToken: before.unsubscribe_token ?? null };
+    }
     const status = input.requireConfirm ? "pending" : "active";
     const { data, error } = await admin
       .from("newsletter_subscribers")
@@ -82,7 +93,7 @@ export async function confirmList(token: string): Promise<string | null> {
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("newsletter_subscribers")
-      .update({ status: "active", subscribed_at: new Date().toISOString() })
+      .update({ status: "active", subscribed_at: new Date().toISOString(), unsubscribed_at: null })
       .eq("unsubscribe_token", token)
       .eq("status", "pending")
       .select("email")
