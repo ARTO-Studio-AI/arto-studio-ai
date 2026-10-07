@@ -32,3 +32,17 @@ export async function GET(request: NextRequest) {
     { headers: { "Content-Type": "text/html" } },
   );
 }
+
+/* Baja en un clic (RFC 8058): Gmail y Apple Mail hacen POST a la URL de List-Unsubscribe
+ * con "List-Unsubscribe=One-Click". Mismo efecto que el GET, sin pagina. 2026-10-07. */
+export async function POST(request: NextRequest) {
+  const token = new URL(request.url).searchParams.get("token");
+  if (!token) return NextResponse.json({ error: "Missing token" }, { status: 400 });
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("newsletter_subscribers")
+    .update({ status: "unsubscribed", unsubscribed_at: new Date().toISOString() })
+    .eq("unsubscribe_token", token);
+  if (error) return NextResponse.json({ error: "error" }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}

@@ -6,6 +6,7 @@ import { adoptOpens } from "@/lib/prompt-limit";
 import { captureServer } from "@/lib/analytics-server";
 import { splitName } from "@/lib/resend-audience";
 import { addToMarketingList } from "@/lib/marketing-list";
+import { sendWelcome } from "@/lib/mailer";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
 import {
@@ -171,7 +172,8 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
     const fullName =
       cleanValue(profile?.full_name) ?? cleanValue(meta.full_name) ?? cleanValue(meta.name) ?? null;
     // Lista unica de promociones (newsletter_subscribers + audiencia de Resend).
-    await addToMarketingList({ email: user.email, source: "signup", userId: user.id, ...splitName(fullName) });
+    const list = await addToMarketingList({ email: user.email, source: "signup", userId: user.id, ...splitName(fullName) });
+    if (list.ok && list.newlyActive) await sendWelcome(user.email, locale === "es" ? "es" : "en", list.unsubscribeToken);
   }
 }
 

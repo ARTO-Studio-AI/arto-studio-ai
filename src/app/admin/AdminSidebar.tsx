@@ -36,6 +36,7 @@ const SECTIONS: Section[] = [
   {
     title: "Outreach",
     items: [
+      { href: "/admin/emails", label: "Correos" },
       { href: "/admin/outreach", label: "Outreach" },
       { href: "/admin/content", label: "Content Factory" },
     ],

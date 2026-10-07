@@ -15,6 +15,7 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
+vi.mock("@/lib/mailer", () => ({ sendWelcome: vi.fn() }));
 vi.mock("@/lib/prompt-limit", () => ({ adoptOpens: vi.fn() }));
 vi.mock("@/lib/analytics-server", () => ({ captureServer: vi.fn() }));
 vi.mock("@/lib/resend-audience", () => ({ splitName: vi.fn() }));

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import BlogCover from "@/components/BlogCover";
 import { notFound } from "next/navigation";
 import type { LearnPageConfig } from "@/lib/learn-config";
