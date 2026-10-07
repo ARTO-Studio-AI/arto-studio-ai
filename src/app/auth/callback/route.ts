@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { adoptOpens } from "@/lib/prompt-limit";
 import { captureServer } from "@/lib/analytics-server";
-import { splitName, upsertAudienceContact } from "@/lib/resend-audience";
+import { splitName } from "@/lib/resend-audience";
+import { addToMarketingList } from "@/lib/marketing-list";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
 import {
@@ -169,7 +170,8 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   if (user.email && marketing === "yes") {
     const fullName =
       cleanValue(profile?.full_name) ?? cleanValue(meta.full_name) ?? cleanValue(meta.name) ?? null;
-    await upsertAudienceContact({ email: user.email, ...splitName(fullName) });
+    // Lista unica de promociones (newsletter_subscribers + audiencia de Resend).
+    await addToMarketingList({ email: user.email, source: "signup", userId: user.id, ...splitName(fullName) });
   }
 }
 

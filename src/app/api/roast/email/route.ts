@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import path from "path";
 import postgres from "postgres";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { upsertAudienceContact } from "@/lib/resend-audience";
+import { addToMarketingList } from "@/lib/marketing-list";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
   // Audiencia de Resend: solo con consentimiento expreso (casilla del roast, 2026-10-06;
   // auditoria de Fable del PR #75). Dejar el correo para ver el reporte no es aceptar
   // promociones. No manda ningun correo y es no-op sin RESEND_AUDIENCE_ID.
-  if (body.marketing === true) await upsertAudienceContact({ email });
+  if (body.marketing === true) await addToMarketingList({ email, source: "roast" });
 
   const sql = getDb();
   if (!sql) {

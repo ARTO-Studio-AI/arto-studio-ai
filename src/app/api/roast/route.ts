@@ -7,6 +7,7 @@ import { runSkill, SkillExecutionError } from "@/lib/skills/engine";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
+import { signShare } from "@/lib/roast-share";
 
 /**
  * Legacy alias: /api/roast → brand-roast skill.
@@ -93,9 +94,24 @@ export async function POST(request: NextRequest) {
         { status: 503, headers: { ...corsHeaders, "Retry-After": "10" } }
       );
     }
+    const input = validation.data as RoastRequest;
+    const out = skillResp.output;
+    const lang = input.lang === "es" ? "es" : "en";
+    const h = (out.headline ?? "").slice(0, 160);
+    const sig = signShare({
+      brand: input.brandName.slice(0, 100),
+      score: String(out.overall),
+      s: String(out.strategy.score),
+      c: String(out.creativity.score),
+      n: String(out.narrative.score),
+      d: String(out.digital.score),
+      h,
+      lang,
+    });
     const legacy: RoastResponse = {
       source: skillResp.source,
-      result: skillResp.output,
+      result: out,
+      share: { brand: input.brandName.slice(0, 100), h, lang, sig },
     };
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {

@@ -1,89 +1,95 @@
-import { SITE_HOST } from "@/lib/site-url";
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { VERTICALS } from "@/types/prompt";
+import { CHAR_SIZES, OG, clip, ogFonts, ogImage } from "@/lib/og-kit";
+import { SITE_HOST } from "@/lib/site-url";
+import { VERTICALS, type Category } from "@/types/prompt";
+
+/* Imagen para redes de cada prompt (1200x630, rediseno 2026-10-07). En el idioma de la
+ * ruta, con la vertical, el plan y un personaje de ARTO. Nunca lleva el cuerpo del prompt. */
 
 export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 1200, height: 630 };
-export const alt = "ARTO · Prompt Library";
+export const alt = "ARTO Studio AI · Biblioteca de prompts";
 
-export default async function Image({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+const CHAR_BY_CAT: Partial<Record<Category, string>> = {
+  branding: "character-02.png",
+  photography: "character-04.png",
+  illustration: "character-05.png",
+  fashion: "character-01.png",
+  ux_ui: "character-05.png",
+  graphic_design: "character-03.png",
+  video: "character-04.png",
+};
+
+export default async function Image({ params }: { params: Promise<{ locale: string; id: string }> }) {
+  const { locale, id } = await params;
+  const es = locale !== "en";
   const admin = createAdminClient();
   const { data: prompt } = await admin
     .from("prompts")
-    .select("id, title_en, category, difficulty, tier, ai_model")
+    .select("id, title_en, title_es, category, tier")
     .eq("id", id)
     .maybeSingle();
 
-  if (!prompt) {
-    return new ImageResponse(
-      (
-        <div style={{ height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a", color: "#fff", fontSize: 48, fontFamily: "system-ui" }}>
-          Prompt not found
-        </div>
-      ),
-      { ...size },
-    );
-  }
-
-  const catLabel = VERTICALS[prompt.category as keyof typeof VERTICALS]?.label_en ?? prompt.category;
-  const tierLabel = prompt.tier === "free" ? "Free" : prompt.tier === "pro" ? "Pro" : "Enterprise";
-  const tierBg = prompt.tier === "free" ? "#10b981" : prompt.tier === "pro" ? "#737373" : "#0a0a0a";
+  const cat = (prompt?.category as Category) ?? "creative_productivity";
+  const vert = VERTICALS[cat] ?? VERTICALS.creative_productivity;
+  const title = prompt ? (es ? prompt.title_es : prompt.title_en) || prompt.title_en : es ? "Biblioteca de prompts de ARTO" : "ARTO prompt library";
+  const tier = prompt?.tier === "free" ? "Free" : prompt?.tier === "pro" ? "Pro" : prompt ? "Enterprise" : "";
+  const charFile = CHAR_BY_CAT[cat] ?? "character-03.png";
+  const [fonts, logo, char] = await Promise.all([ogFonts(), ogImage("logo-black.png"), ogImage(charFile)]);
+  const [cw, ch] = CHAR_SIZES[charFile];
 
   return new ImageResponse(
     (
       <div
         style={{
-          height: "100%",
           width: "100%",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)",
-          color: "#0a0a0a",
-          fontFamily: "system-ui, sans-serif",
+          background: OG.paper,
+          backgroundImage: "radial-gradient(rgba(24,24,27,0.09) 1.5px, transparent 1.5px)",
+          backgroundSize: "28px 28px",
           padding: 64,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22, color: "#737373", letterSpacing: 1 }}>
-            <div style={{ width: 12, height: 12, background: "#0a0a0a", borderRadius: 999 }} />
-            ARTO · PROMPT LIBRARY
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <img src={logo} width={116} height={40} alt="" />
+            <span style={{ fontFamily: "Geist", fontSize: 18, letterSpacing: 4, textTransform: "uppercase", color: OG.accent }}>
+              {es ? "Biblioteca de prompts" : "Prompt library"}
+            </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ background: tierBg, color: prompt.tier === "free" ? "#064e3b" : "#fff", borderRadius: 999, padding: "8px 16px", fontSize: 18, fontWeight: 600 }}>
-              {tierLabel}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ fontSize: 18, fontFamily: "monospace", color: "#737373", letterSpacing: 1 }}>
-            {prompt.id}
-          </div>
-          <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.15, letterSpacing: -1, color: "#0a0a0a", maxHeight: 280, overflow: "hidden" }}>
-            {prompt.title_en}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontFamily: "Geist", fontSize: 20, letterSpacing: 3, color: OG.ink2 }}>{prompt?.id ?? ""}</span>
+            {tier && (
+              <span style={{ display: "flex", fontFamily: "Geist", fontSize: 16, letterSpacing: 2, textTransform: "uppercase", padding: "6px 14px", borderRadius: 99, background: tier === "Free" ? "#fff1ea" : OG.ink, color: tier === "Free" ? "#b33600" : OG.white }}>
+                {tier}
+              </span>
+            )}
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ background: "#e5e5e5", borderRadius: 999, padding: "10px 18px", fontSize: 18, color: "#525252", fontWeight: 600 }}>
-            {catLabel}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 40 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18, width: 800 }}>
+            <span style={{ fontFamily: "Geist", fontSize: 20, letterSpacing: 4, textTransform: "uppercase", color: OG.ink2 }}>
+              {(es ? vert.label_es : vert.label_en) + " · " + vert.code}
+            </span>
+            <span style={{ fontFamily: "Manrope", fontSize: 60, lineHeight: 1.04, letterSpacing: -2, color: OG.ink }}>{clip(title, 90)}</span>
           </div>
-          <div style={{ background: "#e5e5e5", borderRadius: 999, padding: "10px 18px", fontSize: 18, color: "#525252" }}>
-            {String(prompt.difficulty).charAt(0).toUpperCase() + String(prompt.difficulty).slice(1)}
-          </div>
-          <div style={{ background: "#e5e5e5", borderRadius: 999, padding: "10px 18px", fontSize: 18, color: "#525252", fontFamily: "monospace" }}>
-            {prompt.ai_model}
-          </div>
-          <div style={{ marginLeft: "auto", fontSize: 18, color: "#a3a3a3" }}>
-            {SITE_HOST}
-          </div>
+          <img src={char} width={210} height={Math.round((210 * ch) / cw)} alt="" />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: OG.ink, borderRadius: 18, padding: "20px 28px" }}>
+          <span style={{ fontFamily: "Manrope", fontSize: 28, color: OG.white, letterSpacing: -0.5 }}>
+            {es ? "Ábrelo gratis con tu cuenta" : "Open it free with your account"}
+          </span>
+          <span style={{ fontFamily: "Geist", fontSize: 20, color: OG.accent }}>{SITE_HOST}/prompts →</span>
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, fonts },
   );
 }

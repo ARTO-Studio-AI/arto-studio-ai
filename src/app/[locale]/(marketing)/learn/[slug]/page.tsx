@@ -96,6 +96,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/learn/${page.slug}`,
     title: withBrand(pickTitle(page, locale)),
     description: clampDescription(pickMeta(page, locale)),
+    // Imagen propia por guia (opengraph-image.tsx del segmento, 2026-10-07).
+    ogImage: null,
   });
 }
 

@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
       { source: "/upgrade/:path*", destination: "/pricing", statusCode: 301 as const },
     ];
   },
+  /* Imagenes OG (2026-10-07): fuentes TTF y PNG de marca que se leen del repo en tiempo
+   * de ejecucion (src/lib/og-kit.tsx). Se incluyen en el trazado de todas las funciones. */
+  outputFileTracingIncludes: {
+    "/**": ["./src/app/_og/**"],
+  },
   images: {
     remotePatterns: [
       {
