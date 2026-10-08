@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.arto.scraper</string>
+
+    <!-- Nightly cron: runs once at 03:30, exits. NOT a KeepAlive server. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/node</string>
+        <string>/Users/rogelio/Projects/arto-scraper/scrape.mjs</string>
+        <string>--scheduled</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/rogelio/Projects/arto-scraper</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/rogelio</string>
+    </dict>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/arto-scraper.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/arto-scraper.err.log</string>
+</dict>
+</plist>
