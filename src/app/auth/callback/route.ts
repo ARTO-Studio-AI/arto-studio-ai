@@ -9,6 +9,7 @@ import { addToMarketingList } from "@/lib/marketing-list";
 import { sendWelcome } from "@/lib/mailer";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
+import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
 import {
   MARKETING_CONSENT_VERSION,
   NEXT_COOKIE,
@@ -54,6 +55,8 @@ type ProfileCapture = Partial<Record<CaptureColumn, string | null>> & { full_nam
 async function recordSignupOrLogin(request: NextRequest, user: User): Promise<void> {
   const provider = cleanValue(user.app_metadata?.provider) ?? "email";
   const admin = createAdminClient();
+  // PostHog solo con consentimiento de analitica (H-48, 9 oct 2026), igual que en el navegador.
+  const analytics = analyticsAllowed(request.cookies.get(CONSENT_COOKIE)?.value);
 
   let isSignup = false;
   if (Date.now() - Date.parse(user.created_at) < SIGNUP_WINDOW_MS) {
@@ -68,7 +71,7 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   }
 
   if (!isSignup) {
-    await captureServer(user.id, "login_completed", { provider });
+    if (analytics) await captureServer(user.id, "login_completed", { provider });
     return;
   }
 
@@ -158,7 +161,7 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   });
   if (attrError) console.error("[auth/callback] attribution_events fallo:", attrError.message);
 
-  await captureServer(user.id, "signup_completed", {
+  if (analytics) await captureServer(user.id, "signup_completed", {
     provider,
     signup_source: signupSource,
     utm_source: utm.utm_source,

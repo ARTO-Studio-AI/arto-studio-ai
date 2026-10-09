@@ -7,6 +7,7 @@ import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
 import { DEFAULT_OG_IMAGE_PATH, LOCALE_HEADER, SITE_NAME, absoluteUrl, siteUrl } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
+import CookieBanner from "@/components/CookieBanner";
 import "./globals.css";
 
 /* Tipografia (propuesta aprobada por Victor el 2026-10-07, design system de ARTO con la
@@ -110,6 +111,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>
+        <CookieBanner locale={lang} />
         <Analytics />
         <SpeedInsights />
       </body>
