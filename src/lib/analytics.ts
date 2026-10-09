@@ -151,6 +151,10 @@ export function initAnalytics(): Promise<PostHog | null> {
         // Un solo host: la cookie ph_* queda en creative.artostudio.ai y no en
         // .artostudio.ai, asi revokeAnalytics() la puede borrar.
         cross_subdomain_cookie: false,
+        // Con opt-out, PostHog deja de guardar cookie y localStorage. Sin esto, tras retirar el
+        // consentimiento el SDK volvia a escribir ph_* con el distinct_id despues de que
+        // revokeAnalytics() lo borraba (prueba en produccion, 9 oct 2026).
+        opt_out_persistence_by_default: true,
       });
       // La cookie asai_consent manda: si quedo un opt-out guardado de una visita en la
       // que se rechazo, al aceptar ahora se levanta.
