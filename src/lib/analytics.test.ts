@@ -26,18 +26,23 @@ function fakeDocument(initial: string) {
   };
 }
 
-const { initMock, captureMock, optOutMock } = vi.hoisted(() => ({
+const { initMock, captureMock, optOutMock, optInMock, resetMock, sdk } = vi.hoisted(() => ({
   initMock: vi.fn(),
   captureMock: vi.fn(),
   optOutMock: vi.fn(),
+  optInMock: vi.fn(),
+  resetMock: vi.fn(),
+  sdk: { optedOut: false },
 }));
 vi.mock("posthog-js", () => ({
   default: {
     init: initMock,
     capture: captureMock,
     identify: vi.fn(),
-    reset: vi.fn(),
+    reset: resetMock,
     opt_out_capturing: optOutMock,
+    opt_in_capturing: optInMock,
+    has_opted_out_capturing: () => sdk.optedOut,
     get_distinct_id: () => "anon",
   },
 }));
@@ -57,6 +62,9 @@ describe("analytics (cliente)", () => {
     initMock.mockClear();
     captureMock.mockClear();
     optOutMock.mockClear();
+    optInMock.mockClear();
+    resetMock.mockClear();
+    sdk.optedOut = false;
     delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
     delete process.env.NEXT_PUBLIC_POSTHOG_HOST;
   });
@@ -191,10 +199,70 @@ describe("analytics (cliente)", () => {
       expect(await a.initAnalytics()).not.toBeNull();
       a.revokeAnalytics();
       expect(optOutMock).toHaveBeenCalledTimes(1);
+      // reset() antes que opt_out: al reves, reset() borra el opt-out y el SDK sigue capturando.
+      expect(resetMock.mock.invocationCallOrder[0]).toBeLessThan(optOutMock.mock.invocationCallOrder[0]);
       expect(doc.cookie).not.toContain("ph_phc_prueba_posthog");
       expect(doc.cookie).toContain("NEXT_LOCALE=es");
       expect(store.has("ph_phc_prueba_posthog")).toBe(false);
       expect(store.has("otra")).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("retirar y volver a aceptar en la misma carga: opt_in sin un segundo init", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    const doc = fakeDocument(CONSENT_ALL);
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", doc);
+    vi.stubGlobal("localStorage", { removeItem: () => {} });
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      expect(await a.initAnalytics()).not.toBeNull();
+      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      a.revokeAnalytics();
+      a.track("pricing_viewed", { locale: "es", signed_in: false });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(captureMock).not.toHaveBeenCalled();
+      doc.cookie = `${CONSENT_ALL}; path=/`;
+      expect(await a.initAnalytics()).not.toBeNull();
+      expect(initMock).toHaveBeenCalledTimes(1);
+      expect(optInMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("si se retira mientras carga posthog-js, no se inicializa", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    const doc = fakeDocument(CONSENT_ALL);
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", doc);
+    vi.stubGlobal("localStorage", { removeItem: () => {} });
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      const pending = a.initAnalytics();
+      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      a.revokeAnalytics();
+      expect(await pending).toBeNull();
+      expect(initMock).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("un opt-out guardado de otra visita se levanta si hoy hay consentimiento", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    sdk.optedOut = true;
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", fakeDocument(CONSENT_ALL));
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      expect(await a.initAnalytics()).not.toBeNull();
+      expect(optInMock).toHaveBeenCalledTimes(1);
     } finally {
       vi.unstubAllGlobals();
     }

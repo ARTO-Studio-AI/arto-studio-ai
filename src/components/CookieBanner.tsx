@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { UTM_COOKIE, UTM_COOKIE_MAX_AGE, buildFirstTouch, serializeFirstTouch } from "@/lib/attribution";
 import {
@@ -74,6 +74,7 @@ const hasChoiceOnServer = () => true;
 export default function CookieBanner({ locale }: { locale: string }) {
   const decided = useSyncExternalStore(subscribeConsent, hasChoice, hasChoiceOnServer);
   const [reopened, setReopened] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
   const t = locale === "es" ? COPY.es : COPY.en;
 
   useEffect(() => {
@@ -95,16 +96,23 @@ export default function CookieBanner({ locale }: { locale: string }) {
     window.dispatchEvent(new CustomEvent(CONSENT_CHANGED_EVENT, { detail: choice }));
   }
 
-  if (decided && !reopened) return null;
+  const open = !decided || reopened;
+  // El aviso esta al final del DOM: se lleva el foco ahi para que con teclado no sea lo ultimo.
+  useEffect(() => {
+    if (open) box.current?.focus();
+  }, [open]);
+
+  if (!open) return null;
 
   const button =
     "rounded-full border border-zinc-900 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-900 hover:text-white";
   return (
     <div
+      ref={box}
+      tabIndex={-1}
       role="dialog"
-      aria-live="polite"
       aria-label={t.title}
-      className="fixed inset-x-4 bottom-4 z-[60] mx-auto max-w-xl rounded-2xl border border-zinc-200 bg-white p-5 shadow-lg sm:inset-x-auto sm:left-6"
+      className="fixed inset-x-4 bottom-4 z-40 outline-none mx-auto max-w-xl rounded-2xl border border-zinc-200 bg-white p-5 shadow-lg sm:inset-x-auto sm:left-6"
     >
       <p className="text-sm font-semibold text-zinc-900">{t.title}</p>
       <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">

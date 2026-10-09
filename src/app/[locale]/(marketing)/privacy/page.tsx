@@ -25,22 +25,22 @@ type Cookie = { name: string; purpose: string; duration: string; kind: string };
 
 const COOKIES: Record<"es" | "en", Cookie[]> = {
   es: [
-    { name: "sb-…-auth-token", purpose: "Mantiene tu sesión iniciada (Supabase).", duration: "Hasta 400 días o hasta que cierres sesión", kind: "Esencial" },
+    { name: "sb-…-auth-token(.N)", purpose: "Mantiene tu sesión iniciada (Supabase).", duration: "Hasta 400 días o hasta que cierres sesión", kind: "Esencial" },
     { name: "asai_vid", purpose: "Identificador anónimo para el contador de 3 prompts gratis al día y para evitar abusos.", duration: "1 año", kind: "Esencial" },
     { name: "NEXT_LOCALE", purpose: "Recuerda el idioma que elegiste.", duration: "1 año", kind: "Esencial" },
     { name: "asai_next, asai_signup", purpose: "Te regresan a la página donde estabas y guardan empresa y rol mientras creas tu cuenta.", duration: "15 a 60 minutos", kind: "Esencial" },
     { name: "asai_consent", purpose: "Guarda lo que elegiste en el aviso de cookies.", duration: "6 meses", kind: "Esencial" },
     { name: "asai_utm", purpose: "De qué campaña o sitio llegaste la primera vez (parámetros utm y sitio de origen, sin datos personales).", duration: "30 días", kind: "Analítica, solo con tu permiso" },
-    { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
+    { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan. PostHog guarda también un registro en el almacenamiento local del navegador.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
   ],
   en: [
-    { name: "sb-…-auth-token", purpose: "Keeps you signed in (Supabase).", duration: "Up to 400 days or until you sign out", kind: "Essential" },
+    { name: "sb-…-auth-token(.N)", purpose: "Keeps you signed in (Supabase).", duration: "Up to 400 days or until you sign out", kind: "Essential" },
     { name: "asai_vid", purpose: "Anonymous identifier for the 3 free prompts per day counter and to prevent abuse.", duration: "1 year", kind: "Essential" },
     { name: "NEXT_LOCALE", purpose: "Remembers the language you chose.", duration: "1 year", kind: "Essential" },
     { name: "asai_next, asai_signup", purpose: "Bring you back to the page you were on and keep company and role while you create your account.", duration: "15 to 60 minutes", kind: "Essential" },
     { name: "asai_consent", purpose: "Stores your choice in the cookie notice.", duration: "6 months", kind: "Essential" },
     { name: "asai_utm", purpose: "Which campaign or site brought you here the first time (utm parameters and referring site, no personal data).", duration: "30 days", kind: "Analytics, only with your permission" },
-    { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used.", duration: "1 year", kind: "Analytics, only with your permission" },
+    { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used. PostHog also keeps a record in the browser's local storage.", duration: "1 year", kind: "Analytics, only with your permission" },
   ],
 };
 
@@ -52,7 +52,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "Vercel", what: "Aloja el sitio. Vercel Web Analytics y Speed Insights miden visitas y velocidad de forma agregada y sin cookies." },
     { name: "Resend", what: "Envía los correos: enlaces de acceso, reporte del Brand Roast y, solo si lo aceptaste, promociones." },
     { name: "PostHog", what: "Analítica de producto, solo si la aceptas en el aviso de cookies. Te identificamos con un número interno, nunca con tu correo. Sin grabación de sesiones." },
-    { name: "Anthropic", what: "Escribe las recomendaciones de la búsqueda y el análisis del Brand Roast. Recibe el texto de tu búsqueda, o el nombre, sitio y descripción de la marca que evalúas." },
+    { name: "Anthropic", what: "Escribe las recomendaciones de la búsqueda y el análisis del Brand Roast. Recibe el texto de tu búsqueda o, en el roast, el nombre, industria, tamaño, sitio y descripción de la marca, más el texto público que leemos de ese sitio." },
     { name: "OpenAI", what: "Convierte el texto de tu búsqueda en un vector para encontrar los prompts más parecidos." },
     { name: "Google", what: "Solo si eliges iniciar sesión con Google: nos comparte tu nombre, correo y foto." },
     { name: "Stripe", what: "Procesa los pagos si contratas un plan. Nosotros solo guardamos tu id de cliente y el estado de la suscripción, nunca tu tarjeta." },
@@ -62,7 +62,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "Vercel", what: "Hosts the site. Vercel Web Analytics and Speed Insights measure visits and speed in aggregate, without cookies." },
     { name: "Resend", what: "Sends our emails: sign-in links, the Brand Roast report and, only if you opted in, promotions." },
     { name: "PostHog", what: "Product analytics, only if you accept it in the cookie notice. We identify you by an internal number, never by your email. No session recording." },
-    { name: "Anthropic", what: "Writes the search recommendations and the Brand Roast analysis. Receives your search text, or the name, website and description of the brand you roast." },
+    { name: "Anthropic", what: "Writes the search recommendations and the Brand Roast analysis. Receives your search text or, in the roast, the brand's name, industry, size, website and description, plus the public text we read from that website." },
     { name: "OpenAI", what: "Turns your search text into a vector to find the closest prompts." },
     { name: "Google", what: "Only if you choose to sign in with Google: shares your name, email and photo with us." },
     { name: "Stripe", what: "Processes payments if you buy a plan. We only keep your customer id and subscription status, never your card." },
@@ -128,8 +128,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
           <li>
             <strong>{es ? "Técnicos:" : "Technical:"}</strong>{" "}
             {es
-              ? "registros del servidor (IP para limitar abusos, rutas y errores)."
-              : "server logs (IP to limit abuse, paths and errors)."}
+              ? "registros del servidor (rutas y errores) y tu IP para limitar abusos, que se borra a los 7 días."
+              : "server logs (paths and errors) and your IP to limit abuse, deleted after 7 days."}
           </li>
         </ul>
 
@@ -234,8 +234,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             : "You can ask to access, correct or delete your data, object to its use, withdraw your consent and limit how we use it. If you are in the European Union, you can also ask for portability and lodge a complaint with your data protection authority. Email "}
           {mail}
           {es
-            ? " desde el correo de tu cuenta. Respondemos en un máximo de 20 días hábiles."
-            : " from your account email. We reply within 20 business days."}
+            ? " desde el correo de tu cuenta. Respondemos en un máximo de 20 días hábiles, o de un mes si estás en la Unión Europea."
+            : " from your account email. We reply within 20 business days, or within one month if you are in the European Union."}
         </p>
 
         <h2>{es ? "Menores de edad" : "Minors"}</h2>

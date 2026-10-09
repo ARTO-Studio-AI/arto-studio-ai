@@ -67,6 +67,11 @@ export const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
 
 let client: PostHog | null = null;
 let initPromise: Promise<PostHog | null> | null = null;
+/* posthog-js ya inicializado en esta carga. Sobrevive a revokeAnalytics(): un segundo
+ * init() es no-op, asi que al volver a aceptar se llama opt_in_capturing() sobre este. */
+let loaded: PostHog | null = null;
+/* Sube con cada revokeAnalytics(). Un init en vuelo que empezo antes no termina (H-48). */
+let generation = 0;
 let warned = false;
 
 function warnOnce(message: string): void {
@@ -104,6 +109,7 @@ export function initAnalytics(): Promise<PostHog | null> {
   // Sin consentimiento no se cachea la promesa: si la persona acepta despues,
   // la siguiente llamada si inicializa.
   if (typeof window !== "undefined" && browserConsent() !== "all") return Promise.resolve(null);
+  const started = generation;
   initPromise = (async () => {
     const key = analyticsKey();
     if (!key) {
@@ -118,6 +124,13 @@ export function initAnalytics(): Promise<PostHog | null> {
     try {
       const mod = await import("posthog-js");
       const ph = mod.default;
+      // Mientras cargaba el modulo la persona pudo retirar el consentimiento.
+      if (started !== generation || browserConsent() !== "all") return null;
+      if (loaded) {
+        ph.opt_in_capturing();
+        client = ph;
+        return ph;
+      }
       ph.init(key, {
         api_host: analyticsHost(),
         person_profiles: "identified_only",
@@ -135,7 +148,14 @@ export function initAnalytics(): Promise<PostHog | null> {
         disable_surveys: true,
         respect_dnt: true,
         persistence: "localStorage+cookie",
+        // Un solo host: la cookie ph_* queda en creative.artostudio.ai y no en
+        // .artostudio.ai, asi revokeAnalytics() la puede borrar.
+        cross_subdomain_cookie: false,
       });
+      // La cookie asai_consent manda: si quedo un opt-out guardado de una visita en la
+      // que se rechazo, al aceptar ahora se levanta.
+      if (ph.has_opted_out_capturing()) ph.opt_in_capturing();
+      loaded = ph;
       client = ph;
       return ph;
     } catch (error) {
@@ -188,9 +208,12 @@ export function identifyUser(userId: string | null): void {
  * Nunca lanza.
  */
 export function revokeAnalytics(): void {
+  generation += 1;
   try {
-    client?.opt_out_capturing();
-    client?.reset();
+    // reset() primero: si va despues, borra el opt-out recien guardado y el SDK sigue
+    // mandando $pageview y $pageleave (posthog-js lo advierte en reset()).
+    loaded?.reset();
+    loaded?.opt_out_capturing();
   } catch {
     /* nunca romper la UI por analitica */
   }
@@ -212,5 +235,7 @@ export function revokeAnalytics(): void {
 export function __resetAnalyticsForTests(): void {
   client = null;
   initPromise = null;
+  loaded = null;
+  generation = 0;
   warned = false;
 }
