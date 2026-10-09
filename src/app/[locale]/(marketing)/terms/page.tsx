@@ -60,7 +60,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
       {
         h: "Planes de pago",
         p: [
-          "Los planes de pago se cobran por adelantado a través de Stripe. Las suscripciones se renuevan solas y las puedes cancelar cuando quieras; el acceso sigue hasta el final del periodo pagado. No hacemos reembolsos por periodos parciales, salvo lo que exija la ley. Si algún producto se vende en un solo pago, su página dirá qué incluye y por cuánto tiempo.",
+          "Los planes de pago se cobran por adelantado a través de Stripe. Las suscripciones se renuevan solas y las puedes cancelar cuando quieras desde tu cuenta («Administrar facturación»); el acceso sigue hasta el final del periodo pagado. No hacemos reembolsos por periodos parciales, salvo lo que exija la ley. Si algún producto se vende en un solo pago, su página dirá qué incluye y por cuánto tiempo.",
         ],
       },
       {
@@ -78,7 +78,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
       {
         h: "Límite de responsabilidad",
         p: [
-          "En la medida en que la ley lo permita, ARTO Inc. no responde por daños indirectos, incidentales, especiales o consecuenciales derivados del uso del Servicio. Nuestra responsabilidad total se limita a lo que nos hayas pagado en los 12 meses anteriores al hecho que origine el reclamo, o a 100 dólares, lo que sea mayor.",
+          "En la medida en que la ley lo permita, ARTO Inc. no responde por daños indirectos, incidentales, especiales o consecuentes derivados del uso del Servicio. Nuestra responsabilidad total se limita a lo que nos hayas pagado en los 12 meses anteriores al hecho que origine el reclamo, o a 100 dólares, lo que sea mayor.",
         ],
       },
       {
@@ -146,7 +146,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
       {
         h: "Paid plans",
         p: [
-          "Paid plans are billed in advance through Stripe. Subscriptions renew automatically and you can cancel at any time; access continues until the end of the paid period. We don't refund partial periods, except as required by law. If a product is sold as a one-time purchase, its page will say what it includes and for how long.",
+          "Paid plans are billed in advance through Stripe. Subscriptions renew automatically and you can cancel at any time from your account (\"Manage billing\"); access continues until the end of the paid period. We don't refund partial periods, except as required by law. If a product is sold as a one-time purchase, its page will say what it includes and for how long.",
         ],
       },
       {

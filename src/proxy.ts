@@ -58,6 +58,7 @@ const LOCALE_EXEMPT_PREFIXES = [
   "/_vercel/", // scripts de Vercel Analytics y Speed Insights (Fase 1C)
   "/favicon",
   "/brand/",
+  "/.well-known/", // manifiestos para agentes (ai-plugin, openapi): sin prefijo de idioma
   "/sitemap.xml",
   "/robots.txt",
   "/opengraph-image",
@@ -228,7 +229,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_vercel/|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|_vercel/|\\.well-known/|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
 
