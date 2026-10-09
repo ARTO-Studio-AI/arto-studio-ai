@@ -113,7 +113,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
   return (
     <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
       <Link href={lp("/")} className="flex items-baseline gap-2">
-        <Image src="/brand/arto-logo-black.png" alt="ARTO Creative 24/7" width={96} height={24} className="h-6 w-auto" priority />
+        <Image src="/brand/arto-logo-black.svg" alt="ARTO Creative 24/7" width={69} height={24} className="h-6 w-auto" priority />
         <span className="hidden font-mono text-[11px] font-medium tracking-[0.08em] text-zinc-500 sm:inline">
           {nav.tagline}
         </span>

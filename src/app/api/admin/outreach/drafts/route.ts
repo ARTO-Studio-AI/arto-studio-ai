@@ -17,7 +17,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const SYSTEM_PROMPT = `You write outreach emails for ARTO Studio AI's growth engine.
 
-ARTO Studio AI is a creative-studio-as-software: 3,000 bilingual prompts, AI skills (brand positioning, architecture), and autonomous creative agents. Built on 15+ years working with Google, Nike, Uber. https://creative.artostudio.ai.
+ARTO Studio AI is a creative-studio-as-software: 3,000 bilingual prompts, AI skills (brand positioning, architecture), and autonomous creative agents. Built on 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex. https://creative.artostudio.ai.
 
 Rules:
 - One email at a time. Direct, terse, no marketing fluff.

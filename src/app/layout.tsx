@@ -58,13 +58,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: `${SITE_NAME} · The creative studio that never sleeps`,
   description:
-    "3,000 prompts, AI creative skills and autonomous agents built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years with Google, Nike and Uber, now self-serve.",
+    "3,000 prompts, AI creative skills and autonomous agents built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex, now self-serve.",
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
     title: `${SITE_NAME} · The creative studio that never sleeps`,
     description:
-      "3,000 prompts, AI creative skills and autonomous agents. The same methodology ARTO uses with Google, Nike and Uber, now self-serve.",
+      "3,000 prompts, AI creative skills and autonomous agents. The methodology behind ARTO's work for Grupo Modelo, Sigma and Kavak, now self-serve.",
     images: [{ url: absoluteUrl(DEFAULT_OG_IMAGE_PATH), width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: { card: "summary_large_image" },

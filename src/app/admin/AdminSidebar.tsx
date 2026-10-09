@@ -74,9 +74,9 @@ export default function AdminSidebar({ email }: Props) {
          * back to creative.artostudio.ai. */}
         <Link href="/admin" className="flex items-center gap-2">
           <Image
-            src="/brand/arto-logo-black.png"
+            src="/brand/arto-logo-black.svg"
             alt="ARTO"
-            width={64}
+            width={58}
             height={20}
             className="h-5 w-auto"
           />
