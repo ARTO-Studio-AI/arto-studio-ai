@@ -34,7 +34,8 @@ export interface RateLimitResult {
 
 let cached: ReturnType<typeof postgres> | null = null;
 
-function getDb() {
+/** Pool compartido con src/lib/retention.ts (una sola conexion por lambda). */
+export function getDb() {
   if (cached) return cached;
   const url = process.env.DATABASE_URL;
   if (!url) return null;

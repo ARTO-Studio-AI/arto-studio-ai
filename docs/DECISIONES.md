@@ -162,7 +162,8 @@ siguiente sesión.
 | **Por qué** | El RGPD y la directiva ePrivacy piden consentimiento previo para cookies que no son necesarias; la LFPDPPP pide informar y dejar oponerse. Antes PostHog y `asai_utm` se activaban en la primera visita sin preguntar |
 | **Esenciales sin preguntar** | Sesión de Supabase, `asai_vid` (contador free de D7 y anti-abuso), `NEXT_LOCALE`, `asai_next`, `asai_signup` y la propia `asai_consent`. Vercel Web Analytics y Speed Insights no usan cookies y se quedan |
 | **Qué NO hacer** | No inicializar PostHog ni escribir `asai_utm` sin `asai_consent = all`. No marcar «Aceptar» por defecto ni hacerlo más visible que «Solo esenciales». No encender grabación de sesiones ni autocapture solo porque ya hay aviso: siguen apagados por D9 hasta decisión de Victor. Si cambia el texto del aviso o se agrega una cookie no esencial, subir `CONSENT_VERSION` y actualizar la tabla del aviso de privacidad en el mismo PR |
-| **Dónde** | `src/lib/consent.ts`, `src/components/CookieBanner.tsx`, `src/lib/analytics.ts`, `src/proxy.ts`, `src/app/auth/callback/route.ts`, `src/app/[locale]/(marketing)/privacy/page.tsx` |
+| **Responsable y retención (2026-10-09)** | Victor: «ARTO US cobra, no México». El aviso nombra a ARTO US como responsable y dice que los datos se tratan en EE.UU.; se siguen ofreciendo los derechos ARCO. Victor aprobó borrar las búsquedas a los 12 meses: `src/lib/retention.ts` desde el cron diario `/api/cron/purge`. Pendiente: razón social y domicilio de ARTO US, y alinear los Términos (hoy dicen ARTO Group y tribunales de Monterrey) |
+| **Dónde** | `src/lib/consent.ts`, `src/lib/retention.ts`, `src/components/CookieBanner.tsx`, `src/lib/analytics.ts`, `src/proxy.ts`, `src/app/auth/callback/route.ts`, `src/app/[locale]/(marketing)/privacy/page.tsx` |
 
 ### D11 · Claims de clientes: solo marcas con trabajo verificado
 

@@ -210,6 +210,35 @@ describe("analytics (cliente)", () => {
     }
   });
 
+  it("en creative.artostudio.ai borra tambien la cookie ph_* vieja de .artostudio.ai", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    const writes: string[] = [];
+    const doc = fakeDocument(`${CONSENT_ALL}; ph_phc_prueba_posthog=x`);
+    const spy = {
+      get cookie() {
+        return doc.cookie;
+      },
+      set cookie(v: string) {
+        writes.push(v);
+        doc.cookie = v;
+      },
+    };
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", spy);
+    vi.stubGlobal("location", { hostname: "creative.artostudio.ai" });
+    vi.stubGlobal("localStorage", { removeItem: () => {} });
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      await a.initAnalytics();
+      a.revokeAnalytics();
+      expect(writes.some((w) => w.startsWith("ph_phc_prueba_posthog=;") && w.includes("domain=.artostudio.ai"))).toBe(true);
+      expect(writes.some((w) => w.startsWith("ph_phc_prueba_posthog=;") && !w.includes("domain="))).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("retirar y volver a aceptar en la misma carga: opt_in sin un segundo init", async () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
     const doc = fakeDocument(CONSENT_ALL);

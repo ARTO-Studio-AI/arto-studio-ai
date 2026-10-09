@@ -1,4 +1,4 @@
-import postgres from "postgres";
+import { getDb } from "@/lib/rate-limit";
 
 /**
  * Retencion de datos personales (9 oct 2026, pregunta 11 de Victor). Lo que promete
@@ -10,16 +10,6 @@ import postgres from "postgres";
  */
 
 export const SEARCH_RETENTION_DAYS = 365;
-
-let cached: ReturnType<typeof postgres> | null = null;
-
-function getDb() {
-  if (cached) return cached;
-  const url = process.env.DATABASE_URL;
-  if (!url) return null;
-  cached = postgres(url, { ssl: "require", max: 2, prepare: false });
-  return cached;
-}
 
 /** Borra las busquedas con mas de `days` dias. Devuelve cuantas borro. */
 export async function purgeOldSearchQueries(days = SEARCH_RETENTION_DAYS): Promise<number> {
