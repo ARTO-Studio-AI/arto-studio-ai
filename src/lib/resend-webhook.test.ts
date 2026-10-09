@@ -25,6 +25,12 @@ describe("listChangeFor (webhook de Resend)", () => {
     expect(listChangeFor({ type: "contact.updated", data: { email: "ana@ejemplo.com", unsubscribed: false } })).toBeNull();
   });
 
+  it("con audiencia configurada, una baja de otra audiencia no cuenta", () => {
+    const ev = { type: "contact.updated", data: { email: "ana@ejemplo.com", unsubscribed: true, audience_id: "otra" } };
+    expect(listChangeFor(ev, "aud_asai")).toBeNull();
+    expect(listChangeFor({ ...ev, data: { ...ev.data, audience_id: "aud_asai" } }, "aud_asai")?.status).toBe("unsubscribed");
+  });
+
   it("eventos que no tocan la lista se ignoran", () => {
     expect(listChangeFor({ type: "email.delivered", data: { to: ["ana@ejemplo.com"] } })).toBeNull();
     expect(listChangeFor({ type: "email.opened" })).toBeNull();

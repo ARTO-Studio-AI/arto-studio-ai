@@ -71,9 +71,11 @@ export async function upsertAudienceContact(
       console.log(JSON.stringify({ event: "audience_contact_created", email }));
       return { ok: true, action: "created" };
     }
-    // Contacto ya existente: se actualiza el nombre sin tocar unsubscribed.
+    // Contacto ya existente: se actualiza el nombre y se quita la baja. Esta funcion solo
+    // se llama con un si expreso y nuevo (registro o confirmacion del roast), asi que una
+    // baja vieja en Resend ya no vale (auditoria de Fable, PR #80).
     if (/exist/i.test(created.error.message)) {
-      const updated = await resend.contacts.update({ audienceId, email, firstName, lastName });
+      const updated = await resend.contacts.update({ audienceId, email, firstName, lastName, unsubscribed: false });
       if (!updated.error) {
         console.log(JSON.stringify({ event: "audience_contact_updated", email }));
         return { ok: true, action: "updated" };
@@ -86,6 +88,33 @@ export async function upsertAudienceContact(
   } catch (error) {
     console.error("[resend-audience] excepcion:", error);
     return { ok: false, skipped: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+/**
+ * Marca la baja (o la quita) del contacto en la audiencia de Resend, para que los
+ * Broadcasts respeten una baja hecha en el sitio (D12). Nunca lanza; sin audiencia o sin
+ * key no hace nada.
+ */
+export async function setAudienceUnsubscribed(
+  email: string,
+  unsubscribed: boolean,
+  deps: { resend?: Resend } = {},
+): Promise<boolean> {
+  const audienceId = process.env.RESEND_AUDIENCE_ID?.trim();
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!audienceId || (!apiKey && !deps.resend)) return false;
+  try {
+    const resend = deps.resend ?? new Resend(apiKey);
+    const { error } = await resend.contacts.update({ audienceId, email: email.trim().toLowerCase(), unsubscribed });
+    if (error) {
+      console.error("[resend-audience] baja fallo:", error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[resend-audience] baja excepcion:", error);
+    return false;
   }
 }
 

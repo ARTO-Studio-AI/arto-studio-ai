@@ -25,6 +25,7 @@ interface ResendEvent {
     to?: string[];
     email?: string;
     unsubscribed?: boolean;
+    audience_id?: string;
     bounce?: { type?: string; subType?: string };
     suppressed?: { type?: string };
   };
@@ -35,7 +36,7 @@ function clean(list: (string | undefined)[]): string[] {
 }
 
 /** Que cambio de lista implica el evento, o null si no toca la lista. */
-export function listChangeFor(event: ResendEvent): ListChange | null {
+export function listChangeFor(event: ResendEvent, audienceId?: string): ListChange | null {
   const data = event.data ?? {};
   switch (event.type) {
     case "email.bounced": {
@@ -54,6 +55,8 @@ export function listChangeFor(event: ResendEvent): ListChange | null {
     }
     case "contact.updated": {
       if (data.unsubscribed !== true) return null;
+      // Solo la audiencia de ASAI: una baja en otra audiencia de la cuenta no es de aqui.
+      if (audienceId && data.audience_id !== audienceId) return null;
       const emails = clean([data.email]);
       return emails.length ? { emails, status: "unsubscribed", reason: "resend_unsubscribe" } : null;
     }

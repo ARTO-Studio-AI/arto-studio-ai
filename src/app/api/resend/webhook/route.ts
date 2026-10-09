@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const change = listChangeFor(event as Parameters<typeof listChangeFor>[0]);
+  const change = listChangeFor(event as Parameters<typeof listChangeFor>[0], process.env.RESEND_AUDIENCE_ID?.trim() || undefined);
   if (!change) return NextResponse.json({ ok: true, ignored: true });
 
   const patch: Record<string, string> = { status: change.status };

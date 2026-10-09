@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { actionPage } from "@/lib/email-templates/page";
+import { setAudienceUnsubscribed } from "@/lib/resend-audience";
 
 /* Baja de la lista. 2026-10-07 (auditoria de Fable, PR #76):
  *   GET  muestra un boton (los escaneres de enlaces abren el GET y no deben dar de baja).
@@ -43,10 +44,13 @@ export async function POST(request: NextRequest) {
       : NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data: rows, error } = await admin
     .from("newsletter_subscribers")
     .update({ status: "unsubscribed", unsubscribed_at: new Date().toISOString() })
-    .eq("unsubscribe_token", token);
+    .eq("unsubscribe_token", token)
+    .select("email");
+  // Tambien en Resend, para que los Broadcasts respeten la baja (D12). No bloquea la respuesta.
+  for (const row of rows ?? []) await setAudienceUnsubscribed(row.email, true);
   if (!viaPage) return error ? NextResponse.json({ error: "error" }, { status: 500 }) : NextResponse.json({ ok: true });
   return actionPage({
     lang,
