@@ -9,6 +9,7 @@ interface AttributionEvent {
   source: string | null;
   source_detail: string | null;
   target_id: string | null;
+  user_id: string | null;
   user_email: string | null;
   utm_source: string | null;
   utm_medium: string | null;
@@ -327,6 +328,12 @@ export default function AttributionPage() {
                               <p className="mt-1">
                                 {e.utm_source || "—"} / {e.utm_medium || "—"} /{" "}
                                 {e.utm_campaign || "—"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-zinc-500">User ID</p>
+                              <p className="mt-1 font-mono text-[10px]">
+                                {e.user_id || "—"}
                               </p>
                             </div>
                             <div>

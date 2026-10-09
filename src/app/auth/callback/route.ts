@@ -179,15 +179,19 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   }
 }
 
-/* Destino sin `next` (H-62, 9 oct 2026): el idioma del registro o el que eligio en el
- * sitio. Con "/" el proxy decidia por Accept-Language y quien se registraba en /es
- * aterrizaba en /en. */
+/* Destino sin `next` (H-62, 9 oct 2026). Con "/" el proxy decidia por Accept-Language y
+ * quien se registraba en /es aterrizaba en /en. Orden: el idioma que la persona eligio en
+ * el sitio (NEXT_LOCALE, la eleccion vigente), el del registro por enlace magico
+ * (user_metadata) y el del registro con Google (cookie asai_signup, porque Google no
+ * lleva options.data). */
 function homeFor(request: NextRequest, user: User | null): string {
-  const fromSignup = cleanValue(user?.user_metadata?.signup_locale);
-  if (isLocale(fromSignup)) return `/${fromSignup}`;
-  const fromCookie = request.cookies.get("NEXT_LOCALE")?.value;
-  if (isLocale(fromCookie)) return `/${fromCookie}`;
-  return "/";
+  const candidates = [
+    request.cookies.get("NEXT_LOCALE")?.value,
+    cleanValue(user?.user_metadata?.signup_locale),
+    parseSignupExtra(request.cookies.get(SIGNUP_COOKIE)?.value)?.locale,
+  ];
+  const locale = candidates.find((c) => isLocale(c));
+  return locale ? `/${locale}` : "/";
 }
 
 export async function GET(request: NextRequest) {

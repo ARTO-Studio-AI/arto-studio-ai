@@ -81,6 +81,17 @@ describe("GET /auth/callback", () => {
       expect(await locationFor("code=valido", "NEXT_LOCALE=../evil")).toBe(`${SITE}/`);
     });
 
+    it("el idioma elegido en el sitio gana al del registro", async () => {
+      session.user = { id: "u1", user_metadata: { signup_locale: "es" } };
+      expect(await locationFor("code=valido", "NEXT_LOCALE=en")).toBe(`${SITE}/en`);
+    });
+
+    it("Google: el idioma viaja en la cookie asai_signup", async () => {
+      session.user = { id: "u1", user_metadata: {} };
+      const signup = encodeURIComponent(JSON.stringify({ locale: "es" }));
+      expect(await locationFor("code=valido", `asai_signup=${signup}`)).toBe(`${SITE}/es`);
+    });
+
     it("un next pedido gana al idioma", async () => {
       session.user = { id: "u1", user_metadata: { signup_locale: "es" } };
       expect(await locationFor("code=valido&next=%2Fen%2Fprompts")).toBe(`${SITE}/en/prompts`);

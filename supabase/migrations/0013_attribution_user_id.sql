@@ -16,11 +16,18 @@
 -- Termina con notify pgrst (regla de CLAUDE.md).
 begin;
 
+-- El FK valida contra auth.users con un lock breve; si hay una transaccion larga
+-- sobre auth.users, mejor fallar a los 5 s que quedar en cola (sugerencia de Fable).
+set local lock_timeout = '5s';
+
 alter table public.attribution_events
   add column if not exists user_id uuid references auth.users(id) on delete set null;
 
 create index if not exists idx_attribution_events_user
   on public.attribution_events using btree (event_type, user_id);
+
+comment on column public.attribution_events.user_id is
+  'Usuario de auth.users (signup y demas eventos de producto). target_id es de outreach_targets (H-61).';
 
 commit;
 
