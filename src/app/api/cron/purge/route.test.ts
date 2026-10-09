@@ -11,6 +11,12 @@ vi.mock("@/lib/rate-limit", () => ({
   purgeOldRateLimits: (days?: number) => purgeOldRateLimits(days),
 }));
 
+const purgeOldSearchQueries = vi.fn<(days?: number) => Promise<number>>();
+vi.mock("@/lib/retention", () => ({
+  SEARCH_RETENTION_DAYS: 365,
+  purgeOldSearchQueries: (days?: number) => purgeOldSearchQueries(days),
+}));
+
 const { GET } = await import("./route");
 
 function get(authorization?: string) {
@@ -26,6 +32,8 @@ describe("GET /api/cron/purge", () => {
   beforeEach(() => {
     purgeOldRateLimits.mockReset();
     purgeOldRateLimits.mockResolvedValue(11);
+    purgeOldSearchQueries.mockReset();
+    purgeOldSearchQueries.mockResolvedValue(4);
     process.env.CRON_SECRET = "secreto-de-prueba";
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
@@ -39,6 +47,7 @@ describe("GET /api/cron/purge", () => {
     const res = await get();
     expect(res.status).toBe(401);
     expect(purgeOldRateLimits).not.toHaveBeenCalled();
+    expect(purgeOldSearchQueries).not.toHaveBeenCalled();
   });
 
   it("401 con secreto incorrecto", async () => {
@@ -57,8 +66,10 @@ describe("GET /api/cron/purge", () => {
   it("200 con el conteo borrado cuando el secreto coincide", async () => {
     const res = await get("Bearer secreto-de-prueba");
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, days: 7, deleted: 11 });
+    expect(await res.json()).toEqual({ ok: true, days: 7, deleted: 11, searches: 4 });
     expect(purgeOldRateLimits).toHaveBeenCalledWith(7);
+    // Aviso de privacidad: las busquedas se borran a los 12 meses.
+    expect(purgeOldSearchQueries).toHaveBeenCalledWith(365);
   });
 
   it("500 si la purga falla", async () => {

@@ -87,13 +87,13 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
       <div className="prose prose-neutral mt-10 max-w-none text-zinc-800">
         {es ? (
           <p>
-            ARTO Studio AI (creative.artostudio.ai, el «Servicio») es operado por ARTO Group («nosotros»). Este aviso
+            ARTO Studio AI (creative.artostudio.ai, el «Servicio») es un producto de ARTO Group operado por ARTO US, empresa de Estados Unidos que también cobra los planes («nosotros»), responsable de tus datos personales. Este aviso
             explica qué datos personales tratamos, para qué, con quién los compartimos y qué derechos tienes. Para
             cualquier duda o solicitud escríbenos a {mail}.
           </p>
         ) : (
           <p>
-            ARTO Studio AI (creative.artostudio.ai, the &quot;Service&quot;) is operated by ARTO Group (&quot;we&quot;). This
+            ARTO Studio AI (creative.artostudio.ai, the &quot;Service&quot;) is an ARTO Group product operated by ARTO US, a United States company that also bills the plans (&quot;we&quot;), and the controller of your personal data. This
             policy explains what personal data we process, why, who we share it with and what rights you have. For any
             question or request, email {mail}.
           </p>
@@ -181,8 +181,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </ul>
         <p>
           {es
-            ? "Varios de estos proveedores procesan datos en Estados Unidos. Al usar el Servicio, tus datos se transfieren a esos proveedores con las garantías de sus propios contratos de tratamiento de datos."
-            : "Several of these providers process data in the United States. When you use the Service, your data is transferred to them under the safeguards of their own data processing agreements."}
+            ? "Tus datos se tratan en Estados Unidos, donde están ARTO US y la mayoría de estos proveedores, con las garantías de sus propios contratos de tratamiento de datos."
+            : "Your data is processed in the United States, where ARTO US and most of these providers are based, under the safeguards of their own data processing agreements."}
         </p>
 
         <h2 id="cookies">Cookies</h2>
@@ -223,8 +223,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         <h2>{es ? "Cuánto tiempo los guardamos" : "How long we keep it"}</h2>
         <p>
           {es
-            ? "Tu cuenta y lo que guardas en ella se conservan mientras la cuenta exista. Si pides borrarla, eliminamos tus datos personales en un plazo de 30 días, salvo lo que la ley nos obligue a conservar (por ejemplo, registros de pago). Si te das de baja de la lista de correo, guardamos tu correo marcado como baja para no volver a escribirte."
-            : "Your account and what you save in it are kept while the account exists. If you ask us to delete it, we remove your personal data within 30 days, except what the law requires us to keep (for example, payment records). If you unsubscribe from the mailing list, we keep your email marked as unsubscribed so we don't write to you again."}
+            ? "Tu cuenta y lo que guardas en ella se conservan mientras la cuenta exista. El texto de tus búsquedas se borra a los 12 meses. Si pides borrarla, eliminamos tus datos personales en un plazo de 30 días, salvo lo que la ley nos obligue a conservar (por ejemplo, registros de pago). Si te das de baja de la lista de correo, guardamos tu correo marcado como baja para no volver a escribirte."
+            : "Your account and what you save in it are kept while the account exists. Your search text is deleted after 12 months. If you ask us to delete it, we remove your personal data within 30 days, except what the law requires us to keep (for example, payment records). If you unsubscribe from the mailing list, we keep your email marked as unsubscribed so we don't write to you again."}
         </p>
 
         <h2>{es ? "Tus derechos" : "Your rights"}</h2>

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { purgeOldRateLimits } from "@/lib/rate-limit";
+import { SEARCH_RETENTION_DAYS, purgeOldSearchQueries } from "@/lib/retention";
 
 /**
  * GET /api/cron/purge (H-40, 2026-09-13). Cron diario de Vercel (vercel.json,
  * 0 4 * * * UTC) que borra las ventanas de rate_limits mas viejas que 7 dias.
  * Sin esto la tabla crecia sin tope: una fila por key y por hora, para siempre.
+ * Desde el 9 oct 2026 tambien borra las busquedas de mas de 12 meses (src/lib/retention.ts),
+ * que es lo que promete el aviso de privacidad.
  *
  * Auth igual que /api/cron/digest: Vercel manda `Authorization: Bearer <CRON_SECRET>`.
  * Falla cerrado: sin CRON_SECRET configurado responde 401 y no toca la base.
@@ -23,8 +26,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const deleted = await purgeOldRateLimits(PURGE_DAYS);
-    console.log(JSON.stringify({ event: "rate_limits_purge", days: PURGE_DAYS, deleted }));
-    return NextResponse.json({ ok: true, days: PURGE_DAYS, deleted });
+    const searches = await purgeOldSearchQueries(SEARCH_RETENTION_DAYS);
+    console.log(JSON.stringify({ event: "rate_limits_purge", days: PURGE_DAYS, deleted, searches }));
+    return NextResponse.json({ ok: true, days: PURGE_DAYS, deleted, searches });
   } catch (error) {
     console.error("[/api/cron/purge] purge failed:", error);
     return NextResponse.json({ ok: false, error: "purge failed" }, { status: 500 });
