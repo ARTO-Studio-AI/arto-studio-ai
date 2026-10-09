@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://arto-studio-ai.vercel.app",
+      "url": "https://creative.artostudio.ai",
       "description": "Production"
     }
   ],
