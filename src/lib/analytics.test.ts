@@ -1,15 +1,43 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 
 /* Wrapper de PostHog: sin key es no-op con un solo aviso; con DNT no inicializa.
- * posthog-js se mockea para comprobar que ni siquiera se carga en esos casos. */
+ * posthog-js se mockea para comprobar que ni siquiera se carga en esos casos.
+ * Desde H-48 (9 oct 2026) tampoco inicializa sin la cookie asai_consent = all. */
 
-const { initMock, captureMock } = vi.hoisted(() => ({ initMock: vi.fn(), captureMock: vi.fn() }));
+const CONSENT_ALL = "asai_consent=all.v1-2026-10-09";
+
+/* document minimo: un cookie jar de strings, suficiente para consent.ts y revokeAnalytics. */
+function fakeDocument(initial: string) {
+  const jar = new Map<string, string>();
+  for (const part of initial.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k) jar.set(k, v.join("="));
+  }
+  return {
+    get cookie() {
+      return [...jar].map(([k, v]) => `${k}=${v}`).join("; ");
+    },
+    set cookie(value: string) {
+      const [pair, ...attrs] = value.split(";");
+      const [k, ...v] = pair.trim().split("=");
+      if (attrs.some((a) => a.trim() === "max-age=0")) jar.delete(k);
+      else jar.set(k, v.join("="));
+    },
+  };
+}
+
+const { initMock, captureMock, optOutMock } = vi.hoisted(() => ({
+  initMock: vi.fn(),
+  captureMock: vi.fn(),
+  optOutMock: vi.fn(),
+}));
 vi.mock("posthog-js", () => ({
   default: {
     init: initMock,
     capture: captureMock,
     identify: vi.fn(),
     reset: vi.fn(),
+    opt_out_capturing: optOutMock,
     get_distinct_id: () => "anon",
   },
 }));
@@ -28,6 +56,7 @@ describe("analytics (cliente)", () => {
     warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     initMock.mockClear();
     captureMock.mockClear();
+    optOutMock.mockClear();
     delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
     delete process.env.NEXT_PUBLIC_POSTHOG_HOST;
   });
@@ -95,6 +124,7 @@ describe("analytics (cliente)", () => {
   it("con key y navegador inicializa con identified_only y manda el evento", async () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
     vi.stubGlobal("window", {});
+    vi.stubGlobal("document", fakeDocument(CONSENT_ALL));
     vi.stubGlobal("navigator", { doNotTrack: null });
     try {
       const a = await freshModule();
@@ -112,6 +142,59 @@ describe("analytics (cliente)", () => {
       expect(config.api_host).toBe("https://us.i.posthog.com");
       a.track("pricing_viewed", { locale: "es", signed_in: true });
       expect(captureMock).toHaveBeenCalledWith("pricing_viewed", { locale: "es", signed_in: true });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("sin consentimiento no inicializa; al aceptar despues si", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    const doc = fakeDocument("NEXT_LOCALE=es");
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", doc);
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      expect(await a.initAnalytics()).toBeNull();
+      a.track("pricing_viewed", { locale: "es", signed_in: false });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(initMock).not.toHaveBeenCalled();
+      expect(captureMock).not.toHaveBeenCalled();
+      // "Solo esenciales" o una version vieja del aviso no cuentan como si.
+      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      expect(await a.initAnalytics()).toBeNull();
+      doc.cookie = "asai_consent=all.v0-viejo; path=/";
+      expect(await a.initAnalytics()).toBeNull();
+      expect(initMock).not.toHaveBeenCalled();
+      doc.cookie = `${CONSENT_ALL}; path=/`;
+      expect(await a.initAnalytics()).not.toBeNull();
+      expect(initMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("revokeAnalytics apaga la captura y borra cookies y claves ph_*", async () => {
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_prueba";
+    const doc = fakeDocument(`${CONSENT_ALL}; ph_phc_prueba_posthog=x; NEXT_LOCALE=es`);
+    const store = new Map<string, string>([["ph_phc_prueba_posthog", "x"], ["otra", "y"]]);
+    const localStorageStub = {
+      removeItem: (k: string) => store.delete(k),
+    };
+    for (const k of store.keys()) Object.defineProperty(localStorageStub, k, { value: store.get(k), enumerable: true, configurable: true });
+    vi.stubGlobal("window", {});
+    vi.stubGlobal("document", doc);
+    vi.stubGlobal("localStorage", localStorageStub);
+    vi.stubGlobal("navigator", { doNotTrack: null });
+    try {
+      const a = await freshModule();
+      expect(await a.initAnalytics()).not.toBeNull();
+      a.revokeAnalytics();
+      expect(optOutMock).toHaveBeenCalledTimes(1);
+      expect(doc.cookie).not.toContain("ph_phc_prueba_posthog");
+      expect(doc.cookie).toContain("NEXT_LOCALE=es");
+      expect(store.has("ph_phc_prueba_posthog")).toBe(false);
+      expect(store.has("otra")).toBe(true);
     } finally {
       vi.unstubAllGlobals();
     }

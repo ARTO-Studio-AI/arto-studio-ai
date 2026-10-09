@@ -153,6 +153,17 @@ siguiente sesión.
 | **Fuente de verdad del consentimiento** | `attribution_events.metadata.marketing_opt_in` (escrito con service role, con fecha y versión). `user_metadata` lo puede editar el propio usuario y en magic link no lleva fecha: sirve de espejo, no de prueba. El roast tiene su propia casilla; dejar el correo para ver el reporte no es aceptar promociones |
 | **Dónde** | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` y `SignupWall.tsx`, `src/app/[locale]/(marketing)/login/`, `src/app/api/roast/email/route.ts`, `src/app/roast/page.tsx`, `src/app/auth/callback/route.ts`, `src/lib/attribution.ts`, aviso de privacidad |
 
+### D10 · Aviso de cookies: solo esenciales por defecto
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-09 (respuesta «sí» al punto 12, H-48). Implementó Code; auditoría de Fable en el PR |
+| **Qué se decidió** | Aviso de cookies en ES/EN con dos opciones del mismo peso: «Solo esenciales» y «Aceptar analítica». Sin respuesta, solo esenciales. La elección vive en la cookie `asai_consent` (`all` o `essential` + versión del texto, 6 meses). Con `all`: PostHog en el navegador, PostHog del servidor en `/auth/callback` y la cookie `asai_utm`. Sin `all`: nada de eso. El enlace «Cookies» del footer y el del aviso de privacidad reabren el aviso; retirar el consentimiento apaga PostHog y borra sus cookies y claves `ph_*` y `asai_utm` |
+| **Por qué** | El RGPD y la directiva ePrivacy piden consentimiento previo para cookies que no son necesarias; la LFPDPPP pide informar y dejar oponerse. Antes PostHog y `asai_utm` se activaban en la primera visita sin preguntar |
+| **Esenciales sin preguntar** | Sesión de Supabase, `asai_vid` (contador free de D7 y anti-abuso), `NEXT_LOCALE`, `asai_next`, `asai_signup` y la propia `asai_consent`. Vercel Web Analytics y Speed Insights no usan cookies y se quedan |
+| **Qué NO hacer** | No inicializar PostHog ni escribir `asai_utm` sin `asai_consent = all`. No marcar «Aceptar» por defecto ni hacerlo más visible que «Solo esenciales». No encender grabación de sesiones ni autocapture solo porque ya hay aviso: siguen apagados por D9 hasta decisión de Victor. Si cambia el texto del aviso o se agrega una cookie no esencial, subir `CONSENT_VERSION` y actualizar la tabla del aviso de privacidad en el mismo PR |
+| **Dónde** | `src/lib/consent.ts`, `src/components/CookieBanner.tsx`, `src/lib/analytics.ts`, `src/proxy.ts`, `src/app/auth/callback/route.ts`, `src/app/[locale]/(marketing)/privacy/page.tsx` |
+
 ### D11 · Claims de clientes: solo marcas con trabajo verificado
 
 | | |

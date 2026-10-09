@@ -6,6 +6,7 @@ import { LOCALES, DEFAULT_LOCALE, type Locale, isLocale } from "@/i18n/config";
 // the path on every request and forwards the resolved locale here.
 import { LOCALE_HEADER } from "@/lib/seo";
 import { UTM_COOKIE, UTM_COOKIE_MAX_AGE, buildFirstTouch, serializeFirstTouch } from "@/lib/attribution";
+import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
 
 /* Next.js 16 renamed middleware → proxy. This file does four things on every
  * request:
@@ -34,6 +35,9 @@ import { UTM_COOKIE, UTM_COOKIE_MAX_AGE, buildFirstTouch, serializeFirstTouch } 
  *      path for 30 days (src/lib/attribution.ts). It is set on the locale
  *      redirect too, so `/?utm_source=x` → `/en?utm_source=x` records the
  *      first hop and the second one finds the cookie already there.
+ *      Only with analytics consent (`asai_consent` = "all", H-48, 9 oct 2026).
+ *      Without it nothing is written; if the visitor accepts later, the cookie
+ *      banner writes the first touch of the page it was opened on.
  *
  * Order matters: locale redirect runs first because Supabase doesn't care
  * about pathname; redirecting cheaply avoids an auth call when we already
@@ -81,6 +85,7 @@ function isAttributionSkipped(pathname: string): boolean {
 /* Guarda la primera visita (utm_*, referrer externo, landing) en asai_utm si el
  * navegador aun no la trae. Primera atribucion: una vez puesta no se toca. */
 function attachFirstTouch(request: NextRequest, response: NextResponse): void {
+  if (!analyticsAllowed(request.cookies.get(CONSENT_COOKIE)?.value)) return;
   if (request.cookies.get(UTM_COOKIE)?.value) return;
   const pathname = request.nextUrl.pathname;
   if (isAttributionSkipped(pathname)) return;

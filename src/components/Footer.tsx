@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Badge } from "@/components/ui";
+import { CookieSettingsButton } from "@/components/CookieBanner";
 
 interface Props {
   locale: Locale;
@@ -55,6 +56,7 @@ export default function Footer({ locale, footer }: Props) {
             <div className="flex flex-col gap-1.5 text-sm">
               <Link href={lp("/privacy")} className={link}>{footer.privacy}</Link>
               <Link href={lp("/terms")} className={link}>{footer.terms}</Link>
+              <CookieSettingsButton label="Cookies" className={`${link} text-left`} />
               <a href="https://artogroup.com" target="_blank" rel="noopener noreferrer" className={link}>
                 ARTO Group
               </a>

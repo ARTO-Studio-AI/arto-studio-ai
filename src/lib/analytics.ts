@@ -1,4 +1,5 @@
 import type { PostHog } from "posthog-js";
+import { browserConsent } from "@/lib/consent";
 
 /* Wrapper de PostHog para el navegador (Fase 1C, 13 sep 2026).
  *
@@ -6,6 +7,10 @@ import type { PostHog } from "posthog-js";
  *   - Si falta NEXT_PUBLIC_POSTHOG_KEY, todo es no-op y se avisa una sola vez en
  *     consola. Nunca truena: un sitio sin analitica es mejor que un sitio caido.
  *   - Se respeta navigator.doNotTrack: con DNT activo no se inicializa nada.
+ *   - Sin consentimiento de analitica (cookie asai_consent = "all", src/lib/consent.ts)
+ *     no se inicializa ni se escribe nada (H-48, 9 oct 2026). Si la persona acepta
+ *     despues, el aviso vuelve a llamar initAnalytics(); si retira el consentimiento,
+ *     revokeAnalytics() apaga la captura y borra lo que PostHog guardo.
  *   - person_profiles: 'identified_only'. Los anonimos no crean perfil de persona;
  *     al iniciar sesion se llama identify() con el id de Supabase, nunca con el email.
  *   - Los eventos son tipados (AnalyticsEvents). Un evento que no este aqui no se
@@ -96,6 +101,9 @@ export function doNotTrack(): boolean {
  */
 export function initAnalytics(): Promise<PostHog | null> {
   if (initPromise) return initPromise;
+  // Sin consentimiento no se cachea la promesa: si la persona acepta despues,
+  // la siguiente llamada si inicializa.
+  if (typeof window !== "undefined" && browserConsent() !== "all") return Promise.resolve(null);
   initPromise = (async () => {
     const key = analyticsKey();
     if (!key) {
@@ -172,6 +180,32 @@ export function identifyUser(userId: string | null): void {
       if (typeof maybe._isIdentified === "function" && maybe._isIdentified()) ph.reset();
     })
     .catch(() => {});
+}
+
+/**
+ * La persona retiro el consentimiento: se deja de capturar en esta carga y se borra
+ * lo que PostHog guardo en el navegador (cookie ph_* y claves ph_* de localStorage).
+ * Nunca lanza.
+ */
+export function revokeAnalytics(): void {
+  try {
+    client?.opt_out_capturing();
+    client?.reset();
+  } catch {
+    /* nunca romper la UI por analitica */
+  }
+  client = null;
+  initPromise = null;
+  if (typeof document === "undefined") return;
+  for (const part of document.cookie.split(";")) {
+    const name = part.split("=")[0]?.trim();
+    if (name?.startsWith("ph_")) document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
+  }
+  try {
+    for (const key of Object.keys(localStorage)) if (key.startsWith("ph_")) localStorage.removeItem(key);
+  } catch {
+    /* localStorage bloqueado */
+  }
 }
 
 /** Solo para pruebas: vuelve al estado inicial del modulo. */
