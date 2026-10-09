@@ -220,9 +220,15 @@ export function revokeAnalytics(): void {
   client = null;
   initPromise = null;
   if (typeof document === "undefined") return;
+  // Antes del 9 oct PostHog escribia su cookie en .artostudio.ai (cross_subdomain_cookie
+  // por defecto); sin domain= no se borra, asi que se intenta en los dos.
+  const labels = typeof location === "undefined" ? [] : location.hostname.split(".");
+  const parent = labels.length > 1 ? `; domain=.${labels.slice(-2).join(".")}` : "";
   for (const part of document.cookie.split(";")) {
     const name = part.split("=")[0]?.trim();
-    if (name?.startsWith("ph_")) document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
+    if (!name?.startsWith("ph_")) continue;
+    document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
+    if (parent) document.cookie = `${name}=; path=/; max-age=0; samesite=lax${parent}`;
   }
   try {
     for (const key of Object.keys(localStorage)) if (key.startsWith("ph_")) localStorage.removeItem(key);
