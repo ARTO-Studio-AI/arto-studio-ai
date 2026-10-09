@@ -10,7 +10,8 @@ const state = vi.hoisted(() => ({
   provider: "email",
   inserts: [] as unknown[],
   updateUser: vi.fn(async (_id: string, _attrs: unknown) => ({ error: null })),
-  upsert: vi.fn(async (_c: unknown) => true),
+  upsert: vi.fn(async (_c: unknown) => ({ ok: true, newlyActive: true, unsubscribeToken: "tok" })),
+  welcome: vi.fn(async (..._a: unknown[]) => true),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -50,6 +51,7 @@ vi.mock("@/lib/supabase/admin", () => ({
     auth: { admin: { updateUserById: state.updateUser } },
   }),
 }));
+vi.mock("@/lib/mailer", () => ({ sendWelcome: state.welcome }));
 vi.mock("@/lib/prompt-limit", () => ({ adoptOpens: vi.fn() }));
 vi.mock("@/lib/analytics-server", () => ({ captureServer: vi.fn() }));
 vi.mock("@/lib/resend-audience", () => ({ splitName: () => ({}) }));
@@ -74,12 +76,14 @@ describe("callback: consentimiento de correos", () => {
     state.inserts = [];
     state.updateUser.mockClear();
     state.upsert.mockClear();
+    state.welcome.mockClear();
   });
 
   it("magic link con casilla marcada: entra a la audiencia y no reescribe metadata", async () => {
     state.meta = { marketing_opt_in: "yes" };
     await run();
     expect(state.upsert).toHaveBeenCalledTimes(1);
+    expect(state.welcome).toHaveBeenCalledWith("ana@example.com", "en", "tok");
     expect(state.updateUser).not.toHaveBeenCalled();
     expect(JSON.stringify(state.inserts)).toContain('"marketing_opt_in":"yes"');
   });
@@ -88,6 +92,7 @@ describe("callback: consentimiento de correos", () => {
     state.meta = { marketing_opt_in: "no" };
     await run();
     expect(state.upsert).not.toHaveBeenCalled();
+    expect(state.welcome).not.toHaveBeenCalled();
   });
 
   it("Google con cookie marketing=yes: guarda el consentimiento y entra a la audiencia", async () => {
