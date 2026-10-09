@@ -224,6 +224,8 @@ export function revokeAnalytics(): void {
   client = null;
   initPromise = null;
   if (typeof document === "undefined") return;
+  // Con opt_out_persistence_by_default el SDK ya borra ph_* al hacer opt-out; este barrido
+  // queda como respaldo para cuando `loaded` es null (el init nunca termino).
   // Antes del 9 oct PostHog escribia su cookie en .artostudio.ai (cross_subdomain_cookie
   // por defecto); sin domain= no se borra, asi que se intenta en los dos.
   const labels = typeof location === "undefined" ? [] : location.hostname.split(".");
