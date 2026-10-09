@@ -4,13 +4,15 @@ import { NextRequest } from "next/server";
 /* H-46: el callback con un code valido redirige a `next` solo si es una ruta del
  * mismo origin. Supabase y la captacion se mockean: aqui solo importa el Location. */
 
+const session = vi.hoisted(() => ({ user: null as null | { id: string; user_metadata: Record<string, unknown> } }));
+
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: {
       exchangeCodeForSession: async (code: string) => ({
         error: code === "valido" ? null : { message: "invalid flow state" },
       }),
-      getUser: async () => ({ data: { user: null } }),
+      getUser: async () => ({ data: { user: session.user } }),
     },
   }),
 }));
@@ -23,9 +25,10 @@ vi.mock("@/lib/marketing-list", () => ({ addToMarketingList: vi.fn() }));
 
 const SITE = "https://creative.artostudio.ai";
 
-async function locationFor(query: string): Promise<string> {
+async function locationFor(query: string, cookie?: string): Promise<string> {
   const { GET } = await import("./route");
-  const res = await GET(new NextRequest(`http://127.0.0.1:3000/auth/callback?${query}`));
+  const headers = cookie ? { cookie } : undefined;
+  const res = await GET(new NextRequest(`http://127.0.0.1:3000/auth/callback?${query}`, { headers }));
   return res.headers.get("location") ?? "";
 }
 
@@ -56,5 +59,42 @@ describe("GET /auth/callback", () => {
     const location = await locationFor("code=invalido&next=%40evil.com");
     expect(new URL(location).origin).toBe(SITE);
     expect(new URL(location).pathname).toBe("/login");
+  });
+
+  describe("sin next vuelve al idioma de la persona (H-62)", () => {
+    afterAll(() => {
+      session.user = null;
+    });
+
+    it("usa el idioma del registro", async () => {
+      session.user = { id: "u1", user_metadata: { signup_locale: "es" } };
+      expect(await locationFor("code=valido")).toBe(`${SITE}/es`);
+    });
+
+    it("sin idioma de registro usa NEXT_LOCALE", async () => {
+      session.user = { id: "u1", user_metadata: {} };
+      expect(await locationFor("code=valido", "NEXT_LOCALE=es")).toBe(`${SITE}/es`);
+    });
+
+    it("un idioma que no existe no se cuela en la ruta", async () => {
+      session.user = { id: "u1", user_metadata: { signup_locale: "xx" } };
+      expect(await locationFor("code=valido", "NEXT_LOCALE=../evil")).toBe(`${SITE}/`);
+    });
+
+    it("el idioma elegido en el sitio gana al del registro", async () => {
+      session.user = { id: "u1", user_metadata: { signup_locale: "es" } };
+      expect(await locationFor("code=valido", "NEXT_LOCALE=en")).toBe(`${SITE}/en`);
+    });
+
+    it("Google: el idioma viaja en la cookie asai_signup", async () => {
+      session.user = { id: "u1", user_metadata: {} };
+      const signup = encodeURIComponent(JSON.stringify({ locale: "es" }));
+      expect(await locationFor("code=valido", `asai_signup=${signup}`)).toBe(`${SITE}/es`);
+    });
+
+    it("un next pedido gana al idioma", async () => {
+      session.user = { id: "u1", user_metadata: { signup_locale: "es" } };
+      expect(await locationFor("code=valido&next=%2Fen%2Fprompts")).toBe(`${SITE}/en/prompts`);
+    });
   });
 });

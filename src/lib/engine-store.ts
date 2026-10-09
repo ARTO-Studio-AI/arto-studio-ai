@@ -500,6 +500,8 @@ export interface AttributionEvent {
   source: string | null;
   source_detail: string | null;
   target_id: string | null;
+  /** auth.users (desde 0013, H-61). target_id es de outreach. */
+  user_id: string | null;
   user_email: string | null;
   utm_source: string | null;
   utm_medium: string | null;
