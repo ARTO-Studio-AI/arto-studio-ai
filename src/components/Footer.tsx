@@ -36,7 +36,7 @@ export default function Footer({ locale, footer }: Props) {
                 {footer.agents}
                 <Badge tone="soon">Soon</Badge>
               </Link>
-              <Link href={`/roast?lang=${locale}`} className={link}>{footer.roast}</Link>
+              <Link href={lp("/roast")} className={link}>{footer.roast}</Link>
             </div>
           </div>
 

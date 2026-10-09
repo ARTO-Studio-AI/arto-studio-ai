@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Archivo, JetBrains_Mono, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
@@ -9,29 +9,43 @@ import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
-/* Tipografia del sistema (Fase 2, tokens en globals.css). Solo los pesos que
- * usan los tokens: Archivo para headings (500/700/800), Manrope para cuerpo
- * (400/500/700) y JetBrains Mono para eyebrows, IDs, conteos y scores (400/500).
- * Las tres se cargan aqui, en el root, para que /roast, /admin y /studio
- * (fuera de [locale]) tengan las mismas variables CSS que el arbol marketing. */
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["500", "700", "800"],
+/* Tipografia (propuesta aprobada por Victor el 2026-10-07, design system de ARTO con la
+ * linea visual del sitio publico). Cuatro voces con trabajos distintos, para que haya
+ * jerarquia:
+ *   Manrope 800      titulares grandes y scores        --font-brand-display
+ *   Cormorant        palabra clave, citas, roast       --font-brand-serif (en lugar de
+ *                    Garamond                          Romana, que aun no esta en el DS)
+ *   Geist            menu, etiquetas, IDs, eyebrows    --font-brand-meta (font-mono)
+ *   Inter Tight      texto corrido                     --font-brand-text (font-sans)
+ * Sin mono: Victor pidio quitar JetBrains Mono. Se cargan en el root para que /admin y
+ * /studio compartan variables. */
+// Archivos en src/app/fonts (woff2 variables, subconjunto latin, licencia OFL). Se alojan
+// en el repo para que el build no dependa de Google Fonts: el 06 y el 07-oct una descarga
+// fallida de next/font/google tumbo un build de CI y uno de Vercel.
+const manrope = localFont({
+  variable: "--font-brand-display",
+  src: [{ path: "./fonts/Manrope-latin-var.woff2", weight: "600 800", style: "normal" }],
   display: "swap",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+const interTight = localFont({
+  variable: "--font-brand-text",
+  src: [{ path: "./fonts/InterTight-latin-var.woff2", weight: "400 700", style: "normal" }],
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const geist = localFont({
+  variable: "--font-brand-meta",
+  src: [{ path: "./fonts/Geist-latin-var.woff2", weight: "400 600", style: "normal" }],
+  display: "swap",
+});
+
+const cormorant = localFont({
+  variable: "--font-brand-serif",
+  src: [
+    { path: "./fonts/CormorantGaramond-latin-var.woff2", weight: "500 600", style: "normal" },
+    { path: "./fonts/CormorantGaramond-Italic-latin-var.woff2", weight: "500 600", style: "italic" },
+  ],
   display: "swap",
 });
 
@@ -92,7 +106,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${archivo.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${manrope.variable} ${interTight.variable} ${geist.variable} ${cormorant.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>

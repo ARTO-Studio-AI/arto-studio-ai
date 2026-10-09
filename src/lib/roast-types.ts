@@ -29,4 +29,6 @@ export interface RoastRequest {
 export interface RoastResponse {
   source: "ai" | "fallback";
   result: RoastResult;
+  /** v2 (2026-10-07): datos firmados para el enlace compartido (ver roast-share.ts). */
+  share?: { brand: string; h: string; lang: RoastLang; sig: string | null };
 }

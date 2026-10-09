@@ -48,8 +48,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
   const signedIn = Boolean(user);
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const LIBRARY_HREF = lp("/prompts");
-  // /roast lives outside [locale]; ?lang= keeps the roast in the visitor's language.
-  const ROAST_HREF = `/roast?lang=${locale}`;
+  const ROAST_HREF = lp("/roast");
 
   // Click-outside + Escape close for the Products dropdown. Hover was the
   // original model but the 8px gap between trigger and menu sat outside

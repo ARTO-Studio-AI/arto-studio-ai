@@ -10,6 +10,9 @@ import { localeOf, pageMetadata } from "@/lib/seo";
 import { getDictionary } from "@/i18n/dictionaries";
 import { Badge, Button, Card } from "@/components/ui";
 import Testimonials from "@/components/Testimonials";
+import HowItWorks from "@/components/HowItWorks";
+import BlogCover from "@/components/BlogCover";
+import { HOME_V2 } from "./home-v2-copy";
 import { PROOF_PROJECTS } from "./work/projects";
 
 /* Round a precise prompt count to a tidy marketing-friendly figure.
@@ -54,6 +57,52 @@ function SectionHead({ eyebrow, title, className = "" }: { eyebrow?: string; tit
   );
 }
 
+function ProductCard({
+  eyebrow,
+  title,
+  body,
+  bullets,
+  cta,
+  href,
+  character,
+  dark = false,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  bullets: string[];
+  cta: string;
+  href: string;
+  character?: { src: string; w: number; h: number };
+  dark?: boolean;
+}) {
+  return (
+    <div
+      className={`relative flex flex-col gap-3.5 overflow-hidden rounded-[var(--radius-lg)] border p-6 shadow-[var(--shadow-sm)] ${
+        dark ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white"
+      }`}
+    >
+      {character && (
+        <Image src={character.src} alt="" width={character.w} height={character.h} className="absolute right-4 top-4 h-auto w-16" />
+      )}
+      <p className="text-eyebrow text-[var(--accent)]">{eyebrow}</p>
+      <h3 className="pr-16 text-2xl font-extrabold leading-tight">{title}</h3>
+      <p className={`text-[15px] ${dark ? "text-zinc-300" : "text-zinc-600"}`}>{body}</p>
+      <ul className={`flex-1 space-y-1.5 text-sm ${dark ? "text-zinc-300" : "text-zinc-600"}`}>
+        {bullets.map((b) => (
+          <li key={b}>
+            <span className="mr-2 text-[var(--accent)]" aria-hidden="true">—</span>
+            {b}
+          </li>
+        ))}
+      </ul>
+      <Button href={href} variant={dark ? "secondary" : "secondary"} className="mt-1 self-start">
+        {cta}
+      </Button>
+    </div>
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata("home", localeOf(locale));
@@ -65,6 +114,7 @@ export default async function HomePage({ params }: Props) {
   const locale = localeParam as Locale;
   const dict = getDictionary(locale);
   const t = dict.home;
+  const v2 = HOME_V2[locale];
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
 
   // Pull featured prompts + live total count + latest blog posts in
@@ -95,66 +145,55 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6">
-      {/* HERO: lidera con el total real del catalogo */}
-      <section className="py-16 sm:py-24">
-        <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-eyebrow mb-4 text-zinc-500">{t.eyebrow}</p>
-            <h1 className="text-display tracking-tight">
-              {t.hero_h1_line1}
-              <br />
-              <span className="text-zinc-500">{t.hero_h1_line2}</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-lg font-medium text-zinc-800">
-              <span className="font-mono text-zinc-900">{promptsTotal}</span> {t.hero_count_label}
-            </p>
-            <p className="mt-2 max-w-xl text-base font-medium text-zinc-700">{t.hero_subbenefit}</p>
-            <p className="mt-4 max-w-xl text-base text-zinc-600">{t.hero_body}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button href={lp("/prompts")}>{t.hero_cta_free}</Button>
-              <Button href={`/roast?lang=${locale}`} variant="secondary">{t.hero_cta_roast}</Button>
-              <Button href={lp("/pricing")} variant="ghost">{t.hero_cta_pricing}</Button>
-            </div>
-            <p className="mt-3 text-xs text-zinc-500">{t.hero_microcopy}</p>
-            <p className="mt-6 border-t border-zinc-200 pt-4 font-mono text-xs text-zinc-500">{withCount(t.hero_trust)}</p>
+      {/* HERO v2 (2026-10-07): titular con palabra en serif y grafico de tres pasos que
+        * explica el producto al entrar. */}
+      <section className="grid items-center gap-10 py-14 sm:py-20 lg:grid-cols-[1.02fr_1fr] lg:gap-12">
+        <div className="grid min-w-0 gap-5">
+          <p className="text-eyebrow text-[var(--accent)]">{v2.eyebrow}</p>
+          <h1 className="text-display">
+            {v2.h1_before} <span className="serif-accent">{v2.h1_accent}</span>
+          </h1>
+          <p className="max-w-[46ch] text-lg leading-relaxed text-zinc-600">{v2.lead}</p>
+          <div className="flex flex-wrap gap-2.5">
+            <Button href={lp("/prompts")}>{v2.cta_prompts}</Button>
+            <Button href={lp("/roast")} variant="secondary">{v2.cta_roast}</Button>
           </div>
-          <div className="hidden md:block">
-            <Image
-              src="/brand/arto-character-01.png"
-              alt="ARTO"
-              width={290}
-              height={273}
-              priority
-              className="h-auto w-[260px] lg:w-[300px]"
-            />
-          </div>
+          <p className="font-mono text-xs text-zinc-400">{withCount(v2.fine)}</p>
         </div>
+        <HowItWorks locale={locale} />
       </section>
 
-      {/* LIVE: Prompt Library + Brand Roast, lo que existe hoy */}
+      {/* DISPONIBLE HOY: biblioteca, roast y el pack de la proxima semana */}
       <section className="border-t border-zinc-200 py-16">
-        <SectionHead eyebrow={t.tiers_eyebrow} title={t.tiers_h2} className="mb-10" />
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Card highlight className="flex flex-col">
-            <div className="mb-3"><Badge tone="live">{dict.nav.badge_live}</Badge></div>
-            <h3 className="text-lg font-bold">{t.tier_library_title}</h3>
-            <p className="mt-1 text-sm text-zinc-500">{t.tier_library_blurb}</p>
-            <ul className="mt-4 flex-1 space-y-1.5 text-sm text-zinc-600">
-              {t.tier_library_bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2">
-                  <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-            <Button href={lp("/prompts")} className="mt-5 w-full">{t.tier_library_cta}</Button>
-          </Card>
-          <Card className="flex flex-col">
-            <div className="mb-3"><Badge tone="live">{dict.nav.badge_free}</Badge></div>
-            <h3 className="text-lg font-bold">{t.roast_h2}</h3>
-            <p className="mt-1 flex-1 text-sm text-zinc-500">{t.roast_body}</p>
-            <Button href={`/roast?lang=${locale}`} variant="secondary" className="mt-5 w-full">{t.roast_cta}</Button>
-          </Card>
+        <SectionHead eyebrow={t.tiers_eyebrow} title={v2.tiers_h2} className="mb-10" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <ProductCard
+            eyebrow={v2.lib_eyebrow}
+            title={v2.lib_title}
+            body={withCount(v2.lib_body)}
+            bullets={v2.lib_bullets}
+            cta={v2.lib_cta}
+            href={lp("/prompts")}
+            character={{ src: "/brand/arto-character-01.png", w: 290, h: 273 }}
+          />
+          <ProductCard
+            eyebrow={v2.roast_eyebrow}
+            title={v2.roast_title}
+            body={v2.roast_body}
+            bullets={v2.roast_bullets}
+            cta={v2.roast_cta}
+            href={lp("/roast")}
+            character={{ src: "/brand/characters/character-04.png", w: 267, h: 273 }}
+          />
+          <ProductCard
+            dark
+            eyebrow={v2.pack_eyebrow}
+            title={v2.pack_title}
+            body={v2.pack_body}
+            bullets={v2.pack_bullets}
+            cta={v2.pack_cta}
+            href={lp("/skills")}
+          />
         </div>
       </section>
 
@@ -284,7 +323,7 @@ export default async function HomePage({ params }: Props) {
         <section className="border-t border-zinc-200 py-16">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
-              <SectionHead title={t.blogs_h2} />
+              <SectionHead eyebrow={t.blogs_h2} title={v2.blogs_h2} />
               <p className="mt-3 max-w-xl text-sm text-zinc-500">{t.blogs_subtitle}</p>
             </div>
             <Link href={lp("/learn")} className="whitespace-nowrap text-sm text-zinc-500 hover:text-zinc-900">
@@ -294,17 +333,9 @@ export default async function HomePage({ params }: Props) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentBlogs.map((b) => (
               <Card key={b.slug} href={lp(`/learn/${b.slug}`)} padding="none" className="group overflow-hidden">
-                <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100">
-                  <Image
-                    src={b.image_url}
-                    alt={locale === "es" ? b.title_es : b.title_en}
-                    fill
-                    sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                    className="object-cover transition group-hover:scale-[1.02]"
-                  />
-                </div>
+                <BlogCover category={b.category} locale={locale} className="border-b border-zinc-200" />
                 <div className="p-4">
-                  <h3 className="text-sm font-semibold leading-snug text-zinc-900 line-clamp-2">
+                  <h3 className="font-display text-lg font-extrabold leading-tight tracking-[-0.02em] text-zinc-900 line-clamp-2">
                     {locale === "es" ? b.title_es : b.title_en}
                   </h3>
                   <p className="mt-2 text-xs text-zinc-500 line-clamp-2">
@@ -317,32 +348,12 @@ export default async function HomePage({ params }: Props) {
         </section>
       )}
 
-      {/* COMING SOON: Skills Studio + Agents, sin waitlist ni precios que no existen */}
+      {/* CITA del metodo (serif, propuesta 2026-10-07) */}
       <section className="border-t border-zinc-200 py-16">
-        <SectionHead eyebrow={t.soon_eyebrow} title={t.soon_h2} className="mb-10" />
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Card className="flex flex-col bg-zinc-50">
-            <div className="mb-3"><Badge tone="soon">{dict.nav.badge_soon}</Badge></div>
-            <h3 className="text-lg font-bold">{t.tier_skills_title}</h3>
-            <p className="mt-1 text-sm text-zinc-500">{t.tier_skills_blurb}</p>
-            <ul className="mt-4 flex-1 space-y-1.5 text-sm text-zinc-600">
-              {t.tier_skills_bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-            <Button href={lp("/skills")} variant="ghost" className="mt-5 self-start">{t.tier_skills_cta} →</Button>
-          </Card>
-          <Card className="flex flex-col bg-zinc-50">
-            <div className="mb-3"><Badge tone="soon">{dict.nav.badge_soon}</Badge></div>
-            <h3 className="text-lg font-bold">{t.tier_agents_title}</h3>
-            <p className="mt-1 text-sm text-zinc-500">{t.tier_agents_blurb}</p>
-            <ul className="mt-4 flex-1 space-y-1.5 text-sm text-zinc-600">
-              {t.tier_agents_bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-            <Button href={lp("/agents")} variant="ghost" className="mt-5 self-start">{t.tier_agents_cta} →</Button>
-          </Card>
+        <div className="grid gap-3.5 rounded-[var(--radius-lg)] bg-[var(--paper)] p-8">
+          <p className="text-eyebrow text-zinc-500">{v2.quote_eyebrow}</p>
+          <p className="max-w-[34ch] font-serif text-[clamp(24px,3vw,34px)] font-medium italic leading-tight text-zinc-900">{v2.quote}</p>
+          <p className="font-mono text-xs text-zinc-400">{v2.quote_by}</p>
         </div>
       </section>
 
@@ -395,7 +406,7 @@ export default async function HomePage({ params }: Props) {
         <span className="accent-rule mt-4" />
         <p className="mt-4 max-w-xl text-zinc-600">{t.final_body}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button href={`/roast?lang=${locale}`}>{t.final_cta_roast}</Button>
+          <Button href={`/${locale}/roast`}>{t.final_cta_roast}</Button>
           <Button href={lp("/pricing")} variant="secondary">{t.final_cta_pricing}</Button>
         </div>
       </section>

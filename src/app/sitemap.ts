@@ -31,6 +31,7 @@ function localizedEntry(locale: Locale, path: string) {
 const STATIC_MARKETING_PATHS = [
   { path: "/", changeFrequency: "weekly" as ChangeFreq, priority: 1.0 },
   { path: "/pricing", changeFrequency: "monthly" as ChangeFreq, priority: 0.9 },
+  { path: "/roast", changeFrequency: "monthly" as ChangeFreq, priority: 0.8 },
   { path: "/skills", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
@@ -53,11 +54,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: entry.priority,
     })),
   );
-
-  // /roast stays outside the locale tree (own design + flow).
-  const standalone: SitemapEntry[] = [
-    { url: `${SITE_URL}/roast`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-  ];
 
   // /learn/[slug] — 12 hardcoded SEO landings + any Content Factory
   // blog posts that have been published, × 2 locales.
@@ -98,5 +94,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Supabase not reachable at sitemap-gen time — ship the static slice and try again on the next revalidation.
   }
 
-  return [...localized, ...standalone, ...learnEntries, ...promptEntries];
+  return [...localized, ...learnEntries, ...promptEntries];
 }

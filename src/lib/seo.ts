@@ -151,6 +151,7 @@ export type SeoPageKey =
   | "privacy"
   | "terms"
   | "login"
+  | "roast"
   | "account"
   | "collections"
   | "collection"
@@ -317,6 +318,21 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
         title: "Términos de servicio · ARTO Studio AI",
         description:
           "Términos que rigen el uso de ARTO Studio AI: cuentas, uso aceptable, suscripciones y licencia de los prompts.",
+      },
+    },
+  },
+  roast: {
+    path: "/roast",
+    copy: {
+      en: {
+        title: "Brand Roast: an honest, free brand analysis · ARTO Studio AI",
+        description:
+          "We read your website and score your brand on Strategy, Creativity, Narrative and Digital with ARTO's methodology, a brand agency since 2009. Free, no signup.",
+      },
+      es: {
+        title: "Brand Roast: análisis honesto de tu marca, gratis · ARTO Studio AI",
+        description:
+          "Leemos tu sitio y calificamos tu marca en Estrategia, Creatividad, Narrativa y Digital con la metodología de ARTO, agencia de marca desde 2009. Gratis, sin registro.",
       },
     },
   },

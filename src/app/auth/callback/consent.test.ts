@@ -52,10 +52,8 @@ vi.mock("@/lib/supabase/admin", () => ({
 }));
 vi.mock("@/lib/prompt-limit", () => ({ adoptOpens: vi.fn() }));
 vi.mock("@/lib/analytics-server", () => ({ captureServer: vi.fn() }));
-vi.mock("@/lib/resend-audience", () => ({
-  splitName: () => ({}),
-  upsertAudienceContact: state.upsert,
-}));
+vi.mock("@/lib/resend-audience", () => ({ splitName: () => ({}) }));
+vi.mock("@/lib/marketing-list", () => ({ addToMarketingList: state.upsert }));
 
 const SITE = "https://creative.artostudio.ai";
 process.env.NEXT_PUBLIC_SITE_URL = SITE;

@@ -8,7 +8,8 @@ import type { RoastLang, RoastResult } from "@/lib/roast-types";
 import { track } from "@/lib/analytics";
 
 /* Brand Roast v2 (2026-10-06)
- * - Bilingue: espanol por defecto, ingles con ?lang=en o por el navegador.
+ * - Vive en /[locale]/roast dentro del layout de marketing: mismo menu y footer que el
+ *   resto del sitio (pedido de Victor). El idioma viene de la ruta.
  * - Nunca muestra un roast de plantilla. Antes, si el API fallaba (504 con cualquier
  *   URL), la pagina inventaba un roast con frases al azar y lo presentaba como
  *   analisis; lo mismo en los enlaces compartidos y en el historial. Ahora hay un
@@ -28,6 +29,9 @@ const T = {
     h1: "Brand Roast",
     hero: "Un análisis honesto de tu marca, calificado en Estrategia, Creatividad, Narrativa y Digital, con la metodología con la que ARTO trabaja marcas desde 2009.",
     hero_sub: "Sin rodeos. Sin consejos genéricos. Leemos tu sitio y te decimos lo que nadie se atreve.",
+    steps: ["Escribe tu marca y su sitio", "Leemos tu sitio con la metodología de ARTO", "Recibe tu score y compártelo"],
+    preview_caption: "Así se ve tu resultado",
+    share_preview: "Así se verá en redes",
     form_h2: "Cuéntanos de tu marca",
     form_sub: "Entre más contexto, más afilado el roast. Con la URL leemos tu sitio real.",
     brand: "Nombre de la marca *",
@@ -61,7 +65,8 @@ const T = {
     copy: "Copiar enlace",
     copied: "¡Copiado!",
     download: "Descarga la imagen para Instagram",
-    share_text: (b: string, s: number) => `Mi marca "${b}" sacó ${s}/10 en el Brand Roast de ARTO. ¿La tuya lo hace mejor?`,
+    share_text: (b: string, s: number) => `Mi marca "${b}" sacó ${s}/10 en el Brand Roast de ARTO.`,
+    share_cta: "¿Y la tuya? Roastéala gratis aquí:",
     gate_h: "Desbloquea el reporte completo",
     gate_body: "Déjanos tu correo para ver el análisis por pilar, el veredicto, la evidencia y por dónde empezar.",
     gate_ph: "tu@empresa.com",
@@ -96,6 +101,9 @@ const T = {
     h1: "Brand Roast",
     hero: "An honest analysis of your brand, scored across Strategy, Creativity, Narrative and Digital, with the methodology ARTO has used on brands since 2009.",
     hero_sub: "No sugarcoating. No generic advice. We read your site and tell you what nobody else will.",
+    steps: ["Enter your brand and website", "We read your site with ARTO's methodology", "Get your score and share it"],
+    preview_caption: "This is what your result looks like",
+    share_preview: "How it will look on social",
     form_h2: "Tell us about your brand",
     form_sub: "The more context, the sharper the roast. With the URL we read your actual site.",
     brand: "Brand name *",
@@ -129,7 +137,8 @@ const T = {
     copy: "Copy link",
     copied: "Copied!",
     download: "Download image for Instagram",
-    share_text: (b: string, s: number) => `My brand "${b}" scored ${s}/10 on ARTO's Brand Roast. Think yours can do better?`,
+    share_text: (b: string, s: number) => `My brand "${b}" scored ${s}/10 on ARTO's Brand Roast.`,
+    share_cta: "What about yours? Roast it free here:",
     gate_h: "Unlock your full report",
     gate_body: "Enter your email to see the breakdown by pillar, the verdict, the evidence and where to start.",
     gate_ph: "you@company.com",
@@ -299,7 +308,7 @@ function useCountUp(target: number, duration = 1200) {
 
 function ScoreBar({ label, score, roast, delay = 0 }: { label: string; score: number; roast?: string; delay?: number }) {
   const pct = (score / 10) * 100;
-  const color = score >= 7 ? "bg-emerald-500" : score >= 5 ? "bg-amber-500" : "bg-red-500";
+  const color = scoreVar(score);
   const [visible, setVisible] = useState(false);
   const [barWidth, setBarWidth] = useState(0);
   const displayScore = useCountUp(visible ? score : 0);
@@ -315,35 +324,87 @@ function ScoreBar({ label, score, roast, delay = 0 }: { label: string; score: nu
 
   return (
     <div
-      className={`rounded-xl border border-border bg-white p-6 transition-all duration-500 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      className={`rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 shadow-[var(--shadow-sm)] transition-all duration-500 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-widest">{label}</h3>
-        <span className="text-2xl font-bold tracking-tight">{displayScore}/10</span>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-eyebrow text-zinc-500">{label}</h3>
+        <span className="font-display text-3xl font-extrabold tracking-[-0.03em] tabular-nums">
+          {displayScore}
+          <span className="ml-0.5 font-mono text-sm font-normal text-zinc-400">/10</span>
+        </span>
       </div>
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
-        <div
-          className={`h-full rounded-full ${color} transition-all duration-1000 ease-out`}
-          style={{ width: `${barWidth}%` }}
-        />
+        <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${barWidth}%`, background: color }} />
       </div>
-      {roast && <p className="mt-4 text-sm leading-relaxed text-muted">{roast}</p>}
+      {roast && <p className="mt-4 text-[15px] leading-relaxed text-zinc-600">{roast}</p>}
     </div>
   );
 }
 
-/* ── Overall score display (animated) ────────────────── */
+/* ── Tarjeta del resultado (2026-10-07) ──────────────────
+ * El "wow moment": la misma composicion que la imagen para redes (papel, personaje,
+ * score enorme, frase en serif y los cuatro pilares), para que lo que ves en pantalla
+ * sea lo que compartes. */
 
-function OverallScoreDisplay({ score }: { score: number }) {
-  const animated = useCountUp(score, 1500);
-  const color = score >= 7 ? "text-emerald-500" : score >= 5 ? "text-amber-500" : "text-red-500";
+function scoreVar(score: number): string {
+  return score >= 7 ? "var(--ok)" : score >= 5 ? "var(--warn)" : "var(--bad)";
+}
 
+function ScoreCard({ brand, industry, result, t }: { brand: string; industry?: string; result: RoastResult; t: Dict }) {
+  const animated = useCountUp(result.overall, 1500);
+  const pillars: Array<[string, number]> = [
+    [t.pillars.strategy, result.strategy.score],
+    [t.pillars.creativity, result.creativity.score],
+    [t.pillars.narrative, result.narrative.score],
+    [t.pillars.digital, result.digital.score],
+  ];
   return (
-    <div className="mt-6 inline-flex items-baseline gap-1">
-      <span className={`text-7xl font-bold tracking-tight ${color}`}>{animated}</span>
-      <span className="text-2xl font-bold text-zinc-300">/10</span>
+    <div className="relative overflow-hidden rounded-[var(--radius-lg)] bg-[var(--paper)] p-6 sm:p-10">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(24,24,27,0.09)_1px,transparent_1px)] [background-size:18px_18px]" />
+      <Image
+        src="/brand/characters/character-03.png"
+        alt=""
+        width={280}
+        height={183}
+        className="absolute right-5 top-5 h-auto w-20 sm:right-8 sm:top-8 sm:w-32"
+      />
+      <div className="relative grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-end">
+        <div className="min-w-0">
+          <p className="text-eyebrow text-zinc-500">{t.score_for}</p>
+          <h2 className="mt-2 pr-24 text-4xl font-extrabold leading-none sm:text-5xl">{brand}</h2>
+          {industry && <p className="mt-2 font-mono text-xs uppercase tracking-[0.14em] text-zinc-500">{industry}</p>}
+          <div className="mt-4 flex items-end gap-2">
+            <span
+              className="font-display text-[112px] font-extrabold leading-[0.85] tracking-[-0.05em] tabular-nums sm:text-[168px]"
+              style={{ color: scoreVar(result.overall) }}
+            >
+              {animated}
+            </span>
+            <span className="mb-3 font-mono text-2xl text-zinc-400 sm:mb-5">/10</span>
+          </div>
+        </div>
+        <div className="grid min-w-0 gap-6 lg:pt-20">
+          {result.headline && (
+            <p className="font-serif text-2xl font-medium italic leading-snug text-zinc-900 sm:text-[32px]">“{result.headline}”</p>
+          )}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+            {pillars.map(([label, value]) => (
+              <div key={label} className="grid gap-1.5">
+                <span className="text-eyebrow text-zinc-500">{label}</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="block h-2 flex-1 overflow-hidden rounded-full bg-[#e4e0d8]">
+                    <span className="block h-full rounded-full" style={{ width: `${Math.max(4, value * 10)}%`, background: scoreVar(value) }} />
+                  </span>
+                  <span className="font-display text-xl font-extrabold tabular-nums">{value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="font-mono text-[11px] text-zinc-500">{t.weighted}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -363,7 +424,6 @@ interface RoastHistoryEntry {
 }
 
 const HISTORY_KEY = "arto_roast_history";
-const LANG_KEY = "arto_roast_lang";
 
 function loadHistory(): RoastHistoryEntry[] {
   try {
@@ -405,23 +465,34 @@ function storageSet(key: string, value: string) {
 
 /* ── Share helpers ───────────────────────────────────── */
 
-function buildShareUrl(brand: string, result: RoastResult, lang: Lang): string {
+type ShareInfo = { brand: string; h: string; lang: Lang; sig: string | null };
+
+function shareParams(brand: string, result: RoastResult, share: ShareInfo | null, lang: Lang): URLSearchParams {
   const params = new URLSearchParams({
-    brand,
+    brand: share?.brand ?? brand,
     score: String(result.overall),
     s: String(result.strategy.score),
     c: String(result.creativity.score),
     n: String(result.narrative.score),
     d: String(result.digital.score),
-    lang,
+    lang: share?.lang ?? lang,
   });
-  return `${window.location.origin}/roast?${params.toString()}`;
+  // La frase solo viaja con la firma del servidor (roast-share.ts, H-60).
+  if (share?.sig && share.h) {
+    params.set("h", share.h);
+    params.set("sig", share.sig);
+  }
+  return params;
 }
 
-/* El enlace compartido solo trae calificaciones. No se inventa ningun texto de
- * analisis, y no lleva la frase de cabecera: sin firma, cualquiera podria fabricar
- * un enlace con una frase ofensiva bajo la marca de ARTO (auditoria de Fable). */
-function parseSharedResult(params: URLSearchParams): { brand: string; result: RoastResult } | null {
+function buildShareUrl(brand: string, result: RoastResult, share: ShareInfo | null, lang: Lang): string {
+  return `${window.location.origin}/${lang}/roast?${shareParams(brand, result, share, lang).toString()}`;
+}
+
+/* El enlace compartido trae calificaciones y, si la firma del servidor es valida, la
+ * frase del roast (la verifica page.tsx y llega como `verifiedHeadline`). No se inventa
+ * ningun texto de analisis. */
+function parseSharedResult(params: URLSearchParams, verifiedHeadline?: string): { brand: string; result: RoastResult } | null {
   const brand = params.get("brand");
   const nums = ["score", "s", "c", "n", "d"].map((k) => params.get(k));
   if (!brand || nums.some((v) => v === null)) return null;
@@ -437,6 +508,7 @@ function parseSharedResult(params: URLSearchParams): { brand: string; result: Ro
       digital: { score: d, roast: "" },
       verdict: "",
       improvements: [],
+      headline: verifiedHeadline || undefined,
     },
   };
 }
@@ -460,11 +532,11 @@ async function downloadImage(url: string, filename: string) {
 
 type ShareChannel = "x" | "linkedin" | "whatsapp" | "copy_link" | "download_square" | "download_story";
 
-function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: RoastResult; lang: Lang; t: Dict }) {
+function SocialSharePanel({ brand, result, share, lang, t }: { brand: string; result: RoastResult; share: ShareInfo | null; lang: Lang; t: Dict }) {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = buildShareUrl(brand, result, lang);
-  const shareText = result.headline ? `${t.share_text(brand, result.overall)} "${result.headline}"` : t.share_text(brand, result.overall);
+  const shareUrl = buildShareUrl(brand, result, share, lang);
+  const shareText = [t.share_text(brand, result.overall), result.headline ? `“${result.headline}”` : "", t.share_cta].filter(Boolean).join(" ");
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
 
@@ -522,12 +594,13 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
     },
   ];
 
-  const ogBase = `/roast/og?brand=${encodeURIComponent(brand)}&score=${result.overall}&s=${result.strategy.score}&c=${result.creativity.score}&n=${result.narrative.score}&d=${result.digital.score}`;
+  const ogBase = `/roast/og?${shareParams(brand, result, share, lang).toString()}`;
 
   return (
-    <div className="mt-6 flex flex-col items-center gap-4">
-      <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">{t.share_label}</p>
-      <div className="flex flex-wrap justify-center gap-2">
+    <div className="mt-6 grid gap-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 sm:grid-cols-[1fr_auto] sm:items-center">
+      <div className="grid gap-4">
+      <p className="text-eyebrow text-[var(--accent)]">{t.share_label}</p>
+      <div className="flex flex-wrap gap-2">
         {socials.map((s) => (
           <a
             key={s.label}
@@ -535,7 +608,7 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => shared(s.channel)}
-            className={`inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors ${s.color}`}
+            className={`inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-border px-4 py-2 text-sm font-medium transition-colors ${s.color}`}
           >
             {s.icon}
             {s.label}
@@ -544,7 +617,7 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
         <button
           type="button"
           onClick={copyLink}
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100"
+          className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100"
         >
           {copied ? (
             <>
@@ -562,8 +635,8 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
         </button>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        <p className="w-full text-center text-xs text-zinc-400">{t.download}</p>
+      <div className="flex flex-wrap gap-2">
+        <p className="w-full font-mono text-xs text-zinc-400">{t.download}</p>
         {(
           [
             ["download_square", "square", "Feed 1:1"],
@@ -577,7 +650,7 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
               shared(channel);
               downloadImage(`${ogBase}&format=${format}`, `roast-${brand}-${format}.png`);
             }}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-50"
+            className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-border px-4 py-2 text-xs font-medium transition-colors hover:bg-zinc-50"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
@@ -586,6 +659,18 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
           </button>
         ))}
       </div>
+      </div>
+      <figure className="grid justify-items-center gap-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${ogBase}&format=square`}
+          alt={t.share_preview}
+          width={200}
+          height={200}
+          className="h-auto w-44 rounded-[var(--radius-md)] border border-zinc-200 shadow-[var(--shadow-md)] sm:w-52"
+        />
+        <figcaption className="font-mono text-[11px] text-zinc-400">{t.share_preview}</figcaption>
+      </figure>
     </div>
   );
 }
@@ -594,15 +679,15 @@ function SocialSharePanel({ brand, result, lang, t }: { brand: string; result: R
 
 type ErrorKind = "failed" | "rate";
 
-function BrandRoastInner() {
+function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadline?: string }) {
   const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>("es");
   const [brandName, setBrandName] = useState("");
   const [industry, setIndustry] = useState("");
   const [companySize, setCompanySize] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<RoastResult | null>(null);
+  const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<ErrorKind | null>(null);
   const [stage, setStage] = useState(0);
@@ -612,29 +697,8 @@ function BrandRoastInner() {
   const [emailUnlocked, setEmailUnlocked] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [emailMarketing, setEmailMarketing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [history, setHistory] = useState<RoastHistoryEntry[]>([]);
   const t = T[lang];
-
-  // Idioma: ?lang= manda; si no, lo ultimo que eligio la persona; si no, el navegador.
-  useEffect(() => {
-    const fromUrl = searchParams.get("lang");
-    const stored = storageGet(LANG_KEY);
-    const nav = typeof navigator !== "undefined" ? navigator.language.toLowerCase() : "es";
-    const next: Lang =
-      fromUrl === "en" || fromUrl === "es"
-        ? fromUrl
-        : stored === "en" || stored === "es"
-        ? stored
-        : nav.startsWith("en")
-        ? "en"
-        : "es";
-    setLang(next);
-  }, [searchParams]);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
 
   useEffect(() => {
     const savedEmail = storageGet("arto_roast_email");
@@ -646,18 +710,13 @@ function BrandRoastInner() {
   }, []);
 
   useEffect(() => {
-    const shared = parseSharedResult(searchParams);
+    const shared = parseSharedResult(searchParams, verifiedHeadline);
     if (shared) {
       setBrandName(shared.brand);
       setResult(shared.result);
       setIsSharedView(true);
     }
-  }, [searchParams]);
-
-  function switchLang(next: Lang) {
-    setLang(next);
-    storageSet(LANG_KEY, next);
-  }
+  }, [searchParams, verifiedHeadline]);
 
   function runRoast() {
     if (!brandName.trim() || !industry.trim()) return;
@@ -700,6 +759,7 @@ function BrandRoastInner() {
         const roastResult = normalizeRoastResult(data?.result);
         if (!roastResult) throw new Error("invalid");
         setResult(roastResult);
+        setShareInfo(data?.share && typeof data.share === "object" ? (data.share as ShareInfo) : null);
         track("roast_completed", { industry, overall: roastResult.overall, source: "ai" });
         setHistory(
           saveToHistory({
@@ -743,118 +803,51 @@ function BrandRoastInner() {
     setDescription("");
     setStage(0);
     setIsSharedView(false);
-    window.history.replaceState({}, "", `/roast?lang=${lang}`);
+    window.history.replaceState({}, "", `/${lang}/roast`);
   }
 
   const contactHref = `mailto:contact@artogroup.com?subject=${encodeURIComponent(
     `${t.contact_subject}${brandName ? ` (${brandName})` : ""}`
   )}`;
 
-  const LangToggle = (
-    <div className="inline-flex rounded-full border border-border p-0.5 text-xs font-medium" role="group" aria-label="Idioma / Language">
-      {(["es", "en"] as const).map((l) => (
-        <button
-          key={l}
-          type="button"
-          onClick={() => switchLang(l)}
-          aria-pressed={lang === l}
-          className={`rounded-full px-3 py-1 transition-colors ${lang === l ? "bg-foreground text-white" : "text-muted hover:text-foreground"}`}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  );
-
   return (
     <div className="flex flex-col flex-1 bg-white">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-white/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href={`/${lang}`} className="flex items-center gap-3">
-            <Image src="/brand/arto-logo-black.png" alt="ARTO" width={80} height={24} className="h-6 w-auto" />
-            <span className="text-sm font-medium tracking-wide text-muted">Creative 24/7</span>
-          </Link>
-
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href={`/${lang}/work`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_work}
-            </Link>
-            <Link href={`/${lang}/prompts`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_prompts}
-            </Link>
-            <Link href={`/${lang}/pricing`} className="text-sm text-muted hover:text-foreground transition-colors">
-              {t.nav_pricing}
-            </Link>
-            {LangToggle}
-            <Link
-              href={`/${lang}/prompts`}
-              className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-            >
-              {t.nav_cta}
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3 md:hidden">
-            {LangToggle}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-zinc-100"
-              aria-label="Menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="4" y1="8" x2="20" y2="8" />
-                    <line x1="4" y1="16" x2="20" y2="16" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="border-t border-border px-6 py-4 md:hidden">
-            <div className="flex flex-col gap-4">
-              <Link href={`/${lang}/work`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_work}
-              </Link>
-              <Link href={`/${lang}/prompts`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_prompts}
-              </Link>
-              <Link href={`/${lang}/pricing`} className="text-sm text-muted hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                {t.nav_pricing}
-              </Link>
-              <Link
-                href={`/${lang}/prompts`}
-                className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t.nav_cta}
-              </Link>
+      <div className="flex flex-1 flex-col">
+        {/* Hero (2026-10-07): estilo del sitio, con la vista previa del resultado. Se oculta
+          * cuando ya hay resultado para que el score quede arriba. */}
+        {!result && !analyzing && (
+          <section className="border-b border-zinc-200">
+            <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_1fr]">
+              <div className="grid min-w-0 gap-5">
+                <p className="text-eyebrow text-[var(--accent)]">{t.eyebrow}</p>
+                <h1 className="text-display">
+                  Brand <span className="serif-accent">Roast.</span>
+                </h1>
+                <p className="max-w-[48ch] text-lg leading-relaxed text-zinc-600">{t.hero}</p>
+                <ol className="grid gap-2.5">
+                  {t.steps.map((step, i) => (
+                    <li key={step} className="flex items-center gap-3 text-[15px] text-zinc-700">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-zinc-900 font-mono text-xs text-white">{i + 1}</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+                <p className="font-mono text-xs text-zinc-400">{t.hero_sub}</p>
+              </div>
+              <figure className="grid justify-items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/roast/og?format=square&lang=${lang}&brand=${encodeURIComponent(lang === "es" ? "Tu marca" : "Your brand")}&score=6.4&s=7&c=6&n=6&d=6`}
+                  alt={t.preview_caption}
+                  width={480}
+                  height={480}
+                  className="h-auto w-full max-w-[420px] -rotate-2 rounded-[var(--radius-lg)] border border-zinc-200 shadow-[var(--shadow-md)]"
+                />
+                <figcaption className="font-mono text-xs text-zinc-400">{t.preview_caption}</figcaption>
+              </figure>
             </div>
-          </div>
+          </section>
         )}
-      </nav>
-
-      <main className="flex flex-1 flex-col">
-        {/* Hero */}
-        <section className="border-b border-border bg-foreground text-white">
-          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-24">
-            <p className="mb-3 text-sm font-medium uppercase tracking-widest text-zinc-400">{t.eyebrow}</p>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl">{t.h1}</h1>
-            <p className="mt-4 max-w-xl text-lg leading-relaxed text-zinc-400">{t.hero}</p>
-            <p className="mt-2 text-sm text-zinc-500">{t.hero_sub}</p>
-          </div>
-        </section>
 
         <section className="flex-1">
           <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-20">
@@ -956,7 +949,7 @@ function BrandRoastInner() {
 
                   <button
                     type="submit"
-                    className="w-full rounded-full bg-foreground px-8 py-4 text-base font-medium text-white transition-colors hover:bg-zinc-800"
+                    className="w-full rounded-[var(--radius-sm)] bg-foreground px-8 py-4 text-base font-medium text-white transition-colors hover:bg-zinc-800"
                   >
                     {t.submit}
                   </button>
@@ -965,7 +958,7 @@ function BrandRoastInner() {
 
                 {history.length > 0 && (
                   <div className="mt-12 border-t border-border pt-10">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-muted">{t.history}</h3>
+                    <h3 className="text-eyebrow text-zinc-500">{t.history}</h3>
                     <p className="mt-1 text-xs text-zinc-400">{t.history_hint}</p>
                     <div className="mt-4 space-y-3">
                       {history.map((entry, i) => {
@@ -1007,7 +1000,7 @@ function BrandRoastInner() {
             {/* Analyzing */}
             {analyzing && (
               <div className="mx-auto max-w-2xl text-center py-12 md:py-20 animate-fade-in" aria-live="polite">
-                <div className="mx-auto mb-8 h-16 w-16 animate-spin rounded-full border-4 border-zinc-200 border-t-foreground" />
+                <Image src="/brand/characters/character-03.png" alt="" width={280} height={183} className="mx-auto mb-8 h-auto w-28 animate-pulse" />
                 <h2 className="text-2xl font-bold tracking-tight">
                   {t.analyzing} {brandName}...
                 </h2>
@@ -1026,7 +1019,7 @@ function BrandRoastInner() {
 
             {/* Error */}
             {error && !analyzing && (
-              <div className="mx-auto max-w-lg rounded-2xl border border-border bg-zinc-50 p-8 text-center md:p-10" role="alert">
+              <div className="mx-auto max-w-lg rounded-[var(--radius-lg)] border border-border bg-zinc-50 p-8 text-center md:p-10" role="alert">
                 <h2 className="text-xl font-bold tracking-tight">{t.err_title}</h2>
                 <p className="mt-2 text-sm text-muted">{error === "rate" ? t.err_rate : t.err_body}</p>
                 <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -1034,7 +1027,7 @@ function BrandRoastInner() {
                     <button
                       type="button"
                       onClick={runRoast}
-                      className="rounded-full bg-foreground px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+                      className="rounded-[var(--radius-sm)] bg-foreground px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
                     >
                       {t.err_retry}
                     </button>
@@ -1042,7 +1035,7 @@ function BrandRoastInner() {
                   <button
                     type="button"
                     onClick={() => setError(null)}
-                    className="rounded-full border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-white"
+                    className="rounded-[var(--radius-sm)] border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-white"
                   >
                     {t.err_back}
                   </button>
@@ -1053,19 +1046,14 @@ function BrandRoastInner() {
             {/* Results */}
             {result && !analyzing && (
               <div className="animate-fade-in">
-                <div className="mb-12 text-center">
-                  <p className="text-sm font-medium uppercase tracking-widest text-muted">{t.score_for}</p>
-                  <h2 className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">{brandName}</h2>
-                  {!isSharedView && <p className="mt-1 text-sm text-muted">{industryLabel(industry, lang)}</p>}
-                  <OverallScoreDisplay score={result.overall} />
-                  {result.headline && (
-                    <p className="mx-auto mt-6 max-w-2xl text-xl font-semibold leading-snug tracking-tight md:text-2xl">
-                      {result.headline}
-                    </p>
-                  )}
-                  <p className="mx-auto mt-3 max-w-md text-sm text-muted">{t.weighted}</p>
-                  {!isSharedView && <SocialSharePanel brand={brandName} result={result} lang={lang} t={t} />}
-                </div>
+                <ScoreCard
+                  brand={brandName}
+                  industry={!isSharedView ? industryLabel(industry, lang) : undefined}
+                  result={result}
+                  t={t}
+                />
+                {!isSharedView && <SocialSharePanel brand={brandName} result={result} share={shareInfo} lang={lang} t={t} />}
+                <div className="mb-10" />
 
                 {isSharedView ? (
                   <>
@@ -1079,7 +1067,7 @@ function BrandRoastInner() {
                   </>
                 ) : !emailUnlocked ? (
                   <div className="mx-auto max-w-lg">
-                    <div className="rounded-2xl border border-border bg-zinc-50 p-8 text-center md:p-10">
+                    <div className="rounded-[var(--radius-lg)] border border-border bg-zinc-50 p-8 text-center md:p-10">
                       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-foreground">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
@@ -1124,7 +1112,7 @@ function BrandRoastInner() {
                           />
                           <button
                             type="submit"
-                            className="rounded-full bg-foreground px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 whitespace-nowrap"
+                            className="rounded-[var(--radius-sm)] bg-foreground px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 whitespace-nowrap"
                           >
                             {t.gate_btn}
                           </button>
@@ -1167,14 +1155,14 @@ function BrandRoastInner() {
                       <ScoreBar label={t.pillars.digital} score={result.digital.score} roast={result.digital.roast} delay={450} />
                     </div>
 
-                    <div className="mt-12 rounded-2xl border border-border bg-zinc-50 p-8 md:p-10">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted">{t.verdict}</h3>
+                    <div className="mt-12 rounded-[var(--radius-lg)] bg-[var(--paper)] p-8 md:p-10">
+                      <h3 className="text-eyebrow text-zinc-500">{t.verdict}</h3>
                       <p className="mt-4 text-lg font-medium leading-relaxed">{result.verdict}</p>
                     </div>
 
                     {result.evidence && result.evidence.length > 0 && (
-                      <div className="mt-8 rounded-2xl border border-border p-8 md:p-10">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted">{t.evidence}</h3>
+                      <div className="mt-8 rounded-[var(--radius-lg)] border border-border p-8 md:p-10">
+                        <h3 className="text-eyebrow text-zinc-500">{t.evidence}</h3>
                         <ul className="mt-4 space-y-3">
                           {result.evidence.map((ev, i) => (
                             <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-muted">
@@ -1186,8 +1174,8 @@ function BrandRoastInner() {
                       </div>
                     )}
 
-                    <div className="mt-8 rounded-2xl border border-border p-8 md:p-10">
-                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted">{t.start}</h3>
+                    <div className="mt-8 rounded-[var(--radius-lg)] border border-border p-8 md:p-10">
+                      <h3 className="text-eyebrow text-zinc-500">{t.start}</h3>
                       <ul className="mt-4 space-y-4">
                         {result.improvements.map((imp, i) => (
                           <li key={i} className="flex items-start gap-3">
@@ -1203,7 +1191,7 @@ function BrandRoastInner() {
                 )}
 
                 {/* CTA */}
-                <div className="mt-12 rounded-2xl bg-foreground p-8 text-center text-white md:p-12">
+                <div className="mt-12 rounded-[var(--radius-lg)] bg-foreground p-8 text-center text-white md:p-12">
                   <h3 className="text-2xl font-bold tracking-tight md:text-3xl">{isSharedView ? t.cta_shared_h : t.cta_h}</h3>
                   <p className="mx-auto mt-4 max-w-lg text-zinc-400">{isSharedView ? t.cta_shared_body : t.cta_body}</p>
                   <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -1211,7 +1199,7 @@ function BrandRoastInner() {
                       <button
                         type="button"
                         onClick={handleReset}
-                        className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-medium text-foreground transition-colors hover:bg-zinc-100"
+                        className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-white px-8 py-3.5 text-base font-medium text-foreground transition-colors hover:bg-zinc-100"
                       >
                         {t.cta_shared_btn}
                       </button>
@@ -1219,13 +1207,13 @@ function BrandRoastInner() {
                       <>
                         <Link
                           href={`/${lang}/prompts`}
-                          className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-medium text-foreground transition-colors hover:bg-zinc-100"
+                          className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-white px-8 py-3.5 text-base font-medium text-foreground transition-colors hover:bg-zinc-100"
                         >
                           {t.cta_prompts}
                         </Link>
                         <a
                           href={contactHref}
-                          className="inline-flex items-center justify-center rounded-full border border-zinc-600 px-8 py-3.5 text-base font-medium transition-colors hover:bg-zinc-800"
+                          className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-zinc-600 px-8 py-3.5 text-base font-medium transition-colors hover:bg-zinc-800"
                         >
                           {t.cta_contact}
                         </a>
@@ -1244,19 +1232,7 @@ function BrandRoastInner() {
             )}
           </div>
         </section>
-      </main>
-
-      <footer className="border-t border-border bg-foreground text-white">
-        <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <Image src="/brand/arto-logo-black.png" alt="ARTO" width={60} height={18} className="h-4 w-auto invert" />
-              <span className="text-xs tracking-wide text-zinc-500">Creative 24/7</span>
-            </div>
-            <p className="text-xs text-zinc-500">{t.footer}</p>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
@@ -1286,9 +1262,9 @@ class RoastErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
             type="button"
             onClick={() => {
               this.setState({ hasError: false, error: "" });
-              window.location.href = "/roast";
+              window.location.href = "/es/roast";
             }}
-            className="mt-6 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-white"
+            className="mt-6 rounded-[var(--radius-sm)] bg-foreground px-6 py-3 text-sm font-medium text-white"
           >
             {T.es.crash_btn} / {T.en.crash_btn}
           </button>
@@ -1299,11 +1275,11 @@ class RoastErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
-export default function BrandRoast() {
+export default function BrandRoast({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadline?: string }) {
   return (
     <RoastErrorBoundary>
       <Suspense fallback={null}>
-        <BrandRoastInner />
+        <BrandRoastInner lang={lang} verifiedHeadline={verifiedHeadline} />
       </Suspense>
     </RoastErrorBoundary>
   );

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import BlogCover from "@/components/BlogCover";
 import { notFound } from "next/navigation";
 import { LEARN_PAGES, type LearnPageConfig } from "@/lib/learn-config";
 import { getLearnPageBySlug } from "@/lib/learn-pages";
@@ -96,6 +96,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/learn/${page.slug}`,
     title: withBrand(pickTitle(page, locale)),
     description: clampDescription(pickMeta(page, locale)),
+    // Imagen propia por guia (opengraph-image.tsx del segmento, 2026-10-07).
+    ogImage: null,
   });
 }
 
@@ -122,21 +124,8 @@ export default async function LearnSlugPage({ params }: Props) {
       <h1 className="text-h1 mt-6">{pickHero(page, locale)}</h1>
       <span className="accent-rule mt-4" />
 
-      {/* Hero image — content_items blog_posts always carry an image_url
-        * written by the publisher. Hardcoded vertical guides usually
-        * don't, so we only render this block when the field is set. */}
-      {page.image_url && (
-        <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
-          <Image
-            src={page.image_url}
-            alt={pickHero(page, locale)}
-            fill
-            sizes="(min-width: 1024px) 768px, 100vw"
-            priority
-            className="object-cover"
-          />
-        </div>
-      )}
+      {/* Portada de marca por vertical (2026-10-07): sustituye la imagen generada. */}
+      <BlogCover category={page.category} locale={locale} size="hero" className="mt-8 rounded-[var(--radius-lg)] border border-zinc-200" />
 
       <p className="mt-8 text-zinc-700">{pickIntro(page, locale)}</p>
 
