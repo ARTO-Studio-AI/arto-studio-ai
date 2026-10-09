@@ -61,7 +61,7 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
       .from("attribution_events")
       .select("id")
       .eq("event_type", "signup")
-      .eq("target_id", user.id)
+      .eq("user_id", user.id)
       .limit(1)
       .maybeSingle();
     isSignup = !existing;
@@ -131,11 +131,13 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
     }
   }
 
+  // H-61 (9 oct 2026): el usuario va en user_id (FK a auth.users). target_id es de
+  // outreach_targets; con user.id ahi el insert fallaba siempre y la tabla quedo vacia.
   const { error: attrError } = await admin.from("attribution_events").insert({
     event_type: "signup",
     source: provider,
     source_detail: signupSource,
-    target_id: user.id,
+    user_id: user.id,
     user_email: user.email ?? null,
     utm_source: utm.utm_source ?? null,
     utm_medium: utm.utm_medium ?? null,
@@ -177,6 +179,17 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   }
 }
 
+/* Destino sin `next` (H-62, 9 oct 2026): el idioma del registro o el que eligio en el
+ * sitio. Con "/" el proxy decidia por Accept-Language y quien se registraba en /es
+ * aterrizaba en /en. */
+function homeFor(request: NextRequest, user: User | null): string {
+  const fromSignup = cleanValue(user?.user_metadata?.signup_locale);
+  if (isLocale(fromSignup)) return `/${fromSignup}`;
+  const fromCookie = request.cookies.get("NEXT_LOCALE")?.value;
+  if (isLocale(fromCookie)) return `/${fromCookie}`;
+  return "/";
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -187,12 +200,7 @@ export async function GET(request: NextRequest) {
   // H-46 (13 sep 2026): `next` viene de la peticion. Sin validar, `next=@evil.com`
   // o `next=.evil.com` sacaban al usuario del dominio ya con sesion iniciada.
   // El destino llega por query (flujos viejos) o por la cookie asai_next del registro free.
-  const next = safeNextPath(
-    url.searchParams.get("next") ?? request.cookies.get(NEXT_COOKIE)?.value ?? null,
-    "/",
-    siteUrl,
-  );
-  const target = `${siteUrl}${next}`;
+  const requestedNext = url.searchParams.get("next") ?? request.cookies.get(NEXT_COOKIE)?.value ?? null;
 
   if (code) {
     const sb = await createClient();
@@ -215,7 +223,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      const res = NextResponse.redirect(target);
+      const next = safeNextPath(requestedNext, homeFor(request, user), siteUrl);
+      const res = NextResponse.redirect(`${siteUrl}${next}`);
       // La cookie corta de empresa/rol ya cumplio; se borra siempre.
       res.cookies.set(SIGNUP_COOKIE, "", { path: "/", maxAge: 0 });
       res.cookies.set(NEXT_COOKIE, "", { path: "/", maxAge: 0 });

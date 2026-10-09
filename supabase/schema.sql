@@ -306,6 +306,7 @@ CREATE TABLE public.attribution_events (
     value_usd double precision,
     metadata jsonb DEFAULT '{}'::jsonb,
     created_at timestamp with time zone DEFAULT now(),
+    user_id uuid,
     CONSTRAINT attribution_events_event_type_check CHECK ((event_type = ANY (ARRAY['signup'::text, 'trial_start'::text, 'first_search'::text, 'first_skill_run'::text, 'conversion'::text, 'churn'::text, 'reactivation'::text])))
 );
 
@@ -1222,6 +1223,13 @@ CREATE INDEX idx_attribution_events_utm ON public.attribution_events USING btree
 
 
 --
+-- Name: idx_attribution_events_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_attribution_events_user ON public.attribution_events USING btree (event_type, user_id);
+
+
+--
 -- Name: idx_clients_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1613,6 +1621,14 @@ ALTER TABLE ONLY public.agent_social_log
 
 ALTER TABLE ONLY public.attribution_events
     ADD CONSTRAINT attribution_events_target_id_fkey FOREIGN KEY (target_id) REFERENCES public.outreach_targets(id) ON DELETE SET NULL;
+
+
+--
+-- Name: attribution_events attribution_events_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.attribution_events
+    ADD CONSTRAINT attribution_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
 
 
 --

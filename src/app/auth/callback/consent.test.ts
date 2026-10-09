@@ -88,6 +88,14 @@ describe("callback: consentimiento de correos", () => {
     expect(JSON.stringify(state.inserts)).toContain('"marketing_opt_in":"yes"');
   });
 
+  it("la fila de signup lleva el usuario en user_id, nunca en target_id (H-61)", async () => {
+    state.meta = { marketing_opt_in: "yes" };
+    await run();
+    const row = state.inserts[0] as Record<string, unknown>;
+    expect(row.user_id).toBe("u1");
+    expect(row).not.toHaveProperty("target_id");
+  });
+
   it("magic link sin casilla: no entra a la audiencia", async () => {
     state.meta = { marketing_opt_in: "no" };
     await run();
