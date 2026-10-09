@@ -152,3 +152,13 @@ siguiente sesión.
 | **Reactivación** | Volver a marcar la casilla reactiva a quien estaba `unsubscribed`: es un nuevo sí expreso. Revisado por Fable el 2026-10-07 |
 | **Fuente de verdad del consentimiento** | `attribution_events.metadata.marketing_opt_in` (escrito con service role, con fecha y versión). `user_metadata` lo puede editar el propio usuario y en magic link no lleva fecha: sirve de espejo, no de prueba. El roast tiene su propia casilla; dejar el correo para ver el reporte no es aceptar promociones |
 | **Dónde** | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` y `SignupWall.tsx`, `src/app/[locale]/(marketing)/login/`, `src/app/api/roast/email/route.ts`, `src/app/roast/page.tsx`, `src/app/auth/callback/route.ts`, `src/lib/attribution.ts`, aviso de privacidad |
+
+### D11 · Claims de clientes: solo marcas con trabajo verificado
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-09 (punto 11: portafolio en Notion y credenciales en Drive). Revisó Code contra «ARTO Portafolio 2026» en Notion y las credenciales `260416 ARTO Group - Credenciales` |
+| **Qué se decidió** | El sitio, el SEO y los prompts internos (`/admin/content`, `/admin/outreach`) nombran solo marcas con proyecto propio verificado: **Grupo Modelo, Herdez, Sigma, Kavak, Cemex, Guzman y Gomez**. Se quitan «Fortune 500» y «Google, Nike y Uber». Se mantiene «15+ años», que cuadra con «desde 2009» |
+| **Por qué** | Uber no aparece en ningún registro. Google (2019) y Nike (2018-2020) fueron proyectos de arte y medios contratados por agencias intermediarias (Public International y Creatividad de Neta), no trabajo de metodología de marca. «Fortune 500» en plural no tiene base |
+| **Qué NO hacer** | No volver a poner Google, Nike, Uber ni «Fortune 500» como clientes de la metodología. Si se quiere mencionar Google o Nike, solo como «proyectos de arte y contenido». Kimberly-Clark, H&M, Jumex, BIC y Pokémon fueron prospectos, **no clientes**. Antes de agregar una marca nueva, que exista en el portafolio de Notion |
+| **Dónde** | `src/i18n/dictionaries.ts`, `src/lib/seo.ts`, `src/app/layout.tsx`, `src/app/api/admin/content/generate/route.ts`, `src/app/api/admin/outreach/drafts/route.ts` |

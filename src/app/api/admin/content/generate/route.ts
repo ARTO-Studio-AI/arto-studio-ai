@@ -29,7 +29,7 @@ const PRICING: Record<string, { input: number; output: number }> = {
 
 const SYSTEM_BASE = `You generate ARTO Studio AI content for the Content Factory.
 
-ARTO Studio AI: bilingual prompt library, AI skills (brand positioning, architecture), autonomous creative agents. Built on 15+ years with Google, Nike, Uber. https://creative.artostudio.ai
+ARTO Studio AI: bilingual prompt library, AI skills (brand positioning, architecture), autonomous creative agents. Built on 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex. https://creative.artostudio.ai
 
 Tone rules (apply to either language):
 - Direct, terse, no marketing fluff. No emoji unless intentional and rare.
@@ -129,7 +129,7 @@ Constraints:
 - meta_description 120-160 chars
 - hero: one strong headline (under 80 chars)
 - intro: 80-160 words, sets up what the AI can do in this vertical in 2026 (this is the article opener, the hook)
-- body: **HARD MINIMUM 400 words in EACH language, target 400-500 words.** Server-side rejection for under 400. Editorial article body. Structure as 4-5 paragraphs separated by ONE blank line each (literal \\n\\n in the JSON string). EACH paragraph 80-120 words. EDITORIAL FLOW MANDATORY: every paragraph develops ONE idea across 3-6 sentences with connectors and varied sentence length. NO runs of three short declarative sentences. NO paragraphs that are lists of claims. Read it back to yourself after writing: if any paragraph sounds like "Subject verb object. Subject verb object. Subject verb object." rewrite it. Name concrete tools (Claude, Midjourney, ElevenLabs, Figma, Notion, Linear), techniques (positioning matrix, NOT-table, brand spine), brands (Neefter, Crecy, Google, Nike, Uber) when relevant. Walk through methodology step by step. Show mechanism, not conclusion. Avoid "in conclusion", "in summary", "ultimately", "at the end of the day". Do NOT repeat the intro — the body advances the thesis. The last paragraph ends on a claim or a question, not a recap.
+- body: **HARD MINIMUM 400 words in EACH language, target 400-500 words.** Server-side rejection for under 400. Editorial article body. Structure as 4-5 paragraphs separated by ONE blank line each (literal \\n\\n in the JSON string). EACH paragraph 80-120 words. EDITORIAL FLOW MANDATORY: every paragraph develops ONE idea across 3-6 sentences with connectors and varied sentence length. NO runs of three short declarative sentences. NO paragraphs that are lists of claims. Read it back to yourself after writing: if any paragraph sounds like "Subject verb object. Subject verb object. Subject verb object." rewrite it. Name concrete tools (Claude, Midjourney, ElevenLabs, Figma, Notion, Linear), techniques (positioning matrix, NOT-table, brand spine), brands (Neefter, Crecy, Sigma, Kavak, Grupo Modelo) when relevant. Walk through methodology step by step. Show mechanism, not conclusion. Avoid "in conclusion", "in summary", "ultimately", "at the end of the day". Do NOT repeat the intro — the body advances the thesis. The last paragraph ends on a claim or a question, not a recap.
 
 BOLD KEY PHRASES — mandatory in body.
 Inside body_en and body_es, mark 2-4 load-bearing phrases per paragraph in markdown bold using **double asterisks** around the phrase. Example in Spanish: "El brief tradicional asumía un destinatario humano que podía **leer entre líneas**. Cuando trabajas con Claude, esa ambigüedad **se convierte en error**." Each bolded phrase must be a CONCEPT or a CLAIM the reader should skim and grasp at a glance, not stylistic emphasis. Avoid bolding common adverbs, conjunctions, single nouns out of context, or full sentences. Each bolded run is 2-7 words. Distribute bold phrases across the paragraph, not clustered at the end. The bolded phrases are part of the reading rhythm and must read sensibly when extracted (a skimmer should be able to read JUST the bolded phrases and get the gist of the paragraph).
@@ -200,7 +200,7 @@ Shared
 - cta_text: 3-5 words. Examples: 'Browse the catalog', 'Try Brand Roast', 'Read the guide'.
 - cta_url: one of /prompts, /pricing, /work, /roast, /learn, /learn/<slug>. NEVER external.
 - Tone rules apply on all 3 variants (banned words list, tú-form Spanish, no AI tells, no em-dashes, no antithesis patterns).
-- Lean into ARTO's concrete identity: 3,000 bilingual prompts, 15+ years with Google / Nike / Uber, methodology not motivation.
+- Lean into ARTO's concrete identity: 3,000 bilingual prompts, 15+ years of work for Grupo Modelo / Sigma / Kavak / Cemex, methodology not motivation.
 
 The 3 versions should clearly be the SAME idea, never invent a different topic per network. They should diverge ONLY in length, hashtag treatment, and register, not in substance.
 

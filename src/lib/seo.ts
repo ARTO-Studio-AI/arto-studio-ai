@@ -177,12 +177,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "ARTO Studio AI · The creative studio that never sleeps",
         description:
-          "3,000+ bilingual prompts built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years with Google, Nike and Uber, now self-serve. Skills and agents coming soon.",
+          "3,000+ bilingual prompts built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex, now self-serve. Skills and agents coming soon.",
       },
       es: {
         title: "ARTO Studio AI · El estudio creativo que nunca duerme",
         description:
-          "3,000+ prompts bilingües con la metodología real de ARTO: estrategia, creatividad, narrativa y producción. 15+ años con Google, Nike y Uber, ahora en autoservicio. Skills y agentes, próximamente.",
+          "3,000+ prompts bilingües con la metodología real de ARTO: estrategia, creatividad, narrativa y producción. 15+ años de trabajo para Grupo Modelo, Sigma, Kavak y Cemex, ahora en autoservicio. Skills y agentes, próximamente.",
       },
     },
   },

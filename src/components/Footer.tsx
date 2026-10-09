@@ -20,7 +20,7 @@ export default function Footer({ locale, footer }: Props) {
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="grid gap-8 sm:grid-cols-4">
           <div>
-            <Image src="/brand/arto-logo-black.png" alt="ARTO" width={80} height={20} className="h-5 w-auto" />
+            <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={58} height={20} className="h-5 w-auto" />
             <p className="mt-2 text-xs text-zinc-500">{footer.copyright}</p>
           </div>
 

@@ -51,11 +51,11 @@ export const DICTIONARIES = {
       copyright: "© ARTO Group. Design, Culture & Technology since 2009.",
     },
     home: {
-      eyebrow: "By ARTO Group — 15+ years with Google, Nike, Uber",
+      eyebrow: "By ARTO Group — 15+ years with Grupo Modelo, Sigma, Kavak, Cemex",
       hero_h1_line1: "The creative studio",
       hero_h1_line2: "that never sleeps.",
       hero_body:
-        "3,000+ bilingual prompts that encode ARTO's real methodology: strategy, creativity, narrative, and production. Built on 15+ years with Fortune 500 brands. Skills and agents are on the way.",
+        "3,000+ bilingual prompts that encode ARTO's real methodology: strategy, creativity, narrative, and production. Built on 15+ years of work for brands like Grupo Modelo, Herdez and Sigma. Skills and agents are on the way.",
       hero_subbenefit:
         "Find the exact prompt for the job, in English or Spanish, and ship brand-ready work the same day.",
       hero_count_label: "bilingual prompts, ready to use.",
@@ -64,7 +64,7 @@ export const DICTIONARIES = {
       hero_cta_pricing: "See pricing →",
       hero_cta_work: "See our work →",
       hero_microcopy: "Free plan, no credit card. 736 free prompts, 3 opens a day. Pro is $9 USD a month.",
-      hero_trust: "3,000+ bilingual prompts · 12 creative verticals · built on work for Google, Nike, Uber.",
+      hero_trust: "3,000+ bilingual prompts · 12 creative verticals · built on work for Grupo Modelo, Herdez, Sigma, Kavak.",
       tiers_eyebrow: "Live today",
       tiers_h2: "Two things you can use right now.",
       tier_library_title: "Prompt Library",
@@ -121,7 +121,7 @@ export const DICTIONARIES = {
       roast_eyebrow: "Free tool",
       roast_h2: "Think your brand is solid? Prove it.",
       roast_body:
-        "Get an honest analysis of your brand across Strategy, Creativity, Narrative, and Digital, scored with the same methodology we use for Fortune 500 clients. No signup required.",
+        "Get an honest analysis of your brand across Strategy, Creativity, Narrative, and Digital, scored with the same methodology behind our work for Sigma, Kavak and Cemex. No signup required.",
       roast_cta: "Roast My Brand",
       featured_h2: "Editor's Pick",
       featured_see_all: "See all {n} →",
@@ -144,7 +144,7 @@ export const DICTIONARIES = {
         },
         {
           q: "What makes ARTO different from the free prompts floating around online?",
-          a: "These come from 15+ years of real agency work for brands like Google, Nike, and Uber. Each one encodes a methodology step, not a clever one-liner, and they ship in English and Spanish side by side.",
+          a: "These come from 15+ years of real agency work for brands like Grupo Modelo, Herdez, Sigma, Kavak, Cemex and Guzman y Gomez. Each one encodes a methodology step, not a clever one-liner, and they ship in English and Spanish side by side.",
         },
         {
           q: "Do I need a credit card to start?",
@@ -152,7 +152,7 @@ export const DICTIONARIES = {
         },
         {
           q: "What is Brand Roast, and is it really free?",
-          a: "Brand Roast is an honest analysis of your brand across Strategy, Creativity, Narrative, and Digital, scored with the same methodology we use for Fortune 500 clients. The first analysis needs no signup.",
+          a: "Brand Roast is an honest analysis of your brand across Strategy, Creativity, Narrative, and Digital, scored with the same methodology behind our work for Sigma, Kavak and Cemex. The first analysis needs no signup.",
         },
         {
           q: "Is everything available in Spanish?",
@@ -466,11 +466,11 @@ export const DICTIONARIES = {
       copyright: "© ARTO Group. Diseño, Cultura y Tecnología desde 2009.",
     },
     home: {
-      eyebrow: "Por ARTO Group — 15+ años con Google, Nike y Uber",
+      eyebrow: "Por ARTO Group — 15+ años con Grupo Modelo, Sigma, Kavak y Cemex",
       hero_h1_line1: "El estudio creativo",
       hero_h1_line2: "que nunca duerme.",
       hero_body:
-        "3,000+ prompts bilingües que encapsulan la metodología real de ARTO: estrategia, creatividad, narrativa y producción. Construidos sobre 15+ años con marcas Fortune 500. Los skills y los agentes vienen en camino.",
+        "3,000+ prompts bilingües que encapsulan la metodología real de ARTO: estrategia, creatividad, narrativa y producción. Construidos sobre 15+ años de trabajo para marcas como Grupo Modelo, Herdez y Sigma. Los skills y los agentes vienen en camino.",
       hero_subbenefit:
         "Encuentra el prompt exacto para cada tarea, en español o inglés, y entrega trabajo listo para tu marca el mismo día.",
       hero_count_label: "prompts bilingües listos para usar.",
@@ -479,7 +479,7 @@ export const DICTIONARIES = {
       hero_cta_pricing: "Ver precios →",
       hero_cta_work: "Ver nuestro trabajo →",
       hero_microcopy: "Plan gratis, sin tarjeta. 736 prompts gratis, 3 aperturas al día. Pro cuesta $9 USD al mes.",
-      hero_trust: "3,000+ prompts bilingües · 12 verticales creativas · construidos sobre trabajo para Google, Nike y Uber.",
+      hero_trust: "3,000+ prompts bilingües · 12 verticales creativas · construidos sobre trabajo para Grupo Modelo, Herdez, Sigma y Kavak.",
       tiers_eyebrow: "Disponible hoy",
       tiers_h2: "Dos cosas que puedes usar ahora mismo.",
       tier_library_title: "Biblioteca de prompts",
@@ -536,7 +536,7 @@ export const DICTIONARIES = {
       roast_eyebrow: "Herramienta gratuita",
       roast_h2: "¿Crees que tu marca está sólida? Pruébalo.",
       roast_body:
-        "Recibe un análisis honesto de tu marca en Estrategia, Creatividad, Narrativa y Digital, calificado con la misma metodología que usamos con clientes Fortune 500. Sin registro.",
+        "Recibe un análisis honesto de tu marca en Estrategia, Creatividad, Narrativa y Digital, calificado con la misma metodología detrás de nuestro trabajo para Sigma, Kavak y Cemex. Sin registro.",
       roast_cta: "Roastea Mi Marca",
       featured_h2: "Selección del editor",
       featured_see_all: "Ver los {n} →",
@@ -559,7 +559,7 @@ export const DICTIONARIES = {
         },
         {
           q: "¿Qué diferencia a ARTO de los prompts gratis que circulan en internet?",
-          a: "Vienen de 15+ años de trabajo real de agencia para marcas como Google, Nike y Uber. Cada uno encapsula un paso de metodología, no una frase ingeniosa, y llegan en español e inglés lado a lado.",
+          a: "Vienen de 15+ años de trabajo real de agencia para marcas como Grupo Modelo, Herdez, Sigma, Kavak, Cemex y Guzman y Gomez. Cada uno encapsula un paso de metodología, no una frase ingeniosa, y llegan en español e inglés lado a lado.",
         },
         {
           q: "¿Necesito tarjeta para empezar?",
@@ -567,7 +567,7 @@ export const DICTIONARIES = {
         },
         {
           q: "¿Qué es Brand Roast y de verdad es gratis?",
-          a: "Brand Roast es un análisis honesto de tu marca en Estrategia, Creatividad, Narrativa y Digital, calificado con la misma metodología que usamos para clientes Fortune 500. El primer análisis no requiere registro.",
+          a: "Brand Roast es un análisis honesto de tu marca en Estrategia, Creatividad, Narrativa y Digital, calificado con la misma metodología detrás de nuestro trabajo para Sigma, Kavak y Cemex. El primer análisis no requiere registro.",
         },
         {
           q: "¿Todo está disponible en español?",
