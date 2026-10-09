@@ -102,7 +102,7 @@ describe("upsertAudienceContact", () => {
     const m = await fresh();
     const r = await m.upsertAudienceContact({ email: "a@b.co", firstName: "A" }, { resend });
     expect(r).toEqual({ ok: true, action: "updated" });
-    expect(resend.contacts.update).toHaveBeenCalledWith({ audienceId: "aud_1", email: "a@b.co", firstName: "A", lastName: undefined });
+    expect(resend.contacts.update).toHaveBeenCalledWith({ audienceId: "aud_1", email: "a@b.co", firstName: "A", lastName: undefined, unsubscribed: false });
   });
 
   it("un error distinto se devuelve sin lanzar", async () => {
@@ -112,6 +112,27 @@ describe("upsertAudienceContact", () => {
     const m = await fresh();
     expect(await m.upsertAudienceContact({ email: "a@b.co" }, { resend })).toEqual({ ok: false, skipped: false, error: "boom" });
     err.mockRestore();
+  });
+});
+
+describe("setAudienceUnsubscribed", () => {
+  beforeEach(() => {
+    delete process.env.RESEND_AUDIENCE_ID;
+  });
+
+  it("sin audiencia no hace nada", async () => {
+    const resend = fakeResend({ data: null, error: null });
+    const m = await fresh();
+    expect(await m.setAudienceUnsubscribed("a@b.co", true, { resend })).toBe(false);
+    expect(resend.contacts.update).not.toHaveBeenCalled();
+  });
+
+  it("con audiencia marca la baja en Resend", async () => {
+    process.env.RESEND_AUDIENCE_ID = "aud_1";
+    const resend = fakeResend({ data: null, error: null });
+    const m = await fresh();
+    expect(await m.setAudienceUnsubscribed("A@B.co", true, { resend })).toBe(true);
+    expect(resend.contacts.update).toHaveBeenCalledWith({ audienceId: "aud_1", email: "a@b.co", unsubscribed: true });
   });
 });
 

@@ -175,3 +175,13 @@ siguiente sesión.
 | **Por qué** | Uber no aparece en ningún registro. Google (2019) y Nike (2018-2020) fueron proyectos de arte y medios contratados por agencias intermediarias (Public International y Creatividad de Neta), no trabajo de metodología de marca. «Fortune 500» en plural no tiene base |
 | **Qué NO hacer** | No volver a poner Google, Nike, Uber ni «Fortune 500» como clientes de la metodología. Si se quiere mencionar Google o Nike, solo como «proyectos de arte y contenido». Kimberly-Clark, H&M, Jumex, BIC y Pokémon fueron prospectos, **no clientes**. Antes de agregar una marca nueva, que exista en el portafolio de Notion |
 | **Dónde** | `src/i18n/dictionaries.ts`, `src/lib/seo.ts`, `src/app/layout.tsx`, `src/app/api/admin/content/generate/route.ts`, `src/app/api/admin/outreach/drafts/route.ts` |
+
+### D12 · El marketing vive en Resend; en casa solo el webhook
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-09 (punto 8, «yes» a la recomendación) |
+| **Qué se decidió** | Campañas como Broadcasts de Resend y secuencias como Automations de Resend, disparadas por eventos de la app. En el repo solo se construye `/api/resend/webhook`, que lleva rebotes permanentes, supresiones, quejas y bajas de Resend a `newsletter_subscribers`. Se vuelve a evaluar al llegar a ~5,000 contactos (siguiente paso natural: Loops) |
+| **Por qué** | Construir campañas, secuencias y métricas en `/admin` costaba 9 a 13 días más 1 a 2 al mes de mantenimiento, para una lista que hoy casi no tiene contactos. Resend es gratis hasta 1,000 contactos y ya está integrado. Sin el webhook, Supabase y Resend se desincronizan y el digest podría escribirle a quien se dio de baja en Resend |
+| **Qué NO hacer** | No construir un motor de campañas en `/admin` sin decisión nueva de Victor. El webhook **nunca reactiva** a nadie: solo baja de `active`/`pending`. Un rebote temporal no saca a nadie |
+| **Dónde** | `src/lib/resend-webhook.ts`, `src/app/api/resend/webhook/route.ts`, `RESEND_WEBHOOK_SECRET` en Vercel |
