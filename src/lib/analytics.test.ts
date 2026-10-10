@@ -145,6 +145,8 @@ describe("analytics (cliente)", () => {
       // H-47: sin grabacion de sesiones ni autocapture hasta decision de Victor (D9, H-48).
       expect(config.disable_session_recording).toBe(true);
       expect(config.autocapture).toBe(false);
+      // H-48: con opt-out no se guarda nada en el navegador.
+      expect(config.opt_out_persistence_by_default).toBe(true);
       // Lighthouse Fase 6: surveys.js no se descarga.
       expect(config.disable_surveys).toBe(true);
       expect(config.api_host).toBe("https://us.i.posthog.com");
