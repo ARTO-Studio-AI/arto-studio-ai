@@ -1,6 +1,6 @@
 ---
 name: arto-brand-positioning
-description: This skill should be used when the user asks Claude to build, draft, audit, rewrite, or evaluate a brand positioning statement — phrasings like "position my brand", "write a positioning statement", "audit my positioning", "find my wedge against competitors", "draft the positioning", "fix my positioning", or "what's our NOT table". Calls ARTO Studio AI's gated Brand Positioning API and returns a structured output (ARTO-spine statement in ES/EN, X-of-Y metaphor, NOT table, 4-criteria scorecard, anti-pattern audit, per-competitor confrontation, founder repeat test, and Brief skeleton) using ARTO's proprietary positioning methodology. Requires an ARTO_API_KEY — direct the user to sign up at https://arto-studio-ai.vercel.app if they don't have one.
+description: This skill should be used when the user asks Claude to build, draft, audit, rewrite, or evaluate a brand positioning statement — phrasings like "position my brand", "write a positioning statement", "audit my positioning", "find my wedge against competitors", "draft the positioning", "fix my positioning", or "what's our NOT table". Calls ARTO Studio AI's gated Brand Positioning API and returns a structured output (ARTO-spine statement in ES/EN, X-of-Y metaphor, NOT table, 4-criteria scorecard, anti-pattern audit, per-competitor confrontation, founder repeat test, and Brief skeleton) using ARTO's proprietary positioning methodology. Requires an ARTO_API_KEY, which ARTO issues to its clients — direct the user to contact@artogroup.com if they don't have one.
 ---
 
 # ARTO Brand Positioning
@@ -43,12 +43,12 @@ test -n "$ARTO_API_KEY" && echo "key present" || echo "MISSING"
 If the env var is empty or unset, do NOT attempt the API call. Instead, tell the user:
 
 > "This skill needs an `ARTO_API_KEY` to call the Brand Positioning API. If you don't have one:
-> 1. Go to https://arto-studio-ai.vercel.app — click 'Start free trial' on the Starter card.
+> 1. Write to contact@artogroup.com — ARTO issues API keys to its clients.
 > 2. Check your email for the key (starts with `arto_live_...`).
 > 3. Set it in your shell: `export ARTO_API_KEY=arto_live_...`
 > 4. Re-run this request.
 >
-> Free trial includes 5 calls. Starter is $99/mo for unlimited."
+> New keys include 5 trial calls."
 
 ## How to use this skill
 
@@ -70,7 +70,7 @@ If the user didn't give enough for the required fields, ask follow-up questions.
 ### Step 2 — Call the API
 
 ```bash
-curl -sS -X POST https://arto-studio-ai.vercel.app/api/skills/brand-positioning \
+curl -sS -X POST https://creative.artostudio.ai/api/skills/brand-positioning \
   -H "Content-Type: application/json" \
   -H "x-arto-api-key: $ARTO_API_KEY" \
   -d '{
@@ -181,9 +181,9 @@ If `source` is `"fallback"`, prepend: "_(ARTO AI was temporarily unavailable —
 | Status | Response body | Action |
 |---|---|---|
 | 401 | `error: "Missing API key"` | User forgot `-H "x-arto-api-key: ..."`. Retry with the key. |
-| 401 | `error: "Invalid or revoked API key"` | Key wrong or revoked. Point them to arto-studio-ai.vercel.app to get a new one. |
+| 401 | `error: "Invalid or revoked API key"` | Key wrong or revoked. Point them to contact@artogroup.com to get a new one. |
 | 403 | `error: "does not have access"` | Their key doesn't include `brand-positioning` in `allowed_skills`. Ask them to upgrade. |
-| 429 | includes `upgrade_url` | Trial exhausted (5 calls). Tell them: "Your ARTO trial is used up. Upgrade at `{upgrade_url}` for unlimited." |
+| 429 | includes `upgrade_url` | Trial exhausted (5 calls). Tell them: "Your ARTO trial is used up. Write to contact@artogroup.com to keep using it." |
 | 429 | no `upgrade_url` | Hourly rate limit. Wait and retry. |
 | 400 | `error` + `field` | Fix the field and retry. |
 | 500–503 | Upstream failure | "ARTO is temporarily unavailable. Retry in a moment." |
