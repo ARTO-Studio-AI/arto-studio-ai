@@ -21,7 +21,7 @@ const WORD: Record<Category, [string, string, string?]> = {
   marketing: ["Mercado.", "Market.", "character-02.png"],
   ux_ui: ["Interfaz.", "Interface.", "character-05.png"],
   graphic_design: ["Forma.", "Form.", "character-03.png"],
-  video: ["Escena.", "Scene.", "character-04.png"],
+  video: ["Movimiento.", "Motion.", "character-04.png"],
   music: ["Ritmo.", "Rhythm.", "character-02.png"],
   creative_productivity: ["Antes / después.", "Before / after.", "character-01.png"],
   architecture: ["Del boceto al plano.", "Sketch to plan.", "character-03.png"],
