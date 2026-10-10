@@ -25,7 +25,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
     title: "Términos del servicio",
     updated: "Última actualización: 9 de octubre de 2026",
     intro:
-      "Estos son los Términos del servicio («Términos») de ARTO Studio AI (creative.artostudio.ai, el «Servicio»), un producto de ARTO Group operado por ARTO Inc., empresa de Estados Unidos («nosotros»). Al usar el Servicio aceptas estos Términos. Si no estás de acuerdo, no uses el Servicio.",
+      "Estos son los Términos del servicio («Términos») de ARTO Studio AI (creative.artostudio.ai, el «Servicio»), un producto de ARTO Group operado por ARTO Inc., sociedad constituida en Delaware, Estados Unidos, con domicilio en 101 Avenue of the Americas, Fl 8, New York, NY 10013 («nosotros»). Al usar el Servicio aceptas estos Términos. Si no estás de acuerdo, no uses el Servicio.",
     sections: [
       {
         h: "Qué es el Servicio",
@@ -90,7 +90,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
       {
         h: "Ley aplicable",
         p: [
-          "Estos Términos se rigen por las leyes de Estados Unidos y del estado en que está constituida ARTO Inc., y las controversias se resolverán ante sus tribunales competentes. Esto no te quita los derechos que te dé la ley de protección al consumidor de tu país.",
+          "Estos Términos se rigen por las leyes del estado de Delaware, Estados Unidos, y las controversias se resolverán ante sus tribunales competentes. Esto no te quita los derechos que te dé la ley de protección al consumidor de tu país.",
         ],
       },
       {
@@ -111,7 +111,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
     title: "Terms of Service",
     updated: "Last updated: October 9, 2026",
     intro:
-      "These are the Terms of Service (\"Terms\") for ARTO Studio AI (creative.artostudio.ai, the \"Service\"), an ARTO Group product operated by ARTO Inc., a United States company (\"we\"). By using the Service you agree to these Terms. If you don't agree, please don't use the Service.",
+      "These are the Terms of Service (\"Terms\") for ARTO Studio AI (creative.artostudio.ai, the \"Service\"), an ARTO Group product operated by ARTO Inc., a Delaware corporation located at 101 Avenue of the Americas, Fl 8, New York, NY 10013 (\"we\"). By using the Service you agree to these Terms. If you don't agree, please don't use the Service.",
     sections: [
       {
         h: "What the Service is",
@@ -176,7 +176,7 @@ const COPY: Record<"es" | "en", { title: string; updated: string; intro: string;
       {
         h: "Governing law",
         p: [
-          "These Terms are governed by the laws of the United States and of the state where ARTO Inc. is incorporated, and disputes will be resolved in its competent courts. This doesn't take away any rights your country's consumer protection law gives you.",
+          "These Terms are governed by the laws of the State of Delaware, United States, and disputes will be resolved in its competent courts. This doesn't take away any rights your country's consumer protection law gives you.",
         ],
       },
       {
