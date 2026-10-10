@@ -4,9 +4,9 @@ import { Resend } from "resend";
 /**
  * Resend wrapper + transactional email templates for ARTO Studio AI.
  *
- * Sender: during Session 6 MVP we use Resend's testing sender
- * `onboarding@resend.dev`. Swap to `no-reply@artogroup.com` once the
- * domain is verified in the Resend dashboard.
+ * Sender: EMAIL_FROM (en Vercel, `hola@creative.artostudio.ai`). Si falta, cae al
+ * remitente de pruebas de Resend. Los correos de acceso los manda Supabase desde
+ * `noreply@artostudio.ai`: ver D13 en docs/DECISIONES.md.
  */
 
 /**

@@ -120,6 +120,8 @@ export default function BlogCover({ category, locale, size = "card", className =
   const vert = VERTICALS[cat];
   const label = `${locale === "es" ? vert.label_es : vert.label_en} · ${vert.code}`;
   const word = locale === "es" ? m.es : m.en;
+  // Las palabras largas («Del boceto al plano.») bajan de tamano para no cortarse en tarjetas.
+  const wordSize = word.length > 12 ? "text-[clamp(22px,2.6vw,30px)]" : "text-[clamp(28px,4vw,44px)]";
   const ratio = size === "hero" ? "aspect-[21/9]" : "aspect-[16/10]";
 
   return (
@@ -132,7 +134,7 @@ export default function BlogCover({ category, locale, size = "card", className =
         <Shapes c={m.c} />
       </svg>
       <span className="text-eyebrow absolute left-4 top-3.5 text-zinc-600">{label}</span>
-      <span className="absolute bottom-3 left-4 font-serif text-[clamp(28px,4vw,44px)] font-semibold italic leading-none tracking-[-0.01em] text-zinc-900">
+      <span className={`absolute bottom-3 left-4 font-serif ${wordSize} font-semibold italic leading-none tracking-[-0.01em] text-zinc-900`}>
         {word}
       </span>
     </div>

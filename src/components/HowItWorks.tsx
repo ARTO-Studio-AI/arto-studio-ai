@@ -54,7 +54,6 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
         width={280}
         height={183}
         className="absolute -top-11 right-6 z-10 h-auto w-20 sm:w-24"
-        priority
       />
 
       <Step n={1}>
