@@ -185,3 +185,13 @@ siguiente sesión.
 | **Por qué** | Construir campañas, secuencias y métricas en `/admin` costaba 9 a 13 días más 1 a 2 al mes de mantenimiento, para una lista que hoy casi no tiene contactos. Resend es gratis hasta 1,000 contactos y ya está integrado. Sin el webhook, Supabase y Resend se desincronizan y el digest podría escribirle a quien se dio de baja en Resend |
 | **Qué NO hacer** | No construir un motor de campañas en `/admin` sin decisión nueva de Victor. El webhook **nunca reactiva** a nadie: solo baja de `active`/`pending`. Un rebote temporal no saca a nadie |
 | **Dónde** | `src/lib/resend-webhook.ts`, `src/app/api/resend/webhook/route.ts`, `RESEND_WEBHOOK_SECRET` en Vercel |
+
+### D13 · Dos remitentes de correo, a propósito
+
+| | |
+|---|---|
+| **Quién** | Configuración de octubre de 2026; documentado tras la auditoría de Fable de la prueba de registro (2026-10-10) |
+| **Qué se decidió** | Los correos de autenticación (confirmar registro, enlace mágico) los manda **Supabase** con su SMTP personalizado, desde `noreply@artostudio.ai`. Las plantillas viven en el panel de Supabase (copias en Drive, `supabase-plantillas/`). Todo lo demás (bienvenida, reporte del roast, doble opt-in, digest) lo manda la app por Resend desde `EMAIL_FROM` = `ARTO Studio AI <hola@creative.artostudio.ai>` |
+| **Por qué** | El SMTP de Supabase se configura fuera del repo y no comparte variable con la app. Separar `noreply@` (transaccional de acceso, sin respuesta) de `hola@` (correo de marca al que se puede contestar) es intencional |
+| **Qué NO hacer** | No "unificar" el remitente de Supabase con `EMAIL_FROM` por accidente al rotar SMTP o llaves. Si se cambia, se cambia en el panel de Supabase y en esta entrada a la vez |
+| **Dónde** | Supabase → Authentication → SMTP Settings y Email Templates; `EMAIL_FROM` en Vercel; `src/lib/email.ts` |

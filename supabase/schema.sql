@@ -83,28 +83,50 @@ $$;
 -- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.handle_new_user() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-DECLARE
-  granted_tier TEXT;
-  granted_admin BOOLEAN;
-BEGIN
-  SELECT tier, is_admin INTO granted_tier, granted_admin
-  FROM public.email_tier_grants
-  WHERE email = NEW.email;
+-- Definicion vigente: la de la migracion 0012 (copia el perfil completo desde
+-- raw_user_meta_data, con topes de longitud). Actualizado el 2026-10-10.
+CREATE FUNCTION public.handle_new_user() returns trigger
+    language plpgsql security definer
+    set search_path = public, pg_temp
+    as $$
+declare
+  granted_tier text;
+  granted_admin boolean;
+  meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  locale_in text := left(nullif(trim(meta->>'signup_locale'), ''), 10);
+begin
+  select tier, is_admin into granted_tier, granted_admin
+  from public.email_tier_grants
+  where email = new.email;
 
-  INSERT INTO public.profiles (id, email, full_name, avatar_url, tier, is_admin)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name'),
-    NEW.raw_user_meta_data->>'avatar_url',
-    COALESCE(granted_tier, 'free'),
-    COALESCE(granted_admin, FALSE)
+  insert into public.profiles (
+    id, email, full_name, avatar_url, tier, is_admin,
+    company, "role", signup_source,
+    utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+    referrer, signup_locale, preferred_language
+  )
+  values (
+    new.id,
+    new.email,
+    left(coalesce(meta->>'full_name', meta->>'name'), 200),
+    left(meta->>'avatar_url', 2048),
+    coalesce(granted_tier, 'free'),
+    coalesce(granted_admin, false),
+    left(nullif(trim(meta->>'company'), ''), 200),
+    left(nullif(trim(meta->>'role'), ''), 200),
+    left(nullif(trim(meta->>'signup_source'), ''), 200),
+    left(nullif(trim(meta->>'utm_source'), ''), 200),
+    left(nullif(trim(meta->>'utm_medium'), ''), 200),
+    left(nullif(trim(meta->>'utm_campaign'), ''), 200),
+    left(nullif(trim(meta->>'utm_content'), ''), 200),
+    left(nullif(trim(meta->>'utm_term'), ''), 200),
+    left(nullif(trim(meta->>'referrer'), ''), 200),
+    case when locale_in in ('en', 'es') then locale_in else null end,
+    -- preferred_language tiene check (en | es); cualquier otra cosa cae al default.
+    case when locale_in in ('en', 'es') then locale_in else 'en' end
   );
-  RETURN NEW;
-END;
+  return new;
+end;
 $$;
 
 

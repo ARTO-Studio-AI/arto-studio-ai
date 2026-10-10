@@ -1,41 +1,109 @@
-import Image from "next/image";
 import type { Locale } from "@/i18n/config";
 import { VERTICALS, type Category } from "@/types/prompt";
 
-/* Portadas del blog (propuesta aprobada por Victor el 2026-10-07). Sustituyen las
- * imagenes generadas: un solo sistema grafico, hecho con HTML/CSS y los personajes del
- * design system de ARTO, en cuatro variantes que salen de la vertical del articulo.
- * Asi cada articulo nuevo tiene portada de marca desde el primer dia, sin generar nada.
- *   A personaje + palabra en serif · B diagrama del metodo sobre negro
- *   C codigo de la vertical en grande sobre acento · D mini interfaz antes/despues */
+/* Portadas del blog. Sistema hecho con HTML/SVG, sin imagenes generadas (decision de
+ * Victor del 2026-10-07): cada articulo nuevo tiene portada de marca desde el primer dia.
+ * Estilo F «Bauhaus geometrico», aprobado el 2026-10-10: formas planas (circulos, medios
+ * circulos, bloques y lineas) en tinta, arena y un solo acento, sobre papel. Seis
+ * composiciones; cada vertical toma una, y la segunda vertical que repite composicion la
+ * usa en espejo. El codigo de la vertical va arriba y la palabra en serif abajo. */
 
-type Variant = "A" | "B" | "C" | "D";
+type Comp = 1 | 2 | 3 | 4 | 5 | 6;
 
-const MAP: Record<Category, { v: Variant; es: string; en: string; char?: string }> = {
-  branding: { v: "A", es: "Posicionar.", en: "Position.", char: "character-02" },
-  photography: { v: "A", es: "Mirar.", en: "Look.", char: "character-04" },
-  illustration: { v: "A", es: "Trazo.", en: "Line.", char: "character-05" },
-  fashion: { v: "A", es: "Estilo.", en: "Style.", char: "character-01" },
-  copywriting: { v: "B", es: "Voz.", en: "Voice." },
-  marketing: { v: "B", es: "Mercado.", en: "Market." },
-  ux_ui: { v: "C", es: "", en: "", char: "character-05" },
-  graphic_design: { v: "C", es: "", en: "", char: "character-03" },
-  video: { v: "C", es: "", en: "", char: "character-04" },
-  music: { v: "C", es: "", en: "", char: "character-02" },
-  creative_productivity: { v: "D", es: "Antes / después.", en: "Before / after." },
-  architecture: { v: "D", es: "Del boceto al plano.", en: "Sketch to plan." },
+const MAP: Record<Category, { c: Comp; mirror?: boolean; es: string; en: string }> = {
+  branding: { c: 1, es: "Posicionar.", en: "Position." },
+  music: { c: 1, mirror: true, es: "Ritmo.", en: "Rhythm." },
+  illustration: { c: 2, es: "Trazo.", en: "Line." },
+  graphic_design: { c: 2, mirror: true, es: "Forma.", en: "Form." },
+  fashion: { c: 3, es: "Estilo.", en: "Style." },
+  ux_ui: { c: 3, mirror: true, es: "Interfaz.", en: "Interface." },
+  photography: { c: 4, es: "Mirar.", en: "Look." },
+  video: { c: 4, mirror: true, es: "Movimiento.", en: "Motion." },
+  copywriting: { c: 5, es: "Voz.", en: "Voice." },
+  architecture: { c: 5, mirror: true, es: "Del boceto al plano.", en: "Sketch to plan." },
+  marketing: { c: 6, es: "Mercado.", en: "Market." },
+  creative_productivity: { c: 6, mirror: true, es: "Antes / después.", en: "Before / after." },
 };
 
-const CHAR_SIZE: Record<string, [number, number]> = {
-  "character-01": [290, 273],
-  "character-02": [439, 273],
-  "character-03": [280, 183],
-  "character-04": [267, 273],
-  "character-05": [267, 273],
-};
+const INK = "#18181b";
+const SAND = "#e9e3d8";
+const ACCENT = "#ff4d00";
+const PAPER = "#f4f2ee";
 
-function charSrc(name: string): string {
-  return name === "character-01" ? "/brand/arto-character-01.png" : `/brand/characters/${name}.png`;
+/* Composiciones en una caja de 100 x 100. */
+function Shapes({ c }: { c: Comp }) {
+  switch (c) {
+    case 1: // una fila que se rompe: el que se distingue
+      return (
+        <>
+          <path d="M0 100 A50 50 0 0 1 100 100 Z" fill={SAND} />
+          {[6, 18, 30, 42, 82, 94].map((x) => (
+            <circle key={x} cx={x} cy={46} r={4.5} fill={INK} />
+          ))}
+          <circle cx={62} cy={46} r={14} fill={ACCENT} />
+          <line x1={0} y1={46} x2={100} y2={46} stroke={INK} strokeWidth={0.6} />
+        </>
+      );
+    case 2: // arco y sol
+      return (
+        <>
+          <rect x={8} y={8} width={84} height={84} fill={SAND} />
+          <path d="M14 92 A36 36 0 0 1 86 92 Z" fill={INK} />
+          <circle cx={50} cy={34} r={13} fill={ACCENT} />
+          {[20, 26, 32].map((x) => (
+            <line key={x} x1={x} y1={8} x2={x} y2={40} stroke={INK} strokeWidth={0.8} />
+          ))}
+        </>
+      );
+    case 3: // bloques y cuarto de circulo
+      return (
+        <>
+          <rect x={44} y={4} width={52} height={52} fill={INK} />
+          <rect x={4} y={56} width={60} height={40} fill={SAND} />
+          <path d="M44 56 L44 26 A30 30 0 0 0 14 56 Z" fill={ACCENT} />
+          <circle cx={70} cy={30} r={12} fill={PAPER} />
+          <line x1={4} y1={96} x2={96} y2={96} stroke={INK} strokeWidth={0.8} />
+        </>
+      );
+    case 4: // lente y luna
+      return (
+        <>
+          <circle cx={48} cy={52} r={40} fill={SAND} />
+          <circle cx={62} cy={44} r={34} fill={PAPER} />
+          <circle cx={82} cy={78} r={10} fill={ACCENT} />
+          <path d="M8 52 A40 40 0 0 1 48 12 L48 52 Z" fill={INK} />
+          {[88, 92, 96].map((x) => (
+            <line key={x} x1={x} y1={4} x2={x} y2={40} stroke={INK} strokeWidth={0.8} />
+          ))}
+        </>
+      );
+    case 5: // escalera de bloques
+      return (
+        <>
+          <rect x={56} y={74} width={40} height={20} fill={INK} />
+          <rect x={36} y={54} width={60} height={20} fill={SAND} />
+          <rect x={16} y={34} width={80} height={20} fill={INK} />
+          <circle cx={26} cy={20} r={11} fill={ACCENT} />
+          <line x1={4} y1={94} x2={96} y2={94} stroke={INK} strokeWidth={0.8} />
+        </>
+      );
+    default: // rejilla con un punto distinto
+      return (
+        <>
+          <rect x={4} y={4} width={92} height={92} fill={SAND} />
+          {[0, 1, 2].flatMap((r) =>
+            [0, 1, 2].map((k) =>
+              r === 1 && k === 2 ? (
+                <circle key={`${r}${k}`} cx={78} cy={50} r={12} fill={ACCENT} />
+              ) : (
+                <rect key={`${r}${k}`} x={14 + k * 28} y={14 + r * 28} width={16} height={16} fill={INK} />
+              ),
+            ),
+          )}
+          <path d="M4 96 A20 20 0 0 1 44 96 Z" fill={PAPER} />
+        </>
+      );
+  }
 }
 
 interface Props {
@@ -53,72 +121,20 @@ export default function BlogCover({ category, locale, size = "card", className =
   const label = `${locale === "es" ? vert.label_es : vert.label_en} · ${vert.code}`;
   const word = locale === "es" ? m.es : m.en;
   const ratio = size === "hero" ? "aspect-[21/9]" : "aspect-[16/10]";
-  const base = `relative w-full overflow-hidden ${ratio} ${className}`;
-  const codeCls = "text-eyebrow absolute left-4 top-3.5";
-  const wordCls = "absolute bottom-3 left-4 font-serif text-[clamp(28px,4vw,44px)] font-semibold italic leading-none tracking-[-0.01em]";
-  const ch = m.char;
-  const [w, h] = ch ? CHAR_SIZE[ch] : [0, 0];
-
-  if (m.v === "A") {
-    return (
-      <div className={`${base} bg-[var(--paper)]`} aria-hidden="true">
-        <span className="absolute inset-x-0 top-1/2 h-px bg-zinc-900/10" />
-        <span className={`${codeCls} text-zinc-600`}>{label}</span>
-        <span className={`${wordCls} text-zinc-900`}>{word}</span>
-        {ch && <Image src={charSrc(ch)} alt="" width={w} height={h} className="absolute bottom-3.5 right-3.5 h-auto w-[40%] max-w-[220px]" />}
-      </div>
-    );
-  }
-
-  if (m.v === "B") {
-    return (
-      <div className={`${base} bg-zinc-900 text-white`} aria-hidden="true">
-        <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
-          <g fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="1">
-            <circle cx="232" cy="88" r="46" />
-            <circle cx="232" cy="88" r="28" />
-            <line x1="150" y1="88" x2="320" y2="88" />
-            <line x1="232" y1="10" x2="232" y2="170" />
-          </g>
-          <circle cx="232" cy="88" r="10" fill="#ff4d00" />
-          <g fontFamily="var(--font-brand-meta), sans-serif" fontSize="8" fill="#a1a1aa" letterSpacing="1.5">
-            <text x="244" y="40">{locale === "es" ? "ESTRATEGIA" : "STRATEGY"}</text>
-            <text x="244" y="150">{locale === "es" ? "NARRATIVA" : "NARRATIVE"}</text>
-            <text x="276" y="84">DIGITAL</text>
-          </g>
-        </svg>
-        <span className={`${codeCls} text-zinc-400`}>{label}</span>
-        <span className={`${wordCls} text-white`}>{word}</span>
-      </div>
-    );
-  }
-
-  if (m.v === "C") {
-    return (
-      <div className={`${base} bg-[var(--accent)]`} aria-hidden="true">
-        <span className={`${codeCls} text-zinc-900`}>{label}</span>
-        <span className="absolute -bottom-6 -right-1.5 font-display text-[clamp(110px,16vw,170px)] font-extrabold leading-none tracking-[-0.06em] text-white/90">
-          {vert.code}
-        </span>
-        {ch && <Image src={charSrc(ch)} alt="" width={w} height={h} className="absolute bottom-4 left-4 h-auto w-[26%] max-w-[140px]" />}
-      </div>
-    );
-  }
 
   return (
-    <div className={`${base} bg-[var(--sand)]`} aria-hidden="true">
-      <span className={`${codeCls} text-zinc-600`}>{label}</span>
-      <div className="absolute right-3.5 top-9 grid w-[58%] gap-1.5">
-        {[80, 64].map((pct) => (
-          <span key={`x${pct}`} className="relative block h-2 rounded bg-zinc-900/15" style={{ width: `${pct}%` }}>
-            <span className="absolute -inset-x-[4%] top-1/2 h-0.5 -rotate-3 bg-[var(--accent)]" />
-          </span>
-        ))}
-        {[88, 56].map((pct) => (
-          <span key={`ok${pct}`} className="block h-2 rounded bg-zinc-900" style={{ width: `${pct}%` }} />
-        ))}
-      </div>
-      <span className={`${wordCls} text-zinc-900`}>{word}</span>
+    <div className={`relative w-full overflow-hidden bg-[var(--paper)] ${ratio} ${className}`} aria-hidden="true">
+      <svg
+        viewBox="0 0 100 100"
+        className="absolute right-[5%] top-[9%] h-[64%] w-auto"
+        style={m.mirror ? { transform: "scaleX(-1)" } : undefined}
+      >
+        <Shapes c={m.c} />
+      </svg>
+      <span className="text-eyebrow absolute left-4 top-3.5 text-zinc-600">{label}</span>
+      <span className="absolute bottom-3 left-4 font-serif text-[clamp(28px,4vw,44px)] font-semibold italic leading-none tracking-[-0.01em] text-zinc-900">
+        {word}
+      </span>
     </div>
   );
 }

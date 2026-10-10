@@ -10,6 +10,9 @@ export const HOME_V2: Record<Locale, {
   cta_prompts: string;
   cta_roast: string;
   fine: string;
+  hero_alt: string;
+  how_eyebrow: string;
+  how_h2: string;
   tiers_h2: string;
   lib_eyebrow: string;
   lib_title: string;
@@ -38,6 +41,9 @@ export const HOME_V2: Record<Locale, {
     lead: "Elige un prompt hecho por estrategas de ARTO, pégalo en Claude o ChatGPT y entrega trabajo de marca el mismo día. En español y en inglés.",
     cta_prompts: "Explorar prompts gratis",
     cta_roast: "Roastea tu marca",
+    hero_alt: "Ilustración: un personaje con un ojo por cabeza trabaja en su laptop, sentado sobre una luna naranja.",
+    how_eyebrow: "Cómo funciona",
+    how_h2: "Del prompt al resultado, en tres pasos.",
     fine: "Cuenta gratis con tu correo · {n} prompts · 12 verticales creativas",
     tiers_h2: "Tres formas de empezar.",
     lib_eyebrow: "Gratis con cuenta",
@@ -67,6 +73,9 @@ export const HOME_V2: Record<Locale, {
     lead: "Pick a prompt written by ARTO strategists, paste it into Claude or ChatGPT, and ship brand work the same day. In English and Spanish.",
     cta_prompts: "Browse free prompts",
     cta_roast: "Roast your brand",
+    hero_alt: "Illustration: a character with an eye for a head works on a laptop, sitting on an orange moon.",
+    how_eyebrow: "How it works",
+    how_h2: "From prompt to result, in three steps.",
     fine: "Free account with your email · {n} prompts · 12 creative verticals",
     tiers_h2: "Three ways to start.",
     lib_eyebrow: "Free with an account",

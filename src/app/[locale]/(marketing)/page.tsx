@@ -145,8 +145,9 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6">
-      {/* HERO v2 (2026-10-07): titular con palabra en serif y grafico de tres pasos que
-        * explica el producto al entrar. */}
+      {/* HERO v2 (2026-10-07): titular con palabra en serif. Ilustracion de siluetas
+        * (estilo A, aprobado por Victor el 2026-10-10) en la columna derecha; el grafico de
+        * tres pasos baja a su propia seccion justo debajo. */}
       <section className="grid items-center gap-10 py-14 sm:py-20 lg:grid-cols-[1.02fr_1fr] lg:gap-12">
         <div className="grid min-w-0 gap-5">
           <p className="text-eyebrow text-[var(--accent)]">{v2.eyebrow}</p>
@@ -160,6 +161,22 @@ export default async function HomePage({ params }: Props) {
           </div>
           <p className="font-mono text-xs text-zinc-400">{withCount(v2.fine)}</p>
         </div>
+        <div className="overflow-hidden rounded-[var(--radius-lg)] bg-[var(--paper)]">
+          <Image
+            src="/illustrations/hero-luna.webp"
+            alt={v2.hero_alt}
+            width={1168}
+            height={880}
+            priority
+            sizes="(min-width: 1024px) 560px, 100vw"
+            className="h-auto w-full"
+          />
+        </div>
+      </section>
+
+      {/* COMO FUNCIONA: el grafico de tres pasos que antes ocupaba el hero */}
+      <section className="grid items-center gap-10 border-t border-zinc-200 py-16 lg:grid-cols-[1fr_1fr] lg:gap-12">
+        <SectionHead eyebrow={v2.how_eyebrow} title={v2.how_h2} />
         <HowItWorks locale={locale} />
       </section>
 
