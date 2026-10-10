@@ -11,9 +11,9 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://arto-studio-ai.vercel.app/.well-known/openapi.json"
+    "url": "https://creative.artostudio.ai/.well-known/openapi.json"
   },
-  "logo_url": "https://arto-studio-ai.vercel.app/brand/arto-logo-black.png",
+  "logo_url": "https://creative.artostudio.ai/brand/arto-logo-black.png",
   "contact_email": "vhcelaya@artogroup.com",
-  "legal_info_url": "https://arto-studio-ai.vercel.app"
+  "legal_info_url": "https://creative.artostudio.ai/en/terms"
 }

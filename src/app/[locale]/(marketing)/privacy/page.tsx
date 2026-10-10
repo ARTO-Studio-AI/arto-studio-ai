@@ -87,13 +87,13 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
       <div className="prose prose-neutral mt-10 max-w-none text-zinc-800">
         {es ? (
           <p>
-            ARTO Studio AI (creative.artostudio.ai, el «Servicio») es un producto de ARTO Group operado por ARTO US, empresa de Estados Unidos que también cobra los planes («nosotros»), responsable de tus datos personales. Este aviso
+            ARTO Studio AI (creative.artostudio.ai, el «Servicio») es un producto de ARTO Group operado por ARTO Inc., sociedad constituida en Delaware, Estados Unidos, con domicilio en 101 Avenue of the Americas, Fl 8, New York, NY 10013, que también cobra los planes («nosotros») y es responsable de tus datos personales. Este aviso
             explica qué datos personales tratamos, para qué, con quién los compartimos y qué derechos tienes. Para
             cualquier duda o solicitud escríbenos a {mail}.
           </p>
         ) : (
           <p>
-            ARTO Studio AI (creative.artostudio.ai, the &quot;Service&quot;) is an ARTO Group product operated by ARTO US, a United States company that also bills the plans (&quot;we&quot;), and the controller of your personal data. This
+            ARTO Studio AI (creative.artostudio.ai, the &quot;Service&quot;) is an ARTO Group product operated by ARTO Inc., a Delaware corporation located at 101 Avenue of the Americas, Fl 8, New York, NY 10013, which also bills the plans (&quot;we&quot;) and is the controller of your personal data. This
             policy explains what personal data we process, why, who we share it with and what rights you have. For any
             question or request, email {mail}.
           </p>
@@ -181,8 +181,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </ul>
         <p>
           {es
-            ? "Tus datos se tratan en Estados Unidos, donde están ARTO US y la mayoría de estos proveedores, con las garantías de sus propios contratos de tratamiento de datos."
-            : "Your data is processed in the United States, where ARTO US and most of these providers are based, under the safeguards of their own data processing agreements."}
+            ? "Tus datos se tratan en Estados Unidos, donde están ARTO Inc. y la mayoría de estos proveedores, con las garantías de sus propios contratos de tratamiento de datos."
+            : "Your data is processed in the United States, where ARTO Inc. and most of these providers are based, under the safeguards of their own data processing agreements."}
         </p>
 
         <h2 id="cookies">Cookies</h2>
