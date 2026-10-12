@@ -82,8 +82,10 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
     if (!pending) return;
     setBusy(true);
     const r = await post("/api/admin/catalogo/lote", { ...pending.scope, patch: pending.patch, confirm: confirmText });
-    setBusy(false);
-    if (!r.ok) return setMessage({ text: String(r.data.error ?? "No se pudo aplicar."), bad: true });
+    if (!r.ok) {
+      setBusy(false);
+      return setMessage({ text: String(r.data.error ?? "No se pudo aplicar."), bad: true });
+    }
     setPending(null);
     setSelected(new Set());
     setAllInFilter(false);
@@ -91,13 +93,17 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
     const pendingEmb = Number(r.data.embeddingsPending ?? 0);
     setMessage({
       text: changed
-        ? `Listo: ${changed} ${changed === 1 ? "prompt cambió" : "prompts cambiaron"} (${r.data.summary}).${pendingEmb ? ` ${pendingEmb} quedan sin embedding: usa «Calcular embeddings».` : ""}`
+        ? `Listo: ${changed} ${changed === 1 ? "prompt cambió" : "prompts cambiaron"} (${r.data.summary}).${pendingEmb ? ` Recalculando ${pendingEmb} embeddings…` : ""}`
         : "No había nada que cambiar.",
       batchId: changed ? String(r.data.batchId) : undefined,
     });
     // Los embeddings que quedaron pendientes se reponen solos, sin esperar a que alguien
     // pulse el boton (auditoria de Fable, R2).
-    if (pendingEmb) await fillEmbeddings();
+    if (pendingEmb) {
+      await fillEmbeddings();
+      setMessage((m) => (m ? { ...m, text: m.text.replace(/ Recalculando \d+ embeddings…/, " Embeddings al día.") } : m));
+    }
+    setBusy(false);
     router.refresh();
   }
 
