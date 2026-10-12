@@ -34,6 +34,13 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    title: "Catálogo",
+    items: [
+      { href: "/admin/catalogo", label: "Prompts" },
+      { href: "/admin/catalogo/historial", label: "Historial" },
+    ],
+  },
+  {
     title: "Producto",
     items: [
       { href: "/admin/roasts", label: "Brand Roasts" },
