@@ -88,7 +88,7 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
   const byCampaign = group(rows, (p) => (p.utm_campaign ? { key: p.utm_campaign, label: p.utm_campaign, sub: p.utm_source ?? undefined } : null), inList);
   const byReferrer = group(rows, (p) => {
     const h = host(p.referrer);
-    return h && !h.endsWith("artostudio.ai") ? { key: h, label: h } : null;
+    return h && h !== "artostudio.ai" && !h.endsWith(".artostudio.ai") ? { key: h, label: h } : null;
   }, inList);
 
   const total = rows.length;

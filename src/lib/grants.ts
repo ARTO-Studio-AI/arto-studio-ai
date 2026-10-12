@@ -36,6 +36,10 @@ export async function grantTier(email: string, tier: GrantTier, note: string, by
   if (readErr) throw new Error(readErr.message);
   const existing = cur as GrantRow | null;
   if (existing?.is_admin) throw new Error("Esa concesión incluye permisos de administrador; se cambia por SQL, no desde el panel.");
+  // El trigger copia is_admin de la concesion al perfil: a un perfil que ya es admin (puesto
+  // por SQL sin concesion) se lo apagaria. Esos se manejan por SQL (auditoria de Fable, #91).
+  const { data: prof } = await sb.from("profiles").select("is_admin").eq("email", email).maybeSingle();
+  if ((prof as { is_admin: boolean } | null)?.is_admin) throw new Error("Ese correo es administrador; su plan se cambia por SQL, no desde el panel.");
   const line = `[${stamp(by.email)}] ${tier}${note ? `: ${note}` : ""}`;
   const notes = [existing?.notes, line].filter(Boolean).join("\n").slice(-2000);
   const now = new Date().toISOString();
@@ -55,16 +59,22 @@ export async function revokeGrant(email: string, by: { email: string }): Promise
   if (readErr) throw new Error(readErr.message);
   if (!cur) throw new Error("Ese correo no tiene concesión.");
   if ((cur as GrantRow).is_admin) throw new Error("Esa concesión incluye permisos de administrador; se quita por SQL, no desde el panel.");
-  const { error } = await sb.from("email_tier_grants").delete().eq("email", email);
-  if (error) throw new Error(error.message);
-  console.log(JSON.stringify({ event: "grant_revoked", email, by: by.email, at: new Date().toISOString() }));
-
+  // Primero el perfil y despues la concesion: si algo falla a la mitad, la concesion sigue
+  // viva y reintentar funciona (auditoria de Fable, #91).
   const { data: prof } = await sb.from("profiles").select("id, tier, subscription_status, stripe_subscription_id").eq("email", email).maybeSingle();
   const p = prof as { id: string; tier: string; subscription_status: string | null; stripe_subscription_id: string | null } | null;
-  if (!p || p.tier === "free") return { downgraded: false, keptByStripe: false };
-  const stripeLive = Boolean(p.stripe_subscription_id) && ["active", "past_due"].includes(p.subscription_status ?? "");
-  if (stripeLive) return { downgraded: false, keptByStripe: true };
-  const { error: upErr } = await sb.from("profiles").update({ tier: "free", updated_at: new Date().toISOString() }).eq("id", p.id);
-  if (upErr) throw new Error(upErr.message);
-  return { downgraded: true, keptByStripe: false };
+  let result = { downgraded: false, keptByStripe: false };
+  if (p && p.tier !== "free") {
+    const stripeLive = Boolean(p.stripe_subscription_id) && ["active", "past_due", "trialing"].includes(p.subscription_status ?? "");
+    if (stripeLive) result = { downgraded: false, keptByStripe: true };
+    else {
+      const { error: upErr } = await sb.from("profiles").update({ tier: "free", updated_at: new Date().toISOString() }).eq("id", p.id);
+      if (upErr) throw new Error(upErr.message);
+      result = { downgraded: true, keptByStripe: false };
+    }
+  }
+  const { error } = await sb.from("email_tier_grants").delete().eq("email", email);
+  if (error) throw new Error(error.message);
+  console.log(JSON.stringify({ event: "grant_revoked", email, by: by.email, at: new Date().toISOString(), ...result }));
+  return result;
 }
