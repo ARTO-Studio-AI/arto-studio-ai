@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { isLocale } from "@/i18n/config";
+import { LOCALE_HEADER } from "@/lib/seo";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -11,9 +12,11 @@ import { Button } from "@/components/ui";
  * params, asi que el idioma se lee de la URL (cabecera de Next) y cae a "en". */
 export default async function LocaleNotFound() {
   const h = await headers();
+  // El proxy manda el idioma de la URL en x-locale (tambien en las rutas que no existen).
+  const fromProxy = h.get(LOCALE_HEADER);
   const path = h.get("x-invoke-path") ?? h.get("next-url") ?? h.get("referer") ?? "";
   const seg = path.replace(/^https?:\/\/[^/]+/, "").split("/").filter(Boolean)[0];
-  const locale = isLocale(seg) ? seg : "en";
+  const locale = isLocale(fromProxy) ? fromProxy : isLocale(seg) ? seg : "en";
   const dict = getDictionary(locale);
   const es = locale === "es";
   return (

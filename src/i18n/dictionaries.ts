@@ -148,7 +148,7 @@ export const DICTIONARIES = {
         },
         {
           q: "Do I need a credit card to start?",
-          a: "No. The Free plan opens 3 prompts a day from the 736 free ones, with smart search, favorites, and one Brand Roast a month, without entering any payment details.",
+          a: "No. The Free plan opens 3 prompts a day from the 736 free ones, with smart search, favorites, and the Brand Roast, without entering any payment details.",
         },
         {
           q: "What is Brand Roast, and is it really free?",
@@ -219,7 +219,7 @@ export const DICTIONARIES = {
         "Bilingual EN / ES",
         "Smart Search with recommendations",
         "Save favorites and collections",
-        "1 Brand Roast a month",
+        "Free Brand Roast",
       ],
       tier_pro_name: "Pro",
       tier_pro_tagline: "The whole library, no daily limit.",
@@ -228,8 +228,6 @@ export const DICTIONARIES = {
       tier_pro_cta: "Subscribe",
       tier_pro_features: [
         "All 3,001 prompts (EN / ES), no daily limit",
-        "Brand Roast unlimited",
-        "API key",
         "Email support",
         "Cancel anytime",
       ],
@@ -267,8 +265,7 @@ export const DICTIONARIES = {
         ["Prompt opens per day", "3", "Unlimited", "Unlimited", "soon"],
         ["Collections + Favorites", "yes", "yes", "yes", "soon"],
         ["Smart Search", "yes", "yes", "yes", "soon"],
-        ["Brand Roast", "1 a month", "Unlimited", "Unlimited", "soon"],
-        ["API key", "no", "yes", "yes", "soon"],
+        ["Brand Roast", "yes", "yes", "yes", "soon"],
         ["AI Skills", "no", "no", "yes", "soon"],
         ["AI Agents", "no", "no", "no", "soon"],
         ["Support", "Community", "Email", "Priority", "soon"],
@@ -277,11 +274,11 @@ export const DICTIONARIES = {
       meta_description: "Start free with 3 prompts a day. Unlock all 3,001 prompts for $9 USD a month. Studio and AI Agents coming soon.",
     },
     skills: {
-      badge: "Next week",
+      badge: "Coming soon",
       h1: "Skills Studio",
       hero_body:
         "AI-powered creative tools built on ARTO's real methodology. Each skill encodes a specific workflow that took years to develop, now available on demand.",
-      hero_pricing: "The first ARTO Brand Strategy pack ships the week of October 12. Create your free account and you'll be the first to know.",
+      hero_pricing: "The first ARTO Brand Strategy pack is on its way. Create your free account and you'll be the first to know.",
       status_in_dev: "In development",
       status_planned: "Planned",
       list: [
@@ -563,7 +560,7 @@ export const DICTIONARIES = {
         },
         {
           q: "¿Necesito tarjeta para empezar?",
-          a: "No. El plan gratis abre 3 prompts al día de los 736 gratuitos, con búsqueda inteligente, favoritos y un Brand Roast al mes, sin meter ningún dato de pago.",
+          a: "No. El plan gratis abre 3 prompts al día de los 736 gratuitos, con búsqueda inteligente, favoritos y el Brand Roast, sin meter ningún dato de pago.",
         },
         {
           q: "¿Qué es Brand Roast y de verdad es gratis?",
@@ -621,10 +618,10 @@ export const DICTIONARIES = {
       mxn_note: "≈ ${mxn} MXN, solo como referencia (tipo de cambio aproximado de 16.89; se cobra en USD)",
       footnote: "Pagos procesados por Stripe en USD. Cancela desde tu cuenta cuando quieras.",
       compare_h2: "Qué incluye cada plan",
-      compare_th: ["Característica", "Free $0", "Pro $9 USD", "Studio $29 USD", "Agentes"],
+      compare_th: ["Característica", "Gratis $0", "Pro $9 USD", "Studio $29 USD", "Agentes"],
       compare_soon: "pronto",
       compare_yes: "Incluido",
-      tier_free_name: "Free",
+      tier_free_name: "Gratis",
       tier_free_tagline: "Explora la biblioteca.",
       tier_free_price: "$0",
       tier_free_period: "USD / siempre",
@@ -634,7 +631,7 @@ export const DICTIONARIES = {
         "Bilingüe EN / ES",
         "Búsqueda inteligente con recomendaciones",
         "Guardar favoritos y colecciones",
-        "1 Brand Roast al mes",
+        "Brand Roast gratis",
       ],
       tier_pro_name: "Pro",
       tier_pro_tagline: "Toda la biblioteca, sin límite diario.",
@@ -643,8 +640,6 @@ export const DICTIONARIES = {
       tier_pro_cta: "Suscribirme",
       tier_pro_features: [
         "Los 3,001 prompts (EN / ES) sin límite diario",
-        "Brand Roast ilimitado",
-        "API key",
         "Soporte por email",
         "Cancela cuando quieras",
       ],
@@ -682,8 +677,7 @@ export const DICTIONARIES = {
         ["Prompts abiertos al día", "3", "Ilimitado", "Ilimitado", "soon"],
         ["Colecciones + Favoritos", "yes", "yes", "yes", "soon"],
         ["Búsqueda inteligente", "yes", "yes", "yes", "soon"],
-        ["Brand Roast", "1 al mes", "Ilimitado", "Ilimitado", "soon"],
-        ["API key", "no", "yes", "yes", "soon"],
+        ["Brand Roast", "yes", "yes", "yes", "soon"],
         ["AI Skills", "no", "no", "yes", "soon"],
         ["Agentes de IA", "no", "no", "no", "soon"],
         ["Soporte", "Comunidad", "Email", "Prioritario", "soon"],
@@ -692,11 +686,11 @@ export const DICTIONARIES = {
       meta_description: "Empieza gratis con 3 prompts al día. Desbloquea los 3,001 prompts por $9 USD al mes. Studio y Agentes de IA, próximamente.",
     },
     skills: {
-      badge: "La próxima semana",
+      badge: "Muy pronto",
       h1: "Skills Studio",
       hero_body:
         "Herramientas creativas con IA construidas sobre la metodología real de ARTO. Cada skill encapsula un flujo específico que tomó años desarrollar, ahora disponible bajo demanda.",
-      hero_pricing: "El primer pack ARTO de Estrategia de Marca sale la semana del 12 de octubre. Crea tu cuenta gratis y te avisamos primero.",
+      hero_pricing: "El primer pack ARTO de Estrategia de Marca está en camino. Crea tu cuenta gratis y te avisamos primero.",
       status_in_dev: "En desarrollo",
       status_planned: "En plan",
       list: [

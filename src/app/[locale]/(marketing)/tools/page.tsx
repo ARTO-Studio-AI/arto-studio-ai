@@ -21,6 +21,7 @@ export default async function ToolsPage({ params }: Props) {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
+  const es = locale === "es";
   const byGroup = ORDER.map((g) => ({
     group: g,
     meta: AI_GROUPS[g],
@@ -35,23 +36,23 @@ export default async function ToolsPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <header className="max-w-3xl">
-        <p className="text-eyebrow text-zinc-500">Reference</p>
-        <h1 className="text-h1 mt-3">AI Tools</h1>
+        <p className="text-eyebrow text-zinc-500">{es ? "Referencia" : "Reference"}</p>
+        <h1 className="text-h1 mt-3">{es ? "Herramientas de IA" : "AI Tools"}</h1>
         <span className="accent-rule mt-4" />
         <p className="mt-4 text-zinc-600">
-          The generative AI tools we recommend, grouped by what they output. Use this as a
-          quick lookup when you need to pick the right tool for a prompt, or to discover
-          alternatives for any tool you already use.
+          {es
+            ? "Las herramientas de IA generativa que recomendamos, agrupadas por lo que producen. Usa esta lista como consulta rápida para elegir la herramienta correcta para un prompt o para descubrir alternativas a las que ya usas."
+            : "The generative AI tools we recommend, grouped by what they output. Use this as a quick lookup when you need to pick the right tool for a prompt, or to discover alternatives for any tool you already use."}
         </p>
         <p className="mt-2 font-mono text-xs text-zinc-500">
-          {AI_TOOLS.length} tools · {ORDER.length} groups · {locale === "es" ? "Última actualización" : "Last updated"}: {updated}
+          {AI_TOOLS.length} {es ? "herramientas" : "tools"} · {ORDER.length} {es ? "grupos" : "groups"} · {es ? "Última actualización" : "Last updated"}: {updated}
         </p>
       </header>
 
       {byGroup.map(({ group, meta, tools }) => (
         <section key={group} className="mt-12">
           <div className="flex items-baseline gap-3">
-            <h2 className="text-xl font-semibold tracking-tight">{meta.label}</h2>
+            <h2 className="text-xl font-semibold tracking-tight">{es ? meta.label_es : meta.label}</h2>
             <Badge tone="neutral">{tools.length}</Badge>
           </div>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -59,10 +60,10 @@ export default async function ToolsPage({ params }: Props) {
               <Card key={t.key} as="article" padding="sm" interactive={false} className="transition hover:border-zinc-400">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-medium">{t.label}</h3>
-                  {t.status === "deprecating" && <Badge tone="soon">Deprecating</Badge>}
+                  {t.status === "deprecating" && <Badge tone="soon">{es ? "Se retira" : "Deprecating"}</Badge>}
                   {t.status === "preview" && <Badge tone="live">Preview</Badge>}
                 </div>
-                <p className="mt-2 text-sm text-zinc-600">{t.description}</p>
+                <p className="mt-2 text-sm text-zinc-600">{es ? t.description_es ?? t.description : t.description}</p>
                 {t.url && (
                   <a
                     href={t.url}

@@ -4,9 +4,8 @@
 
 // Portfolio data from ARTO Portafolio 2026 (Notion).
 // This will eventually be fetched from Notion API at build time. Project
-// names, client names, and one-paragraph project descriptions stay in
-// their original language — they're brand-tied content, and the chrome
-// (headings, stats labels, CTA) is the part the visitor reads first.
+// names and client names stay in their original language. The description
+// has an English version and a Spanish one for /es (description_es, 2026-10-12).
 export interface WorkProject {
   slug: string;
   name: string;
@@ -17,6 +16,8 @@ export interface WorkProject {
   location: string;
   tags: string[];
   description: string;
+  /** Descripcion en espanol para /es (2026-10-12). */
+  description_es: string;
   image: string;
 }
 
@@ -32,6 +33,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "B2B", "Digital", "Identidad Visual"],
     description:
       "Branding and web development for Grupo Proeza. Strengthened the brand system and translated it into a clear, responsive web experience that communicates the group's platform and business units.",
+    description_es:
+      "Branding y desarrollo web para Grupo Proeza. Fortalecimos el sistema de marca y lo trasladamos a una experiencia web clara y adaptable, que comunica la plataforma del grupo y sus unidades de negocio.",
     image: "/work/grupo-proeza-2025-1200.webp",
   },
   {
@@ -45,6 +48,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Identidad Visual", "Estrategia"],
     description:
       "Brand identity for GSE Biomedical in the health and medical technology sector. Created a clear, professional visual identity to build recognition and credibility in a specialized market.",
+    description_es:
+      "Identidad de marca para GSE Biomedical, en el sector de salud y tecnología médica. Creamos una identidad visual clara y profesional para ganar reconocimiento y credibilidad en un mercado especializado.",
     image: "/work/gse-biomedical.webp",
   },
   {
@@ -58,6 +63,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "B2B", "Identidad Visual", "Estrategia", "Digital"],
     description:
       "Brand ecosystem for Grupo Proeza. Structured a consistent brand system across business units and channels, creating visual clarity and narrative coherence.",
+    description_es:
+      "Sistema de marca para Grupo Proeza. Estructuramos un sistema de marca consistente entre unidades de negocio y canales, con claridad visual y coherencia narrativa.",
     image: "/work/grupo-proeza-ecosystem.webp",
   },
   {
@@ -71,6 +78,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Identidad Visual"],
     description:
       "Branding for a technology investment vehicle. Built a contemporary, sophisticated visual identity that communicates vision, solidity, and purpose.",
+    description_es:
+      "Branding para un vehículo de inversión en tecnología. Construimos una identidad visual contemporánea y sofisticada que comunica visión, solidez y propósito.",
     image: "/work/poder-partners.webp",
   },
   {
@@ -84,6 +93,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail"],
     description:
       "UI design and Shopify development focused on clarity and conversion. Created a stable, scalable e-commerce platform that elevated user experience.",
+    description_es:
+      "Diseño de interfaz y desarrollo en Shopify enfocados en la claridad y la conversión. Creamos una plataforma de comercio electrónico estable, preparada para crecer, que mejoró la experiencia de usuario.",
     image: "/work/mr-fox.webp",
   },
   {
@@ -97,6 +108,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Retail"],
     description:
       "Brand strategy and showroom experience for Kavak. Developed narrative, visual cues, and a coherent physical experience for customers and visitors.",
+    description_es:
+      "Estrategia de marca y experiencia de showroom para Kavak. Desarrollamos la narrativa, las señales visuales y una experiencia física coherente para clientes y visitantes.",
     image: "/work/kavak-showroom.webp",
   },
   {
@@ -110,6 +123,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Full brand ecosystem — strategy, visual identity, and web platform — for a global digital services company. Built to compete across multiple markets.",
+    description_es:
+      "Sistema de marca completo (estrategia, identidad visual y plataforma web) para una empresa global de servicios digitales. Pensado para competir en varios mercados.",
     image: "/work/break-off.webp",
   },
   {
@@ -123,6 +138,8 @@ export const projects: WorkProject[] = [
     tags: ["Alimentos", "Identidad Visual", "Corporativo", "Retail"],
     description:
       "Monumental mural designed by Pedro Friedeberg for Cerveza Corona. Art, brand, and public space merged into a memorable urban experience.",
+    description_es:
+      "Mural monumental diseñado por Pedro Friedeberg para Cerveza Corona. Arte, marca y espacio público se unieron en una experiencia urbana memorable.",
     image: "/work/el-mural-mas-fino.webp",
   },
   {
@@ -136,6 +153,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "B2B", "Digital"],
     description:
       "Comprehensive brand, web, and video project. Strengthened the group's visibility and communication of its purpose and business units.",
+    description_es:
+      "Proyecto integral de marca, web y video. Fortaleció la visibilidad del grupo y la comunicación de su propósito y sus unidades de negocio.",
     image: "/work/grupo-proeza-2019.webp",
   },
   {
@@ -149,6 +168,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail"],
     description:
       "Brand identity and Shopify e-commerce for a New York retail brand. Created a cohesive digital presence with a focus on usability and aesthetics.",
+    description_es:
+      "Identidad de marca y comercio electrónico en Shopify para una marca de retail de Nueva York. Creamos una presencia digital cohesiva, con atención a la usabilidad y la estética.",
     image: "/work/niki-b.webp",
   },
   {
@@ -162,6 +183,8 @@ export const projects: WorkProject[] = [
     tags: ["Identidad Visual"],
     description:
       "Naming and brand identity. Defined the name and built a clear, consistent visual system ready to scale across touchpoints.",
+    description_es:
+      "Naming e identidad de marca. Definimos el nombre y construimos un sistema visual claro y consistente, listo para crecer en todos los puntos de contacto.",
     image: "/work/vehement.webp",
   },
   {
@@ -175,6 +198,8 @@ export const projects: WorkProject[] = [
     tags: ["Alimentos", "Identidad Visual"],
     description:
       "Branding and illustration for an artisanal mezcal brand. Distinctive visual language that communicates tradition and character in a competitive market.",
+    description_es:
+      "Branding e ilustración para una marca de mezcal artesanal. Un lenguaje visual distintivo que comunica tradición y carácter en un mercado competido.",
     image: "/work/mezcal-inmortal.webp",
   },
   {
@@ -188,6 +213,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Identidad Visual"],
     description:
       "Branding and product design for a financial institution empowering women through credit access and financial education.",
+    description_es:
+      "Branding y diseño de producto para una institución financiera que impulsa a las mujeres mediante el acceso al crédito y la educación financiera.",
     image: "/work/muvop.webp",
   },
   {
@@ -201,6 +228,8 @@ export const projects: WorkProject[] = [
     tags: ["Alimentos", "Corporativo", "Identidad Visual", "Estrategia"],
     description:
       "Brand strategy and redesign for Sigma Alimentos' meat cuts brand. Consumer segmentation, simplified identity, and improved shelf clarity.",
+    description_es:
+      "Estrategia y rediseño de marca para la marca de cortes de carne de Sigma Alimentos. Segmentación de consumidores, identidad simplificada y mayor claridad en el anaquel.",
     image: "/work/comnor.webp",
   },
   {
@@ -214,6 +243,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail"],
     description:
       "UI/UX redesign and Shopify store for a beloved Mexican shoe brand. Translated the physical brand personality into a digital shopping experience.",
+    description_es:
+      "Rediseño de UI/UX y tienda en Shopify para una querida marca mexicana de calzado. Trasladamos la personalidad de la marca física a una experiencia de compra digital.",
     image: "/work/loly-in-the-sky.webp",
   },
   {
@@ -227,6 +258,8 @@ export const projects: WorkProject[] = [
     tags: ["Identidad Visual"],
     description:
       "Branding and product design for Zirker. Defined a clear identity and design language for the product, ensuring consistency and scalability across touchpoints.",
+    description_es:
+      "Branding y diseño de producto para Zirker. Definimos una identidad clara y un lenguaje de diseño para el producto, con consistencia y capacidad de crecer en todos los puntos de contacto.",
     image: "/work/zirker.webp",
   },
   {
@@ -240,6 +273,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital"],
     description:
       "Web development for a contemporary art gallery. Clean architecture and elegant navigation optimized for exhibitions and artist profiles.",
+    description_es:
+      "Desarrollo web para una galería de arte contemporáneo. Arquitectura limpia y navegación elegante, pensadas para exposiciones y perfiles de artistas.",
     image: "/work/celaya-brothers-gallery.webp",
   },
   {
@@ -253,6 +288,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail"],
     description:
       "Branding and e-commerce for a creative art and products brand. Built a digital platform to grow the offering and reach new audiences.",
+    description_es:
+      "Branding y comercio electrónico para una marca creativa de arte y productos. Construimos una plataforma digital para ampliar la oferta y llegar a nuevas audiencias.",
     image: "/work/aisha-sufe.webp",
   },
   {
@@ -266,6 +303,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Industrial", "B2B", "Digital"],
     description:
       "Branding and UI system for Metalsa's innovation lab. Created a distinctive tech-forward identity with coherent interface language.",
+    description_es:
+      "Branding y sistema de UI para el laboratorio de innovación de Metalsa. Creamos una identidad distintiva, con vocación tecnológica y un lenguaje de interfaz coherente.",
     image: "/work/mlab-metalsa.webp",
   },
   {
@@ -279,6 +318,8 @@ export const projects: WorkProject[] = [
     tags: ["Industrial", "B2B", "Corporativo", "Identidad Visual", "Estrategia"],
     description:
       "Logo redesign and brand strategy for an industrial company. Refreshed identity with strategic guidelines for market positioning.",
+    description_es:
+      "Rediseño de logotipo y estrategia de marca para una empresa industrial. Identidad renovada con lineamientos estratégicos para su posicionamiento en el mercado.",
     image: "/work/galvasid.webp",
   },
   {
@@ -292,6 +333,8 @@ export const projects: WorkProject[] = [
     tags: ["Alimentos", "Retail", "Digital", "Packaging"],
     description:
       "Branding and web development for an artisanal gift basket brand. Clear customization experience aligned with the handcrafted proposition.",
+    description_es:
+      "Branding y desarrollo web para una marca de canastas de regalo artesanales. Una experiencia de personalización clara, acorde con la propuesta hecha a mano.",
     image: "/work/basket.webp",
   },
   {
@@ -305,6 +348,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail", "Identidad Visual"],
     description:
       "Full brand creation — naming, identity, UI, and product design. Built a distinctive and coherent visual system for retail growth.",
+    description_es:
+      "Creación integral de marca: naming, identidad, UI y diseño de producto. Construimos un sistema visual distintivo y coherente para el crecimiento en retail.",
     image: "/work/julee.webp",
   },
   {
@@ -318,6 +363,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Branding, UI design, and web development. Built a coherent digital presence optimized for communication and value proposition.",
+    description_es:
+      "Branding, diseño de UI y desarrollo web. Construimos una presencia digital coherente, pensada para comunicar la propuesta de valor.",
     image: "/work/tres-mas-dos.webp",
   },
   {
@@ -331,6 +378,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital"],
     description:
       "UI design and web development for a lighting architecture studio. Clean interface and elegant navigation for portfolio and services showcase.",
+    description_es:
+      "Diseño de UI y desarrollo web para un estudio de iluminación arquitectónica. Interfaz limpia y navegación elegante para presentar portafolio y servicios.",
     image: "/work/lua.webp",
   },
   {
@@ -344,6 +393,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Integrated branding, interface design, and web development. Built a consistent brand identity and clear digital experience.",
+    description_es:
+      "Branding, diseño de interfaz y desarrollo web integrados. Construimos una identidad de marca consistente y una experiencia digital clara.",
     image: "/work/load.webp",
   },
   {
@@ -357,6 +408,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Brand identity and web platform for a technology company. Strengthened digital presence with clear brand communication.",
+    description_es:
+      "Identidad de marca y plataforma web para una empresa de tecnología. Fortalecimos la presencia digital con una comunicación de marca clara.",
     image: "/work/jetboards.webp",
   },
   {
@@ -370,6 +423,8 @@ export const projects: WorkProject[] = [
     tags: ["Industrial", "B2B", "Corporativo", "Identidad Visual"],
     description:
       "Brand identity for an industrial company. Created a solid visual system to strengthen market positioning and recognition.",
+    description_es:
+      "Identidad de marca para una empresa industrial. Creamos un sistema visual sólido para reforzar su posicionamiento y reconocimiento en el mercado.",
     image: "/work/hagane.webp",
   },
   {
@@ -383,6 +438,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Identidad Visual"],
     description:
       "Complete brand identity to establish a strong, distinctive market presence in Monterrey's services sector.",
+    description_es:
+      "Identidad de marca completa para establecer una presencia fuerte y distintiva en el sector de servicios de Monterrey.",
     image: "/work/florence.webp",
   },
   {
@@ -396,6 +453,8 @@ export const projects: WorkProject[] = [
     tags: ["Packaging", "Identidad Visual"],
     description:
       "Branding and packaging for an organic products brand. Coherent visual identity and clear shelf language communicating trust and quality.",
+    description_es:
+      "Branding y empaque para una marca de productos orgánicos. Identidad visual coherente y un lenguaje claro en el anaquel que comunica confianza y calidad.",
     image: "/work/tikaa.webp",
   },
   {
@@ -409,6 +468,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Integrated branding, UI design, and web development. Built a solid visual identity and coherent digital experience across touchpoints.",
+    description_es:
+      "Branding, diseño de UI y desarrollo web integrados. Construimos una identidad visual sólida y una experiencia digital coherente en todos los puntos de contacto.",
     image: "/work/the-misc-forest.webp",
   },
   {
@@ -422,6 +483,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual"],
     description:
       "Branding, interface design, and web development for a technology platform. Consistent brand identity and improved digital user experience.",
+    description_es:
+      "Branding, diseño de interfaz y desarrollo web para una plataforma de tecnología. Identidad de marca consistente y mejor experiencia digital para el usuario.",
     image: "/work/locker.webp",
   },
   {
@@ -435,6 +498,8 @@ export const projects: WorkProject[] = [
     tags: ["Corporativo", "Identidad Visual", "Digital", "B2B"],
     description:
       "Branding and web development for an industrial company. Distinctive and consistent presence, ready to scale with new applications.",
+    description_es:
+      "Branding y desarrollo web para una empresa industrial. Una presencia distintiva y consistente, lista para crecer con nuevas aplicaciones.",
     image: "/work/optime.webp",
   },
   {
@@ -448,6 +513,8 @@ export const projects: WorkProject[] = [
     tags: ["Identidad Visual", "Digital"],
     description:
       "Branding, UI, and web development for a Monterrey fashion and lifestyle brand. Unified identity and digital experience.",
+    description_es:
+      "Branding, UI y desarrollo web para una marca regiomontana de moda y estilo de vida. Identidad y experiencia digital unificadas.",
     image: "/work/call-us-whatever.webp",
   },
   {
@@ -461,6 +528,8 @@ export const projects: WorkProject[] = [
     tags: ["Identidad Visual"],
     description:
       "Brand identity for Monterrey's innovation and entrepreneurship ecosystem initiative. Clear communication of community purpose.",
+    description_es:
+      "Identidad de marca para la iniciativa de innovación y emprendimiento de Monterrey. Comunicación clara del propósito de la comunidad.",
     image: "/work/distrito.webp",
   },
   {
@@ -474,6 +543,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail"],
     description:
       "Branding and online store for a men's accessories brand. Optimized shopping experience aligned with brand identity.",
+    description_es:
+      "Branding y tienda en línea para una marca de accesorios para hombre. Una experiencia de compra cuidada y alineada con la identidad de la marca.",
     image: "/work/don-cortes.webp",
   },
   {
@@ -487,6 +558,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Retail", "Identidad Visual"],
     description:
       "Integrated branding, UI design, and e-commerce development. Coherent digital experience aligned with brand identity to drive online conversion.",
+    description_es:
+      "Branding, diseño de UI y desarrollo de comercio electrónico integrados. Una experiencia digital coherente con la identidad de marca, orientada a la conversión en línea.",
     image: "/work/maxis.webp",
   },
   {
@@ -500,6 +573,8 @@ export const projects: WorkProject[] = [
     tags: ["Digital", "Identidad Visual", "Corporativo", "B2B"],
     description:
       "Brand identity and web platform for an industrial projects company. Improved visibility and streamlined client interaction.",
+    description_es:
+      "Identidad de marca y plataforma web para una empresa de proyectos industriales. Mayor visibilidad y una interacción más ágil con los clientes.",
     image: "/work/lvl.webp",
   },
   {
@@ -513,6 +588,8 @@ export const projects: WorkProject[] = [
     tags: ["Identidad Visual"],
     description:
       "Brand identity standardization. Clear and consistent visual system across physical and digital touchpoints.",
+    description_es:
+      "Estandarización de la identidad de marca. Un sistema visual claro y consistente en los puntos de contacto físicos y digitales.",
     image: "/work/blue-box.webp",
   },
 ];

@@ -106,7 +106,7 @@ export default async function WorkPage({ params }: PageProps) {
                     {project.name}
                   </h2>
                   <p className="mt-1 text-sm font-medium text-zinc-500">{project.client}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-500 line-clamp-3">{project.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-500 line-clamp-3">{locale === "es" ? project.description_es : project.description}</p>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {project.categories.slice(0, 3).map((cat) => (
                       <Badge key={cat} tone="neutral" mono={false}>{cat}</Badge>

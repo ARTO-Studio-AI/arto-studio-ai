@@ -61,6 +61,22 @@ describe("GET /auth/callback", () => {
     expect(new URL(location).pathname).toBe("/login");
   });
 
+  it("con code invalido vuelve al login en el idioma de la persona", async () => {
+    const location = await locationFor("code=invalido", "NEXT_LOCALE=es");
+    expect(new URL(location).pathname).toBe("/es/login");
+    expect(new URL(location).searchParams.get("error")).toBe("invalid flow state");
+  });
+
+  it("sin code y con idioma elegido manda a /es/login con missing_code", async () => {
+    const location = await locationFor("", "NEXT_LOCALE=es");
+    expect(location).toBe(`${SITE}/es/login?error=missing_code`);
+  });
+
+  it("un NEXT_LOCALE que no existe no se cuela en la ruta del login", async () => {
+    const location = await locationFor("code=invalido", "NEXT_LOCALE=xx");
+    expect(new URL(location).pathname).toBe("/login");
+  });
+
   describe("sin next vuelve al idioma de la persona (H-62)", () => {
     afterAll(() => {
       session.user = null;
