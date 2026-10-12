@@ -421,11 +421,18 @@ export async function applyImport(
       });
       created.push(id);
     }
+    // El historial de cada tanda va justo despues de insertarla: si una tanda posterior
+    // falla, las altas ya hechas quedan en el historial y se pueden deshacer.
+    const inserted: string[] = [];
     for (const part of chunks(rowsToInsert, 100)) {
       const { error } = await sb.from("prompts").insert(part);
-      if (error) throw new Error(error.code === "23505" ? "Otro alta tomó uno de los ID mientras se importaba. Vuelve a intentar." : error.message);
+      if (error) {
+        const done = inserted.length ? ` Se alcanzaron a crear ${inserted.length} (${inserted.slice(0, 3).join(", ")}…); están en el historial.` : "";
+        throw new Error((error.code === "23505" ? "Otro alta tomó uno de los ID mientras se importaba. Vuelve a intentar." : error.message) + done);
+      }
+      await writeHistory(part.map((r) => ({ batch_id: batchId, entity_id: String(r.id), action: "create", summary: "importar CSV: alta", before: null, after: r, changed_by: by })));
+      inserted.push(...part.map((r) => String(r.id)));
     }
-    await writeHistory(rowsToInsert.map((r) => ({ batch_id: batchId, entity_id: String(r.id), action: "create", summary: "importar CSV: alta", before: null, after: r, changed_by: by })));
   }
 
   const reembed = [
