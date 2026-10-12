@@ -17,7 +17,7 @@ import type Stripe from "stripe";
  */
 
 export type ProfileSubscriptionStatus = "active" | "inactive" | "canceled" | "past_due";
-export type ProfileTier = "free" | "pro";
+export type ProfileTier = "free" | "pro" | "enterprise";
 
 export interface ProfileRef {
   id: string;
@@ -57,6 +57,9 @@ export interface WebhookDeps {
   findProfileBySubscription(subscriptionId: string): Promise<ProfileRef | null>;
   findProfileByCustomer(customerId: string): Promise<ProfileRef | null>;
   updateProfile(id: string, patch: ProfilePatch): Promise<boolean>;
+  /** Plan concedido por correo (email_tier_grants) al dueno del perfil, si lo tiene. Al
+   * cancelarse la suscripcion, la persona vuelve a ese plan y no a free (2026-10-12). */
+  findGrantTier?(profileId: string): Promise<"pro" | "enterprise" | null>;
   getClientById(id: string): Promise<ClientRef | null>;
   updateClient(id: string, patch: ClientPatch): Promise<boolean>;
   sendUpgradeConfirmationEmail(params: { to: string; name: string }): Promise<boolean>;
@@ -260,15 +263,19 @@ async function handleSubscriptionDeleted(
   const profile = await findProfileForSubscription(sub, deps);
   if (profile) {
     if (isStaleSubscription(profile, sub)) return ignoreStale(profile, sub);
+    // Si tiene una concesion, vuelve a ese plan. Si la consulta falla, se lanza para que
+    // Stripe reintente: mejor tarde que bajar a free a alguien con concesion.
+    const granted = deps.findGrantTier ? await deps.findGrantTier(profile.id) : null;
     const ok = await deps.updateProfile(profile.id, {
-      tier: "free",
+      tier: granted ?? "free",
       subscription_status: "canceled",
       subscription_ends_at: endedAtIso(sub) ?? periodEndIso(sub),
     });
     if (!ok) throw new Error(`profiles update failed for ${profile.id}`);
-    log("profile_downgraded_to_free", {
+    log(granted ? "profile_back_to_granted_tier" : "profile_downgraded_to_free", {
       user_id: profile.id,
       subscription_id: sub.id,
+      granted_tier: granted ?? undefined,
     });
     return { status: "processed" };
   }

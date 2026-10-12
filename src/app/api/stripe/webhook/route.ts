@@ -132,6 +132,16 @@ function buildDeps(): WebhookDeps {
       }
       return true;
     },
+    async findGrantTier(profileId) {
+      const { data: prof, error } = await admin.from("profiles").select("email").eq("id", profileId).maybeSingle();
+      if (error) throw new Error(`profiles email lookup failed: ${error.message}`);
+      const email = (prof as { email: string | null } | null)?.email;
+      if (!email) return null;
+      const { data: grant, error: gErr } = await admin.from("email_tier_grants").select("tier").eq("email", email.toLowerCase()).maybeSingle();
+      if (gErr) throw new Error(`email_tier_grants lookup failed: ${gErr.message}`);
+      const tier = (grant as { tier: string } | null)?.tier;
+      return tier === "pro" || tier === "enterprise" ? tier : null;
+    },
     getClientById,
     updateClient,
     sendUpgradeConfirmationEmail,

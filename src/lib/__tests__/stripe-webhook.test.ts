@@ -26,7 +26,7 @@ interface Harness {
   emails: { to: string; name: string }[];
 }
 
-function harness(overrides: { profileTier?: string; subscriptionId?: string | null } = {}): Harness {
+function harness(overrides: { profileTier?: string; subscriptionId?: string | null; grantTier?: "pro" | "enterprise" | "error" } = {}): Harness {
   const profiles = new Map<string, ProfileRef & { patches: ProfilePatch[] }>();
   const clients = new Map<string, ClientRef & { patches: ClientPatch[] }>();
   const events = new Set<string>();
@@ -97,6 +97,10 @@ function harness(overrides: { profileTier?: string; subscriptionId?: string | nu
     async sendUpgradeConfirmationEmail(params) {
       emails.push(params);
       return true;
+    },
+    async findGrantTier() {
+      if (overrides.grantTier === "error") throw new Error("grants down");
+      return overrides.grantTier ?? null;
     },
     now: () => new Date("2026-09-11T10:00:00.000Z"),
   };
@@ -227,6 +231,26 @@ describe("processStripeEvent", () => {
         subscription_ends_at: new Date(PERIOD_END * 1000).toISOString(),
       },
     ]);
+  });
+
+  it("customer.subscription.deleted regresa al plan concedido si hay concesion", async () => {
+    const h = harness({ profileTier: "pro", subscriptionId: "sub_test", grantTier: "enterprise" });
+    const outcome = await processStripeEvent(
+      event("customer.subscription.deleted", subscription({ status: "canceled", ended_at: PERIOD_END })),
+      h.deps
+    );
+    expect(outcome.status).toBe("processed");
+    const profile = h.profiles.get(USER_ID)!;
+    expect(profile.tier).toBe("enterprise");
+    expect(profile.patches[0]).toMatchObject({ tier: "enterprise", subscription_status: "canceled" });
+  });
+
+  it("customer.subscription.deleted no baja a free si falla la consulta de concesiones", async () => {
+    const h = harness({ profileTier: "pro", subscriptionId: "sub_test", grantTier: "error" });
+    const evt = event("customer.subscription.deleted", subscription({ status: "canceled", ended_at: PERIOD_END }));
+    await expect(processStripeEvent(evt, h.deps)).rejects.toThrow();
+    expect(h.profiles.get(USER_ID)!.tier).toBe("pro");
+    expect(h.events.has(evt.id)).toBe(false);
   });
 
   it("customer.subscription.updated con cancel_at_period_end no baja el tier", async () => {
