@@ -104,7 +104,7 @@ async function fetchPublishedBlogPosts(): Promise<DynamicPage[]> {
  * (body_en/es, image_url, image_brief) which the hardcoded entries don't
  * carry. The result: /learn/branding etc keep their SEO-tuned hero + intro
  * AND gain a 400-word body + a brand-faithful hero image, both managed
- * from /admin/content.
+ * from the old Content Factory (retirada el 2026-10-12, D15; las filas siguen en content_items).
  *
  * Slugs that exist only in content_items keep the dynamic entry verbatim
  * (Content-Factory-born blogs that don't shadow a hardcoded vertical). */

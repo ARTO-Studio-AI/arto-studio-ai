@@ -17,7 +17,7 @@
  * Plus a high-level helper for content_items payloads:
  *   - `applyVoiceScrub(type, items)`: iterate over the text fields of
  *     each payload (per content-item type), scrub dashes, reject items
- *     with antithesis. Used by /api/admin/content/generate after dedup.
+ *     with antithesis. Lo usa el generador del Catalogo (src/lib/catalog-generate.ts).
  *
  * And a low-level helper for the publisher:
  *   - `scrubCopy(s)`: scrub dashes on a single piece of copy without
