@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { applyFilter, describePatch, embedSource, nextId, nextValues, parseFilter, parsePatch, parsePromptInput, safeSearch } from "./catalog";
+import { applyFilter, describePatch, embedSource, nextId, nextValues, parseFilter, parsePatch, parsePromptInput, safeSearch, sameValue } from "./catalog";
+
+describe("sameValue", () => {
+  it("compara fechas como instante (formato de la app contra el de PostgREST)", () => {
+    expect(sameValue("2026-10-12T17:35:00.123Z", "2026-10-12T17:35:00.123000+00:00")).toBe(true);
+    expect(sameValue("2026-10-12T17:35:00.123Z", "2026-10-12T17:35:01.123000+00:00")).toBe(false);
+  });
+  it("compara lo demas por valor", () => {
+    expect(sameValue(["a", "b"], ["a", "b"])).toBe(true);
+    expect(sameValue(null, undefined)).toBe(true);
+    expect(sameValue("pro", "free")).toBe(false);
+    expect(sameValue("2026", "2026-01-01T00:00:00Z")).toBe(false);
+  });
+});
 
 describe("parseFilter", () => {
   it("ignora valores fuera de lista", () => {

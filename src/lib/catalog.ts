@@ -250,6 +250,17 @@ export function parsePromptInput(raw: unknown): { ok: true; value: PromptInput }
   }
 }
 
+/** Compara dos valores del catalogo. Las fechas se comparan como instante: la app guarda
+ * «...00.123Z» y PostgREST devuelve «...00.123000+00:00» (auditoria de Fable de 0d29df8). */
+export function sameValue(a: unknown, b: unknown): boolean {
+  if (typeof a === "string" && typeof b === "string" && /^\d{4}-\d{2}-\d{2}T/.test(a) && /^\d{4}-\d{2}-\d{2}T/.test(b)) {
+    const ta = Date.parse(a);
+    const tb = Date.parse(b);
+    if (!Number.isNaN(ta) && !Number.isNaN(tb)) return ta === tb;
+  }
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
 /** Siguiente ID de una vertical a partir del mayor existente («BR-0251» → «BR-0252»). */
 export function nextId(category: Category, maxExisting: string | null): string {
   const code = VERTICALS[category].code;

@@ -95,7 +95,17 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
         : "No había nada que cambiar.",
       batchId: changed ? String(r.data.batchId) : undefined,
     });
+    // Los embeddings que quedaron pendientes se reponen solos, sin esperar a que alguien
+    // pulse el boton (auditoria de Fable, R2).
+    if (pendingEmb) await fillEmbeddings();
     router.refresh();
+  }
+
+  async function fillEmbeddings() {
+    for (let i = 0; i < 30; i++) {
+      const e = await post("/api/admin/catalogo/embeddings", {});
+      if (!e.ok || !Number(e.data.remaining) || !Number(e.data.done)) break;
+    }
   }
 
   async function undo(batchId: string) {
@@ -103,6 +113,7 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
     const r = await post("/api/admin/catalogo/deshacer", { batch_id: batchId });
     setBusy(false);
     const skipped = Array.isArray(r.data.skipped) ? (r.data.skipped as string[]) : [];
+    if (r.ok && Number(r.data.embeddingsPending)) await fillEmbeddings();
     setMessage(
       r.ok
         ? { text: `Deshecho: ${r.data.reverted} revertidos.${skipped.length ? ` ${skipped.length} no se tocaron porque alguien los cambió después (${skipped.slice(0, 5).join(", ")}${skipped.length > 5 ? "…" : ""}).` : ""}` }

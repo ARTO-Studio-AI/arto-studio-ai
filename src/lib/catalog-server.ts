@@ -9,6 +9,7 @@ import {
   nextId,
   nextValues,
   patchColumns,
+  sameValue,
   type BulkPatch,
   type CatalogFilter,
   type EmbedFields,
@@ -90,12 +91,13 @@ export async function refreshEmbeddings(ids: string[]): Promise<number> {
     const rows = (data ?? []) as unknown as (EmbedFields & { id: string })[];
     if (!rows.length) continue;
     const resp = await client().embeddings.create({ model: "text-embedding-3-small", input: rows.map(embedSource) });
-    // Las actualizaciones de cada tanda van en paralelo para caber en el tiempo de la funcion.
-    const results = await Promise.all(
-      rows.map((r, i) => sb.from("prompts").update({ embedding: `[${resp.data[i].embedding.join(",")}]` }).eq("id", r.id)),
-    );
-    const failed = results.find((r) => r.error);
-    if (failed?.error) throw new Error(failed.error.message);
+    // Las actualizaciones van en paralelo de 25 en 25 para caber en el tiempo de la funcion.
+    const pairs = rows.map((r, i) => ({ id: r.id, vec: `[${resp.data[i].embedding.join(",")}]` }));
+    for (const group of chunks(pairs, 25)) {
+      const results = await Promise.all(group.map((p) => sb.from("prompts").update({ embedding: p.vec }).eq("id", p.id)));
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw new Error(failed.error.message);
+    }
     done += rows.length;
   }
   return done;
@@ -160,7 +162,7 @@ export async function applyBulk(ids: string[], patch: BulkPatch, by: string): Pr
       const after = nextValues(b, patch, now);
       const before: Record<string, unknown> = {};
       for (const k of Object.keys(after)) before[k] = b[k] ?? null;
-      const same = Object.keys(after).every((k) => JSON.stringify(after[k]) === JSON.stringify(before[k]));
+      const same = Object.keys(after).every((k) => sameValue(after[k], before[k]));
       return same ? null : { id: b.id, before, after };
     })
     .filter((c): c is { id: string; before: Record<string, unknown>; after: Record<string, unknown> } => c !== null);
@@ -229,7 +231,7 @@ export async function undoBatch(batchId: string, by: string): Promise<{ reverted
       todo.push({ row: r, values: { is_published: false } });
       continue;
     }
-    const untouched = Object.keys(r.after).every((k) => JSON.stringify(cur[k] ?? null) === JSON.stringify(r.after[k] ?? null));
+    const untouched = Object.keys(r.after).every((k) => sameValue(cur[k], r.after[k]));
     if (!untouched) { skipped.push(r.entity_id); continue; }
     todo.push({ row: r, values: r.before ?? {} });
     if (Object.keys(r.before ?? {}).some((k) => (EMBED_FIELDS as readonly string[]).includes(k))) reembed.push(r.entity_id);
@@ -239,12 +241,12 @@ export async function undoBatch(batchId: string, by: string): Promise<{ reverted
     const results = await Promise.all(part.map((t) => sb.from("prompts").update({ ...t.values, updated_at: now }).eq("id", t.row.entity_id)));
     const failed = results.find((r) => r.error);
     if (failed?.error) throw new Error(failed.error.message);
-    restored.push(...part.map((t) => t.row.id));
-  }
-  // Solo se marcan como deshechas las filas que de verdad se restauraron.
-  for (const part of chunks(restored)) {
-    const { error } = await sb.from("catalog_changes").update({ reverted_at: now, reverted_by: by }).in("id", part);
+    // Se marca cada tanda al terminarla: si una falla despues, las ya restauradas no quedan
+    // como vigentes en el historial.
+    const ids = part.map((t) => t.row.id);
+    const { error } = await sb.from("catalog_changes").update({ reverted_at: now, reverted_by: by }).in("id", ids);
     if (error) throw new Error(error.message);
+    restored.push(...ids);
   }
   const embeddingsPending = await refreshOrQueue(reembed);
   return { reverted: restored.length, skipped, embeddingsPending };
