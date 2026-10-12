@@ -214,3 +214,12 @@ siguiente sesión.
 | **Qué se decidió** | Se retiraron de `/admin` las 7 páginas Engine, Outreach, Content Factory y la pestaña «Roast traces», con sus APIs (`/api/admin/engine/*`, `/api/admin/outreach/*`, `/api/admin/content/*`, `/api/traces`) y las librerías que solo usaban ellas (`engine-store.ts`, `content-image.ts`). El generador de prompts de Content Factory vive ahora en el Catálogo |
 | **Por qué** | Las páginas Engine solo mostraban lo que escribe el motor externo del Mac Mini (`com.arto.engine.intelligence`, lunes 11:00, escribe `engine_runs` y `engine_signals` directo en Supabase); ninguna decisión del sitio dependía de ellas. Si el motor sigue o se apaga es decisión aparte de Victor. Las páginas de scraping, social y gaps leían tablas que ya nadie escribe. Outreach redactaba correos en frío a prospectos sin consentimiento, lo que choca con la política del 2026-10-06. El marketing, las redes y el outreach se trabajan en una plataforma aparte, con su propia estrategia |
 | **Qué NO hacer** | No volver a meter herramientas de marketing en `/admin` sin decisión nueva. No borrar las tablas (`engine_*`, `outreach_*`, `content_items`, `agent_social_log`, `content_gaps`): `content_items` alimenta artículos de `/learn` y `engine_config` guarda el correo de bienvenida |
+
+### D16 · Las tablas nuevas nacen cerradas
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-12 (pregunta 59) |
+| **Qué se decidió** | Migración 0016: los privilegios por defecto del rol `postgres` en `public` ya no dan nada a `anon` ni a `authenticated` en tablas, secuencias y funciones nuevas. `service_role` conserva todo |
+| **Por qué** | Cada tabla nueva nacía abierta a la API pública y había que cerrarla a mano; así nacieron H-63 y H-64 |
+| **Qué NO hacer** | No crear una tabla que el navegador deba leer sin su `GRANT` explícito y su política RLS en la misma migración. No revertir 0016 para «arreglar» un 401: el 401 es la protección funcionando |
