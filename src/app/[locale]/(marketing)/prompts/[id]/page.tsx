@@ -270,9 +270,13 @@ export default async function PromptDetail({ params }: Props) {
             <SignupWall locale={locale} promptId={prompt.id} teaser={teaserOf(body)} />
           ) : isLocked ? (
             <>
-              <pre className="select-none whitespace-pre-wrap break-words font-sans text-zinc-700 blur-sm">
-                {body.slice(0, 400)}…
-              </pre>
+              {/* Relleno sin texto real: antes iban los primeros 400 caracteres del prompt bajo
+                * un blur de CSS, y cualquiera los leia en el HTML (H-65, 2026-10-12). */}
+              <div aria-hidden="true" className="select-none space-y-2 py-1 blur-[2px]">
+                {[96, 88, 92, 70, 94, 82, 60, 90, 76].map((w, i) => (
+                  <div key={i} className="h-3 rounded bg-zinc-200" style={{ width: `${w}%` }} />
+                ))}
+              </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center rounded bg-white/80 backdrop-blur-sm">
                 <p className="text-sm font-medium text-zinc-900">
                   {prompt.tier === "pro" ? dict.pro_prompt : dict.enterprise_prompt}

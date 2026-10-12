@@ -36,7 +36,7 @@ notify pgrst, 'reload schema';
 commit;
 
 -- Verificacion con la anon key (despues de aplicar):
---   GET  /rest/v1/prompts?select=prompt_en&limit=1          -> 401 (permission denied for column)
+--   GET  /rest/v1/prompts?select=prompt_en&limit=1          -> 403 (42501, permission denied for column)
 --   GET  /rest/v1/prompts?select=id,title_es,tier&limit=1    -> 200
---   POST /rest/v1/rpc/search_prompts {"search_query":"x"}    -> 401
+--   POST /rest/v1/rpc/search_prompts {"search_query":"x"}    -> 401 o 403
 -- Y el sitio: /es/prompts, una ficha /es/prompts/BR-0001, la busqueda y /es/favorites.
