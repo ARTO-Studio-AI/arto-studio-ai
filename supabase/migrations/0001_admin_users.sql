@@ -1,3 +1,6 @@
+-- ⚠ HISTORICA, NO APLICAR (D14, 2026-10-12). Esta tabla nunca se creo en produccion y su
+-- pantalla (/admin/admins) se retiro. El acceso al panel sale solo de ADMIN_EMAILS.
+--
 -- 0001_admin_users.sql
 --
 -- Table: admin_users

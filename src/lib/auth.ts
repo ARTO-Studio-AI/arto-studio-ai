@@ -71,18 +71,10 @@ export async function requireAdminSession(
       data: { user },
     } = await sb.auth.getUser();
     if (user?.email) {
-      // Check env var first (cheap, no DB hit). If it matches, short-circuit.
-      // If not, fall through to the DB lookup.
       if (isAdminEmail(user.email)) {
         return { ok: true, email: user.email, userId: user.id, via: "session" };
       }
-      if (await isAdminEmailAsync(user.email)) {
-        return { ok: true, email: user.email, userId: user.id, via: "session" };
-      }
-      // Signed in but not admin. The "no_allowlist" reason is reserved for
-      // a config error (env var blank AND DB empty). Once you've used the
-      // UI to add a single admin, the table is populated and we'd reach
-      // not_admin instead.
+      // Con sesion pero sin ser admin. "no_allowlist" = ADMIN_EMAILS sin configurar.
       if (!process.env.ADMIN_EMAILS) {
         return { ok: false, reason: "no_allowlist" };
       }

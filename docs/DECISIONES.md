@@ -203,5 +203,5 @@ siguiente sesión.
 | **Quién** | Victor, 2026-10-12 (pregunta 55: «quítala») |
 | **Qué se decidió** | Quien entra a `/admin` sale únicamente de la variable `ADMIN_EMAILS` en Vercel. Se retiraron la pantalla `/admin/admins`, su API y la consulta a la tabla `admin_users` en `src/lib/auth.ts` |
 | **Por qué** | La tabla `admin_users` (migración 0001) nunca se creó en producción, así que la pantalla no funcionaba. Con dos administradores, una segunda vía de acceso solo agrega superficie de riesgo |
-| **Qué NO hacer** | No volver a dar acceso por base de datos sin decisión nueva de Victor. `profiles.is_admin` y `email_tier_grants.is_admin` no dan acceso al panel; solo alimentan políticas RLS de lectura |
+| **Qué NO hacer** | No volver a dar acceso por base de datos sin decisión nueva de Victor. No aplicar `supabase/migrations/0001_admin_users.sql`: queda solo como histórica. `profiles.is_admin` y `email_tier_grants.is_admin` no dan acceso al panel; solo alimentan políticas RLS de lectura |
 | **Cómo dar o quitar acceso** | `vercel env rm ADMIN_EMAILS production` y luego `vercel env add ADMIN_EMAILS production` con la lista nueva separada por comas, y redesplegar producción |
