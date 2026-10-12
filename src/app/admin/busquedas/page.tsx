@@ -16,7 +16,7 @@ const PARTIAL = 0.55;
 const PERIODS = [7, 30, 90] as const;
 
 interface Q {
-  id: number;
+  id: string;
   query: string;
   query_lang: string | null;
   results_count: number | null;
@@ -55,10 +55,10 @@ export default async function Busquedas({ searchParams }: { searchParams: Promis
   );
 
   const weak = rows.filter((r) => r.top_similarity !== null && r.top_similarity < WEAK).sort((a, b) => (a.top_similarity ?? 0) - (b.top_similarity ?? 0));
-  const groups = new Map<string, { text: string; n: number; sims: number[]; last: string }>();
+  const groups = new Map<string, { key: string; text: string; n: number; sims: number[]; last: string }>();
   for (const r of rows) {
     const k = norm(r.query);
-    const g = groups.get(k) ?? { text: r.query, n: 0, sims: [], last: r.created_at };
+    const g = groups.get(k) ?? { key: k, text: r.query, n: 0, sims: [], last: r.created_at };
     g.n++;
     if (r.top_similarity !== null) g.sims.push(r.top_similarity);
     groups.set(k, g);
@@ -75,7 +75,7 @@ export default async function Busquedas({ searchParams }: { searchParams: Promis
     { label: "Con sesión", value: signed.toLocaleString("es-MX"), sub: `${rows.length - signed} sin cuenta` },
   ];
 
-  const createHref = (q: string, lang: string | null) => `/admin/catalogo/nuevo?idea=${encodeURIComponent(q.slice(0, 600))}${lang ? `&lang=${lang}` : ""}`;
+  const createHref = (q: string, lang: string | null) => `/admin/catalogo/nuevo?idea=${encodeURIComponent(q.slice(0, 600))}${lang ? `&lang=${encodeURIComponent(lang)}` : ""}`;
 
   return (
     <div>
@@ -120,7 +120,7 @@ export default async function Busquedas({ searchParams }: { searchParams: Promis
           const a = avg(g.sims);
           const c = cover(a);
           return (
-            <tr key={g.text}>
+            <tr key={g.key}>
               <td className={`${TD} max-w-md text-zinc-900`}>{g.text}</td>
               <td className={TD}>{g.n}</td>
               <td className={TD}><Badge tone={c.tone} dot={c.tone === "live"} mono={false}>{c.label}{a !== null ? ` · ${a.toFixed(2)}` : ""}</Badge></td>
