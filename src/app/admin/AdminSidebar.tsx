@@ -20,10 +20,29 @@ interface Section {
  * these groups rather than creating a new top-level section unless it
  * really doesn't fit. */
 const SECTIONS: Section[] = [
+  /* Rediseno, fase 1 (2026-10-12): Hoy, Personas y Producto. Lo anterior sigue abajo, bajo
+   * «Anterior», hasta que Victor decida que se retira (propuesta en la bitacora S41). */
   {
-    title: "Seguimiento",
+    title: "Panel",
+    items: [{ href: "/admin", label: "Hoy" }],
+  },
+  {
+    title: "Personas",
     items: [
-      { href: "/admin", label: "Resumen", desc: "Vista general" },
+      { href: "/admin/usuarios", label: "Usuarios" },
+      { href: "/admin/lista", label: "Lista de promociones" },
+    ],
+  },
+  {
+    title: "Producto",
+    items: [
+      { href: "/admin/roasts", label: "Brand Roasts" },
+      { href: "/admin/emails", label: "Correos" },
+    ],
+  },
+  {
+    title: "Anterior",
+    items: [
       { href: "/admin/traces/roast", label: "Roast traces" },
       { href: "/admin/traces/skills", label: "Skill traces" },
       { href: "/admin/engine/runs", label: "Engine · Runs" },
@@ -36,7 +55,6 @@ const SECTIONS: Section[] = [
   {
     title: "Outreach",
     items: [
-      { href: "/admin/emails", label: "Correos" },
       { href: "/admin/outreach", label: "Outreach" },
       { href: "/admin/content", label: "Content Factory" },
     ],
