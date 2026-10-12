@@ -59,7 +59,7 @@ export interface WebhookDeps {
   updateProfile(id: string, patch: ProfilePatch): Promise<boolean>;
   /** Plan concedido por correo (email_tier_grants) al dueno del perfil, si lo tiene. Al
    * cancelarse la suscripcion, la persona vuelve a ese plan y no a free (2026-10-12). */
-  findGrantTier?(profileId: string): Promise<"pro" | "enterprise" | null>;
+  findGrantTier(profileId: string): Promise<"pro" | "enterprise" | null>;
   getClientById(id: string): Promise<ClientRef | null>;
   updateClient(id: string, patch: ClientPatch): Promise<boolean>;
   sendUpgradeConfirmationEmail(params: { to: string; name: string }): Promise<boolean>;
@@ -265,7 +265,7 @@ async function handleSubscriptionDeleted(
     if (isStaleSubscription(profile, sub)) return ignoreStale(profile, sub);
     // Si tiene una concesion, vuelve a ese plan. Si la consulta falla, se lanza para que
     // Stripe reintente: mejor tarde que bajar a free a alguien con concesion.
-    const granted = deps.findGrantTier ? await deps.findGrantTier(profile.id) : null;
+    const granted = await deps.findGrantTier(profile.id);
     const ok = await deps.updateProfile(profile.id, {
       tier: granted ?? "free",
       subscription_status: "canceled",

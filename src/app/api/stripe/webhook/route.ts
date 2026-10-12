@@ -31,7 +31,7 @@ export const maxDuration = 30;
  *   checkout.session.completed      metadata.user_id + tier=pro → profiles.tier='pro'
  *                                   metadata.client_id           → clients.tier='starter'
  *   customer.subscription.updated   profiles.subscription_status / subscription_ends_at
- *   customer.subscription.deleted   profiles.tier='free' / clients.tier='trial'
+ *   customer.subscription.deleted   profiles.tier='free (o el plan concedido en email_tier_grants, si lo hay)' / clients.tier='trial'
  *   invoice.payment_failed          profiles.subscription_status='past_due'
  */
 export async function POST(request: NextRequest) {
