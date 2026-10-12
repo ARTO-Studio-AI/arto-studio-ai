@@ -90,6 +90,7 @@ Return { "items": [ ... ] }`;
     const msg = e instanceof Error ? e.message : "";
     throw new Error(/timeout|timed out/i.test(msg) ? "La IA tardó demasiado. Intenta otra vez o pide menos borradores." : `La IA no respondió: ${msg}`);
   }
+  if (resp.stop_reason === "max_tokens") throw new Error("El borrador salió demasiado largo. Intenta otra vez o acota la idea.");
   const text = resp.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
   let parsed: { items?: unknown };
   try {
