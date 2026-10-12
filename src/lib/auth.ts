@@ -63,7 +63,8 @@ export async function isAdminEmailAsync(email?: string | null): Promise<boolean>
     const { data } = await sb
       .from("admin_users")
       .select("id")
-      .ilike("email", email.trim())
+      // eq y no ilike: el _ y el % del correo actuaban como comodines (2026-10-12).
+      .eq("email", email.trim().toLowerCase())
       .limit(1)
       .maybeSingle();
     return !!data;

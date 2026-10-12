@@ -99,7 +99,9 @@ export async function DELETE(request: NextRequest) {
   }
 
   const sb = createAdminClient();
-  const { error } = await sb.from("admin_users").delete().ilike("email", email);
+  // eq y no ilike: con ilike, ?email=%25 borraba a todos los admins (diagnostico 2026-10-12).
+  // El POST ya guarda el correo en minusculas.
+  const { error } = await sb.from("admin_users").delete().eq("email", email.trim().toLowerCase());
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
