@@ -31,11 +31,11 @@ export default function Footer({ locale, footer }: Props) {
               <Link href={lp("/prompts")} className={link}>{footer.prompts}</Link>
               <Link href={lp("/skills")} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-600">
                 {footer.skills}
-                <Badge tone="soon">Soon</Badge>
+                <Badge tone="soon">{locale === "es" ? "Pronto" : "Soon"}</Badge>
               </Link>
               <Link href={lp("/agents")} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-600">
                 {footer.agents}
-                <Badge tone="soon">Soon</Badge>
+                <Badge tone="soon">{locale === "es" ? "Pronto" : "Soon"}</Badge>
               </Link>
               <Link href={lp("/roast")} className={link}>{footer.roast}</Link>
             </div>

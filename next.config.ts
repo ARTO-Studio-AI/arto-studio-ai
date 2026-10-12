@@ -17,7 +17,21 @@ const SUPABASE_HOSTNAME = new URL(
 const CANONICAL_HOST = "creative.artostudio.ai";
 const LEGACY_HOSTS = ["arto-studio-ai.vercel.app", "library.artostudio.ai"];
 
+/* Cabeceras de seguridad basicas (prelanzamiento, 2026-10-12). Sin CSP todavia: PostHog,
+ * Stripe y las imagenes de Supabase necesitan una lista cuidada y se hace aparte.
+ * HSTS ya lo pone Vercel. */
+const SECURITY_HEADERS = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
   async redirects() {
     return [
       ...LEGACY_HOSTS.map((host) => ({

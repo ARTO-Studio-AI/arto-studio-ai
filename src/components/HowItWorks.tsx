@@ -59,7 +59,7 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
       <Step n={1}>
         <div className="text-eyebrow flex justify-between gap-2 text-zinc-400">
           <span>{c.s1k}</span>
-          <span className="rounded-full border border-[#ffd2bf] bg-[var(--accent-soft)] px-2 text-[10px] text-[#b33600]">Free</span>
+          <span className="rounded-full border border-[#ffd2bf] bg-[var(--accent-soft)] px-2 text-[10px] text-[#b33600]">{c.s3free}</span>
         </div>
         <p className="mt-1.5 text-[15px] font-semibold leading-snug text-zinc-900">{c.s1t}</p>
         <p className="mt-1.5 text-[13px] leading-snug text-zinc-600">{c.s1p}</p>
