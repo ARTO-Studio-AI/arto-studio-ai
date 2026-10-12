@@ -17,7 +17,9 @@
   ],
   "security": [
     {},
-    { "ArtoApiKey": [] }
+    {
+      "ArtoApiKey": []
+    }
   ],
   "paths": {
     "/api/skills": {
@@ -25,7 +27,12 @@
         "operationId": "listSkills",
         "summary": "List available skills",
         "description": "Returns the catalog of skills. Without an API key, returns only public skills (currently just brand-roast). With a valid x-arto-api-key header, also returns the private skills that client is permitted to use.",
-        "security": [{}, { "ArtoApiKey": [] }],
+        "security": [
+          {},
+          {
+            "ArtoApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Skill catalog",
@@ -36,7 +43,9 @@
                   "properties": {
                     "skills": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/SkillCatalogEntry" }
+                      "items": {
+                        "$ref": "#/components/schemas/SkillCatalogEntry"
+                      }
                     }
                   }
                 }
@@ -51,14 +60,21 @@
         "operationId": "runSkill",
         "summary": "Execute a skill by slug",
         "description": "Canonical skill invocation endpoint. The request body schema depends on the skill — see GET /api/skills for the catalog. Public skills (like brand-roast) need no auth. Private skills require x-arto-api-key and return 401 if missing, 403 if the client is not allowed to use that skill, 429 if over their quota.",
-        "security": [{}, { "ArtoApiKey": [] }],
+        "security": [
+          {},
+          {
+            "ArtoApiKey": []
+          }
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
             "required": true,
             "description": "Skill slug (e.g. 'brand-roast').",
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -77,16 +93,30 @@
             "description": "Skill output",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SkillResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/SkillResponse"
+                }
               }
             }
           },
-          "400": { "description": "Validation error" },
-          "401": { "description": "Missing or invalid API key" },
-          "403": { "description": "Client not permitted to use this skill" },
-          "404": { "description": "Skill slug not found" },
-          "429": { "description": "Rate limit exceeded" },
-          "503": { "description": "Skill execution failed and no fallback available" }
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Missing or invalid API key"
+          },
+          "403": {
+            "description": "Client not permitted to use this skill"
+          },
+          "404": {
+            "description": "Skill slug not found"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Skill execution failed and no fallback available"
+          }
         }
       }
     },
@@ -95,12 +125,16 @@
         "operationId": "roastBrand",
         "summary": "Roast a brand (legacy alias for brand-roast skill)",
         "description": "Public, free marketing-funnel endpoint. Internally routes to the brand-roast skill and returns the legacy { source, result } shape for backward compatibility. Rate limited per IP.",
-        "security": [{}],
+        "security": [
+          {}
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/RoastRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/RoastRequest"
+              }
             }
           }
         },
@@ -109,7 +143,9 @@
             "description": "Brand roast result",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/RoastResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/RoastResponse"
+                }
               }
             }
           },
@@ -120,8 +156,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "error": { "type": "string" },
-                    "field": { "type": "string" }
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -134,54 +174,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "error": { "type": "string" },
-                    "retryAfter": { "type": "integer" }
+                    "error": {
+                      "type": "string"
+                    },
+                    "retryAfter": {
+                      "type": "integer"
+                    }
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/traces": {
-      "get": {
-        "operationId": "getTraces",
-        "summary": "Query roast traces",
-        "description": "Retrieve past roast traces with optional filtering. Use view=stats for aggregate statistics. Admin-only.",
-        "parameters": [
-          {
-            "name": "view",
-            "in": "query",
-            "description": "Set to 'stats' for aggregate statistics instead of individual traces",
-            "schema": { "type": "string", "enum": ["stats"] }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": { "type": "integer", "default": 50, "maximum": 100 }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": { "type": "integer", "default": 0 }
-          },
-          {
-            "name": "industry",
-            "in": "query",
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Traces or stats",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    { "$ref": "#/components/schemas/TracesListResponse" },
-                    { "$ref": "#/components/schemas/TraceStatsResponse" }
-                  ]
                 }
               }
             }
@@ -203,94 +202,150 @@
       "SkillCatalogEntry": {
         "type": "object",
         "properties": {
-          "slug": { "type": "string" },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "public": { "type": "boolean" },
-          "requiresWebFetch": { "type": "boolean" },
-          "inputFields": { "type": "array", "items": { "type": "string" } },
-          "outputFields": { "type": "array", "items": { "type": "string" } }
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "requiresWebFetch": {
+            "type": "boolean"
+          },
+          "inputFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outputFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "SkillResponse": {
         "type": "object",
         "properties": {
-          "skill": { "type": "string" },
-          "source": { "type": "string", "enum": ["ai", "fallback"] },
-          "output": { "type": "object", "description": "Skill-specific structured output" },
-          "latencyMs": { "type": "integer" },
-          "model": { "type": "string" }
+          "skill": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "fallback"
+            ]
+          },
+          "output": {
+            "type": "object",
+            "description": "Skill-specific structured output"
+          },
+          "latencyMs": {
+            "type": "integer"
+          },
+          "model": {
+            "type": "string"
+          }
         }
       },
       "RoastRequest": {
         "type": "object",
-        "required": ["brandName", "industry"],
+        "required": [
+          "brandName",
+          "industry"
+        ],
         "properties": {
-          "brandName": { "type": "string", "maxLength": 100 },
-          "industry": { "type": "string" },
-          "websiteUrl": { "type": "string", "format": "uri", "maxLength": 200 },
+          "brandName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "industry": {
+            "type": "string"
+          },
+          "websiteUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 200
+          },
           "companySize": {
             "type": "string",
-            "enum": ["solo", "micro", "small", "medium", "large", "enterprise"]
+            "enum": [
+              "solo",
+              "micro",
+              "small",
+              "medium",
+              "large",
+              "enterprise"
+            ]
           },
-          "description": { "type": "string", "maxLength": 500 }
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          }
         }
       },
       "PillarScore": {
         "type": "object",
         "properties": {
-          "score": { "type": "number", "minimum": 1, "maximum": 10 },
-          "roast": { "type": "string" }
+          "score": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "roast": {
+            "type": "string"
+          }
         }
       },
       "RoastResult": {
         "type": "object",
         "properties": {
-          "overall": { "type": "number" },
-          "strategy": { "$ref": "#/components/schemas/PillarScore" },
-          "creativity": { "$ref": "#/components/schemas/PillarScore" },
-          "narrative": { "$ref": "#/components/schemas/PillarScore" },
-          "digital": { "$ref": "#/components/schemas/PillarScore" },
-          "verdict": { "type": "string" },
-          "improvements": { "type": "array", "items": { "type": "string" } }
+          "overall": {
+            "type": "number"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/PillarScore"
+          },
+          "creativity": {
+            "$ref": "#/components/schemas/PillarScore"
+          },
+          "narrative": {
+            "$ref": "#/components/schemas/PillarScore"
+          },
+          "digital": {
+            "$ref": "#/components/schemas/PillarScore"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "improvements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "RoastResponse": {
         "type": "object",
         "properties": {
-          "source": { "type": "string", "enum": ["ai", "fallback"] },
-          "result": { "$ref": "#/components/schemas/RoastResult" }
-        }
-      },
-      "TracesListResponse": {
-        "type": "object",
-        "properties": {
-          "traces": { "type": "array", "items": { "type": "object" } },
-          "count": { "type": "integer" }
-        }
-      },
-      "TraceStatsResponse": {
-        "type": "object",
-        "properties": {
-          "total": { "type": "integer" },
-          "avgOverall": { "type": "number" },
-          "bySource": {
-            "type": "object",
-            "properties": {
-              "ai": { "type": "integer" },
-              "fallback": { "type": "integer" }
-            }
+          "source": {
+            "type": "string",
+            "enum": [
+              "ai",
+              "fallback"
+            ]
           },
-          "byIndustry": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "industry": { "type": "string" },
-                "count": { "type": "integer" },
-                "avgScore": { "type": "number" }
-              }
-            }
+          "result": {
+            "$ref": "#/components/schemas/RoastResult"
           }
         }
       }
