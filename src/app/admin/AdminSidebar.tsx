@@ -31,6 +31,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/admin/usuarios", label: "Usuarios" },
       { href: "/admin/lista", label: "Lista de promociones" },
+      { href: "/admin/pro", label: "Pro y planes de pago" },
     ],
   },
   {
@@ -45,6 +46,7 @@ const SECTIONS: Section[] = [
     title: "Producto",
     items: [
       { href: "/admin/roasts", label: "Brand Roasts" },
+      { href: "/admin/busquedas", label: "Búsquedas" },
       { href: "/admin/emails", label: "Correos" },
     ],
   },

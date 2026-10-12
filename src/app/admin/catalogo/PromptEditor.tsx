@@ -29,7 +29,7 @@ export interface EditorPrompt {
 const FIELD = "mt-1 w-full rounded-[var(--radius-sm)] border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none";
 const LABEL = "block text-sm font-medium text-zinc-700";
 
-export default function PromptEditor({ initial, subcategories }: { initial: EditorPrompt | null; subcategories: string[] }) {
+export default function PromptEditor({ initial, subcategories, initialIdea = "" }: { initial: EditorPrompt | null; subcategories: string[]; initialIdea?: string }) {
   const router = useRouter();
   const [p, setP] = useState({
     title_en: initial?.title_en ?? "",
@@ -72,7 +72,7 @@ export default function PromptEditor({ initial, subcategories }: { initial: Edit
 
   return (
     <div className="grid gap-5">
-      {!initial && <GeneratorPanel onUse={useDraft} />}
+      {!initial && <GeneratorPanel onUse={useDraft} initialIdea={initialIdea} />}
       <div className="grid gap-4 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5 lg:grid-cols-2">
         <div>
           <label className={LABEL}>Título (español)<input className={FIELD} value={p.title_es} onChange={(e) => set("title_es", e.target.value)} /></label>
