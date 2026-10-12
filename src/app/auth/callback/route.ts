@@ -197,6 +197,13 @@ function homeFor(request: NextRequest, user: User | null): string {
   return locale ? `/${locale}` : "/";
 }
 
+/* Login en el idioma de la persona cuando el enlace falla (antes iba a /login sin idioma
+ * y el proxy lo mandaba a /en aunque se hubiera registrado en /es). */
+function loginPathFor(request: NextRequest): string {
+  const home = homeFor(request, null);
+  return home === "/" ? "/login" : `${home}/login`;
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -237,8 +244,8 @@ export async function GET(request: NextRequest) {
       res.cookies.set(NEXT_COOKIE, "", { path: "/", maxAge: 0 });
       return res;
     }
-    return NextResponse.redirect(`${siteUrl}/login?error=${encodeURIComponent(error.message)}`);
+    return NextResponse.redirect(`${siteUrl}${loginPathFor(request)}?error=${encodeURIComponent(error.message)}`);
   }
 
-  return NextResponse.redirect(`${siteUrl}/login?error=missing_code`);
+  return NextResponse.redirect(`${siteUrl}${loginPathFor(request)}?error=missing_code`);
 }

@@ -63,8 +63,8 @@ export const WELCOME_DEFAULT: WelcomeContent = {
     {
       title_es: "Pack ARTO de Estrategia de Marca",
       title_en: "ARTO Brand Strategy Pack",
-      body_es: "Cinco skills para Claude y ChatGPT. Sale la semana del 12 de octubre.",
-      body_en: "Five skills for Claude and ChatGPT. Ships the week of October 12.",
+      body_es: "Cinco skills para Claude y ChatGPT. Muy pronto, y tú te enteras primero.",
+      body_en: "Five skills for Claude and ChatGPT. Coming soon, and you'll hear first.",
       url: "/skills",
     },
   ],
