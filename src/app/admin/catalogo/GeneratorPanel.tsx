@@ -14,11 +14,11 @@ export interface DraftFields {
 
 const FIELD = "mt-1 w-full rounded-[var(--radius-sm)] border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none";
 
-export default function GeneratorPanel({ onUse }: { onUse: (d: DraftFields) => void }) {
+export default function GeneratorPanel({ onUse, initialIdea = "" }: { onUse: (d: DraftFields) => void; initialIdea?: string }) {
   const [category, setCategory] = useState("branding");
   const [tier, setTier] = useState("free");
   const [subcategory, setSubcategory] = useState("");
-  const [idea, setIdea] = useState("");
+  const [idea, setIdea] = useState(initialIdea);
   const [count, setCount] = useState(2);
   const [busy, setBusy] = useState(false);
   const [drafts, setDrafts] = useState<DraftFields[]>([]);

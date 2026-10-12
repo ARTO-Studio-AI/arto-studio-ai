@@ -57,9 +57,9 @@ export default async function AdminHoy() {
   const tiles: { label: string; value: string; sub: string; href?: string }[] = [
     { label: "Registros · 7 días", value: n(reg7), sub: `${n(reg30)} en 30 días · ${n(regTotal)} en total`, href: "/admin/usuarios" },
     { label: "Lista de promociones", value: n(listaActiva), sub: `activos · ${n(listaPend)} por confirmar · ${n(listaBaja)} bajas o rebotes`, href: "/admin/lista" },
-    { label: "Plan Pro", value: n(pro), sub: `${n(proStripe)} con suscripción activa en Stripe · el resto por concesión`, href: "/admin/usuarios?tier=pro" },
+    { label: "Plan Pro", value: n(pro), sub: `${n(proStripe)} con suscripción activa en Stripe · el resto por concesión`, href: "/admin/pro" },
     { label: "Roasts · 7 días", value: n(roasts7), sub: `${n(roastsTotal)} en total`, href: "/admin/roasts" },
-    { label: "Búsquedas · 7 días", value: n(busq7), sub: "en la biblioteca · pantalla en la fase 2" },
+    { label: "Búsquedas · 7 días", value: n(busq7), sub: "en la biblioteca · qué no encuentran", href: "/admin/busquedas" },
   ];
 
   return (
