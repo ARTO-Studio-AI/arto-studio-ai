@@ -1,167 +1,86 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { Card } from "@/components/ui";
+import { fecha, guardAdmin, PageHead } from "./_kit";
 
-/* /admin landing — "Resumen". Cheap counts pulled server-side so the
- * dashboard is useful at first glance. Each card links into the deeper
- * page under its sidebar section. */
+/* /admin · Hoy (fase 1 del rediseno, 2026-10-12). Numeros reales del negocio. La portada
+ * vieja contaba tablas que ya no existen (traces, scraping_runs, growth_signals) y
+ * mostraba 0 sin avisar. Si una consulta falla, la tarjeta dice «sin dato», nunca 0. */
 
 export const dynamic = "force-dynamic";
 
-interface Card {
-  href: string;
-  label: string;
-  desc: string;
-  badge?: string | number | null;
-}
+type Count = number | null;
 
-async function safeCount(table: string): Promise<number | null> {
+// Tipo del query builder de supabase-js sin acoplarse a sus genericos internos.
+type CountQuery = ReturnType<ReturnType<ReturnType<typeof createAdminClient>["from"]>["select"]>;
+
+async function count(table: string, filter?: (q: CountQuery) => CountQuery): Promise<Count> {
   try {
-    const sb = createAdminClient();
-    const { count } = await sb.from(table).select("*", { count: "exact", head: true });
-    return count ?? 0;
+    let q = createAdminClient().from(table).select("*", { count: "exact", head: true });
+    if (filter) q = filter(q);
+    const { count: c, error } = await q;
+    return error ? null : (c ?? 0);
   } catch {
     return null;
   }
 }
 
-export default async function AdminHome() {
-  const [clients, roastTraces, skillTraces, runs, signals, admins, outreachTargets, contentItems] =
-    await Promise.all([
-      safeCount("clients"),
-      safeCount("traces"),
-      safeCount("skill_traces"),
-      safeCount("scraping_runs"),
-      safeCount("growth_signals"),
-      safeCount("admin_users"),
-      safeCount("outreach_targets"),
-      safeCount("content_items"),
-    ]);
+const daysAgo = (d: number) => new Date(Date.now() - d * 86_400_000).toISOString();
 
-  const seguimiento: Card[] = [
-    {
-      href: "/admin/traces/roast",
-      label: "Roast traces",
-      desc: "Cada Brand Roast que se ha corrido en /roast, con su score por pilar (Strategy, Creativity, Narrative, Digital), los inputs de marca y el usuario que lo ejecutó. Útil para muestrear casos, validar la calidad de los análisis y debuggear quejas sobre un score específico.",
-      badge: roastTraces,
-    },
-    {
-      href: "/admin/traces/skills",
-      label: "Skill traces",
-      desc: "Llamadas al API de Skills Studio (Brand Positioning, Brand Architecture, etc.) por client_id. Muestra qué skill se invocó, cuándo, con qué inputs y tamaño de output. Sirve para tracking de uso por tier, facturación y para encontrar sesiones específicas a inspeccionar.",
-      badge: skillTraces,
-    },
-    {
-      href: "/admin/engine/runs",
-      label: "Engine · Runs",
-      desc: "Bitácora de cada corrida del engine de outbound — manual o programada. Status, duración, fuente, traza de error si falló. Úsalo para confirmar que el engine está vivo, ver qué corrida produjo qué señales, o diagnosticar un job que se rompió.",
-      badge: runs,
-    },
-    {
-      href: "/admin/engine/signals",
-      label: "Engine · Signals",
-      desc: "Señales de crecimiento detectadas por el engine durante el scraping: un competidor lanzó, un target cambió de rol, una empresa abrió ronda. Es la cola priorizada para outreach manual o contenido reactivo.",
-      badge: signals,
-    },
-    {
-      href: "/admin/engine/attribution",
-      label: "Engine · Attribution",
-      desc: "Cuándo una señal del engine derivó en una conversión real (deal cerrado, sign-up, demo). Liga signal_id → outcome. Sirve para mostrar ROI del engine y decidir qué fuentes de señal vale la pena seguir alimentando.",
-    },
-    {
-      href: "/admin/engine/social",
-      label: "Engine · Social",
-      desc: "Posts que el engine publicó (o agendó) en redes a tu nombre, con engagement, alcance y gasto en ads si aplicó. Úsalo para auditar qué salió, ajustar la cadencia y revertir lo que no funcionó.",
-    },
-    {
-      href: "/admin/engine/scraping",
-      label: "Engine · Scraping",
-      desc: "Targets que el engine está monitoreando — empresas, personas, sitios — con stats de cobertura: cuándo se scrapeó por última vez, cuántas señales generó, status actual. Aquí agregas un target nuevo, pausas uno ruidoso, o validas la cobertura.",
-    },
+export default async function AdminHoy() {
+  await guardAdmin();
+  const d7 = daysAgo(7);
+  const d30 = daysAgo(30);
+  const [reg7, reg30, regTotal, listaActiva, listaPend, listaBaja, pro, roasts7, roastsTotal, busq7, lastSent] = await Promise.all([
+    count("profiles", (q) => q.gte("created_at", d7)),
+    count("profiles", (q) => q.gte("created_at", d30)),
+    count("profiles"),
+    count("newsletter_subscribers", (q) => q.eq("status", "active")),
+    count("newsletter_subscribers", (q) => q.eq("status", "pending")),
+    count("newsletter_subscribers", (q) => q.in("status", ["unsubscribed", "bounced"])),
+    count("profiles", (q) => q.in("subscription_status", ["active", "trialing", "past_due"])),
+    count("skill_traces", (q) => q.eq("skill_slug", "brand-roast").gte("created_at", d7)),
+    count("skill_traces", (q) => q.eq("skill_slug", "brand-roast")),
+    count("search_queries", (q) => q.gte("created_at", d7)),
+    createAdminClient()
+      .from("newsletter_subscribers")
+      .select("last_sent_at")
+      .not("last_sent_at", "is", null)
+      .order("last_sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then((r) => (r.data?.last_sent_at as string | undefined) ?? null, () => null),
+  ]);
+
+  const n = (c: Count) => (c === null ? "sin dato" : c.toLocaleString("es-MX"));
+  const tiles: { label: string; value: string; sub: string; href?: string }[] = [
+    { label: "Registros · 7 días", value: n(reg7), sub: `${n(reg30)} en 30 días · ${n(regTotal)} en total`, href: "/admin/usuarios" },
+    { label: "Lista de promociones", value: n(listaActiva), sub: `activos · ${n(listaPend)} por confirmar · ${n(listaBaja)} bajas o rebotes`, href: "/admin/lista" },
+    { label: "Pro activos", value: n(pro), sub: "con suscripción en Stripe", href: "/admin/usuarios?tier=pro" },
+    { label: "Roasts · 7 días", value: n(roasts7), sub: `${n(roastsTotal)} en total`, href: "/admin/roasts" },
+    { label: "Búsquedas · 7 días", value: n(busq7), sub: "en la biblioteca · pantalla en la fase 2" },
   ];
-
-  const outreach: Card[] = [
-    {
-      href: "/admin/outreach",
-      label: "Outreach",
-      desc: "Warm targets que el engine puede contactar (Module 2). Marca cuáles sí/no, revisa los drafts personalizados que Claude genera por cada uno, edita lo que necesites, aprueba antes de envío. Nada sale a producción sin tu visto bueno.",
-      badge: outreachTargets,
-    },
-    {
-      href: "/admin/content",
-      label: "Content Factory",
-      desc: "Module 3 Phase 3a. Genera prompts nuevos para la biblioteca y posts editoriales para /learn vía Claude. Cada item cae en borrador, lo apruebas, y un publisher empuja a la tabla pública. Bulk approve + bulk publish. Imágenes + distribución multi-canal vienen en Phase 3b/3c.",
-      badge: contentItems,
-    },
-  ];
-
-  const administrativas: Card[] = [
-    {
-      href: "/admin/clients",
-      label: "Clients",
-      desc: "Empresas con API key activo para Skills Studio. Crea, edita, cambia tier, suspende, o regenera la key. Cada renglón muestra uso del mes en curso y el plan al que están suscritas.",
-      badge: clients,
-    },
-    {
-      href: "/admin/admins",
-      label: "Administradores",
-      desc: "Quién puede entrar a este panel. Lista admins permanentes (env var, no se quitan desde aquí) y dinámicos (DB, los agregas con un email y los quitas con un click). El nuevo admin entra firmando con magic link.",
-      badge: admins,
-    },
-  ];
-
-  const desarrollo: Card[] = [
-    {
-      href: "/admin/engine/gaps",
-      label: "Engine · Gaps",
-      desc: "Brechas de contenido que el engine detectó: preguntas que se están haciendo en el mercado y que ARTO no responde con prompts, skills o /learn. Sirve de brief priorizado para producción de contenido.",
-    },
-    {
-      href: "/admin/engine/config",
-      label: "Engine · Config",
-      desc: "Vista de solo lectura de la configuración del engine: qué fuentes scrapea, con qué cadencia, qué umbrales aplican a cada señal. Para cambiar la config, edita la tabla engine_config en Supabase directamente.",
-    },
-  ];
-
-  const Section = ({ title, cards }: { title: string; cards: Card[] }) => (
-    <section className="mb-8">
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-        {title}
-      </h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className="flex flex-col rounded-lg border border-zinc-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-sm"
-          >
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="font-semibold text-zinc-900">{card.label}</p>
-              {card.badge !== undefined && card.badge !== null && (
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-mono text-zinc-600">
-                  {typeof card.badge === "number" ? card.badge.toLocaleString() : card.badge}
-                </span>
-              )}
-            </div>
-            <p className="mt-2 text-[13px] leading-relaxed text-zinc-600">{card.desc}</p>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
 
   return (
     <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Admin</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Resumen del panel. Usa el menú de la izquierda para entrar a cada sección.
+      <PageHead eyebrow="Panel" title="Hoy" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tiles.map((t) => (
+          <Card key={t.label} href={t.href} padding="md">
+            <p className="text-eyebrow text-zinc-500">{t.label}</p>
+            <p className="font-display mt-2 text-4xl font-extrabold tracking-[-0.03em] text-zinc-900">{t.value}</p>
+            <p className="mt-1 text-sm text-zinc-500">{t.sub}</p>
+          </Card>
+        ))}
+      </div>
+      <div className="mt-8 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
+        <p className="text-eyebrow text-zinc-500">Salud</p>
+        <p className="mt-2">Último envío del digest: <span className="text-zinc-900">{fecha(lastSent)}</span></p>
+        <p className="mt-1">
+          Las secciones viejas siguen en el menú, bajo «Anterior», hasta que se decida qué se retira.{" "}
+          <Link href="/admin/emails" className="text-zinc-900 underline-offset-2 hover:underline">Editar la bienvenida</Link>
         </p>
-      </header>
-
-      <Section title="Seguimiento" cards={seguimiento} />
-      <Section title="Outreach" cards={outreach} />
-      <Section title="Administrativas" cards={administrativas} />
-      <Section title="Desarrollo" cards={desarrollo} />
+      </div>
     </div>
   );
 }
