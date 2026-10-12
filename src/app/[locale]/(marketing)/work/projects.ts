@@ -64,7 +64,7 @@ export const projects: WorkProject[] = [
     description:
       "Brand ecosystem for Grupo Proeza. Structured a consistent brand system across business units and channels, creating visual clarity and narrative coherence.",
     description_es:
-      "Ecosistema de marca para Grupo Proeza. Estructuramos un sistema de marca consistente entre unidades de negocio y canales, con claridad visual y coherencia narrativa.",
+      "Sistema de marca para Grupo Proeza. Estructuramos un sistema de marca consistente entre unidades de negocio y canales, con claridad visual y coherencia narrativa.",
     image: "/work/grupo-proeza-ecosystem.webp",
   },
   {
@@ -124,7 +124,7 @@ export const projects: WorkProject[] = [
     description:
       "Full brand ecosystem — strategy, visual identity, and web platform — for a global digital services company. Built to compete across multiple markets.",
     description_es:
-      "Ecosistema de marca completo (estrategia, identidad visual y plataforma web) para una empresa global de servicios digitales. Pensado para competir en varios mercados.",
+      "Sistema de marca completo (estrategia, identidad visual y plataforma web) para una empresa global de servicios digitales. Pensado para competir en varios mercados.",
     image: "/work/break-off.webp",
   },
   {
