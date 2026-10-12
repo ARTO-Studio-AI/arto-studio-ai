@@ -31,14 +31,15 @@ export default async function AdminHoy() {
   await guardAdmin();
   const d7 = daysAgo(7);
   const d30 = daysAgo(30);
-  const [reg7, reg30, regTotal, listaActiva, listaPend, listaBaja, pro, roasts7, roastsTotal, busq7, lastSent] = await Promise.all([
+  const [reg7, reg30, regTotal, listaActiva, listaPend, listaBaja, pro, proStripe, roasts7, roastsTotal, busq7, lastSent] = await Promise.all([
     count("profiles", (q) => q.gte("created_at", d7)),
     count("profiles", (q) => q.gte("created_at", d30)),
     count("profiles"),
     count("newsletter_subscribers", (q) => q.eq("status", "active")),
     count("newsletter_subscribers", (q) => q.eq("status", "pending")),
     count("newsletter_subscribers", (q) => q.in("status", ["unsubscribed", "bounced"])),
-    count("profiles", (q) => q.in("subscription_status", ["active", "trialing", "past_due"])),
+    count("profiles", (q) => q.eq("tier", "pro")),
+    count("profiles", (q) => q.in("subscription_status", ["active", "past_due"])),
     count("skill_traces", (q) => q.eq("skill_slug", "brand-roast").gte("created_at", d7)),
     count("skill_traces", (q) => q.eq("skill_slug", "brand-roast")),
     count("search_queries", (q) => q.gte("created_at", d7)),
@@ -56,7 +57,7 @@ export default async function AdminHoy() {
   const tiles: { label: string; value: string; sub: string; href?: string }[] = [
     { label: "Registros · 7 días", value: n(reg7), sub: `${n(reg30)} en 30 días · ${n(regTotal)} en total`, href: "/admin/usuarios" },
     { label: "Lista de promociones", value: n(listaActiva), sub: `activos · ${n(listaPend)} por confirmar · ${n(listaBaja)} bajas o rebotes`, href: "/admin/lista" },
-    { label: "Pro activos", value: n(pro), sub: "con suscripción en Stripe", href: "/admin/usuarios?tier=pro" },
+    { label: "Plan Pro", value: n(pro), sub: `${n(proStripe)} con suscripción activa en Stripe · el resto por concesión`, href: "/admin/usuarios?tier=pro" },
     { label: "Roasts · 7 días", value: n(roasts7), sub: `${n(roastsTotal)} en total`, href: "/admin/roasts" },
     { label: "Búsquedas · 7 días", value: n(busq7), sub: "en la biblioteca · pantalla en la fase 2" },
   ];

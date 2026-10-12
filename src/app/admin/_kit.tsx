@@ -17,7 +17,7 @@ export const fecha = (iso: string | null | undefined) => (iso ? DATE.format(new 
 export const PAGE_SIZE = 50;
 export function pageOf(raw: string | string[] | undefined): number {
   const n = Number(Array.isArray(raw) ? raw[0] : raw);
-  return Number.isInteger(n) && n > 0 ? n : 1;
+  return Number.isInteger(n) && n > 0 && n <= 100_000 ? n : 1;
 }
 
 export function PageHead({ eyebrow, title, children }: { eyebrow: string; title: string; children?: React.ReactNode }) {

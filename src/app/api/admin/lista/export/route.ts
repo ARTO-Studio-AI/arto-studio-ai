@@ -20,13 +20,15 @@ export async function GET(request: NextRequest) {
   const auth = await requireAdminSession(request);
   if (!auth.ok || auth.via !== "session") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const estado = request.nextUrl.searchParams.get("estado");
+  // Se valida una sola vez: el valor tambien va al nombre del archivo.
+  const raw = request.nextUrl.searchParams.get("estado");
+  const estado = raw && STATUSES.includes(raw) ? raw : "";
   let q = createAdminClient()
     .from("newsletter_subscribers")
     .select("email, status, source, subscribed_at, last_sent_at, unsubscribed_at")
     .order("subscribed_at", { ascending: false })
     .limit(50_000);
-  if (estado && STATUSES.includes(estado)) q = q.eq("status", estado);
+  if (estado) q = q.eq("status", estado);
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
