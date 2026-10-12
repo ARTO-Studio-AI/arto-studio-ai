@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Verify admin access via Bearer token.
@@ -24,13 +23,8 @@ export function isAdminAuthorized(request: NextRequest): boolean {
  * Synchronous env-only admin check.
  *
  * ADMIN_EMAILS is a comma-separated list of lowercase email addresses
- * set as a Vercel env var. These are the "bootstrap" admins — they
- * always have access even if the DB is unreachable, and they cannot be
- * removed from the /admin/admins UI. Use this when you're in a
- * sync-only context (e.g. inside a tight render path that can't await).
- *
- * For most checks, prefer isAdminEmailAsync() which also consults the
- * admin_users table.
+ * set as a Vercel env var. Es la unica lista de administradores (D14, 2026-10-12):
+ * para dar o quitar acceso al panel se edita esa variable en Vercel y se redespliega.
  */
 export function isAdminEmail(email?: string | null): boolean {
   if (!email) return false;
@@ -43,34 +37,12 @@ export function isAdminEmail(email?: string | null): boolean {
   return allowlist.includes(email.trim().toLowerCase());
 }
 
-/**
- * Composite async admin check: ADMIN_EMAILS env var OR admin_users table.
- *
- * The env var is the bootstrap path — immutable from the UI, used so
- * the platform owner can always log in even if the DB row gets deleted
- * by accident. The admin_users table is the dynamic path — managed
- * from /admin/admins.
- *
- * A user is admin if their email matches EITHER source.
- */
+/** Version async de isAdminEmail (misma regla: solo ADMIN_EMAILS). */
 export async function isAdminEmailAsync(email?: string | null): Promise<boolean> {
-  if (!email) return false;
-  if (isAdminEmail(email)) return true;
-  // DB lookup. createAdminClient uses the service role key so we bypass
-  // RLS on admin_users.
-  try {
-    const sb = createAdminClient();
-    const { data } = await sb
-      .from("admin_users")
-      .select("id")
-      // eq y no ilike: el _ y el % del correo actuaban como comodines (2026-10-12).
-      .eq("email", email.trim().toLowerCase())
-      .limit(1)
-      .maybeSingle();
-    return !!data;
-  } catch {
-    return false;
-  }
+  // Desde el 2026-10-12 (D14) el unico origen es ADMIN_EMAILS. La tabla admin_users nunca
+  // existio en produccion y su pantalla se retiro. Se conserva la firma async para no tocar
+  // a quienes la llaman.
+  return isAdminEmail(email);
 }
 
 export type AdminAuthResult =
@@ -83,8 +55,7 @@ export type AdminAuthResult =
  * This is the canonical admin check for the app's server surface.
  *
  * Resolution order:
- *   1. Supabase session present and user.email is on ADMIN_EMAILS env
- *      OR in admin_users table → ok via "session"
+ *   1. Supabase session present and user.email is on ADMIN_EMAILS → ok via "session"
  *   2. Authorization: Bearer ADMIN_API_KEY match → ok via "bearer"
  *   3. otherwise → not_admin / unauthenticated / no_allowlist
  *
@@ -100,18 +71,10 @@ export async function requireAdminSession(
       data: { user },
     } = await sb.auth.getUser();
     if (user?.email) {
-      // Check env var first (cheap, no DB hit). If it matches, short-circuit.
-      // If not, fall through to the DB lookup.
       if (isAdminEmail(user.email)) {
         return { ok: true, email: user.email, userId: user.id, via: "session" };
       }
-      if (await isAdminEmailAsync(user.email)) {
-        return { ok: true, email: user.email, userId: user.id, via: "session" };
-      }
-      // Signed in but not admin. The "no_allowlist" reason is reserved for
-      // a config error (env var blank AND DB empty). Once you've used the
-      // UI to add a single admin, the table is populated and we'd reach
-      // not_admin instead.
+      // Con sesion pero sin ser admin. "no_allowlist" = ADMIN_EMAILS sin configurar.
       if (!process.env.ADMIN_EMAILS) {
         return { ok: false, reason: "no_allowlist" };
       }

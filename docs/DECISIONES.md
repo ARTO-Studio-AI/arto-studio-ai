@@ -195,3 +195,13 @@ siguiente sesión.
 | **Por qué** | El SMTP de Supabase se configura fuera del repo y no comparte variable con la app. Separar `noreply@` (transaccional de acceso, sin respuesta) de `hola@` (correo de marca al que se puede contestar) es intencional |
 | **Qué NO hacer** | No "unificar" el remitente de Supabase con `EMAIL_FROM` por accidente al rotar SMTP o llaves. Si se cambia, se cambia en el panel de Supabase y en esta entrada a la vez |
 | **Dónde** | Supabase → Authentication → SMTP Settings y Email Templates; `EMAIL_FROM` en Vercel; `src/lib/email.ts` |
+
+### D14 · Acceso al panel: solo ADMIN_EMAILS
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-12 (pregunta 55: «quítala») |
+| **Qué se decidió** | Quien entra a `/admin` sale únicamente de la variable `ADMIN_EMAILS` en Vercel. Se retiraron la pantalla `/admin/admins`, su API y la consulta a la tabla `admin_users` en `src/lib/auth.ts` |
+| **Por qué** | La tabla `admin_users` (migración 0001) nunca se creó en producción, así que la pantalla no funcionaba. Con dos administradores, una segunda vía de acceso solo agrega superficie de riesgo |
+| **Qué NO hacer** | No volver a dar acceso por base de datos sin decisión nueva de Victor. No aplicar `supabase/migrations/0001_admin_users.sql`: queda solo como histórica. `profiles.is_admin` y `email_tier_grants.is_admin` no dan acceso al panel; solo alimentan políticas RLS de lectura |
+| **Cómo dar o quitar acceso** | `vercel env rm ADMIN_EMAILS production` y luego `vercel env add ADMIN_EMAILS production` con la lista nueva separada por comas, y redesplegar producción |

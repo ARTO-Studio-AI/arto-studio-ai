@@ -43,7 +43,7 @@ export default async function MarketingLayout({
     userEmail = null;
   }
 
-  // Admin status: bootstrap env var OR dynamic admin_users table.
+  // Admin status: ADMIN_EMAILS (D14).
   // Server-side check so the link never ships to non-admins.
   const isAdmin = await isAdminEmailAsync(userEmail);
 
