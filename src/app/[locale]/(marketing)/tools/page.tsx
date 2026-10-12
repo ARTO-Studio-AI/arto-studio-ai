@@ -41,7 +41,7 @@ export default async function ToolsPage({ params }: Props) {
         <span className="accent-rule mt-4" />
         <p className="mt-4 text-zinc-600">
           {es
-            ? "Las herramientas de IA generativa que recomendamos, agrupadas por lo que producen. Úsala como consulta rápida para elegir la herramienta correcta para un prompt o para descubrir alternativas a las que ya usas."
+            ? "Las herramientas de IA generativa que recomendamos, agrupadas por lo que producen. Usa esta lista como consulta rápida para elegir la herramienta correcta para un prompt o para descubrir alternativas a las que ya usas."
             : "The generative AI tools we recommend, grouped by what they output. Use this as a quick lookup when you need to pick the right tool for a prompt, or to discover alternatives for any tool you already use."}
         </p>
         <p className="mt-2 font-mono text-xs text-zinc-500">
