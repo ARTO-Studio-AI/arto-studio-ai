@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { describePatch, parseFilter, parsePatch } from "@/lib/catalog";
-import { applyBulk, resolveIds } from "@/lib/catalog-server";
+import { applyBulk, isPerRow, PER_ROW_MAX, resolveIds } from "@/lib/catalog-server";
 import { catalogAdmin, fail } from "../_guard";
 
 /* POST /api/admin/catalogo/lote
@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const { ids: target, capped } = await resolveIds({ ids, filter });
-    if (capped) return NextResponse.json({ error: "El filtro abarca demasiados prompts; acotalo." }, { status: 400 });
+    if (capped) return NextResponse.json({ error: "El filtro abarca demasiados prompts; acótalo." }, { status: 400 });
+    if (isPerRow(patch) && target.length > PER_ROW_MAX) {
+      return NextResponse.json({ error: `Etiquetas y destacados van de ${PER_ROW_MAX} en ${PER_ROW_MAX}; este filtro tiene ${target.length}. Acótalo.`, count: target.length }, { status: 400 });
+    }
     if (body.dry_run === true) return NextResponse.json({ count: target.length, summary: describePatch(patch) });
     if (target.length > 50 && String(body.confirm ?? "") !== String(target.length)) {
       return NextResponse.json({ error: `Escribe ${target.length} para confirmar.`, count: target.length }, { status: 409 });

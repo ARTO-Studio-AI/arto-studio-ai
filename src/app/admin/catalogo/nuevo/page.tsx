@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { distinctValues } from "@/lib/catalog-server";
 import { guardAdmin, PageHead } from "../../_kit";
 import PromptEditor from "../PromptEditor";
 
@@ -9,8 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NuevoPrompt() {
   await guardAdmin();
-  const { data: subs } = await createAdminClient().from("prompts").select("subcategory").limit(5000);
-  const subcategories = [...new Set(((subs ?? []) as { subcategory: string }[]).map((s) => s.subcategory))].sort();
+  const subcategories = await distinctValues("subcategory");
   return (
     <div>
       <PageHead eyebrow="Catálogo" title="Nuevo prompt" />

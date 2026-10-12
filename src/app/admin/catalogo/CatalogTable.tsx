@@ -88,7 +88,13 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
     setSelected(new Set());
     setAllInFilter(false);
     const changed = Number(r.data.changed ?? 0);
-    setMessage({ text: changed ? `Listo: ${changed} ${changed === 1 ? "prompt cambió" : "prompts cambiaron"} (${r.data.summary}).` : "No había nada que cambiar.", batchId: changed ? String(r.data.batchId) : undefined });
+    const pendingEmb = Number(r.data.embeddingsPending ?? 0);
+    setMessage({
+      text: changed
+        ? `Listo: ${changed} ${changed === 1 ? "prompt cambió" : "prompts cambiaron"} (${r.data.summary}).${pendingEmb ? ` ${pendingEmb} quedan sin embedding: usa «Calcular embeddings».` : ""}`
+        : "No había nada que cambiar.",
+      batchId: changed ? String(r.data.batchId) : undefined,
+    });
     router.refresh();
   }
 
@@ -96,7 +102,12 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
     setBusy(true);
     const r = await post("/api/admin/catalogo/deshacer", { batch_id: batchId });
     setBusy(false);
-    setMessage(r.ok ? { text: `Deshecho: ${r.data.reverted} cambios revertidos.` } : { text: String(r.data.error ?? "No se pudo deshacer."), bad: true });
+    const skipped = Array.isArray(r.data.skipped) ? (r.data.skipped as string[]) : [];
+    setMessage(
+      r.ok
+        ? { text: `Deshecho: ${r.data.reverted} revertidos.${skipped.length ? ` ${skipped.length} no se tocaron porque alguien los cambió después (${skipped.slice(0, 5).join(", ")}${skipped.length > 5 ? "…" : ""}).` : ""}` }
+        : { text: String(r.data.error ?? "No se pudo deshacer."), bad: true },
+    );
     router.refresh();
   }
 
@@ -115,7 +126,7 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
   return (
     <div>
       {message && (
-        <div className={`mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-sm ${message.bad ? "border-red-200 bg-red-50 text-red-800" : "border-zinc-200 bg-white text-zinc-700"}`}>
+        <div role="status" aria-live="polite" className={`mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border px-4 py-3 text-sm ${message.bad ? "border-red-200 bg-red-50 text-red-800" : "border-zinc-200 bg-white text-zinc-700"}`}>
           <span>{message.text}</span>
           {message.batchId && <Button size="sm" variant="secondary" onClick={() => undo(message.batchId!)} disabled={busy}>Deshacer</Button>}
         </div>
@@ -153,7 +164,7 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
       )}
 
       {pending && (
-        <div className="mb-4 rounded-[var(--radius-lg)] border border-[var(--warn)] bg-white p-4 text-sm">
+        <div role="alertdialog" aria-label="Confirmar cambio" className="mb-4 rounded-[var(--radius-lg)] border border-[var(--warn)] bg-white p-4 text-sm">
           <p className="text-zinc-900">
             Vas a <strong>{pending.summary}</strong> en <strong>{pending.count.toLocaleString("es-MX")}</strong> prompts. Queda en el historial y se puede deshacer.
           </p>
@@ -206,12 +217,12 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
                   <div className="text-xs text-zinc-400">{r.subcategory.replace(/_/g, " ")}</div>
                 </td>
                 <td className="px-3 py-2.5 align-top">
-                  <button type="button" disabled={busy} onClick={() => inline(r.id, { is_published: !r.is_published })} title="Cambiar disponibilidad">
+                  <button type="button" disabled={busy} onClick={() => inline(r.id, { is_published: !r.is_published })} aria-pressed={r.is_published} aria-label={`${r.id}: ${r.is_published ? "disponible; hacer no disponible" : "no disponible; hacer disponible"}`}>
                     <Badge tone={r.is_published ? "live" : "soon"} dot={r.is_published}>{r.is_published ? "sí" : "no"}</Badge>
                   </button>
                 </td>
                 <td className="px-3 py-2.5 align-top">
-                  <button type="button" disabled={busy} onClick={() => inline(r.id, { tier: r.tier === "pro" ? "free" : "pro" })} title="Cambiar plan">
+                  <button type="button" disabled={busy} onClick={() => inline(r.id, { tier: r.tier === "pro" ? "free" : "pro" })} aria-label={`${r.id}: plan ${r.tier === "pro" ? "Pro; pasar a gratis" : "gratis; pasar a Pro"}`}>
                     <Badge tone={r.tier === "pro" ? "inverse" : "neutral"} dot={r.tier === "pro"}>{r.tier === "pro" ? "Pro" : "gratis"}</Badge>
                   </button>
                 </td>

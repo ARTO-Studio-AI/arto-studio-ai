@@ -4,7 +4,9 @@ import { Button } from "@/components/ui";
 import { VERTICALS } from "@/types/prompt";
 import { applyFilter, CATEGORIES, DIFFICULTIES, filterToParams, parseFilter, TIERS, type CatalogFilter } from "@/lib/catalog";
 import { guardAdmin, PageHead, Pager, PAGE_SIZE, pageOf } from "../_kit";
+import { distinctValues } from "@/lib/catalog-server";
 import CatalogTable, { type CatalogRow } from "./CatalogTable";
+import EmbeddingsButton from "./EmbeddingsButton";
 
 /* /admin/catalogo (fase 2 del rediseno, 2026-10-12). Todo el catalogo con una busqueda,
  * filtros por clasificacion, cambios en linea (disponible y plan) y por lotes con historial
@@ -40,13 +42,13 @@ export default async function Catalogo({ searchParams }: { searchParams: SP }) {
 
   const [list, models, total, noPub, sinEmb, destacados] = await Promise.all([
     listQuery,
-    sb.from("prompts").select("ai_model").limit(5000),
+    distinctValues("ai_model"),
     countWhere({}),
     countWhere({ pending: "no_publicado" }),
     countWhere({ pending: "sin_embedding" }),
     countWhere({ pending: "destacado" }),
   ]);
-  const aiModels = [...new Set(((models.data ?? []) as { ai_model: string }[]).map((r) => r.ai_model))].sort();
+  const aiModels = models;
   const rows = (list.data ?? []) as CatalogRow[];
   const params = filterToParams(filter);
   const n = (c: number | null) => (c === null ? "—" : c.toLocaleString("es-MX"));
@@ -77,6 +79,7 @@ export default async function Catalogo({ searchParams }: { searchParams: SP }) {
             <span className="font-semibold text-zinc-900">{n(p.value)}</span> {p.label}
           </Link>
         ))}
+        {(sinEmb ?? 0) > 0 && <EmbeddingsButton pending={sinEmb ?? 0} />}
       </div>
 
       <form action="/admin/catalogo" className="mb-5 grid gap-2 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-3 sm:grid-cols-2 lg:grid-cols-4">

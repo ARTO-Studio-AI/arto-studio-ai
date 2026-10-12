@@ -14,7 +14,7 @@ export default async function Historial() {
     .from("catalog_changes")
     .select("batch_id, entity_id, summary, changed_by, created_at, reverted_at")
     .order("created_at", { ascending: false })
-    .limit(2000);
+    .limit(1000); // PostgREST no da mas de 1,000 filas: son los cambios mas recientes
   const batches = new Map<string, { first: Change; ids: string[] }>();
   for (const c of (data ?? []) as Change[]) {
     const b = batches.get(c.batch_id);
@@ -25,6 +25,7 @@ export default async function Historial() {
   return (
     <div>
       <PageHead eyebrow="Catálogo" title="Historial de cambios" />
+      <p className="-mt-4 mb-4 text-sm text-zinc-500">Los últimos 100 lotes. Deshacer solo restaura los prompts que nadie cambió después.</p>
       {error && <p className="mb-4 text-sm text-[var(--bad)]">No se pudo leer el historial: {error.message}</p>}
       <Table head={["Cambio", "Prompts", "Quién", "Cuándo", ""]} empty={!error && list.length === 0 && "Todavía no hay cambios."}>
         {list.map(({ first, ids }) => (

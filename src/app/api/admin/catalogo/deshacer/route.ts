@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   const batchId = typeof body?.batch_id === "string" ? body.batch_id : "";
   if (!/^[0-9a-f-]{36}$/i.test(batchId)) return NextResponse.json({ error: "Lote no valido" }, { status: 400 });
   try {
-    return NextResponse.json({ reverted: await undoBatch(batchId, who.email) });
+    return NextResponse.json(await undoBatch(batchId, who.email));
   } catch (e) {
     return fail(e);
   }

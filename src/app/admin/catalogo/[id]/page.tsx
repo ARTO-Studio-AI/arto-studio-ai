@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { distinctValues } from "@/lib/catalog-server";
 import { fecha, guardAdmin, PageHead, Table, TD } from "../../_kit";
 import PromptEditor, { type EditorPrompt } from "../PromptEditor";
 
@@ -12,14 +13,14 @@ export default async function EditarPrompt({ params }: { params: Promise<{ id: s
   const { id } = await params;
   if (!/^[A-Z]{2}-\d{4}$/.test(id)) notFound();
   const sb = createAdminClient();
-  const [{ data }, { data: history }, { data: subs }] = await Promise.all([
+  const [{ data }, { data: history }, subs] = await Promise.all([
     sb.from("prompts").select("id, title_en, title_es, prompt_en, prompt_es, category, subcategory, ai_model, difficulty, tier, tags, use_case, expected_output, is_published, view_count, copy_count, updated_at").eq("id", id).maybeSingle(),
     sb.from("catalog_changes").select("batch_id, summary, changed_by, created_at, reverted_at").eq("entity", "prompt").eq("entity_id", id).order("created_at", { ascending: false }).limit(20),
-    sb.from("prompts").select("subcategory").limit(5000),
+    distinctValues("subcategory"),
   ]);
   if (!data) notFound();
   const prompt = data as unknown as EditorPrompt & { view_count: number | null; copy_count: number | null; updated_at: string | null };
-  const subcategories = [...new Set(((subs ?? []) as { subcategory: string }[]).map((s) => s.subcategory))].sort();
+  const subcategories = subs;
 
   return (
     <div>
