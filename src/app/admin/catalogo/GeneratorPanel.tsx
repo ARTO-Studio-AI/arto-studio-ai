@@ -77,7 +77,7 @@ export default function GeneratorPanel({ onUse }: { onUse: (d: DraftFields) => v
       </div>
       <div className="mt-3 flex items-center gap-3">
         <Button size="sm" onClick={generate} disabled={busy || idea.trim().length < 10}>{busy ? "Generando…" : "Generar"}</Button>
-        <span className="text-xs text-zinc-500">Tarda entre 20 y 40 segundos. No se guarda nada hasta que pulses «Crear prompt».</span>
+        <span className="text-xs text-zinc-500">Tarda entre 20 y 50 segundos. No se guarda nada hasta que pulses «Crear prompt».</span>
       </div>
       <div role="status" aria-live="polite">
         {notes.map((n) => <p key={n} className="mt-2 text-xs text-[var(--warn)]">{n}</p>)}

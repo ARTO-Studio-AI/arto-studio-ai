@@ -327,7 +327,7 @@ interface PlannedChange {
 }
 
 /** Compara el CSV con el catalogo y dice que pasaria con cada fila, sin tocar nada. */
-export async function planImport(rows: ImportRow[]): Promise<{ plan: ImportPlanRow[]; changes: PlannedChange[]; creates: ImportRow[] }> {
+export async function planImport(rows: ImportRow[]): Promise<{ plan: ImportPlanRow[]; changes: PlannedChange[]; creates: ImportRow[]; notices: string[] }> {
   const sb = createAdminClient();
   const ids = [...new Set(rows.map((r) => r.id).filter((x): x is string => Boolean(x)))];
   const existing = new Map<string, Row>();
@@ -368,7 +368,14 @@ export async function planImport(rows: ImportRow[]): Promise<{ plan: ImportPlanR
     if (fields.length) changes.push({ row, before, after });
     plan.push({ line: row.line, id: row.id, action: fields.length ? "update" : "same", fields, errors: [], title });
   }
-  return { plan, changes, creates };
+  // Avisos (no errores): valores nuevos de modelo o subcategoria, por si son erratas.
+  const [models, subs] = await Promise.all([distinctValues("ai_model"), distinctValues("subcategory")]);
+  const notices: string[] = [];
+  const newModels = [...new Set(rows.map((r) => r.values.ai_model).filter((v): v is string => typeof v === "string" && !models.includes(v)))];
+  const newSubs = [...new Set(rows.map((r) => r.values.subcategory).filter((v): v is string => typeof v === "string" && !subs.includes(v)))];
+  if (newModels.length) notices.push(`Modelos de IA que hoy no existen en el catálogo: ${newModels.join(", ")}. Revisa que no sean erratas.`);
+  if (newSubs.length) notices.push(`Subcategorías nuevas: ${newSubs.slice(0, 10).join(", ")}${newSubs.length > 10 ? "…" : ""}.`);
+  return { plan, changes, creates, notices };
 }
 
 /** Aplica una importacion ya planeada como un solo lote (un batch_id para deshacerlo). */
@@ -427,8 +434,10 @@ export async function applyImport(
     for (const part of chunks(rowsToInsert, 100)) {
       const { error } = await sb.from("prompts").insert(part);
       if (error) {
-        const done = inserted.length ? ` Se alcanzaron a crear ${inserted.length} (${inserted.slice(0, 3).join(", ")}…); están en el historial.` : "";
-        throw new Error((error.code === "23505" ? "Otro alta tomó uno de los ID mientras se importaba. Vuelve a intentar." : error.message) + done);
+        const edited = changes.length ? ` Las ${changes.length} ediciones sí se aplicaron.` : "";
+        const done = inserted.length ? ` Se alcanzaron a crear ${inserted.length} (${inserted.slice(0, 3).join(", ")}…).` : "";
+        const where = edited || done ? ` Todo lo aplicado está en el historial como un lote; deshazlo ahí antes de reintentar para no duplicar altas.` : "";
+        throw new Error((error.code === "23505" ? "Otro alta tomó uno de los ID mientras se importaba." : error.message) + edited + done + where);
       }
       await writeHistory(part.map((r) => ({ batch_id: batchId, entity_id: String(r.id), action: "create", summary: "importar CSV: alta", before: null, after: r, changed_by: by })));
       inserted.push(...part.map((r) => String(r.id)));

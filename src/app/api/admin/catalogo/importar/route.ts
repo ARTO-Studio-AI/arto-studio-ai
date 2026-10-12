@@ -22,11 +22,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const { rows, warnings } = readImport(parseCsv(csv));
-    const { plan, changes, creates } = await planImport(rows);
+    const { plan, changes, creates, notices } = await planImport(rows);
     const errors = plan.filter((p) => p.action === "error").length;
     const total = changes.length + creates.length;
     const summary = { creates: creates.length, updates: changes.length, same: plan.filter((p) => p.action === "same").length, errors };
-    if (body?.apply !== true) return NextResponse.json({ plan, warnings, summary });
+    if (body?.apply !== true) return NextResponse.json({ plan, warnings: [...warnings, ...notices], summary });
     if (errors) return NextResponse.json({ error: `Hay ${errors} filas con error; corrígelas antes de aplicar.`, plan, summary }, { status: 400 });
     if (!total) return NextResponse.json({ error: "No hay nada que cambiar." }, { status: 400 });
     if (total > 50 && String(body.confirm ?? "") !== String(total)) {

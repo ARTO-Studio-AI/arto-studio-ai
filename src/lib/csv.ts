@@ -39,6 +39,12 @@ export function parseCsv(text: string): string[][] {
   return rows.filter((r) => r.some((c) => c.trim() !== ""));
 }
 
+/** Quita el apostrofo que csvCell antepone a las celdas que empiezan con = + - @ o
+ * tabulador, para que exportar y volver a importar no cambie el texto. */
+export function uncell(s: string): string {
+  return s.replace(/^'(?=[=+\-@\t\r])/, "");
+}
+
 /** Una celda segura para Excel y Sheets: entre comillas y sin formulas. */
 export function csvCell(v: unknown): string {
   const s = v == null ? "" : String(v);

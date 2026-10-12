@@ -72,13 +72,24 @@ difficulty must be one of: ${DIFFICULTIES.join(", ")}.
 Each entry:
 { "title_es": "...", "title_en": "...", "prompt_es": "...", "prompt_en": "...", "subcategory": "...", "ai_model": "...", "difficulty": "...", "tags": ["3 to 6 lowercase tags"], "use_case": "one sentence: when a strategist picks this prompt", "expected_output": "one sentence: the deliverable" }
 
-Constraints: titles under 70 characters; each prompt 150 to 450 words, ready to paste, with [placeholders] in brackets; entries must differ from each other and from these existing ${v.label_en} titles:
+Constraints: titles under 70 characters; each prompt 150 to 300 words, ready to paste, with [placeholders] in brackets; entries must differ from each other and from these existing ${v.label_en} titles:
 ${sameVertical.slice(0, 12000)}
 
 Return { "items": [ ... ] }`;
 
   const anth = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const resp = await anth.messages.create({ model: MODEL, max_tokens: 8000, system: SYSTEM, messages: [{ role: "user", content: user }] });
+  // Un borrador por llamada, con tope de salida y de tiempo para responder antes de que
+  // Vercel corte a los 60 s (auditoria de Fable del PR #89).
+  let resp: Anthropic.Message;
+  try {
+    resp = await anth.messages.create(
+      { model: MODEL, max_tokens: 4000, system: SYSTEM, messages: [{ role: "user", content: user }] },
+      { timeout: 50_000, maxRetries: 0 },
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    throw new Error(/timeout|timed out/i.test(msg) ? "La IA tardó demasiado. Intenta otra vez o pide menos borradores." : `La IA no respondió: ${msg}`);
+  }
   const text = resp.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
   let parsed: { items?: unknown };
   try {

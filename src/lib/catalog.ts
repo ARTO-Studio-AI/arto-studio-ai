@@ -1,4 +1,5 @@
 import { VERTICALS, type Category } from "@/types/prompt";
+import { uncell } from "@/lib/csv";
 
 /* Catalogo de /admin (rediseno, fase 2, 2026-10-12). Logica pura: filtros, cambios
  * permitidos, validacion del editor y el texto del embedding. Lo que toca la base vive en
@@ -346,7 +347,7 @@ export function readImport(table: string[][]): { rows: ImportRow[]; warnings: st
   const rows = table.slice(1).map((cells, i) => {
     const row: ImportRow = { line: i + 2, id: null, values: {}, errors: [] };
     head.forEach((h, j) => {
-      const raw = cells[j] ?? "";
+      const raw = uncell(cells[j] ?? "");
       if (h === "id") {
         const id = raw.trim().toUpperCase();
         if (id && !/^[A-Z]{2}-\d{4}$/.test(id)) row.errors.push(`id «${raw}» no válido`);

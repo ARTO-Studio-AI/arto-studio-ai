@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { csvCell, parseCsv, toCsv } from "./csv";
+import { csvCell, parseCsv, toCsv, uncell } from "./csv";
 
 describe("parseCsv", () => {
   it("lee comillas, comas y saltos de linea dentro de un campo", () => {
@@ -23,6 +23,11 @@ describe("csvCell y toCsv", () => {
   it("neutraliza formulas y escapa comillas", () => {
     expect(csvCell("=SUMA(A1)")).toBe(`"'=SUMA(A1)"`);
     expect(csvCell('di "hola"')).toBe('"di ""hola"""');
+  });
+  it("exportar e importar no deja el apostrofo protector", () => {
+    const text = toCsv(["p", "q", "r"], [{ p: "- lista\n+ otro", q: "=1+1", r: "'cita normal" }]);
+    const row = parseCsv(text)[1].map(uncell);
+    expect(row).toEqual(["- lista\n+ otro", "=1+1", "'cita normal"]);
   });
   it("ida y vuelta sin perder nada", () => {
     const text = toCsv(["id", "t"], [{ id: "BR-0001", t: 'linea 1\nlinea, "2"' }]);
