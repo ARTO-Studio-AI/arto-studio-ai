@@ -10,7 +10,9 @@ import {
   nextValues,
   patchColumns,
   sameValue,
+  CSV_WRITABLE,
   type BulkPatch,
+  type ImportRow,
   type CatalogFilter,
   type EmbedFields,
   type PromptInput,
@@ -106,7 +108,7 @@ export async function refreshEmbeddings(ids: string[]): Promise<number> {
 /* Recalcula ahora si son pocos; si son muchos, los deja en null para que /embeddings los
  * reponga por tandas (el contador «sin embedding» los muestra). Devuelve cuantos quedaron
  * pendientes. */
-async function refreshOrQueue(ids: string[]): Promise<number> {
+export async function refreshOrQueue(ids: string[]): Promise<number> {
   if (!ids.length) return 0;
   if (ids.length <= INLINE_EMBED_MAX) {
     await refreshEmbeddings(ids);
@@ -120,7 +122,7 @@ async function refreshOrQueue(ids: string[]): Promise<number> {
   return ids.length;
 }
 
-async function writeHistory(rows: { batch_id: string; entity_id: string; action: "create" | "update"; summary: string; before: unknown; after: unknown; changed_by: string }[]) {
+export async function writeHistory(rows: { batch_id: string; entity_id: string; action: "create" | "update"; summary: string; before: unknown; after: unknown; changed_by: string }[]) {
   const sb = createAdminClient();
   for (const part of chunks(rows, 500)) {
     const { error } = await sb.from("catalog_changes").insert(part.map((r) => ({ ...r, entity: "prompt" })));
@@ -305,4 +307,151 @@ export async function savePrompt(id: string | null, input: PromptInput, by: stri
   if (error) throw new Error(error.message);
   if (Object.keys(after).some((k) => (EMBED_FIELDS as readonly string[]).includes(k))) await refreshEmbeddings([id]);
   return { id, batchId };
+}
+
+/* ── Importacion CSV (2026-10-12) ────────────────────────────────────────────────── */
+
+export interface ImportPlanRow {
+  line: number;
+  id: string | null;
+  action: "create" | "update" | "same" | "error";
+  fields: string[];
+  errors: string[];
+  title: string;
+}
+
+interface PlannedChange {
+  row: ImportRow;
+  before: Record<string, unknown>;
+  after: Record<string, unknown>;
+}
+
+/** Compara el CSV con el catalogo y dice que pasaria con cada fila, sin tocar nada. */
+export async function planImport(rows: ImportRow[]): Promise<{ plan: ImportPlanRow[]; changes: PlannedChange[]; creates: ImportRow[]; notices: string[] }> {
+  const sb = createAdminClient();
+  const ids = [...new Set(rows.map((r) => r.id).filter((x): x is string => Boolean(x)))];
+  const existing = new Map<string, Row>();
+  for (const part of chunks(ids)) {
+    const { data, error } = await sb.from("prompts").select(["id", ...CSV_WRITABLE].join(", ")).in("id", part);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as unknown as Row[]) existing.set(r.id, r);
+  }
+  const seen = new Set<string>();
+  const plan: ImportPlanRow[] = [];
+  const changes: PlannedChange[] = [];
+  const creates: ImportRow[] = [];
+  for (const row of rows) {
+    const title = String(row.values.title_es ?? (row.id ? existing.get(row.id)?.title_es ?? "" : ""));
+    const errors = [...row.errors];
+    if (row.id && seen.has(row.id)) errors.push(`${row.id} aparece dos veces en el CSV`);
+    if (row.id) seen.add(row.id);
+    if (row.id && !existing.has(row.id)) errors.push(`${row.id} no existe (deja el id vacío para dar de alta)`);
+    if (errors.length) {
+      plan.push({ line: row.line, id: row.id, action: "error", fields: [], errors, title });
+      continue;
+    }
+    if (!row.id) {
+      creates.push(row);
+      plan.push({ line: row.line, id: null, action: "create", fields: Object.keys(row.values), errors: [], title });
+      continue;
+    }
+    const cur = existing.get(row.id)!;
+    const before: Record<string, unknown> = {};
+    const after: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(row.values)) {
+      if (!sameValue(cur[k], v)) {
+        before[k] = cur[k] ?? null;
+        after[k] = v;
+      }
+    }
+    const fields = Object.keys(after);
+    if (fields.length) changes.push({ row, before, after });
+    plan.push({ line: row.line, id: row.id, action: fields.length ? "update" : "same", fields, errors: [], title });
+  }
+  // Avisos (no errores): valores nuevos de modelo o subcategoria, por si son erratas.
+  const [models, subs] = await Promise.all([distinctValues("ai_model"), distinctValues("subcategory")]);
+  const notices: string[] = [];
+  const newModels = [...new Set(rows.map((r) => r.values.ai_model).filter((v): v is string => typeof v === "string" && !models.includes(v)))];
+  const newSubs = [...new Set(rows.map((r) => r.values.subcategory).filter((v): v is string => typeof v === "string" && !subs.includes(v)))];
+  if (newModels.length) notices.push(`Modelos de IA que hoy no existen en el catálogo: ${newModels.join(", ")}. Revisa que no sean erratas.`);
+  if (newSubs.length) notices.push(`Subcategorías nuevas: ${newSubs.slice(0, 10).join(", ")}${newSubs.length > 10 ? "…" : ""}.`);
+  return { plan, changes, creates, notices };
+}
+
+/** Aplica una importacion ya planeada como un solo lote (un batch_id para deshacerlo). */
+export async function applyImport(
+  changes: PlannedChange[],
+  creates: ImportRow[],
+  by: string,
+): Promise<{ batchId: string; updated: number; created: string[]; embeddingsPending: number }> {
+  const sb = createAdminClient();
+  const batchId = randomUUID();
+  const now = new Date().toISOString();
+
+  // Ediciones: historial primero, luego los updates en paralelo de 25.
+  if (changes.length) {
+    await writeHistory(
+      changes.map((c) => ({ batch_id: batchId, entity_id: c.row.id!, action: "update", summary: `importar CSV: ${Object.keys(c.after).join(", ")}`, before: c.before, after: c.after, changed_by: by })),
+    );
+    for (const part of chunks(changes, 25)) {
+      const results = await Promise.all(part.map((c) => sb.from("prompts").update({ ...c.after, updated_at: now }).eq("id", c.row.id!)));
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw new Error(failed.error.message);
+    }
+  }
+
+  // Altas: los ID se asignan en orden por vertical, a partir del mayor existente.
+  const created: string[] = [];
+  if (creates.length) {
+    const nextByCat = new Map<string, number>();
+    const rowsToInsert: Record<string, unknown>[] = [];
+    for (const c of creates) {
+      const cat = c.values.category as PromptInput["category"];
+      if (!nextByCat.has(cat)) {
+        const first = await nextFreeId(cat);
+        nextByCat.set(cat, Number(first.split("-")[1]));
+      }
+      const n = nextByCat.get(cat)!;
+      nextByCat.set(cat, n + 1);
+      const id = `${first2(cat)}-${String(n).padStart(4, "0")}`;
+      rowsToInsert.push({
+        id,
+        tags: [],
+        use_case: null,
+        expected_output: null,
+        ...c.values,
+        is_published: false,
+        author: "ARTO Studio AI",
+        version: "1.0",
+        created_at: now,
+        updated_at: now,
+      });
+      created.push(id);
+    }
+    // El historial de cada tanda va justo despues de insertarla: si una tanda posterior
+    // falla, las altas ya hechas quedan en el historial y se pueden deshacer.
+    const inserted: string[] = [];
+    for (const part of chunks(rowsToInsert, 100)) {
+      const { error } = await sb.from("prompts").insert(part);
+      if (error) {
+        const edited = changes.length ? ` Las ${changes.length} ediciones sí se aplicaron.` : "";
+        const done = inserted.length ? ` Se alcanzaron a crear ${inserted.length} (${inserted.slice(0, 3).join(", ")}…).` : "";
+        const where = edited || done ? ` Todo lo aplicado está en el historial como un lote; deshazlo ahí antes de reintentar para no duplicar altas.` : "";
+        throw new Error((error.code === "23505" ? "Otro alta tomó uno de los ID mientras se importaba." : error.message) + edited + done + where);
+      }
+      await writeHistory(part.map((r) => ({ batch_id: batchId, entity_id: String(r.id), action: "create", summary: "importar CSV: alta", before: null, after: r, changed_by: by })));
+      inserted.push(...part.map((r) => String(r.id)));
+    }
+  }
+
+  const reembed = [
+    ...changes.filter((c) => Object.keys(c.after).some((k) => (EMBED_FIELDS as readonly string[]).includes(k))).map((c) => c.row.id!),
+    ...created,
+  ];
+  const embeddingsPending = await refreshOrQueue(reembed);
+  return { batchId, updated: changes.length, created, embeddingsPending };
+}
+
+function first2(category: PromptInput["category"]): string {
+  return nextId(category, null).split("-")[0];
 }

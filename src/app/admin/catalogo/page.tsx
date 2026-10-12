@@ -65,6 +65,8 @@ export default async function Catalogo({ searchParams }: { searchParams: SP }) {
       <PageHead eyebrow="Catálogo" title={`Prompts · ${n(total)}`}>
         <div className="flex gap-2">
           <Button href="/admin/catalogo/historial" variant="ghost" size="sm">Historial</Button>
+          <Button href={`/api/admin/catalogo/exportar?${new URLSearchParams(params).toString()}`} variant="secondary" size="sm">Exportar CSV</Button>
+          <Button href="/admin/catalogo/importar" variant="secondary" size="sm">Importar CSV</Button>
           <Button href="/admin/catalogo/nuevo" size="sm">Nuevo prompt</Button>
         </div>
       </PageHead>

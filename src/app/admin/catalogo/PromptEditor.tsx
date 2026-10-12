@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui";
 import { VERTICALS, type Category } from "@/types/prompt";
+import GeneratorPanel, { type DraftFields } from "./GeneratorPanel";
 
 /* Editor de un prompt: espanol e ingles lado a lado. Al guardar se recalcula el embedding si
  * cambio algo que lo afecta, y el cambio queda en el historial. */
@@ -48,6 +49,10 @@ export default function PromptEditor({ initial, subcategories }: { initial: Edit
   const [status, setStatus] = useState<{ text: string; bad?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof p, v: string | boolean) => setP((s) => ({ ...s, [k]: v }));
+  const useDraft = (d: DraftFields) => {
+    setP((s) => ({ ...s, ...d, tags: d.tags.join(", "), is_published: false }));
+    setStatus({ text: "Borrador cargado. Revísalo y pulsa «Crear prompt»; entra como no disponible." });
+  };
 
   async function save() {
     setBusy(true);
@@ -67,6 +72,7 @@ export default function PromptEditor({ initial, subcategories }: { initial: Edit
 
   return (
     <div className="grid gap-5">
+      {!initial && <GeneratorPanel onUse={useDraft} />}
       <div className="grid gap-4 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5 lg:grid-cols-2">
         <div>
           <label className={LABEL}>Título (español)<input className={FIELD} value={p.title_es} onChange={(e) => set("title_es", e.target.value)} /></label>
