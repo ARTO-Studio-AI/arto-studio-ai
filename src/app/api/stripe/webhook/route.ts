@@ -31,7 +31,7 @@ export const maxDuration = 30;
  *   checkout.session.completed      metadata.user_id + tier=pro → profiles.tier='pro'
  *                                   metadata.client_id           → clients.tier='starter'
  *   customer.subscription.updated   profiles.subscription_status / subscription_ends_at
- *   customer.subscription.deleted   profiles.tier='free' / clients.tier='trial'
+ *   customer.subscription.deleted   profiles.tier='free (o el plan concedido en email_tier_grants, si lo hay)' / clients.tier='trial'
  *   invoice.payment_failed          profiles.subscription_status='past_due'
  */
 export async function POST(request: NextRequest) {
@@ -131,6 +131,16 @@ function buildDeps(): WebhookDeps {
         return false;
       }
       return true;
+    },
+    async findGrantTier(profileId) {
+      const { data: prof, error } = await admin.from("profiles").select("email").eq("id", profileId).maybeSingle();
+      if (error) throw new Error(`profiles email lookup failed: ${error.message}`);
+      const email = (prof as { email: string | null } | null)?.email;
+      if (!email) return null;
+      const { data: grant, error: gErr } = await admin.from("email_tier_grants").select("tier").eq("email", email.toLowerCase()).maybeSingle();
+      if (gErr) throw new Error(`email_tier_grants lookup failed: ${gErr.message}`);
+      const tier = (grant as { tier: string } | null)?.tier;
+      return tier === "pro" || tier === "enterprise" ? tier : null;
     },
     getClientById,
     updateClient,
