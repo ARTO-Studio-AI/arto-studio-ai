@@ -222,4 +222,5 @@ siguiente sesión.
 | **Quién** | Victor, 2026-10-12 (pregunta 59) |
 | **Qué se decidió** | Migración 0016: los privilegios por defecto del rol `postgres` en `public` ya no dan nada a `anon` ni a `authenticated` en tablas, secuencias y funciones nuevas. Para funciones, además, se quita el EXECUTE a PUBLIC de forma global (todos los esquemas) para el rol `postgres`, porque una entrada por esquema no lo quita. `service_role` conserva todo |
 | **Por qué** | Cada tabla nueva nacía abierta a la API pública y había que cerrarla a mano; así nacieron H-63 y H-64 |
+| **Alcance** | Solo el rol `postgres`. El esquema `storage` (que maneja Supabase) y los defaults de los roles `supabase_*` quedan fuera a propósito |
 | **Qué NO hacer** | No crear una tabla que el navegador deba leer sin su `GRANT` explícito y su política RLS en la misma migración. No revertir 0016 para «arreglar» un 401: el 401 es la protección funcionando |
