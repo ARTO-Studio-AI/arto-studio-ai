@@ -78,7 +78,6 @@ const SECTIONS: Section[] = [
     title: "Administrativas",
     items: [
       { href: "/admin/clients", label: "Clients" },
-      { href: "/admin/admins", label: "Administradores" },
     ],
   },
   {
