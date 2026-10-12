@@ -37,6 +37,7 @@ const SECTIONS: Section[] = [
     title: "Catálogo",
     items: [
       { href: "/admin/catalogo", label: "Prompts" },
+      { href: "/admin/catalogo/importar", label: "Importar CSV" },
       { href: "/admin/catalogo/historial", label: "Historial" },
     ],
   },

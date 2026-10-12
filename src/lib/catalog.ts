@@ -267,3 +267,103 @@ export function nextId(category: Category, maxExisting: string | null): string {
   const n = maxExisting ? Number(maxExisting.split("-")[1]) : 0;
   return `${code}-${String((Number.isFinite(n) ? n : 0) + 1).padStart(4, "0")}`;
 }
+
+/* ── Importar y exportar CSV (2026-10-12) ──────────────────────────────────────────
+ * Columnas del CSV. Las etiquetas van separadas por «|». Al importar:
+ *  - fila con id que existe → edicion: solo cambian las celdas con valor; vacia = sin cambio.
+ *  - fila sin id → alta, siempre como NO disponible (borrador): se publica despues en el
+ *    Catalogo, uno por uno o por lote. Necesita todas las columnas obligatorias.
+ *  - id que no existe → error (los ID nuevos los asigna el sistema). */
+export const CSV_COLUMNS = [
+  "id", "title_es", "title_en", "prompt_es", "prompt_en", "category", "subcategory", "ai_model",
+  "difficulty", "tier", "tags", "use_case", "expected_output", "is_published", "is_featured",
+] as const;
+export type CsvColumn = (typeof CSV_COLUMNS)[number];
+
+/* Columnas que se pueden escribir desde el CSV (is_featured e id solo se exportan). */
+export const CSV_WRITABLE = [
+  "title_es", "title_en", "prompt_es", "prompt_en", "category", "subcategory", "ai_model",
+  "difficulty", "tier", "tags", "use_case", "expected_output", "is_published",
+] as const;
+type Writable = (typeof CSV_WRITABLE)[number];
+
+export const IMPORT_MAX_ROWS = 500;
+
+const LIMITS: Record<string, number> = { title_es: 200, title_en: 200, prompt_es: 20000, prompt_en: 20000, use_case: 1000, expected_output: 2000 };
+
+/** Valida una celda. Devuelve el valor ya normalizado o un error en espanol. */
+export function csvValue(col: Writable, raw: string): { ok: true; value: unknown } | { ok: false; error: string } {
+  const v = raw.trim();
+  switch (col) {
+    case "category":
+      return (CATEGORIES as string[]).includes(v) ? { ok: true, value: v } : { ok: false, error: `vertical «${v}» no existe` };
+    case "difficulty":
+      return (DIFFICULTIES as readonly string[]).includes(v) ? { ok: true, value: v } : { ok: false, error: `dificultad «${v}» no válida` };
+    case "tier":
+      return (TIERS as readonly string[]).includes(v) ? { ok: true, value: v } : { ok: false, error: `plan «${v}» no válido (free o pro)` };
+    case "subcategory": {
+      const s = v.toLowerCase().replace(/\s+/g, "_");
+      return /^[a-z0-9_]{1,60}$/.test(s) ? { ok: true, value: s } : { ok: false, error: "subcategoría con caracteres no válidos" };
+    }
+    case "ai_model":
+      return /^[a-z0-9_.-]{1,40}$/i.test(v) ? { ok: true, value: v } : { ok: false, error: `modelo «${v}» no válido` };
+    case "tags": {
+      const tags = cleanTags(v.split("|"));
+      return { ok: true, value: tags ?? [] };
+    }
+    case "is_published": {
+      const b = v.toLowerCase();
+      if (["true", "si", "sí", "1", "yes"].includes(b)) return { ok: true, value: true };
+      if (["false", "no", "0"].includes(b)) return { ok: true, value: false };
+      return { ok: false, error: `disponible «${v}» no válido (sí o no)` };
+    }
+    default: {
+      const max = LIMITS[col] ?? 2000;
+      return v.length > max ? { ok: false, error: `${col} pasa de ${max} caracteres` } : { ok: true, value: v };
+    }
+  }
+}
+
+const REQUIRED_FOR_CREATE: Writable[] = ["title_es", "title_en", "prompt_es", "prompt_en", "category", "subcategory", "ai_model", "difficulty", "tier"];
+
+export interface ImportRow {
+  line: number;
+  id: string | null;
+  values: Partial<Record<Writable, unknown>>;
+  errors: string[];
+}
+
+/** Convierte el CSV ya leido en filas validadas. El encabezado debe usar los nombres de
+ * CSV_COLUMNS; las columnas desconocidas se reportan y se ignoran. */
+export function readImport(table: string[][]): { rows: ImportRow[]; warnings: string[] } {
+  if (table.length < 2) return { rows: [], warnings: ["El CSV no tiene filas de datos."] };
+  const head = table[0].map((h) => h.trim().toLowerCase());
+  const warnings: string[] = [];
+  const unknown = head.filter((h) => h && !(CSV_COLUMNS as readonly string[]).includes(h));
+  if (unknown.length) warnings.push(`Columnas ignoradas: ${unknown.join(", ")}.`);
+  if (head.includes("is_featured")) warnings.push("La columna is_featured solo se exporta; para destacar usa el Catálogo.");
+  if (table.length - 1 > IMPORT_MAX_ROWS) throw new Error(`El CSV tiene ${table.length - 1} filas; el máximo por importación es ${IMPORT_MAX_ROWS}.`);
+  const rows = table.slice(1).map((cells, i) => {
+    const row: ImportRow = { line: i + 2, id: null, values: {}, errors: [] };
+    head.forEach((h, j) => {
+      const raw = cells[j] ?? "";
+      if (h === "id") {
+        const id = raw.trim().toUpperCase();
+        if (id && !/^[A-Z]{2}-\d{4}$/.test(id)) row.errors.push(`id «${raw}» no válido`);
+        else row.id = id || null;
+        return;
+      }
+      if (!(CSV_WRITABLE as readonly string[]).includes(h) || raw.trim() === "") return;
+      const r = csvValue(h as Writable, raw);
+      if (r.ok) row.values[h as Writable] = r.value;
+      else row.errors.push(r.error);
+    });
+    if (!row.id) {
+      const missing = REQUIRED_FOR_CREATE.filter((k) => row.values[k] === undefined);
+      if (missing.length) row.errors.push(`para un alta faltan: ${missing.join(", ")}`);
+      row.values.is_published = false;
+    }
+    return row;
+  });
+  return { rows, warnings };
+}
