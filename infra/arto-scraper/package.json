@@ -1,0 +1,16 @@
+{
+  "name": "arto-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ARTO Module 4b — nightly prospect-discovery scraper. Runs on the Mac Mini via launchd, writes prospects into Supabase outreach_targets.",
+  "scripts": {
+    "start": "node scrape.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "cheerio": "^1.0.0",
+    "postgres": "^3.4.9",
+    "rss-parser": "^3.13.0"
+  }
+}
