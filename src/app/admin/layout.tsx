@@ -3,7 +3,7 @@ import { requireAdminSession } from "@/lib/auth";
 import AdminSidebar from "./AdminSidebar";
 
 /* /admin layout — server-gated, renders the persistent left sidebar.
- * Every page under /admin (including /admin/engine/*) inherits this. */
+ * Every page under /admin inherits this; cada pagina servidor ademas llama guardAdmin(). */
 
 export const dynamic = "force-dynamic";
 

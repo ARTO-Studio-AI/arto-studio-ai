@@ -25,7 +25,7 @@ Producción en **`https://creative.artostudio.ai`** (D6). `arto-studio-ai.vercel
 | Brand Roast | Público y sin login, 10 llamadas por hora por IP (tabla `rate_limits`) | `src/app/roast`, `/api/roast` |
 | Brand Positioning | Skill con **API key de cliente** y **trial**: el consumo del trial es atómico y se devuelve si el skill cae a fallback o falla (H-39, H-43). Dashboard interno en `/studio` | `/api/skills/[slug]`, `src/lib/clients/*`, `src/lib/skills/*` |
 | /learn | Guías de prompts por vertical, EN y ES | `src/app/[locale]/(marketing)/learn` |
-| /admin | Clients, traces, admins, outreach, **Content Factory** (`/admin/content`) y **engine** (`/admin/engine`: runs, signals, scraping, gaps, social, attribution, config) | `src/app/admin` |
+| /admin | Hoy, Personas (usuarios, lista, Pro, concesiones), Catálogo de prompts, Producto (roasts, búsquedas, correos), Adquisición (canales) y Sistema (clientes API, llamadas a skills). Engine, Outreach y Content Factory se retiraron el 2026-10-12 (D15) | `src/app/admin` |
 
 **Fuente de los precios.** El comentario de `pricing/page.tsx` y el PR #62 citan la decisión D7 de
 Victor del 11 sep. La fila D7 de `docs/DECISIONES.md` todavía dice «pendiente»: ponerla al día es
@@ -145,7 +145,7 @@ Authoring docs live in-repo:
 - Env vars in Vercel prod: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `ADMIN_API_KEY`, `DATABASE_URL`, `ARTO_API_KEY_SALT`
 - Skills engine stable (`src/lib/skills/engine.ts`, `registry.ts`, `types.ts`) - do NOT modify when adding skills
 - Client auth + gating (`src/lib/clients/store.ts`, `auth.ts`)
-- Routes: `/api/skills`, `/api/skills/[slug]`, `/api/roast`, `/api/admin/clients`, `/api/traces`
+- Routes: `/api/skills`, `/api/skills/[slug]`, `/api/roast`, `/api/admin/clients`, `/api/admin/traces`
 
 ##### Registered skills
 | Slug | Public | Knowledge keys | Status |

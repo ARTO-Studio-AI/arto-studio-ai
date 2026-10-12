@@ -205,3 +205,12 @@ siguiente sesión.
 | **Por qué** | La tabla `admin_users` (migración 0001) nunca se creó en producción, así que la pantalla no funcionaba. Con dos administradores, una segunda vía de acceso solo agrega superficie de riesgo |
 | **Qué NO hacer** | No volver a dar acceso por base de datos sin decisión nueva de Victor. No aplicar `supabase/migrations/0001_admin_users.sql`: queda solo como histórica. `profiles.is_admin` y `email_tier_grants.is_admin` no dan acceso al panel; solo alimentan políticas RLS de lectura |
 | **Cómo dar o quitar acceso** | `vercel env rm ADMIN_EMAILS production` y luego `vercel env add ADMIN_EMAILS production` con la lista nueva separada por comas, y redesplegar producción |
+
+### D15 · El panel solo administra el sitio
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-12 (preguntas 47 y 56) |
+| **Qué se decidió** | Se retiraron de `/admin` las 7 páginas Engine, Outreach, Content Factory y la pestaña «Roast traces», con sus APIs (`/api/admin/engine/*`, `/api/admin/outreach/*`, `/api/admin/content/*`, `/api/traces`) y las librerías que solo usaban ellas (`engine-store.ts`, `content-image.ts`). El generador de prompts de Content Factory vive ahora en el Catálogo |
+| **Por qué** | Las páginas Engine solo mostraban lo que escribe el motor externo del Mac Mini (`com.arto.engine.intelligence`, lunes 11:00, escribe `engine_runs` y `engine_signals` directo en Supabase); ninguna decisión del sitio dependía de ellas. Si el motor sigue o se apaga es decisión aparte de Victor. Las páginas de scraping, social y gaps leían tablas que ya nadie escribe. Outreach redactaba correos en frío a prospectos sin consentimiento, lo que choca con la política del 2026-10-06. El marketing, las redes y el outreach se trabajan en una plataforma aparte, con su propia estrategia |
+| **Qué NO hacer** | No volver a meter herramientas de marketing en `/admin` sin decisión nueva. No borrar las tablas (`engine_*`, `outreach_*`, `content_items`, `agent_social_log`, `content_gaps`): `content_items` alimenta artículos de `/learn` y `engine_config` guarda el correo de bienvenida |

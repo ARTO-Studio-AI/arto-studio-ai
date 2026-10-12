@@ -20,8 +20,9 @@ interface Section {
  * these groups rather than creating a new top-level section unless it
  * really doesn't fit. */
 const SECTIONS: Section[] = [
-  /* Rediseno, fase 1 (2026-10-12): Hoy, Personas y Producto. Lo anterior sigue abajo, bajo
-   * «Anterior», hasta que Victor decida que se retira (propuesta en la bitacora S41). */
+  /* Rediseno de /admin (2026-10-12, bitacora S41): el panel solo administra el sitio.
+   * Engine, Outreach y Content Factory se retiraron en la fase 5 (decision 47 de Victor);
+   * sus tablas siguen en la base. */
   {
     title: "Panel",
     items: [{ href: "/admin", label: "Hoy" }],
@@ -56,35 +57,10 @@ const SECTIONS: Section[] = [
     items: [{ href: "/admin/canales", label: "Canales" }],
   },
   {
-    title: "Anterior",
+    title: "Sistema",
     items: [
-      { href: "/admin/traces/roast", label: "Roast traces" },
-      { href: "/admin/traces/skills", label: "Skill traces" },
-      { href: "/admin/engine/runs", label: "Engine · Runs" },
-      { href: "/admin/engine/signals", label: "Engine · Signals" },
-      { href: "/admin/engine/attribution", label: "Engine · Attribution" },
-      { href: "/admin/engine/social", label: "Engine · Social" },
-      { href: "/admin/engine/scraping", label: "Engine · Scraping" },
-    ],
-  },
-  {
-    title: "Outreach",
-    items: [
-      { href: "/admin/outreach", label: "Outreach" },
-      { href: "/admin/content", label: "Content Factory" },
-    ],
-  },
-  {
-    title: "Administrativas",
-    items: [
-      { href: "/admin/clients", label: "Clients" },
-    ],
-  },
-  {
-    title: "Desarrollo",
-    items: [
-      { href: "/admin/engine/gaps", label: "Engine · Gaps" },
-      { href: "/admin/engine/config", label: "Engine · Config" },
+      { href: "/admin/clients", label: "Clientes API" },
+      { href: "/admin/traces/skills", label: "Llamadas a skills" },
     ],
   },
 ];
