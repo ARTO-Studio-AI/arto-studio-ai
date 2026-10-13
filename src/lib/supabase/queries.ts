@@ -7,6 +7,7 @@ import {
   type Tier,
 } from "@/types/prompt";
 import { createClient } from "./server";
+import { createAdminClient } from "./admin";
 
 export interface PromptFilters {
   category?: Category;
@@ -60,9 +61,21 @@ export async function listPrompts(filters: PromptFilters = {}, page = 1) {
   };
 }
 
+/* El texto del prompt (prompt_en, prompt_es) ya no se lee con la llave publica ni con la
+ * sesion del usuario: la migracion 0017 se lo quita a anon y authenticated, porque con la
+ * anon key cualquiera leia los 2,265 prompts Pro (2026-10-12). Se lee aqui con service
+ * role, solo en el servidor; la pagina decide que mostrar segun el plan de quien la ve.
+ * service role se salta RLS, asi que el filtro de publicados va explicito. */
 export async function getPrompt(id: string) {
-  const sb = await createClient();
-  const { data, error } = await sb.from("prompts").select("*").eq("id", id).maybeSingle();
+  const sb = createAdminClient();
+  const { data, error } = await sb
+    .from("prompts")
+    .select(
+      "id, title_en, title_es, prompt_en, prompt_es, category, subcategory, ai_model, difficulty, tags, tier, version, author, use_case, expected_output, view_count, copy_count, favorite_count, is_published, created_at, updated_at, is_featured, featured_at, featured_reason",
+    )
+    .eq("id", id)
+    .eq("is_published", true)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data as Prompt | null;
 }
@@ -71,7 +84,7 @@ export async function getStats() {
   const sb = await createClient();
   const { count: total } = await sb
     .from("prompts")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("is_published", true);
   return { total: total ?? 0 };
 }

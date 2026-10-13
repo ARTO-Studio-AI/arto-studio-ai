@@ -30,6 +30,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
     .from("prompts")
     .select("id, title_en, title_es, category, tier")
     .eq("id", id)
+    .eq("is_published", true) // service role salta RLS: sin esto expone titulos no publicados
     .maybeSingle();
 
   const cat = (prompt?.category as Category) ?? "creative_productivity";
