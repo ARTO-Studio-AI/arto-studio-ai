@@ -19,7 +19,7 @@ export async function generateMetadata({
 }
 
 const CONTACT = "contact@artogroup.com";
-const UPDATED = { es: "9 de octubre de 2026", en: "October 9, 2026" };
+const UPDATED = { es: "16 de octubre de 2026", en: "October 16, 2026" };
 
 type Cookie = { name: string; purpose: string; duration: string; kind: string };
 
@@ -120,6 +120,12 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
               : "the name, website, industry, company size and description of the brand you roast, and the result. Our server reads the public page of that website. If you leave your email to get the report, we store it with the result."}
           </li>
           <li>
+            <strong>{es ? "Listas de espera:" : "Waitlists:"}</strong>{" "}
+            {es
+              ? "tu correo, el idioma, si marcaste la casilla de promociones (con la fecha y la versión del texto) y, si aceptaste la analítica, de qué campaña o sitio llegaste la primera vez."
+              : "your email, language, whether you ticked the promotions box (with the date and the version of the text) and, if you accepted analytics, which campaign or site first brought you here."}
+          </li>
+          <li>
             <strong>{es ? "Pagos:" : "Payments:"}</strong>{" "}
             {es
               ? "si contratas un plan, tu id de cliente de Stripe, tu plan y el estado de la suscripción."
@@ -139,7 +145,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             ? [
                 "Darte acceso a tu cuenta, tus favoritos y colecciones, y aplicar el límite del plan gratis.",
                 "Responder tus búsquedas y generar el Brand Roast.",
-                "Mandarte los correos que pediste: enlaces de acceso y el reporte del roast.",
+                "Mandarte los correos que pediste: enlaces de acceso, el reporte del roast y el aviso de apertura de una lista de espera.",
                 "Mejorar el catálogo con lo que la gente busca y no encuentra.",
                 "Cobrar tu plan, si contratas uno.",
                 "Medir qué funciona del sitio, solo si aceptas la analítica.",
@@ -148,7 +154,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             : [
                 "Give you access to your account, favorites and collections, and apply the free plan limit.",
                 "Answer your searches and generate the Brand Roast.",
-                "Send the emails you asked for: sign-in links and the roast report.",
+                "Send the emails you asked for: sign-in links, the roast report and the opening notice of a waitlist.",
                 "Improve the catalog with what people search for and don't find.",
                 "Charge your plan, if you buy one.",
                 "Measure what works on the site, only if you accept analytics.",
@@ -162,8 +168,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         <h2>{es ? "Correos de promoción" : "Promotional emails"}</h2>
         <p>
           {es
-            ? "Solo te escribimos promociones si lo aceptaste de forma expresa: la casilla viene sin marcar. Si la marcas al crear tu cuenta, el enlace de acceso ya confirma que el correo es tuyo. Si la marcas en el Brand Roast, te mandamos un correo para confirmar y no te escribimos nada más hasta que confirmes. Cada correo trae un botón para darte de baja; la baja no afecta los correos de acceso ni los recibos."
-            : "We only send promotions if you expressly opted in: the box comes unticked. If you tick it when you create your account, the sign-in link already proves the address is yours. If you tick it in the Brand Roast, we send a confirmation email and send nothing else until you confirm. Every email has an unsubscribe button; unsubscribing doesn't affect sign-in emails or receipts."}
+            ? "Solo te escribimos promociones si lo aceptaste de forma expresa: la casilla viene sin marcar. Si la marcas al crear tu cuenta, el enlace de acceso ya confirma que el correo es tuyo. Si la marcas en el Brand Roast o en una lista de espera, te mandamos un correo para confirmar y no te escribimos nada más hasta que confirmes. Cada correo trae un botón para darte de baja; la baja no afecta los correos de acceso ni los recibos."
+            : "We only send promotions if you expressly opted in: the box comes unticked. If you tick it when you create your account, the sign-in link already proves the address is yours. If you tick it in the Brand Roast or on a waitlist, we send a confirmation email and send nothing else until you confirm. Every email has an unsubscribe button; unsubscribing doesn't affect sign-in emails or receipts."}
         </p>
 
         <h2>{es ? "Con quién los compartimos" : "Who we share it with"}</h2>

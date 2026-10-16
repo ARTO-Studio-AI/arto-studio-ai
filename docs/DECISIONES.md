@@ -154,6 +154,17 @@ siguiente sesión.
 | **H-61 (2026-10-09)** | Hasta la migración 0013 la fila de signup **nunca se escribió**: el callback ponía el usuario en `target_id`, que tiene FK a `outreach_targets`, y el insert fallaba en silencio (0 filas en producción). Desde 0013 el usuario va en `user_id` (FK a `auth.users`). Para quien se registró antes, la única prueba fechada escrita por servidor es `newsletter_subscribers.subscribed_at`. **Qué NO hacer:** no volver a usar `target_id` para usuarios; es de outreach |
 | **Dónde** | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` y `SignupWall.tsx`, `src/app/[locale]/(marketing)/login/`, `src/app/api/roast/email/route.ts`, `src/app/roast/page.tsx`, `src/app/auth/callback/route.ts`, `src/lib/attribution.ts`, aviso de privacidad |
 
+### Lista de espera del Pack ARTO: aviso de apertura aparte de las promociones
+
+| | |
+|---|---|
+| **Quién** | Campaña de lanzamiento ARTO x TIVC del 2026-10-16: la etapa 1 es juntar correos. Implementó Code; auditoría de Fable en el PR `fix/waitlist-pack-consentimiento`; **pendiente de la firma de Victor** |
+| **Qué se decidió** | El formulario de `/skills` (Pack ARTO) y `/agents` guarda siempre la fila en `waitlist`: es el aviso de apertura que la persona pidió. La casilla de promociones va **sin marcar**, con enlace al aviso de privacidad, en ES/EN. Si la marca, `/api/waitlist` llama a `addToMarketingList` con `requireConfirm: true` (fuente `pack_waitlist` o `agents_waitlist`) y manda `sendListConfirmation`, igual que el roast. La fila de `waitlist` guarda idioma, `marketing_opt_in`, `consent_version` (`WAITLIST_CONSENT_VERSION`), `consent_at` (hora del servidor) y el primer toque de `asai_utm`. Un fallo de base responde 500 |
+| **Por qué** | La campaña necesita que cada correo llegue a la lista con consentimiento y que se sepa de qué canal vino. Antes la ruta guardaba solo email y fuente, sin consentimiento ni UTM, con mensajes en inglés, y respondía ok aunque fallara la base. Condicionar el aviso de apertura a aceptar promociones no sería un consentimiento libre (RGPD), por eso son dos cosas |
+| **Qué NO hacer** | No marcar la casilla por defecto ni hacerla obligatoria para anotarse. No mandar promociones a la tabla `waitlist`: la lista es `newsletter_subscribers` con `status = active`. Un «no» posterior no borra un «sí» anterior en `waitlist` (la baja va por el enlace del correo). El primer toque de una fila no se pisa. Si cambia el texto de la casilla, subir `WAITLIST_CONSENT_VERSION` |
+| **Quien ya estaba en la lista** | Las filas anteriores al 2026-10-16 nunca aceptaron promociones. La invitación única a confirmar es una propuesta aparte (`docs/propuestas/261016-waitlist-invitacion-confirmar.md`) y no se ejecuta sin el go de Victor |
+| **Dónde** | `src/components/NewsletterForm.tsx`, `src/app/api/waitlist/route.ts`, `src/lib/waitlist.ts`, `src/lib/marketing-list.ts`, `src/app/admin/canales/page.tsx`, migración `0018_waitlist_consentimiento_utm.sql`, aviso de privacidad |
+
 ### D10 · Aviso de cookies: solo esenciales por defecto
 
 | | |

@@ -2,8 +2,16 @@ import { SITE_URL } from "@/lib/site-url";
 import { C, F, button, eyebrow, layout } from "./layout";
 
 /* Correo de confirmacion del doble opt-in (2026-10-07). Sale a quien marco la casilla de
- * promociones en el Brand Roast; hasta que confirme no entra a la lista. */
-export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string) {
+ * promociones en el Brand Roast o, desde el 2026-10-16, en una lista de espera; hasta que
+ * confirme no entra a la lista. `origin` solo cambia la linea de por que le llega. */
+export type ListOrigin = "roast" | "waitlist";
+
+const ORIGIN = {
+  es: { roast: "desde el Brand Roast", waitlist: "desde una lista de espera" },
+  en: { roast: "from the Brand Roast", waitlist: "from a waitlist" },
+} as const;
+
+export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string, origin: ListOrigin = "roast") {
   const es = lang === "es";
   const t = es
     ? {
@@ -15,7 +23,7 @@ export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string) {
         body: "Marcaste la casilla para recibir prompts nuevos, guías y promociones de ARTO Studio AI. Confírmalo con el botón y te mandamos la bienvenida.",
         cta: "Sí, inscribirme",
         note: "Si no fuiste tú, ignora este correo: no te vamos a inscribir.",
-        reason: "Recibes este correo porque alguien pidió inscribir esta dirección a la lista de ARTO Studio AI desde el Brand Roast.",
+        reason: `Recibes este correo porque alguien pidió inscribir esta dirección a la lista de ARTO Studio AI ${ORIGIN.es[origin]}.`,
       }
     : {
         subject: "Confirm your ARTO Studio AI subscription",
@@ -26,7 +34,7 @@ export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string) {
         body: "You ticked the box to receive new prompts, guides and promotions from ARTO Studio AI. Confirm with the button and we'll send you the welcome.",
         cta: "Yes, subscribe me",
         note: "If this wasn't you, ignore this email: we won't subscribe you.",
-        reason: "You're receiving this because someone asked to add this address to the ARTO Studio AI list from the Brand Roast.",
+        reason: `You're receiving this because someone asked to add this address to the ARTO Studio AI list ${ORIGIN.en[origin]}.`,
       };
   const body = `
     ${eyebrow(t.eyebrow, C.accent)}

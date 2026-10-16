@@ -5,7 +5,7 @@ import { upsertAudienceContact } from "@/lib/resend-audience";
  * tabla que ya usa el digest semanal (solo status = active) y que trae token de baja por
  * fila. Solo se llama con consentimiento expreso (ver DECISIONES):
  *   - registro: el enlace magico o Google ya prueban que el buzon es suyo; entra directo.
- *   - roast (`requireConfirm`): doble opt-in. Queda "pending" y se le manda un correo de
+ *   - roast y lista de espera del Pack (`requireConfirm`): doble opt-in. Queda "pending" y se le manda un correo de
  *     confirmacion; confirmList() lo pasa a "active" (auditoria de Fable, PR #76).
  * Nunca lanza: un fallo aqui no debe romper el login ni el roast. */
 export interface MarketingListResult {
@@ -19,9 +19,12 @@ export interface MarketingListResult {
 
 const FAIL: MarketingListResult = { ok: false, newlyActive: false, needsConfirmation: false, unsubscribeToken: null };
 
+/** Origen del alta en newsletter_subscribers.source. Las *_waitlist vienen de /api/waitlist (2026-10-16). */
+export type MarketingSource = "signup" | "roast" | "pack_waitlist" | "agents_waitlist" | "waitlist";
+
 export async function addToMarketingList(input: {
   email: string;
-  source: "signup" | "roast";
+  source: MarketingSource;
   userId?: string | null;
   firstName?: string;
   lastName?: string;

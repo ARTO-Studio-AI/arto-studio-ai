@@ -6,7 +6,9 @@ import { guardAdmin, PageHead, Table, TD } from "../_kit";
 
 /* /admin/canales (fase 4, 2026-10-12): de donde llegan los registros. Lee el primer toque
  * guardado en profiles (utm_*, signup_source, referrer) y cruza con la lista de
- * promociones y los planes de pago. Solo lectura. */
+ * promociones y los planes de pago. Solo lectura.
+ * 2026-10-16: suma la lista de espera del Pack ARTO y de Agentes (tabla waitlist, migracion
+ * 0018), con su propio primer toque, porque esos correos no tienen cuenta. */
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,35 @@ interface P {
 }
 
 interface Agg { key: string; label: string; sub?: string; n: number; lista: number; pago: number }
+
+interface W {
+  email: string;
+  source: string;
+  marketing_opt_in: boolean;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  referrer: string | null;
+  created_at: string;
+}
+
+interface WAgg { key: string; label: string; sub?: string; n: number; pidio: number; confirmo: number }
+
+const WAITLIST_LABEL: Record<string, string> = { skills: "Pack ARTO", agents: "Agentes" };
+
+function groupWaitlist(rows: W[], keyOf: (w: W) => { key: string; label: string; sub?: string } | null, inList: Set<string>): WAgg[] {
+  const m = new Map<string, WAgg>();
+  for (const w of rows) {
+    const k = keyOf(w);
+    if (!k) continue;
+    const a = m.get(k.key) ?? { ...k, n: 0, pidio: 0, confirmo: 0 };
+    a.n++;
+    if (w.marketing_opt_in) a.pidio++;
+    if (inList.has(w.email)) a.confirmo++;
+    m.set(k.key, a);
+  }
+  return [...m.values()].sort((a, b) => b.n - a.n);
+}
 
 function host(ref: string | null): string | null {
   if (!ref) return null;
@@ -51,6 +82,21 @@ function group(rows: P[], keyOf: (p: P) => { key: string; label: string; sub?: s
 
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "—");
 
+function WaitlistTable({ data, head, empty }: { data: WAgg[]; head: string; empty: string }) {
+  return (
+    <Table head={[head, "Correos", "Marcaron promociones", "En la lista"]} empty={data.length === 0 && empty}>
+      {data.map((a) => (
+        <tr key={a.key}>
+          <td className={`${TD} text-zinc-900`}>{a.label}{a.sub && <span className="ml-2 text-xs text-zinc-500">{a.sub}</span>}</td>
+          <td className={TD}>{a.n}</td>
+          <td className={TD}>{a.pidio} <span className="text-xs text-zinc-400">({pct(a.pidio, a.n)})</span></td>
+          <td className={TD}>{a.confirmo} <span className="text-xs text-zinc-400">({pct(a.confirmo, a.n)})</span></td>
+        </tr>
+      ))}
+    </Table>
+  );
+}
+
 function AggTable({ data, head, empty }: { data: Agg[]; head: string; empty: string }) {
   return (
     <Table head={[head, "Registros", "En la lista", "Con plan"]} empty={data.length === 0 && empty}>
@@ -71,13 +117,18 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const period = PERIODS.find((p) => p.key === sp.periodo) ?? PERIODS[0];
   const sb = createAdminClient();
-  const [rows, subs] = await Promise.all([
+  const [rows, subs, waits] = await Promise.all([
     selectAll<P>(() => {
       let q = sb.from("profiles").select("email, tier, utm_source, utm_medium, utm_campaign, signup_source, referrer, created_at").order("created_at", { ascending: false });
       if (period.days) q = q.gte("created_at", sinceIso(period.days));
       return q;
     }),
     selectAll<{ email: string }>(() => sb.from("newsletter_subscribers").select("email").eq("status", "active").order("email")),
+    selectAll<W>(() => {
+      let q = sb.from("waitlist").select("email, source, marketing_opt_in, utm_source, utm_medium, utm_campaign, referrer, created_at").order("created_at", { ascending: false });
+      if (period.days) q = q.gte("created_at", sinceIso(period.days));
+      return q;
+    }),
   ]);
   const inList = new Set(subs.map((s) => s.email));
 
@@ -90,6 +141,13 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
     const h = host(p.referrer);
     return h && h !== "artostudio.ai" && !h.endsWith(".artostudio.ai") ? { key: h, label: h } : null;
   }, inList);
+
+  const waitBySource = groupWaitlist(waits, (w) => {
+    const src = w.utm_source || (host(w.referrer) ? "referido" : "directo");
+    const list = WAITLIST_LABEL[w.source] ?? w.source;
+    return { key: `${w.source}|${src}|${w.utm_medium ?? ""}`, label: `${list} · ${src}`, sub: w.utm_medium ?? undefined };
+  }, inList);
+  const waitByCampaign = groupWaitlist(waits, (w) => (w.utm_campaign ? { key: `${w.source}|${w.utm_campaign}`, label: `${WAITLIST_LABEL[w.source] ?? w.source} · ${w.utm_campaign}`, sub: w.utm_source ?? undefined } : null), inList);
 
   const total = rows.length;
   const conUtm = rows.filter((r) => r.utm_source).length;
@@ -124,8 +182,12 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
       <AggTable data={byCampaign} head="Campaña · fuente" empty="Ningún registro llegó con utm_campaign." />
       <h2 className="text-eyebrow mb-2 mt-8 text-zinc-500">Sitios que mandan gente</h2>
       <AggTable data={byReferrer} head="Sitio" empty="Ningún registro trae un sitio de origen externo." />
+      <h2 className="text-eyebrow mb-2 mt-10 text-zinc-500">Lista de espera · por fuente</h2>
+      <WaitlistTable data={waitBySource} head="Lista · fuente · medio" empty="Nadie se anotó en una lista de espera en este periodo." />
+      <h2 className="text-eyebrow mb-2 mt-8 text-zinc-500">Lista de espera · por campaña</h2>
+      <WaitlistTable data={waitByCampaign} head="Lista · campaña · fuente" empty="Ningún correo de la lista de espera llegó con utm_campaign." />
       <p className="mt-6 text-xs text-zinc-500">
-        Fuente: el primer toque (cookie asai_utm), que solo se guarda con consentimiento de analítica. Quien rechazó la analítica cuenta como «directo».
+        Fuente: el primer toque (cookie asai_utm), que solo se guarda con consentimiento de analítica. Quien rechazó la analítica cuenta como «directo». En la lista de espera, «En la lista» es quien ya confirmó el doble opt-in; las filas anteriores al 16 de octubre no tienen primer toque y salen como «directo».
       </p>
     </div>
   );

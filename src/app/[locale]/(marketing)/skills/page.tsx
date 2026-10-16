@@ -49,7 +49,7 @@ export default async function SkillsPage({ params }: Props) {
         <h2 className="text-xl font-bold">{t.newsletter_h2}</h2>
         <p className="mt-2 text-sm text-zinc-500">{t.newsletter_body}</p>
         <div className="mx-auto mt-6 max-w-sm">
-          <NewsletterForm source="skills" cta={t.newsletter_cta} />
+          <NewsletterForm source="skills" cta={t.newsletter_cta} locale={locale} />
         </div>
       </Card>
 

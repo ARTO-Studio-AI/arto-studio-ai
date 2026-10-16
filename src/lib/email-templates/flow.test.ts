@@ -28,5 +28,12 @@ describe("listConfirmationEmail", () => {
     const m = listConfirmationEmail("es", "https://x/api/newsletter/confirm?token=t&lang=es");
     expect(m.html).toContain("https://x/api/newsletter/confirm?token=t&amp;lang=es");
     expect(m.text).toContain("no te vamos a inscribir");
+    expect(m.text).toContain("desde el Brand Roast");
+  });
+  it("dice que viene de la lista de espera cuando sale de ahi", () => {
+    const es = listConfirmationEmail("es", "https://x/c", "waitlist");
+    expect(es.text).toContain("desde una lista de espera");
+    expect(es.text).not.toContain("Brand Roast");
+    expect(listConfirmationEmail("en", "https://x/c", "waitlist").text).toContain("from a waitlist");
   });
 });
