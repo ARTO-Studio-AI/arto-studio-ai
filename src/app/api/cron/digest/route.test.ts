@@ -2,15 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 /**
- * GET /api/cron/digest (H-44): el digest usa el mismo remitente que
- * src/lib/email.ts (EMAIL_FROM), no uno escrito a mano. Resend y Supabase se
- * mockean: ninguna prueba manda correo ni lee la base.
+ * GET /api/cron/digest. H-44: el digest usa el mismo remitente que src/lib/email.ts
+ * (EMAIL_FROM). 2026-10-16: plantilla de marca, idioma del suscriptor, sin datos internos.
+ * Resend y Supabase se mockean: ninguna prueba manda correo ni lee la base.
  */
 
-const { sendMock, ctorMock, tables } = vi.hoisted(() => ({
+const { sendMock, ctorMock, tables, reads } = vi.hoisted(() => ({
   sendMock: vi.fn(),
   ctorMock: vi.fn(),
   tables: {} as Record<string, { data: unknown; error: null }>,
+  reads: [] as string[],
 }));
 
 vi.mock("resend", () => ({
@@ -27,14 +28,20 @@ vi.mock("resend", () => ({
 type Chain = { [method: string]: unknown };
 function chain(table: string): Chain {
   const c: Chain = {};
-  for (const m of ["select", "eq", "gte", "lt", "order", "limit", "update"]) c[m] = () => c;
+  for (const m of ["select", "eq", "gte", "lt", "order", "limit", "update", "in"]) c[m] = () => c;
   c.then = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
     Promise.resolve(tables[table] ?? { data: null, error: null }).then(resolve, reject);
   return c;
 }
 vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({ from: (table: string) => chain(table) }),
+  createAdminClient: () => ({
+    from: (table: string) => {
+      reads.push(table);
+      return chain(table);
+    },
+  }),
 }));
+vi.mock("@/lib/email-config", () => ({ getWelcomeContent: async () => ({}) }));
 
 async function freshRoute() {
   vi.resetModules();
@@ -51,21 +58,26 @@ function get(GET: (req: NextRequest) => Promise<Response>) {
   );
 }
 
-describe("GET /api/cron/digest remitente", () => {
+describe("GET /api/cron/digest", () => {
   const saved = { ...process.env };
 
   beforeEach(() => {
     sendMock.mockReset();
     sendMock.mockResolvedValue({ data: { id: "correo-falso" }, error: null });
     ctorMock.mockClear();
+    reads.length = 0;
     process.env.CRON_SECRET = "secreto-de-prueba";
     process.env.RESEND_API_KEY = "re_prueba_no_real";
-    tables.prompts = { data: [], error: null };
-    tables.search_queries = { data: [], error: null };
-    tables.newsletter_subscribers = {
-      data: [{ email: "suscriptor@ejemplo.com", unsubscribe_token: "t1" }],
+    tables.prompts = {
+      data: [{ id: "VD-0001", title_es: "Guion de 60 segundos", title_en: "60-Second Script", category: "video" }],
       error: null,
     };
+    tables.newsletter_subscribers = {
+      data: [{ email: "suscriptor@ejemplo.com", unsubscribe_token: "t1", user_id: null }],
+      error: null,
+    };
+    tables.profiles = { data: [], error: null };
+    tables.waitlist = { data: [], error: null };
   });
 
   afterEach(() => {
@@ -106,5 +118,52 @@ describe("GET /api/cron/digest remitente", () => {
     expect(res.status).toBe(401);
     expect(ctorMock).not.toHaveBeenCalled();
     expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("plantilla de marca en espanol por defecto, con texto plano y baja de un clic", async () => {
+    const { GET } = await freshRoute();
+    await get(GET);
+    const msg = sendMock.mock.calls[0][0];
+    expect(msg.html).toContain('lang="es"');
+    expect(msg.html).toContain("Guion de 60 segundos");
+    expect(msg.text).toContain("Darme de baja:");
+    expect(msg.headers["List-Unsubscribe"]).toContain("token=t1&lang=es");
+    expect(msg.headers["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
+    expect(msg.html).not.toMatch(/Top searches|Gap|similarity/);
+    expect(reads).not.toContain("search_queries");
+  });
+
+  it("usa el idioma guardado: registro primero, luego lista de espera", async () => {
+    tables.newsletter_subscribers = {
+      data: [
+        { email: "a@ejemplo.com", unsubscribe_token: "ta", user_id: "u1" },
+        { email: "b@ejemplo.com", unsubscribe_token: "tb", user_id: null },
+        { email: "c@ejemplo.com", unsubscribe_token: "tc", user_id: null },
+      ],
+      error: null,
+    };
+    tables.profiles = { data: [{ id: "u1", signup_locale: "en" }], error: null };
+    tables.waitlist = { data: [{ email: "b@ejemplo.com", locale: "en" }], error: null };
+    const { GET } = await freshRoute();
+    await get(GET);
+    const byTo = Object.fromEntries(sendMock.mock.calls.map((c) => [c[0].to, c[0]]));
+    expect(byTo["a@ejemplo.com"].html).toContain("60-Second Script");
+    expect(byTo["b@ejemplo.com"].html).toContain('lang="en"');
+    expect(byTo["c@ejemplo.com"].html).toContain('lang="es"');
+  });
+
+  it("sin destacados no manda nada", async () => {
+    tables.prompts = { data: [], error: null };
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(await res.json()).toMatchObject({ ok: true, sent: 0 });
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("un error de Resend cuenta como fallo, no como enviado", async () => {
+    sendMock.mockResolvedValueOnce({ data: null, error: { message: "rechazado" } });
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(await res.json()).toEqual({ ok: true, sent: 0, failed: 1 });
   });
 });
