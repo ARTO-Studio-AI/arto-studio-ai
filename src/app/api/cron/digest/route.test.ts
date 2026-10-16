@@ -32,7 +32,12 @@ function chain(table: string): Chain {
   const c: Chain = {};
   let single = false;
   let gt: string | null = null;
-  for (const m of ["select", "eq", "gte", "lt", "order", "limit", "in", "or", "range"]) c[m] = () => c;
+  let lim: number | null = null;
+  for (const m of ["select", "eq", "gte", "lt", "order", "in", "or", "range"]) c[m] = () => c;
+  c.limit = (n: number) => {
+    lim = n;
+    return c;
+  };
   // gt("id", x): pagina por cursor sobre los datos de la tabla.
   c.gt = (_col: string, v: string) => {
     gt = v;
@@ -55,8 +60,11 @@ function chain(table: string): Chain {
     Promise.resolve(
       (() => {
         const r = (single ? tables[`${table}:hoy`] : tables[table]) ?? { data: null, error: null };
-        if (gt === null || !Array.isArray(r.data)) return r;
-        return { ...r, data: (r.data as { id: string }[]).filter((x) => x.id > (gt as string)) };
+        if (!Array.isArray(r.data)) return r;
+        let rows = r.data as { id: string }[];
+        if (gt !== null) rows = rows.filter((x) => x.id > (gt as string));
+        if (lim !== null) rows = rows.slice(0, lim);
+        return { ...r, data: rows };
       })(),
     ).then(resolve, reject);
   return c;
@@ -253,6 +261,9 @@ describe("GET /api/cron/digest", () => {
     const res = await get(GET);
     expect(res.status).toBe(200);
     expect(inserts).toHaveLength(1);
+    // Tres paginas de 1000 (la ultima corta) y una vacia que corta el bucle.
+    const pages = reads.filter((t) => t === "prompts").length;
+    expect(pages).toBeGreaterThanOrEqual(5);
   });
 
   it("si falla guardar la seleccion responde 500 y no manda", async () => {
