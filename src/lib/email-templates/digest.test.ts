@@ -5,8 +5,8 @@ import { digestEmail, digestUrl, type DigestPrompt } from "@/lib/email-templates
  * seccion interna (busquedas de usuarios ni brecha del catalogo) llega a la lista. */
 
 const prompts: DigestPrompt[] = [
-  { id: "VD-0001", title_es: "Escribe un guion de 60 segundos", title_en: "Write a 60-Second Script", category: "video" },
-  { id: "DG-0001", title_es: "Carrusel <b>de</b> Instagram", title_en: "Instagram Carousel", category: "graphic_design" },
+  { id: "VD-0001", title_es: "Escribe un guion de 60 segundos", title_en: "Write a 60-Second Script", category: "video", tier: "free" },
+  { id: "DG-0001", title_es: "Carrusel <b>de</b> Instagram", title_en: "Instagram Carousel", category: "graphic_design", tier: "pro" },
 ];
 const unsub = "https://x/api/newsletter/unsubscribe?token=t&lang=es";
 
@@ -27,6 +27,20 @@ describe("digestEmail", () => {
     expect(m.text).toContain("Aviso de privacidad:");
     expect(m.text).toContain("ARTO Group");
     expect(m.text).toContain("/es/prompts/DG-0001?utm_source=email&utm_medium=email&utm_campaign=digest&utm_content=DG-0001");
+    expect(m.html).toContain(">Gratis</span>");
+    expect(m.html).toContain(">Pro</span>");
+    expect(m.text).toContain("(VD-0001, Video, Gratis)");
+    expect(m.text).toContain("martes");
+  });
+
+  it("no presenta la seleccion como editorial ni verificada", () => {
+    for (const lang of ["es", "en"] as const) {
+      const m = digestEmail({ lang, prompts, unsubscribeUrl: unsub });
+      for (const s of [m.html, m.text]) {
+        expect(s).not.toMatch(/estrategas|strategists|probado|tested|lunes|Monday/i);
+      }
+    }
+    expect(digestEmail({ lang: "en", prompts, unsubscribeUrl: unsub }).text).toContain("Tuesday");
   });
 
   it("en ingles usa title_en y textos en ingles", () => {
@@ -53,7 +67,7 @@ describe("digestEmail", () => {
   });
 
   it("si falta el titulo en el idioma usa el otro", () => {
-    const m = digestEmail({ lang: "es", prompts: [{ id: "X-1", title_es: "", title_en: "Only English", category: "otra_cosa" }], unsubscribeUrl: unsub });
+    const m = digestEmail({ lang: "es", prompts: [{ id: "X-1", title_es: "", title_en: "Only English", category: "otra_cosa", tier: "free" }], unsubscribeUrl: unsub });
     expect(m.html).toContain("Only English");
     expect(m.html).toContain("otra cosa");
   });

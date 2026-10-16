@@ -7,9 +7,10 @@ import { NextRequest } from "next/server";
  * Resend y Supabase se mockean: ninguna prueba manda correo ni lee la base.
  */
 
-const { sendMock, ctorMock, tables, reads, updates } = vi.hoisted(() => ({
+const { sendMock, ctorMock, tables, reads, updates, inserts } = vi.hoisted(() => ({
   sendMock: vi.fn(),
   updates: [] as unknown[],
+  inserts: [] as { table: string; row: unknown }[],
   ctorMock: vi.fn(),
   tables: {} as Record<string, { data: unknown; error: null }>,
   reads: [] as string[],
@@ -29,13 +30,23 @@ vi.mock("resend", () => ({
 type Chain = { [method: string]: unknown };
 function chain(table: string): Chain {
   const c: Chain = {};
-  for (const m of ["select", "eq", "gte", "lt", "order", "limit", "in", "or"]) c[m] = () => c;
+  let single = false;
+  for (const m of ["select", "eq", "gte", "lt", "order", "limit", "in", "or", "range"]) c[m] = () => c;
+  // maybeSingle lee `tabla:hoy`; insert guarda la fila y resuelve `tabla:insert`.
+  c.maybeSingle = () => {
+    single = true;
+    return c;
+  };
+  c.insert = (row: unknown) => {
+    inserts.push({ table, row });
+    return Promise.resolve(tables[`${table}:insert`] ?? { data: null, error: null });
+  };
   c.update = (v: unknown) => {
     updates.push(v);
     return c;
   };
   c.then = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
-    Promise.resolve(tables[table] ?? { data: null, error: null }).then(resolve, reject);
+    Promise.resolve((single ? tables[`${table}:hoy`] : tables[table]) ?? { data: null, error: null }).then(resolve, reject);
   return c;
 }
 vi.mock("@/lib/supabase/admin", () => ({
@@ -72,12 +83,16 @@ describe("GET /api/cron/digest", () => {
     ctorMock.mockClear();
     reads.length = 0;
     updates.length = 0;
+    inserts.length = 0;
+    for (const k of Object.keys(tables)) delete tables[k];
     process.env.CRON_SECRET = "secreto-de-prueba";
     process.env.RESEND_API_KEY = "re_prueba_no_real";
     tables.prompts = {
-      data: [{ id: "VD-0001", title_es: "Guion de 60 segundos", title_en: "60-Second Script", category: "video" }],
+      data: [{ id: "VD-0001", title_es: "Guion de 60 segundos", title_en: "60-Second Script", category: "video", tier: "free", created_at: "2026-10-15T00:00:00Z" }],
       error: null,
     };
+    tables.digest_sends = { data: [], error: null };
+    tables["digest_sends:hoy"] = { data: null, error: null };
     tables.newsletter_subscribers = {
       data: [{ email: "suscriptor@ejemplo.com", unsubscribe_token: "t1", user_id: null }],
       error: null,
@@ -161,11 +176,45 @@ describe("GET /api/cron/digest", () => {
     expect(byTo["c@ejemplo.com"].html).toContain('lang="es"');
   });
 
-  it("sin destacados no manda nada", async () => {
+  it("sin prompts nuevos por mandar no manda nada ni guarda fila", async () => {
     tables.prompts = { data: [], error: null };
     const { GET } = await freshRoute();
     const res = await get(GET);
     expect(await res.json()).toMatchObject({ ok: true, sent: 0 });
+    expect(sendMock).not.toHaveBeenCalled();
+    expect(inserts).toHaveLength(0);
+  });
+
+  it("guarda la seleccion de hoy en digest_sends antes de mandar", async () => {
+    const { GET } = await freshRoute();
+    await get(GET);
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0]).toMatchObject({ table: "digest_sends", row: { prompt_ids: ["VD-0001"], strategy: "new_then_random" } });
+    expect((inserts[0].row as { sent_on: string }).sent_on).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("nunca repite: excluye los prompts ya enviados", async () => {
+    tables.digest_sends = { data: [{ prompt_ids: ["VD-0001"] }], error: null };
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(await res.json()).toMatchObject({ sent: 0, message: "no prompts left" });
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("si ya hay fila de hoy, reutiliza esa seleccion y no sortea otra", async () => {
+    tables["digest_sends:hoy"] = { data: { prompt_ids: ["VD-0001"] }, error: null };
+    tables.digest_sends = { data: [{ prompt_ids: ["VD-0001"] }], error: null };
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(await res.json()).toEqual({ ok: true, sent: 1, failed: 0 });
+    expect(inserts).toHaveLength(0);
+  });
+
+  it("si falla guardar la seleccion responde 500 y no manda", async () => {
+    tables["digest_sends:insert"] = { data: null, error: { code: "42P01", message: "no existe" } } as never;
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(res.status).toBe(500);
     expect(sendMock).not.toHaveBeenCalled();
   });
 

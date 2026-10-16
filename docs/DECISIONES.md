@@ -165,6 +165,17 @@ siguiente sesión.
 | **Quien ya estaba en la lista** | Las filas anteriores al 2026-10-16 nunca aceptaron promociones. La invitación única a confirmar es una propuesta aparte (`docs/propuestas/261016-waitlist-invitacion-confirmar.md`) y no se ejecuta sin el go de Victor |
 | **Dónde** | `src/components/NewsletterForm.tsx`, `src/app/api/waitlist/route.ts`, `src/lib/waitlist.ts`, `src/lib/marketing-list.ts`, `src/app/admin/canales/page.tsx`, migración `0018_waitlist_consentimiento_utm.sql`, aviso de privacidad |
 
+### Resumen semanal: diseño de marca, martes y nunca repetir un prompt
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-16: «rehaz el resumen semanal con el diseño de marca, en español, sin los datos internos» y, al ver la muestra, «haz el cambio [a martes]» y «que los prompts destacados, por lo pronto, vayan cambiando de manera random... pero que nunca repitamos prompts, o podrían ser también los prompts nuevos de la semana. Eso lo puedes definir». La regla la definió Code; auditoría de Fable en el PR #99 |
+| **Qué se decidió** | El digest sale los **martes a las 14:00 UTC** con la plantilla de marca (`digest.ts`), en el idioma guardado del suscriptor. Lleva **cinco prompts**: primero los publicados en los últimos 7 días que nunca se mandaron, del más nuevo al más viejo; lo que falte, al azar entre los publicados nunca enviados, sin repetir vertical mientras se pueda. Gratis y Pro mezclados, con su etiqueta. Cada envío queda en `digest_sends` (una fila por día, migración 0019) antes de mandar |
+| **Por qué** | Las búsquedas de los usuarios y la brecha del catálogo son datos internos. No repetir mantiene el correo útil semana a semana. El copy ya no dice que los eligieron estrategas ni que están probados, porque no es una selección editorial |
+| **Qué NO hacer** | No volver a leer `search_queries` en el digest. No mandar un prompt que ya esté en `digest_sends`. No borrar filas de `digest_sends`: es el registro que impide repetir. «Publicado en los últimos 7 días» usa `created_at` porque `prompts` no tiene fecha de publicación |
+| **Pendiente** | Gancho apagado para «los más usados de la semana» (`mostUsed` en `digest-selection.ts`). Lo activa una decisión de Victor |
+| **Dónde** | `src/lib/email-templates/digest.ts`, `src/lib/digest-selection.ts`, `src/app/api/cron/digest/route.ts`, `vercel.json`, migración `0019_digest_sends.sql` |
+
 ### D10 · Aviso de cookies: solo esenciales por defecto
 
 | | |

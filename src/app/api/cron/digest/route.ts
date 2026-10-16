@@ -5,21 +5,30 @@ import { unsubscribeUrl } from "@/lib/mailer";
 import { digestEmail, type DigestPrompt } from "@/lib/email-templates/digest";
 import { Resend } from "resend";
 import { createHash } from "node:crypto";
+import { DIGEST_STRATEGY, selectDigestPrompts, type DigestCandidate } from "@/lib/digest-selection";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-/* Resumen semanal (cron de los lunes, vercel.json). Desde el 2026-10-16 usa la plantilla de
- * marca de src/lib/email-templates/digest.ts: solo prompts destacados, linea editorial y
- * biblioteca, en el idioma del suscriptor. Ya no lee search_queries: las busquedas de los
- * usuarios y la brecha del catalogo son datos internos y no van a la lista.
+/* Resumen semanal (cron de los martes a las 14:00 UTC, vercel.json; Victor lo movio del
+ * lunes el 16 oct). Usa la plantilla de marca de src/lib/email-templates/digest.ts: cinco
+ * prompts de la biblioteca, linea editorial y biblioteca, en el idioma del suscriptor. Ya
+ * no lee search_queries: las busquedas de los usuarios y la brecha del catalogo son datos
+ * internos y no van a la lista.
+ *
+ * Seleccion (src/lib/digest-selection.ts): nunca se repite un prompt. Cada envio deja su
+ * fila en digest_sends (migracion 0019) ANTES de mandar, una por dia: una relanzada el
+ * mismo dia reutiliza la seleccion, y si el envio falla esos prompts se dan por usados
+ * (preferimos saltar un prompt a repetirlo).
  *
  * Envio por lotes (auditoria de Fable): resend.batch.send de hasta 100 correos por
  * llamada con una pausa entre lotes (Resend admite 2 solicitudes por segundo), clave de
  * idempotencia por lote y dia, y solo a quien no recibio el digest en los ultimos 6 dias:
  * si la funcion se corta o se relanza a mano, no se repite a nadie. */
 
-const FEATURED = 5;
+/** Ventana de «publicados esta semana». prompts no tiene published_at: se usa created_at. */
+const RECENT_DAYS = 7;
+const PAGE = 1000;
 const BATCH = 100;
 const PAUSE_MS = 600;
 const RESEND_EVERY_DAYS = 6;
@@ -65,6 +74,73 @@ async function languages(
   return out;
 }
 
+type Admin = ReturnType<typeof createAdminClient>;
+
+/** Los prompts de esta semana. Si ya hay fila de hoy en digest_sends, la reutiliza; si no,
+ *  sortea con la regla de digest-selection.ts y la guarda antes de devolverla. Lanza ante
+ *  cualquier error de base: la ruta responde 500 y no manda nada. */
+async function weeklyPrompts(admin: Admin): Promise<DigestPrompt[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const todays = await admin.from("digest_sends").select("prompt_ids").eq("sent_on", today).maybeSingle();
+  if (todays.error) throw new Error(`digest_sends: ${todays.error.message}`);
+  let ids = (todays.data?.prompt_ids as string[] | undefined) ?? null;
+
+  if (!ids) {
+    const past = await admin.from("digest_sends").select("prompt_ids");
+    if (past.error) throw new Error(`digest_sends: ${past.error.message}`);
+    const sentBefore = new Set(((past.data ?? []) as { prompt_ids: string[] }[]).flatMap((r) => r.prompt_ids));
+    const fresh = (p: DigestCandidate) => !sentBefore.has(p.id);
+
+    const recentSince = new Date(Date.now() - RECENT_DAYS * 86_400_000).toISOString();
+    const recent = await admin
+      .from("prompts")
+      .select("id, category, tier, created_at")
+      .eq("is_published", true)
+      .gte("created_at", recentSince)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (recent.error) throw new Error(`prompts recientes: ${recent.error.message}`);
+
+    const pool: DigestCandidate[] = [];
+    for (let from = 0; from < 20 * PAGE; from += PAGE) {
+      const page = await admin
+        .from("prompts")
+        .select("id, category, tier, created_at")
+        .eq("is_published", true)
+        .order("id")
+        .range(from, from + PAGE - 1);
+      if (page.error) throw new Error(`prompts: ${page.error.message}`);
+      const rows = (page.data ?? []) as DigestCandidate[];
+      pool.push(...rows);
+      if (rows.length < PAGE) break;
+    }
+
+    // Gancho apagado: «los mas usados de la semana» (por ejemplo, prompt_opens de los
+    // ultimos 7 dias) entraria como `mostUsed`. Victor lo decide despues.
+    const chosen = selectDigestPrompts({
+      recent: ((recent.data ?? []) as DigestCandidate[]).filter(fresh),
+      pool: pool.filter(fresh),
+    });
+    if (chosen.length === 0) return [];
+
+    const ins = await admin.from("digest_sends").insert({ sent_on: today, prompt_ids: chosen.map((p) => p.id), strategy: DIGEST_STRATEGY });
+    if (ins.error) {
+      // Otra ejecucion de hoy guardo primero: se usa la suya.
+      if (ins.error.code !== "23505") throw new Error(`digest_sends insert: ${ins.error.message}`);
+      const again = await admin.from("digest_sends").select("prompt_ids").eq("sent_on", today).maybeSingle();
+      if (again.error || !again.data) throw new Error("digest_sends: no se pudo releer la fila de hoy");
+      ids = again.data.prompt_ids as string[];
+    } else {
+      ids = chosen.map((p) => p.id);
+    }
+  }
+
+  const details = await admin.from("prompts").select("id, title_es, title_en, category, tier").in("id", ids);
+  if (details.error) throw new Error(`prompts detalle: ${details.error.message}`);
+  const byId = new Map(((details.data ?? []) as DigestPrompt[]).map((p) => [p.id, p]));
+  return ids.map((id) => byId.get(id)).filter((p): p is DigestPrompt => !!p);
+}
+
 export async function GET(request: NextRequest) {
   // Auth del cron: Vercel manda `Authorization: Bearer <CRON_SECRET>`. Falla cerrado:
   // sin CRON_SECRET configurado la ruta responde 401 y no manda nada, en vez de quedar
@@ -82,23 +158,6 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  const { data: featured, error: featuredError } = await admin
-    .from("prompts")
-    .select("id, title_en, title_es, category")
-    .eq("is_featured", true)
-    .eq("is_published", true)
-    .order("featured_at", { ascending: false })
-    .limit(FEATURED);
-  if (featuredError) {
-    console.error("[digest] prompts:", featuredError.message);
-    return NextResponse.json({ error: "db_error" }, { status: 500 });
-  }
-  const prompts = (featured ?? []) as DigestPrompt[];
-  // Sin destacados el correo no tiene nada que decir: no se manda.
-  if (prompts.length === 0) {
-    return NextResponse.json({ ok: true, sent: 0, message: "no featured prompts" });
-  }
-
   const since = new Date(Date.now() - RESEND_EVERY_DAYS * 86_400_000).toISOString();
   const { data: subscribers, error: subsError } = await admin
     .from("newsletter_subscribers")
@@ -114,6 +173,18 @@ export async function GET(request: NextRequest) {
 
   if (!subscribers || subscribers.length === 0) {
     return NextResponse.json({ ok: true, sent: 0, message: "no active subscribers" });
+  }
+
+  let prompts: DigestPrompt[];
+  try {
+    prompts = await weeklyPrompts(admin);
+  } catch (err) {
+    console.error("[digest] seleccion:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
+  }
+  // Sin prompts que no se hayan mandado nunca, el correo no tiene nada que decir.
+  if (prompts.length === 0) {
+    return NextResponse.json({ ok: true, sent: 0, message: "no prompts left" });
   }
 
   const subs = subscribers as { email: string; unsubscribe_token: string; user_id: string | null }[];

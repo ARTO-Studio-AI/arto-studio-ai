@@ -6,13 +6,17 @@ import { C, F, button, esc, eyebrow, layout } from "./layout";
  * /api/cron/digest: en ingles, con emojis y con dos secciones internas (las busquedas
  * de los usuarios y la brecha del catalogo con su similarity) que se mandaban a toda la
  * lista. Regla de Victor del 16 oct: todo correo va con el diseno de marca. Aqui solo va
- * contenido publico: los prompts destacados, una linea editorial y la biblioteca. */
+ * contenido publico: cinco prompts de la biblioteca, una linea editorial y la biblioteca.
+ * Los prompts ya no son una seleccion editorial (ver src/lib/digest-selection.ts): el copy
+ * no dice que los eligieron estrategas ni que estan probados. Sale los martes. */
 
 export interface DigestPrompt {
   id: string;
   title_es: string;
   title_en: string;
   category: string;
+  /** free, pro o enterprise. La etiqueta dice Gratis o Pro. */
+  tier: string;
 }
 
 export interface DigestInput {
@@ -37,14 +41,16 @@ function categoryLabel(category: string, lang: "es" | "en"): string {
 const COPY = {
   es: {
     subject: "Lo que vale la pena abrir esta semana · ARTO Studio AI",
-    preheader: "Los prompts que eligieron nuestros estrategas esta semana.",
+    preheader: "Cinco prompts de la biblioteca para abrir esta semana.",
     eyebrow: "Resumen semanal",
     h: "Esta semana en la",
     accent: "biblioteca.",
-    intro: "Estos son los prompts que nuestros estrategas eligieron esta semana. Cada uno está probado en proyectos reales y listo para copiar.",
-    list: "Destacados",
+    intro: "Cinco prompts de la biblioteca que vale la pena abrir esta semana, listos para copiar en Claude o ChatGPT.",
+    list: "Esta semana",
+    free: "Gratis",
+    pro: "Pro",
     cta: "Ver toda la biblioteca",
-    sign: "Nos leemos el próximo lunes.",
+    sign: "Nos leemos el próximo martes.",
     reason: "Recibes este correo porque te inscribiste a la lista de ARTO Studio AI.",
     unsub: "Darme de baja",
     privacy: "Aviso de privacidad",
@@ -52,14 +58,16 @@ const COPY = {
   },
   en: {
     subject: "Worth opening this week · ARTO Studio AI",
-    preheader: "The prompts our strategists picked this week.",
+    preheader: "Five prompts from the library to open this week.",
     eyebrow: "Weekly digest",
     h: "This week in the",
     accent: "library.",
-    intro: "These are the prompts our strategists picked this week. Each one is tested on real projects and ready to copy.",
-    list: "Featured",
+    intro: "Five prompts from the library worth opening this week, ready to paste into Claude or ChatGPT.",
+    list: "This week",
+    free: "Free",
+    pro: "Pro",
     cta: "Browse the full library",
-    sign: "Talk next Monday.",
+    sign: "Talk next Tuesday.",
     reason: "You're receiving this because you joined the ARTO Studio AI list.",
     unsub: "Unsubscribe",
     privacy: "Privacy",
@@ -69,6 +77,7 @@ const COPY = {
 
 export function digestEmail({ lang, prompts, unsubscribeUrl }: DigestInput) {
   const t = COPY[lang];
+  const tierLabel = (p: DigestPrompt) => (p.tier === "free" ? t.free : t.pro);
   const title = (p: DigestPrompt) => (lang === "es" ? p.title_es || p.title_en : p.title_en || p.title_es);
 
   const rows = prompts
@@ -76,7 +85,7 @@ export function digestEmail({ lang, prompts, unsubscribeUrl }: DigestInput) {
       (p) => `
       <tr><td style="padding:16px 0;border-top:1px solid ${C.line};">
         <a href="${esc(digestUrl(`/prompts/${p.id}`, lang, p.id))}" style="text-decoration:none;">
-          <div style="font-family:${F.meta};font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${C.ink3};">${esc(p.id)} · ${esc(categoryLabel(p.category, lang))}</div>
+          <div style="font-family:${F.meta};font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${C.ink3};">${esc(p.id)} · ${esc(categoryLabel(p.category, lang))} · <span style="color:${p.tier === "free" ? C.ink2 : C.accent};">${tierLabel(p)}</span></div>
           <div style="font-family:${F.display};font-size:19px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;margin-top:4px;">${esc(title(p))} <span style="color:${C.accent};">→</span></div>
         </a>
       </td></tr>`,
@@ -99,7 +108,7 @@ export function digestEmail({ lang, prompts, unsubscribeUrl }: DigestInput) {
     "",
     t.intro,
     "",
-    ...prompts.map((p) => `- ${title(p)} (${p.id}, ${categoryLabel(p.category, lang)}): ${digestUrl(`/prompts/${p.id}`, lang, p.id)}`),
+    ...prompts.map((p) => `- ${title(p)} (${p.id}, ${categoryLabel(p.category, lang)}, ${tierLabel(p)}): ${digestUrl(`/prompts/${p.id}`, lang, p.id)}`),
     "",
     `${t.cta}: ${libraryUrl}`,
     "",
