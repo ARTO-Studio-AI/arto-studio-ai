@@ -104,7 +104,9 @@ export async function GET(request: NextRequest) {
     .from("newsletter_subscribers")
     .select("email, unsubscribe_token, user_id")
     .eq("status", "active")
-    .or(`last_sent_at.is.null,last_sent_at.lt.${since}`);
+    .or(`last_sent_at.is.null,last_sent_at.lt."${since}"`)
+    // Orden estable: en una relanzada el mismo lote da la misma clave de idempotencia.
+    .order("email");
   if (subsError) {
     console.error("[digest] suscriptores:", subsError.message);
     return NextResponse.json({ error: "db_error" }, { status: 500 });
@@ -138,21 +140,29 @@ export async function GET(request: NextRequest) {
     });
     // Misma clave para el mismo lote el mismo dia: Resend no lo manda dos veces.
     const idempotencyKey = `digest-${day}-${createHash("sha256").update(group.map((g) => g.email).join(",")).digest("hex").slice(0, 32)}`;
-    let res = await resend.batch.send(payload, { idempotencyKey });
+    // permissive: una direccion que Resend rechaza no tumba a los otros 99.
+    const opts = { idempotencyKey, batchValidation: "permissive" as const };
+    let res = await resend.batch.send(payload, opts);
     if (res.error?.name === "rate_limit_exceeded") {
       await sleep(1500);
-      res = await resend.batch.send(payload, { idempotencyKey });
+      res = await resend.batch.send(payload, opts);
     }
     if (res.error) {
       console.error("[digest] lote fallo:", res.error.name, res.error.message);
       failed += group.length;
     } else {
-      const { error } = await admin
-        .from("newsletter_subscribers")
-        .update({ last_sent_at: new Date().toISOString() })
-        .in("email", group.map((g) => g.email));
-      if (error) console.error("[digest] last_sent_at:", error.message);
-      sent += group.length;
+      const bad = new Set((res.data?.errors ?? []).map((e) => e.index));
+      for (const e of res.data?.errors ?? []) console.error("[digest] correo rechazado:", e.index, e.message);
+      const ok = group.filter((_, k) => !bad.has(k)).map((g) => g.email);
+      if (ok.length) {
+        const { error } = await admin
+          .from("newsletter_subscribers")
+          .update({ last_sent_at: new Date().toISOString() })
+          .in("email", ok);
+        if (error) console.error("[digest] last_sent_at:", error.message);
+      }
+      sent += ok.length;
+      failed += group.length - ok.length;
     }
     if (i + BATCH < subs.length) await sleep(PAUSE_MS);
   }

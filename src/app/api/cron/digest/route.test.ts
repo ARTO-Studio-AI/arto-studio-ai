@@ -68,7 +68,7 @@ describe("GET /api/cron/digest", () => {
 
   beforeEach(() => {
     sendMock.mockReset();
-    sendMock.mockResolvedValue({ data: { data: [{ id: "correo-falso" }] }, error: null });
+    sendMock.mockResolvedValue({ data: { data: [{ id: "correo-falso" }], errors: [] }, error: null });
     ctorMock.mockClear();
     reads.length = 0;
     updates.length = 0;
@@ -104,6 +104,7 @@ describe("GET /api/cron/digest", () => {
       from: "Prueba ARTO <prueba@ejemplo.com>",
       to: "suscriptor@ejemplo.com",
     });
+    expect(sendMock.mock.calls[0][1].batchValidation).toBe("permissive");
     expect(sendMock.mock.calls[0][1].idempotencyKey).toMatch(/^digest-\d{4}-\d{2}-\d{2}-[0-9a-f]{32}$/);
     expect(updates).toHaveLength(1);
   });
@@ -183,6 +184,22 @@ describe("GET /api/cron/digest", () => {
     expect(await res.json()).toEqual({ ok: true, sent: 1, failed: 0 });
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(sendMock.mock.calls[1][1].idempotencyKey).toBe(sendMock.mock.calls[0][1].idempotencyKey);
+  });
+
+  it("un correo rechazado en el lote no tumba a los demas", async () => {
+    tables.newsletter_subscribers = {
+      data: [
+        { email: "a@ejemplo.com", unsubscribe_token: "ta", user_id: null },
+        { email: "malo", unsubscribe_token: "tb", user_id: null },
+        { email: "c@ejemplo.com", unsubscribe_token: "tc", user_id: null },
+      ],
+      error: null,
+    };
+    sendMock.mockResolvedValueOnce({ data: { data: [{ id: "1" }, { id: "3" }], errors: [{ index: 1, message: "invalid to" }] }, error: null });
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(await res.json()).toEqual({ ok: true, sent: 2, failed: 1 });
+    expect(updates).toHaveLength(1);
   });
 
   it("manda en lotes de 100", async () => {
