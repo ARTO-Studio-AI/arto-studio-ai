@@ -101,18 +101,18 @@ async function weeklyPrompts(admin: Admin): Promise<DigestPrompt[]> {
       .limit(50);
     if (recent.error) throw new Error(`prompts recientes: ${recent.error.message}`);
 
+    // Paginacion por cursor (id): no depende del tope de filas que tenga PostgREST.
     const pool: DigestCandidate[] = [];
-    for (let from = 0; from < 20 * PAGE; from += PAGE) {
-      const page = await admin
-        .from("prompts")
-        .select("id, category, tier, created_at")
-        .eq("is_published", true)
-        .order("id")
-        .range(from, from + PAGE - 1);
+    let after = "";
+    for (let round = 0; round < 50; round++) {
+      let q = admin.from("prompts").select("id, category, tier, created_at").eq("is_published", true);
+      if (after) q = q.gt("id", after);
+      const page = await q.order("id").limit(PAGE);
       if (page.error) throw new Error(`prompts: ${page.error.message}`);
       const rows = (page.data ?? []) as DigestCandidate[];
+      if (rows.length === 0) break;
       pool.push(...rows);
-      if (rows.length < PAGE) break;
+      after = rows[rows.length - 1].id;
     }
 
     // Gancho apagado: «los mas usados de la semana» (por ejemplo, prompt_opens de los
@@ -135,7 +135,7 @@ async function weeklyPrompts(admin: Admin): Promise<DigestPrompt[]> {
     }
   }
 
-  const details = await admin.from("prompts").select("id, title_es, title_en, category, tier").in("id", ids);
+  const details = await admin.from("prompts").select("id, title_es, title_en, category, tier").eq("is_published", true).in("id", ids);
   if (details.error) throw new Error(`prompts detalle: ${details.error.message}`);
   const byId = new Map(((details.data ?? []) as DigestPrompt[]).map((p) => [p.id, p]));
   return ids.map((id) => byId.get(id)).filter((p): p is DigestPrompt => !!p);
@@ -238,5 +238,7 @@ export async function GET(request: NextRequest) {
     if (i + BATCH < subs.length) await sleep(PAUSE_MS);
   }
 
+  // Un martes con fallos no se reintenta solo (Vercel no reintenta el cron): queda en el log.
+  if (failed > 0) console.error(JSON.stringify({ event: "digest_failed", sent, failed, total: subs.length }));
   return NextResponse.json({ ok: true, sent, failed });
 }

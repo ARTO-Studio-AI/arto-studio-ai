@@ -15,7 +15,7 @@ export interface DigestPrompt {
   title_es: string;
   title_en: string;
   category: string;
-  /** free, pro o enterprise. La etiqueta dice Gratis o Pro. */
+  /** free, pro o enterprise. La etiqueta dice Gratis solo para free; pro y enterprise dicen Pro. */
   tier: string;
 }
 
@@ -46,7 +46,7 @@ const COPY = {
     h: "Esta semana en la",
     accent: "biblioteca.",
     intro: "Cinco prompts de la biblioteca que vale la pena abrir esta semana, listos para copiar en Claude o ChatGPT.",
-    list: "Esta semana",
+    list: "Cinco prompts",
     free: "Gratis",
     pro: "Pro",
     cta: "Ver toda la biblioteca",
@@ -63,7 +63,7 @@ const COPY = {
     h: "This week in the",
     accent: "library.",
     intro: "Five prompts from the library worth opening this week, ready to paste into Claude or ChatGPT.",
-    list: "This week",
+    list: "Five prompts",
     free: "Free",
     pro: "Pro",
     cta: "Browse the full library",

@@ -31,7 +31,13 @@ type Chain = { [method: string]: unknown };
 function chain(table: string): Chain {
   const c: Chain = {};
   let single = false;
+  let gt: string | null = null;
   for (const m of ["select", "eq", "gte", "lt", "order", "limit", "in", "or", "range"]) c[m] = () => c;
+  // gt("id", x): pagina por cursor sobre los datos de la tabla.
+  c.gt = (_col: string, v: string) => {
+    gt = v;
+    return c;
+  };
   // maybeSingle lee `tabla:hoy`; insert guarda la fila y resuelve `tabla:insert`.
   c.maybeSingle = () => {
     single = true;
@@ -46,7 +52,13 @@ function chain(table: string): Chain {
     return c;
   };
   c.then = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
-    Promise.resolve((single ? tables[`${table}:hoy`] : tables[table]) ?? { data: null, error: null }).then(resolve, reject);
+    Promise.resolve(
+      (() => {
+        const r = (single ? tables[`${table}:hoy`] : tables[table]) ?? { data: null, error: null };
+        if (gt === null || !Array.isArray(r.data)) return r;
+        return { ...r, data: (r.data as { id: string }[]).filter((x) => x.id > (gt as string)) };
+      })(),
+    ).then(resolve, reject);
   return c;
 }
 vi.mock("@/lib/supabase/admin", () => ({
@@ -208,6 +220,39 @@ describe("GET /api/cron/digest", () => {
     const res = await get(GET);
     expect(await res.json()).toEqual({ ok: true, sent: 1, failed: 0 });
     expect(inserts).toHaveLength(0);
+  });
+
+  it("si otra ejecucion guardo primero (23505), usa su fila", async () => {
+    tables.prompts = {
+      data: [
+        { id: "AR-0001", title_es: "Arquitectura", title_en: "Architecture", category: "architecture", tier: "pro", created_at: null },
+        { id: "VD-0001", title_es: "Guion de 60 segundos", title_en: "60-Second Script", category: "video", tier: "free", created_at: null },
+      ],
+      error: null,
+    };
+    tables["digest_sends:insert"] = { data: null, error: { code: "23505", message: "duplicate" } } as never;
+    const { GET } = await freshRoute();
+    // La primera lectura de hoy no encuentra fila; la relectura tras el 23505, si.
+    let calls = 0;
+    Object.defineProperty(tables, "digest_sends:hoy", {
+      configurable: true,
+      get: () => (calls++ === 0 ? { data: null, error: null } : { data: { prompt_ids: ["AR-0001"] }, error: null }),
+    });
+    const res = await get(GET);
+    expect(await res.json()).toEqual({ ok: true, sent: 1, failed: 0 });
+    expect(sendMock.mock.calls[0][0][0].html).toContain("AR-0001");
+    expect(sendMock.mock.calls[0][0][0].html).not.toContain("VD-0001");
+  });
+
+  it("recorre todo el catalogo por cursor", async () => {
+    tables.prompts = {
+      data: Array.from({ length: 2500 }, (_, i) => ({ id: `P${String(i).padStart(4, "0")}`, title_es: "t", title_en: "t", category: "branding", tier: "free", created_at: null })),
+      error: null,
+    };
+    const { GET } = await freshRoute();
+    const res = await get(GET);
+    expect(res.status).toBe(200);
+    expect(inserts).toHaveLength(1);
   });
 
   it("si falla guardar la seleccion responde 500 y no manda", async () => {
