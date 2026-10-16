@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site-url";
 import { getWelcomeContent } from "@/lib/email-config";
 import { welcomeEmail } from "@/lib/email-templates/welcome";
 import { roastReportEmail, type RoastReportInput } from "@/lib/email-templates/roast-report";
-import { listConfirmationEmail } from "@/lib/email-templates/confirm";
+import { listConfirmationEmail, type ListOrigin } from "@/lib/email-templates/confirm";
 
 /* Envio de los correos de marca (2026-10-07). Nunca lanza: el correo es best-effort y no
  * debe tumbar el roast ni el login. El de bienvenida es de promociones y lleva
@@ -43,9 +43,9 @@ export function unsubscribeUrl(token: string, lang: "es" | "en" = "es"): string 
 }
 
 /** Doble opt-in del roast: correo con el boton para confirmar la inscripcion. */
-export async function sendListConfirmation(to: string, lang: "es" | "en", token: string): Promise<boolean> {
+export async function sendListConfirmation(to: string, lang: "es" | "en", token: string, origin: ListOrigin = "roast"): Promise<boolean> {
   const url = `${SITE_URL}/api/newsletter/confirm?token=${encodeURIComponent(token)}&lang=${lang}`;
-  const m = listConfirmationEmail(lang, url);
+  const m = listConfirmationEmail(lang, url, origin);
   return deliver({ to, ...m, tag: "list_confirmation" });
 }
 
