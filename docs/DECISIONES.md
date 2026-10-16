@@ -72,7 +72,7 @@ siguiente sesión.
 | **Quién** | Victor, 2026-09-10 |
 | **Qué se decidió** | El dominio de producción es `https://creative.artostudio.ai`. `arto-studio-ai.vercel.app` es el alias técnico de Vercel, no el que se comunica |
 | **Por qué** | Consistencia de marca y SEO: un solo host canónico |
-| **Qué NO hacer** | No poner `arto-studio-ai.vercel.app` en correos, OG, sitemap ni copys nuevos. Pendiente: `src/app/api/cron/digest/route.ts` todavía lo usa en el HTML del digest |
+| **Qué NO hacer** | No poner `arto-studio-ai.vercel.app` en correos, OG, sitemap ni copys nuevos. Desde el 2026-10-16 el digest usa `SITE_URL` vía la plantilla de marca (`src/lib/email-templates/digest.ts`) |
 | **Dónde** | `NEXT_PUBLIC_SITE_URL`, `src/app/robots.ts` |
 
 ### D7 · Pricing de lanzamiento: Free con tope de 3 prompts al día
