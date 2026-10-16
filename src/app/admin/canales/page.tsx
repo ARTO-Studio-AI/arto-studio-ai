@@ -124,10 +124,15 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
       return q;
     }),
     selectAll<{ email: string }>(() => sb.from("newsletter_subscribers").select("email").eq("status", "active").order("email")),
+    // Si la migracion 0018 no esta aplicada esta consulta falla; la pagina sigue con las
+    // tablas de registros en vez de caerse entera (auditoria de Fable, H4).
     selectAll<W>(() => {
       let q = sb.from("waitlist").select("email, source, marketing_opt_in, utm_source, utm_medium, utm_campaign, referrer, created_at").order("created_at", { ascending: false });
       if (period.days) q = q.gte("created_at", sinceIso(period.days));
       return q;
+    }).catch((err: unknown) => {
+      console.error("[admin/canales] waitlist:", err instanceof Error ? err.message : err);
+      return null;
     }),
   ]);
   const inList = new Set(subs.map((s) => s.email));
@@ -142,12 +147,13 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
     return h && h !== "artostudio.ai" && !h.endsWith(".artostudio.ai") ? { key: h, label: h } : null;
   }, inList);
 
-  const waitBySource = groupWaitlist(waits, (w) => {
+  const waitRows = waits ?? [];
+  const waitBySource = groupWaitlist(waitRows, (w) => {
     const src = w.utm_source || (host(w.referrer) ? "referido" : "directo");
     const list = WAITLIST_LABEL[w.source] ?? w.source;
     return { key: `${w.source}|${src}|${w.utm_medium ?? ""}`, label: `${list} · ${src}`, sub: w.utm_medium ?? undefined };
   }, inList);
-  const waitByCampaign = groupWaitlist(waits, (w) => (w.utm_campaign ? { key: `${w.source}|${w.utm_campaign}`, label: `${WAITLIST_LABEL[w.source] ?? w.source} · ${w.utm_campaign}`, sub: w.utm_source ?? undefined } : null), inList);
+  const waitByCampaign = groupWaitlist(waitRows, (w) => (w.utm_campaign ? { key: `${w.source}|${w.utm_campaign}`, label: `${WAITLIST_LABEL[w.source] ?? w.source} · ${w.utm_campaign}`, sub: w.utm_source ?? undefined } : null), inList);
 
   const total = rows.length;
   const conUtm = rows.filter((r) => r.utm_source).length;
@@ -183,11 +189,12 @@ export default async function Canales({ searchParams }: { searchParams: Promise<
       <h2 className="text-eyebrow mb-2 mt-8 text-zinc-500">Sitios que mandan gente</h2>
       <AggTable data={byReferrer} head="Sitio" empty="Ningún registro trae un sitio de origen externo." />
       <h2 className="text-eyebrow mb-2 mt-10 text-zinc-500">Lista de espera · por fuente</h2>
+      {!waits && <p className="mb-2 text-sm text-[var(--bad)]">No se pudo leer la lista de espera (¿falta aplicar la migración 0018?).</p>}
       <WaitlistTable data={waitBySource} head="Lista · fuente · medio" empty="Nadie se anotó en una lista de espera en este periodo." />
       <h2 className="text-eyebrow mb-2 mt-8 text-zinc-500">Lista de espera · por campaña</h2>
       <WaitlistTable data={waitByCampaign} head="Lista · campaña · fuente" empty="Ningún correo de la lista de espera llegó con utm_campaign." />
       <p className="mt-6 text-xs text-zinc-500">
-        Fuente: el primer toque (cookie asai_utm), que solo se guarda con consentimiento de analítica. Quien rechazó la analítica cuenta como «directo». En la lista de espera, «En la lista» es quien ya confirmó el doble opt-in; las filas anteriores al 16 de octubre no tienen primer toque y salen como «directo».
+        Fuente: el primer toque (cookie asai_utm), que solo se guarda con consentimiento de analítica. Quien rechazó la analítica cuenta como «directo». En la lista de espera, «En la lista» es quien está activo en la lista de promociones, haya entrado por ahí o antes (registro o roast); la lista es la primera en la que se anotó. Las filas anteriores al 16 de octubre no tienen primer toque y salen como «directo».
       </p>
     </div>
   );

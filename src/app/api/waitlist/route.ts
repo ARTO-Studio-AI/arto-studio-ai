@@ -13,12 +13,6 @@ config({
   override: true,
 });
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
 let cached: ReturnType<typeof postgres> | null = null;
 function getDb() {
   if (cached) return cached;
@@ -26,10 +20,6 @@ function getDb() {
   if (!url) return null;
   cached = postgres(url, { ssl: "require", max: 1, prepare: false });
   return cached;
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
 /**
@@ -45,6 +35,10 @@ export async function OPTIONS() {
  *   - Un fallo de base responde error; antes respondia ok y el correo se perdia.
  *   - Limite por IP (10/h) y por destinatario (3/h): manda correo a una direccion que
  *     escribe un tercero, no debe servir para bombardear a nadie.
+ *   - Sin CORS: solo la usan /skills y /agents, del mismo origen. Con `*` cualquier sitio
+ *     podia disparar altas desde el navegador de sus visitantes (auditoria de Fable, H2).
+ *   - La respuesta no dice si el correo ya estaba en la lista: seria un oraculo para
+ *     saber si un tercero esta suscrito (auditoria de Fable, H1).
  */
 const RATE_LIMIT = 10;
 const PER_RECIPIENT = 3;
@@ -60,7 +54,7 @@ export async function POST(request: NextRequest) {
   if (rl.limited) {
     return NextResponse.json(
       { error: "rate_limited", retryAfter: rl.retryAfterSec },
-      { status: 429, headers: { ...corsHeaders, "Retry-After": String(rl.retryAfterSec) } },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
     );
   }
 
@@ -68,12 +62,12 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400, headers: corsHeaders });
+    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase().slice(0, 254) : "";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "invalid_email" }, { status: 400, headers: corsHeaders });
+    return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
   const source = parseWaitlistSource(body.source);
   const lang = body.lang === "en" ? "en" : "es";
@@ -84,39 +78,48 @@ export async function POST(request: NextRequest) {
     if (perTo.limited) {
       return NextResponse.json(
         { error: "rate_limited", retryAfter: perTo.retryAfterSec },
-        { status: 429, headers: { ...corsHeaders, "Retry-After": String(perTo.retryAfterSec) } },
+        { status: 429, headers: { "Retry-After": String(perTo.retryAfterSec) } },
       );
     }
   }
 
   const sql = getDb();
   if (!sql) {
-    return NextResponse.json({ error: "db_unavailable" }, { status: 503, headers: corsHeaders });
+    return NextResponse.json({ error: "db_unavailable" }, { status: 503 });
   }
 
-  const ft = parseFirstTouch(request.cookies.get(UTM_COOKIE)?.value);
+  // Si el ts de la cookie no parsea no se guarda nada del primer toque: la regla de no
+  // pisarlo se ancla en first_touch_at (auditoria de Fable, H6).
+  const rawFt = parseFirstTouch(request.cookies.get(UTM_COOKIE)?.value);
+  const firstTouchAt = isoOrNull(rawFt?.ts);
+  const ft = firstTouchAt ? rawFt : null;
   const consentVersion = marketing ? WAITLIST_CONSENT_VERSION : null;
   const consentAt = marketing ? new Date().toISOString() : null; // hora del servidor, no del navegador
 
   // Una fila por correo. Si ya existia: la casilla solo suma (un "no" posterior no borra un
-  // "si" previo; la baja se hace con el enlace del correo) y el primer toque no se pisa,
-  // solo se llena si la fila no lo tenia.
+  // "si" previo; la baja se hace con el enlace del correo), se guarda la fecha del primer
+  // "si", `source` queda la primera lista y `sources` acumula todas, y el primer toque no
+  // se pisa: solo se llena si la fila no lo tenia.
   try {
     await sql`
       INSERT INTO waitlist (
-        email, source, locale, marketing_opt_in, consent_version, consent_at,
+        email, source, sources, locale, marketing_opt_in, consent_version, consent_at,
         utm_source, utm_medium, utm_campaign, utm_content, utm_term,
         referrer, landing_path, first_touch_at
       ) VALUES (
-        ${email}, ${source}, ${lang}, ${marketing}, ${consentVersion}, ${consentAt},
+        ${email}, ${source}, ARRAY[${source}]::text[], ${lang}, ${marketing}, ${consentVersion}, ${consentAt},
         ${ft?.utm_source ?? null}, ${ft?.utm_medium ?? null}, ${ft?.utm_campaign ?? null},
         ${ft?.utm_content ?? null}, ${ft?.utm_term ?? null},
-        ${ft?.referrer ?? null}, ${ft?.landing_path ?? null}, ${isoOrNull(ft?.ts)}
+        ${ft?.referrer ?? null}, ${ft?.landing_path ?? null}, ${firstTouchAt}
       )
       ON CONFLICT (email) DO UPDATE SET
         marketing_opt_in = waitlist.marketing_opt_in OR excluded.marketing_opt_in,
-        consent_version = CASE WHEN excluded.marketing_opt_in THEN excluded.consent_version ELSE waitlist.consent_version END,
-        consent_at = CASE WHEN excluded.marketing_opt_in THEN excluded.consent_at ELSE waitlist.consent_at END,
+        consent_version = COALESCE(waitlist.consent_version, excluded.consent_version),
+        consent_at = COALESCE(waitlist.consent_at, excluded.consent_at),
+        sources = CASE
+          WHEN excluded.source = ANY(COALESCE(waitlist.sources, ARRAY[waitlist.source])) THEN COALESCE(waitlist.sources, ARRAY[waitlist.source])
+          ELSE array_append(COALESCE(waitlist.sources, ARRAY[waitlist.source]), excluded.source)
+        END,
         locale = COALESCE(waitlist.locale, excluded.locale),
         utm_source = CASE WHEN waitlist.first_touch_at IS NULL THEN excluded.utm_source ELSE waitlist.utm_source END,
         utm_medium = CASE WHEN waitlist.first_touch_at IS NULL THEN excluded.utm_medium ELSE waitlist.utm_medium END,
@@ -129,21 +132,22 @@ export async function POST(request: NextRequest) {
     `;
   } catch (error) {
     console.error("[/api/waitlist] DB error:", error);
-    return NextResponse.json({ error: "db_error" }, { status: 500, headers: corsHeaders });
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
   // Promociones: doble opt-in. Queda pendiente hasta que confirme desde su buzon.
   let confirmationSent = false;
-  let alreadySubscribed = false;
+  let confirmationFailed = false;
   if (marketing) {
     const list = await addToMarketingList({ email, source: LIST_SOURCE[source], requireConfirm: true });
     if (!list.ok) {
-      return NextResponse.json({ error: "list_error" }, { status: 500, headers: corsHeaders });
+      return NextResponse.json({ error: "list_error" }, { status: 500 });
     }
-    if (list.needsConfirmation && list.unsubscribeToken) {
-      confirmationSent = await sendListConfirmation(email, lang, list.unsubscribeToken, "waitlist");
-    } else if (!list.needsConfirmation) {
-      alreadySubscribed = true;
+    if (list.needsConfirmation) {
+      confirmationSent = list.unsubscribeToken
+        ? await sendListConfirmation(email, lang, list.unsubscribeToken, LIST_SOURCE[source])
+        : false;
+      confirmationFailed = !confirmationSent;
     }
   }
 
@@ -159,8 +163,8 @@ export async function POST(request: NextRequest) {
   );
 
   return NextResponse.json(
-    { ok: true, marketing, confirmation_sent: confirmationSent, already_subscribed: alreadySubscribed },
-    { headers: corsHeaders },
+    { ok: true, marketing, confirmation_failed: confirmationFailed },
+    undefined,
   );
 }
 
@@ -169,7 +173,7 @@ export async function GET(request: NextRequest) {
   if (!(await requireAdminSession(request)).ok) {
     return NextResponse.json(
       { error: "Unauthorized" },
-      { status: 401, headers: corsHeaders }
+      { status: 401 }
     );
   }
 
@@ -177,13 +181,13 @@ export async function GET(request: NextRequest) {
   if (!sql) {
     return NextResponse.json(
       { error: "Database not configured" },
-      { status: 503, headers: corsHeaders }
+      { status: 503 }
     );
   }
 
   try {
     const rows = await sql`
-      SELECT id, email, source, marketing_opt_in, utm_source, utm_medium, utm_campaign, created_at
+      SELECT id, email, source, sources, marketing_opt_in, utm_source, utm_medium, utm_campaign, created_at
       FROM waitlist
       ORDER BY created_at DESC
       LIMIT 200
@@ -191,13 +195,13 @@ export async function GET(request: NextRequest) {
     const [countResult] = await sql`SELECT COUNT(*)::int as total FROM waitlist`;
     return NextResponse.json(
       { signups: rows, total: countResult.total },
-      { headers: corsHeaders }
+      undefined
     );
   } catch (error) {
     console.error("[/api/waitlist] Query error:", error);
     return NextResponse.json(
       { error: "Failed to query waitlist" },
-      { status: 500, headers: corsHeaders }
+      { status: 500 }
     );
   }
 }

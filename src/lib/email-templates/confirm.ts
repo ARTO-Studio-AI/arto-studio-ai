@@ -4,12 +4,22 @@ import { C, F, button, eyebrow, layout } from "./layout";
 /* Correo de confirmacion del doble opt-in (2026-10-07). Sale a quien marco la casilla de
  * promociones en el Brand Roast o, desde el 2026-10-16, en una lista de espera; hasta que
  * confirme no entra a la lista. `origin` solo cambia la linea de por que le llega. */
-export type ListOrigin = "roast" | "waitlist";
+export type ListOrigin = "roast" | "pack_waitlist" | "agents_waitlist" | "waitlist";
 
 const ORIGIN = {
-  es: { roast: "desde el Brand Roast", waitlist: "desde una lista de espera" },
-  en: { roast: "from the Brand Roast", waitlist: "from a waitlist" },
-} as const;
+  es: {
+    roast: "desde el Brand Roast",
+    pack_waitlist: "desde la lista de espera del Pack ARTO",
+    agents_waitlist: "desde la lista de espera de Agentes",
+    waitlist: "desde una lista de espera",
+  },
+  en: {
+    roast: "from the Brand Roast",
+    pack_waitlist: "from the ARTO Pack waitlist",
+    agents_waitlist: "from the Agents waitlist",
+    waitlist: "from a waitlist",
+  },
+} as const satisfies Record<"es" | "en", Record<ListOrigin, string>>;
 
 export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string, origin: ListOrigin = "roast") {
   const es = lang === "es";

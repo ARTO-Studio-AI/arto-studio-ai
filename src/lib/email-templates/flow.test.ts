@@ -31,9 +31,9 @@ describe("listConfirmationEmail", () => {
     expect(m.text).toContain("desde el Brand Roast");
   });
   it("dice que viene de la lista de espera cuando sale de ahi", () => {
-    const es = listConfirmationEmail("es", "https://x/c", "waitlist");
-    expect(es.text).toContain("desde una lista de espera");
+    const es = listConfirmationEmail("es", "https://x/c", "pack_waitlist");
+    expect(es.text).toContain("desde la lista de espera del Pack ARTO");
     expect(es.text).not.toContain("Brand Roast");
-    expect(listConfirmationEmail("en", "https://x/c", "waitlist").text).toContain("from a waitlist");
+    expect(listConfirmationEmail("en", "https://x/c", "agents_waitlist").text).toContain("from the Agents waitlist");
   });
 });

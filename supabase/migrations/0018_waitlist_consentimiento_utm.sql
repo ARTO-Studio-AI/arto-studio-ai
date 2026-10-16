@@ -18,6 +18,7 @@ begin;
 set local lock_timeout = '5s';
 
 alter table public.waitlist
+  add column if not exists sources text[],
   add column if not exists locale text,
   add column if not exists marketing_opt_in boolean not null default false,
   add column if not exists consent_version text,
@@ -31,12 +32,14 @@ alter table public.waitlist
   add column if not exists landing_path text,
   add column if not exists first_touch_at timestamptz;
 
+comment on column public.waitlist.sources is
+  'Todas las listas en las que se anoto este correo (skills, agents...). source guarda la primera. Null en filas anteriores a 0018.';
 comment on column public.waitlist.marketing_opt_in is
   'Marco la casilla de promociones en NewsletterForm. Es la peticion; el alta real en la lista es newsletter_subscribers tras el doble opt-in.';
 comment on column public.waitlist.consent_version is
   'WAITLIST_CONSENT_VERSION (src/lib/waitlist.ts) del texto que vio, solo si marco la casilla.';
 comment on column public.waitlist.consent_at is
-  'Hora del servidor en que marco la casilla.';
+  'Hora del servidor en que marco la casilla por primera vez (no se pisa).';
 comment on column public.waitlist.first_touch_at is
   'ts de la cookie asai_utm (primer toque). Null si no acepto la analitica o entro directo sin cookie.';
 

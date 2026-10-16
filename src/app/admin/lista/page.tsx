@@ -12,6 +12,14 @@ export const dynamic = "force-dynamic";
 const STATUSES = ["active", "pending", "unsubscribed", "bounced"] as const;
 const LABEL: Record<string, string> = { active: "Activos", pending: "Por confirmar", unsubscribed: "Bajas", bounced: "Rebotes" };
 
+const SOURCE_LABEL: Record<string, string> = {
+  signup: "registro",
+  roast: "roast",
+  pack_waitlist: "espera Pack",
+  agents_waitlist: "espera Agentes",
+  waitlist: "lista de espera",
+};
+
 export default async function Lista({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await guardAdmin();
   const sp = await searchParams;
@@ -54,7 +62,7 @@ export default async function Lista({ searchParams }: { searchParams: Promise<Re
           <tr key={r.email}>
             <td className={`${TD} text-zinc-900`}>{r.email}</td>
             <td className={TD}><Badge tone={r.status === "active" ? "live" : "soon"} dot={r.status === "active"}>{LABEL[r.status] ?? r.status}</Badge></td>
-            <td className={TD}>{r.source === "signup" ? "registro" : r.source === "roast" ? "roast" : (r.source ?? "—")}</td>
+            <td className={TD}>{SOURCE_LABEL[r.source ?? ""] ?? r.source ?? "—"}</td>
             <td className={`${TD} whitespace-nowrap`}>{fecha(r.subscribed_at)}</td>
             <td className={`${TD} whitespace-nowrap`}>{fecha(r.last_sent_at)}</td>
             <td className={`${TD} whitespace-nowrap`}>{fecha(r.unsubscribed_at)}</td>

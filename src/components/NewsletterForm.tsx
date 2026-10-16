@@ -15,13 +15,13 @@ import type { WaitlistSource } from "@/lib/waitlist";
 const COPY = {
   es: {
     placeholder: "tu@empresa.com",
+    label: "Correo electrónico",
     consent: "Quiero recibir por correo promociones, prompts nuevos y skills de ARTO. Puedo darme de baja cuando quiera.",
     privacy: "Aviso de privacidad",
     saving: "Guardando...",
     saved: "Guardado",
     ok: "Listo. Te avisamos por correo el día que abra.",
-    ok_confirm: "Listo. Te mandamos un correo para confirmar que quieres recibir promociones. Revisa tu bandeja.",
-    ok_already: "Listo. Ya estabas en nuestra lista de correos.",
+    ok_confirm: "Listo. Si aún no estabas en nuestra lista, te llega un correo para confirmar las promociones. Revisa tu bandeja.",
     ok_confirm_failed: "Quedaste en la lista de espera, pero no pudimos mandarte el correo para confirmar las promociones. Inténtalo más tarde.",
     err_email: "Escribe un correo válido.",
     err_rate: "Demasiados intentos. Prueba de nuevo en una hora.",
@@ -30,13 +30,13 @@ const COPY = {
   },
   en: {
     placeholder: "you@company.com",
+    label: "Email",
     consent: "Send me ARTO's promotions, new prompts and skills by email. I can unsubscribe anytime.",
     privacy: "Privacy policy",
     saving: "Saving...",
     saved: "Saved",
     ok: "Done. We'll email you the day it opens.",
-    ok_confirm: "Done. We sent you an email to confirm you want promotions. Check your inbox.",
-    ok_already: "Done. You were already on our mailing list.",
+    ok_confirm: "Done. If you weren't on our list yet, you'll get an email to confirm promotions. Check your inbox.",
     ok_confirm_failed: "You're on the waitlist, but we couldn't send the email to confirm promotions. Please try again later.",
     err_email: "Enter a valid email.",
     err_rate: "Too many tries. Try again in an hour.",
@@ -70,15 +70,11 @@ export default function NewsletterForm({ source = "general", cta, locale }: Prop
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source, lang: locale, marketing }),
       });
-      const data = (await res.json().catch(() => ({}))) as {
-        marketing?: boolean;
-        confirmation_sent?: boolean;
-        already_subscribed?: boolean;
-      };
+      const data = (await res.json().catch(() => ({}))) as { marketing?: boolean; confirmation_failed?: boolean };
       if (res.ok) {
         setStatus("ok");
         setMessage(
-          !data.marketing ? t.ok : data.already_subscribed ? t.ok_already : data.confirmation_sent ? t.ok_confirm : t.ok_confirm_failed,
+          !data.marketing ? t.ok : data.confirmation_failed ? t.ok_confirm_failed : t.ok_confirm,
         );
         setEmail("");
       } else {
@@ -102,7 +98,7 @@ export default function NewsletterForm({ source = "general", cta, locale }: Prop
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t.placeholder}
-          aria-label={t.placeholder}
+          aria-label={t.label}
           className="flex-1 rounded-[var(--radius-sm)] border border-zinc-300 bg-white px-4 py-2.5 text-sm focus:border-zinc-900 focus:outline-none"
           disabled={locked}
         />
@@ -121,13 +117,13 @@ export default function NewsletterForm({ source = "general", cta, locale }: Prop
         />
         <span>
           {t.consent}{" "}
-          <Link href={`/${locale}/privacy`} className="underline underline-offset-2">
+          <Link href={`/${locale}/privacy`} target="_blank" rel="noopener" className="underline underline-offset-2">
             {t.privacy}
           </Link>
         </span>
       </label>
       {message && (
-        <p className={`text-xs ${status === "error" ? "text-[var(--bad)]" : "text-zinc-600"}`} role="status">
+        <p className={`text-xs ${status === "error" ? "text-[var(--bad)]" : "text-zinc-600"}`} role={status === "error" ? "alert" : "status"}>
           {message}
         </p>
       )}
