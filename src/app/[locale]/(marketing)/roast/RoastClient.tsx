@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { RoastLang, RoastResult } from "@/lib/roast-types";
 import { track } from "@/lib/analytics";
+import { ROAST_OG_VERSION } from "@/lib/roast-og-version";
 
 /* Brand Roast v2 (2026-10-06)
  * - Vive en /[locale]/roast dentro del layout de marketing: mismo menu y footer que el
@@ -600,7 +601,7 @@ function SocialSharePanel({ brand, result, share, lang, t }: { brand: string; re
     },
   ];
 
-  const ogBase = `/roast/og?${shareParams(brand, result, share, lang).toString()}`;
+  const ogBase = `/roast/og?${shareParams(brand, result, share, lang).toString()}&v=${ROAST_OG_VERSION}`;
 
   return (
     <div className="mt-6 grid gap-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -846,7 +847,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
               <figure className="grid justify-items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`/roast/og?format=square&lang=${lang}&brand=${encodeURIComponent(lang === "es" ? "Tu marca" : "Your brand")}&score=6.4&s=7&c=6&n=6&d=6`}
+                  src={`/roast/og?format=square&lang=${lang}&brand=${encodeURIComponent(lang === "es" ? "Tu marca" : "Your brand")}&score=6.4&s=7&c=6&n=6&d=6&v=${ROAST_OG_VERSION}`}
                   alt={t.preview_caption}
                   width={480}
                   height={480}
