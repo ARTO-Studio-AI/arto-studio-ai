@@ -1,5 +1,6 @@
 import type { PostHog } from "posthog-js";
 import { browserConsent } from "@/lib/consent";
+import { gaEvent, initGA, revokeGA } from "@/lib/ga";
 
 /* Wrapper de PostHog para el navegador (Fase 1C, 13 sep 2026).
  *
@@ -17,6 +18,10 @@ import { browserConsent } from "@/lib/consent";
  *     manda; asi docs/METRICS.md y el codigo no se separan.
  *   - posthog-js se carga con import() dinamico solo cuando hay key, para que el
  *     bundle de las paginas y las pruebas en node no lo arrastren.
+ *
+ * Google Analytics 4 (20 oct 2026) va por la misma puerta: initAnalytics() llama a
+ * initGA(), track() reenvia el evento con gaEvent() y revokeAnalytics() llama a
+ * revokeGA(). Las reglas de GA estan en src/lib/ga.ts.
  *
  * Servidor: src/lib/analytics-server.ts (posthog-node) para signup y login, que
  * ocurren en /auth/callback sin navegador de por medio. */
@@ -105,6 +110,9 @@ export function doNotTrack(): boolean {
  * (sin key, DNT activo, fuera del navegador o fallo de carga). Nunca lanza.
  */
 export function initAnalytics(): Promise<PostHog | null> {
+  // GA4 es independiente de PostHog: carga aunque falte la key de PostHog. initGA() es
+  // idempotente y revisa el consentimiento por su cuenta.
+  initGA();
   if (initPromise) return initPromise;
   // Sin consentimiento no se cachea la promesa: si la persona acepta despues,
   // la siguiente llamada si inicializa.
@@ -172,6 +180,7 @@ export function initAnalytics(): Promise<PostHog | null> {
 
 /** Manda un evento tipado. No-op silencioso si no hay cliente. */
 export function track<E extends AnalyticsEvent>(event: E, props: AnalyticsEvents[E]): void {
+  gaEvent(event, props as unknown as Record<string, unknown>);
   if (client) {
     try {
       client.capture(event, props);
@@ -213,6 +222,7 @@ export function identifyUser(userId: string | null): void {
  */
 export function revokeAnalytics(): void {
   generation += 1;
+  revokeGA();
   try {
     // reset() primero: si va despues, borra el opt-out recien guardado y el SDK sigue
     // mandando $pageview y $pageleave (posthog-js lo advierte en reset()).

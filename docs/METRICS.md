@@ -62,6 +62,7 @@ Cuando entren, se agregan a `AnalyticsEvents` y a la tabla de §4; F5 pasa a med
 |---|---|---|---|
 | Producto | PostHog (`posthog-js` en cliente, `posthog-node` en `/auth/callback`) | eventos tipados, funnels, cohortes, retención | `src/components/analytics/PostHogProvider.tsx` desde `src/app/layout.tsx` |
 | Tráfico | Vercel Analytics | visitas, páginas, referrers, países | `<Analytics />` en `src/app/layout.tsx` |
+| Tráfico y adquisición | Google Analytics 4 (`gtag.js`, 20 oct 2026) | sesiones, canales, campañas UTM, páginas; los mismos eventos tipados que PostHog | `src/lib/ga.ts`, llamado desde `initAnalytics()`, `track()` y `revokeAnalytics()` |
 | Rendimiento | Vercel Speed Insights | Core Web Vitals reales por ruta | `<SpeedInsights />` en `src/app/layout.tsx` |
 | Atribución | cookie `asai_utm` + `profiles` + `attribution_events` | de dónde vino cada signup | `src/proxy.ts`, `src/lib/attribution.ts`, `/auth/callback`, migración 0010 |
 | Audiencia | Resend (`RESEND_AUDIENCE_ID`) | lista de contactos para onboarding (D8) | `src/lib/resend-audience.ts` |
@@ -69,6 +70,13 @@ Cuando entren, se agregan a `AnalyticsEvents` y a la tabla de §4; F5 pasa a med
 Reglas del wrapper (`src/lib/analytics.ts`): sin `NEXT_PUBLIC_POSTHOG_KEY` todo es no-op con un solo aviso;
 se respeta `navigator.doNotTrack`; `person_profiles: identified_only`; `identify(user.id)` sin email;
 autocapture apagado (solo eventos con nombre); pageviews por `history_change` para el App Router.
+
+Reglas de GA4 (`src/lib/ga.ts`): sin `NEXT_PUBLIC_GA_MEASUREMENT_ID` no carga; solo con `asai_consent = all`
+(aviso v2 del 20 oct 2026, que nombra a Google Analytics) y sin DNT; Consent Mode v2 con todo lo de anuncios en
+`denied`, Google Signals y personalización de anuncios apagados; cookie `_ga` solo en el host; al retirar el
+consentimiento se apaga y se borran `_ga` y `_ga_<id>`. Las vistas de página las cuenta la medición mejorada
+de GA4 (cambios del history). Los eventos de la sección 4 llegan a GA con el mismo nombre; `signup_completed`
+y `login_completed` no, porque salen del servidor.
 
 **Variables.** Producción ya tiene `NEXT_PUBLIC_POSTHOG_KEY` y `NEXT_PUBLIC_POSTHOG_HOST`. Preview no las
 tiene: los previews no miden (a propósito hasta que Victor decida si quiere un proyecto de PostHog aparte
