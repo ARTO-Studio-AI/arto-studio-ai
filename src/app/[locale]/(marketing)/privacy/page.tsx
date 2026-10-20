@@ -6,7 +6,7 @@ import { CookieSettingsButton } from "@/components/CookieBanner";
 /* Aviso de privacidad (reescrito el 9 oct 2026, punto 13 de Victor). Describe lo que
  * el codigo hace hoy, nada mas: si cambia un proveedor, una cookie o una retencion,
  * se cambia aqui en el mismo PR. Fuentes: src/lib/consent.ts (cookies y aviso),
- * src/lib/analytics.ts (PostHog), src/lib/attribution.ts (asai_utm), src/proxy.ts
+ * src/lib/analytics.ts (PostHog), src/lib/ga.ts (Google Analytics), src/lib/attribution.ts (asai_utm), src/proxy.ts
  * (asai_vid), src/lib/marketing-list.ts (lista y doble opt-in), docs/DECISIONES.md D9. */
 
 export async function generateMetadata({
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }
 
 const CONTACT = "contact@artogroup.com";
-const UPDATED = { es: "16 de octubre de 2026", en: "October 16, 2026" };
+const UPDATED = { es: "20 de octubre de 2026", en: "October 20, 2026" };
 
 type Cookie = { name: string; purpose: string; duration: string; kind: string };
 
@@ -32,6 +32,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_consent", purpose: "Guarda lo que elegiste en el aviso de cookies.", duration: "6 meses", kind: "Esencial" },
     { name: "asai_utm", purpose: "De qué campaña o sitio llegaste la primera vez (parámetros utm y sitio de origen, sin datos personales).", duration: "30 días", kind: "Analítica, solo con tu permiso" },
     { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan. PostHog guarda también un registro en el almacenamiento local del navegador.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
+    { name: "_ga, _ga_…", purpose: "Google Analytics: cuántas personas visitan el sitio, qué páginas ven y de dónde llegan. Sin funciones de publicidad.", duration: "2 años", kind: "Analítica, solo con tu permiso" },
   ],
   en: [
     { name: "sb-…-auth-token(.N)", purpose: "Keeps you signed in (Supabase).", duration: "Up to 400 days or until you sign out", kind: "Essential" },
@@ -41,6 +42,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_consent", purpose: "Stores your choice in the cookie notice.", duration: "6 months", kind: "Essential" },
     { name: "asai_utm", purpose: "Which campaign or site brought you here the first time (utm parameters and referring site, no personal data).", duration: "30 days", kind: "Analytics, only with your permission" },
     { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used. PostHog also keeps a record in the browser's local storage.", duration: "1 year", kind: "Analytics, only with your permission" },
+    { name: "_ga, _ga_…", purpose: "Google Analytics: how many people visit the site, which pages they see and where they come from. No advertising features.", duration: "2 years", kind: "Analytics, only with your permission" },
   ],
 };
 
@@ -54,7 +56,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "PostHog", what: "Analítica de producto, solo si la aceptas en el aviso de cookies. Te identificamos con un número interno, nunca con tu correo. Sin grabación de sesiones." },
     { name: "Anthropic", what: "Escribe las recomendaciones de la búsqueda y el análisis del Brand Roast. Recibe el texto de tu búsqueda o, en el roast, el nombre, industria, tamaño, sitio y descripción de la marca, más el texto público que leemos de ese sitio." },
     { name: "OpenAI", what: "Convierte el texto de tu búsqueda en un vector para encontrar los prompts más parecidos." },
-    { name: "Google", what: "Solo si eliges iniciar sesión con Google: nos comparte tu nombre, correo y foto." },
+    { name: "Google", what: "Si eliges iniciar sesión con Google, nos comparte tu nombre, correo y foto. Y, solo si aceptas la analítica en el aviso de cookies, Google Analytics mide visitas y páginas vistas con un identificador seudónimo (un número aleatorio, no tu nombre ni tu correo); tenemos apagadas sus funciones de publicidad y Google Signals." },
     { name: "Stripe", what: "Procesa los pagos si contratas un plan. Nosotros solo guardamos tu id de cliente y el estado de la suscripción, nunca tu tarjeta." },
   ],
   en: [
@@ -64,7 +66,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "PostHog", what: "Product analytics, only if you accept it in the cookie notice. We identify you by an internal number, never by your email. No session recording." },
     { name: "Anthropic", what: "Writes the search recommendations and the Brand Roast analysis. Receives your search text or, in the roast, the brand's name, industry, size, website and description, plus the public text we read from that website." },
     { name: "OpenAI", what: "Turns your search text into a vector to find the closest prompts." },
-    { name: "Google", what: "Only if you choose to sign in with Google: shares your name, email and photo with us." },
+    { name: "Google", what: "If you choose to sign in with Google, it shares your name, email and photo with us. And, only if you accept analytics in the cookie notice, Google Analytics measures visits and page views with a pseudonymous identifier (a random number, not your name or email); its advertising features and Google Signals are turned off." },
     { name: "Stripe", what: "Processes payments if you buy a plan. We only keep your customer id and subscription status, never your card." },
   ],
 };

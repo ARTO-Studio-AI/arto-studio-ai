@@ -31,14 +31,14 @@ const LANDING =
 const COPY = {
   es: {
     title: "Cookies",
-    body: "Usamos cookies esenciales para tu sesión, tu idioma y el contador de prompts gratis. Con tu permiso, también usamos analítica (PostHog) para entender qué partes del sitio sirven y de dónde llegas. No vendemos tus datos ni usamos cookies de publicidad.",
+    body: "Usamos cookies esenciales para tu sesión, tu idioma y el contador de prompts gratis. Con tu permiso, también usamos analítica (PostHog y Google Analytics) para entender qué partes del sitio sirven y de dónde llegas. No vendemos tus datos ni usamos cookies de publicidad.",
     more: "Aviso de privacidad",
     essential: "Solo esenciales",
     all: "Aceptar analítica",
   },
   en: {
     title: "Cookies",
-    body: "We use essential cookies for your session, your language and the free prompt counter. With your permission, we also use analytics (PostHog) to learn which parts of the site work and where you came from. We don't sell your data or use advertising cookies.",
+    body: "We use essential cookies for your session, your language and the free prompt counter. With your permission, we also use analytics (PostHog and Google Analytics) to learn which parts of the site work and where you came from. We don't sell your data or use advertising cookies.",
     more: "Privacy policy",
     essential: "Essential only",
     all: "Accept analytics",

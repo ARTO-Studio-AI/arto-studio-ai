@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
  * posthog-js se mockea para comprobar que ni siquiera se carga en esos casos.
  * Desde H-48 (9 oct 2026) tampoco inicializa sin la cookie asai_consent = all. */
 
-const CONSENT_ALL = "asai_consent=all.v1-2026-10-09";
+const CONSENT_ALL = "asai_consent=all.v2-2026-10-20";
 
 /* document minimo: un cookie jar de strings, suficiente para consent.ts y revokeAnalytics. */
 function fakeDocument(initial: string) {
@@ -171,7 +171,7 @@ describe("analytics (cliente)", () => {
       expect(initMock).not.toHaveBeenCalled();
       expect(captureMock).not.toHaveBeenCalled();
       // "Solo esenciales" o una version vieja del aviso no cuentan como si.
-      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      doc.cookie = "asai_consent=essential.v2-2026-10-20; path=/";
       expect(await a.initAnalytics()).toBeNull();
       doc.cookie = "asai_consent=all.v0-viejo; path=/";
       expect(await a.initAnalytics()).toBeNull();
@@ -251,7 +251,7 @@ describe("analytics (cliente)", () => {
     try {
       const a = await freshModule();
       expect(await a.initAnalytics()).not.toBeNull();
-      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      doc.cookie = "asai_consent=essential.v2-2026-10-20; path=/";
       a.revokeAnalytics();
       a.track("pricing_viewed", { locale: "es", signed_in: false });
       await new Promise((r) => setTimeout(r, 0));
@@ -275,7 +275,7 @@ describe("analytics (cliente)", () => {
     try {
       const a = await freshModule();
       const pending = a.initAnalytics();
-      doc.cookie = "asai_consent=essential.v1-2026-10-09; path=/";
+      doc.cookie = "asai_consent=essential.v2-2026-10-20; path=/";
       a.revokeAnalytics();
       expect(await pending).toBeNull();
       expect(initMock).not.toHaveBeenCalled();
