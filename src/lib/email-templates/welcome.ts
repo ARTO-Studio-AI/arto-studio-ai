@@ -94,7 +94,7 @@ export function welcomeEmail(content: WelcomeContent, lang: "es" | "en", unsubsc
   const items = content.items
     .map(
       (it) => `
-      <tr><td width="36" valign="top" style="padding:18px 0 16px 0;border-top:1px solid ${C.line};"><div style="width:22px;height:22px;border-radius:6px;background:${C.accent};color:${C.white};font-family:${F.meta};font-size:14px;line-height:22px;text-align:center;font-weight:700;">&#10003;</div></td>
+      <tr><td width="36" valign="top" style="padding:18px 0 16px 0;border-top:1px solid ${C.line};"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="22" height="22" bgcolor="${C.accent}" align="center" valign="middle" style="width:22px;height:22px;background:${C.accent};border-radius:6px;color:${C.white};font-family:${F.meta};font-size:14px;line-height:22px;font-weight:700;">&#10003;</td></tr></table></td>
         <td style="padding:16px 0;border-top:1px solid ${C.line};">
         <a href="${esc(abs(it.url, lang))}" style="text-decoration:none;">
           <div style="font-family:${F.display};font-size:19px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;">${esc(L(it.title_es, it.title_en))} <span style="color:${C.accent};">&rarr;</span></div>

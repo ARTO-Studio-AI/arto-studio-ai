@@ -25,7 +25,7 @@ function getResend(): Resend | null {
 
 /**
  * Generic send helper. Returns true on success, false on failure (logs error).
- * Never throws — email is best-effort; callers shouldn't fail the main flow
+ * Never throws: email is best-effort; callers shouldn't fail the main flow
  * just because email didn't deliver.
  */
 async function send(params: {
@@ -36,7 +36,7 @@ async function send(params: {
 }): Promise<boolean> {
   const resend = getResend();
   if (!resend) {
-    console.warn("[email] RESEND_API_KEY not set — email not sent:", params.subject);
+    console.warn("[email] RESEND_API_KEY not set: email not sent:", params.subject);
     return false;
   }
   try {

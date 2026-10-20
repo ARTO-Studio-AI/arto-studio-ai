@@ -100,7 +100,7 @@ export function checks(items: string[]): string {
   const rows = items
     .map(
       (it) => `<tr>
-        <td width="34" valign="top" style="padding:0 0 12px 0;"><div style="width:22px;height:22px;border-radius:6px;background:${C.accent};color:${C.white};font-family:${F.meta};font-size:14px;line-height:22px;text-align:center;font-weight:700;">&#10003;</div></td>
+        <td width="34" valign="top" style="padding:0 0 12px 0;"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="22" height="22" bgcolor="${C.accent}" align="center" valign="middle" style="width:22px;height:22px;background:${C.accent};border-radius:6px;color:${C.white};font-family:${F.meta};font-size:14px;line-height:22px;font-weight:700;">&#10003;</td></tr></table></td>
         <td valign="top" style="padding:1px 0 12px 0;font-family:${F.body};font-size:16px;line-height:23px;color:${C.ink};">${esc(it)}</td>
       </tr>`,
     )
