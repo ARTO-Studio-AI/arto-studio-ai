@@ -64,7 +64,13 @@ export async function GET(req: NextRequest) {
   const story = format === "story";
   const wide = format === "default";
   const pad = wide ? 56 : 72;
-  const brandSize = wide ? 64 : story ? 104 : 76;
+  /* El nombre va en un solo renglon y el tamano baja con el largo: en dos renglones se
+   * montaba sobre la calificacion (Victor, 20 oct 2026, «Marca de ejemplo»). Manrope 800
+   * mide unos 0.62 em por caracter; se deja margen. */
+  const brandText = clip(share.brand, story ? 26 : 22);
+  const brandBox = wide ? 470 : size.width - pad * 2;
+  const brandMax = wide ? 64 : story ? 104 : 76;
+  const brandSize = Math.max(28, Math.min(brandMax, Math.floor(brandBox / (Math.max(brandText.length, 1) * 0.62))));
   const scoreSize = wide ? 230 : story ? 420 : 250;
   const headlineSize = wide ? 34 : story ? 58 : 38;
   const headline = share.h ? clip(share.h, wide ? 110 : story ? 150 : 120) : "";
@@ -88,8 +94,8 @@ export async function GET(req: NextRequest) {
       <span style={{ fontFamily: "Geist", fontSize: wide ? 18 : 24, letterSpacing: 4, textTransform: "uppercase", color: OG.ink2 }}>
         {t.scoreFor}
       </span>
-      <span style={{ fontFamily: "Manrope", fontSize: brandSize, lineHeight: 1, letterSpacing: -2, color: OG.ink, marginTop: 10 }}>
-        {clip(share.brand, story ? 26 : 22)}
+      <span style={{ fontFamily: "Manrope", fontSize: brandSize, lineHeight: 1.05, letterSpacing: -2, color: OG.ink, marginTop: 10, whiteSpace: "nowrap" }}>
+        {brandText}
       </span>
       <div style={{ display: "flex", alignItems: "flex-end", marginTop: wide ? 4 : 10 }}>
         <span style={{ fontFamily: "Manrope", fontSize: scoreSize, lineHeight: 0.86, letterSpacing: -12, color }}>

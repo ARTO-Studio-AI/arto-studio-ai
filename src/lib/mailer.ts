@@ -38,6 +38,11 @@ async function deliver(p: { to: string; subject: string; html: string; text: str
   }
 }
 
+/** Prueba de /admin/emails: mismo envio que el real, con «[Prueba]» en el asunto. */
+export async function sendTestEmail(to: string, m: { subject: string; html: string; text: string }, kind: string): Promise<boolean> {
+  return deliver({ to, subject: `[Prueba] ${m.subject}`, html: m.html, text: m.text, tag: `admin_test_${kind}` });
+}
+
 export function unsubscribeUrl(token: string, lang: "es" | "en" = "es"): string {
   return `${SITE_URL}/api/newsletter/unsubscribe?token=${encodeURIComponent(token)}&lang=${lang}`;
 }
