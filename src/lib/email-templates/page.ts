@@ -18,8 +18,8 @@ export function actionPage(opts: {
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&family=Inter+Tight:wght@400;500&family=Manrope:wght@800&display=swap" rel="stylesheet"></head>
 <body style="margin:0;background:#f4f2ee;font-family:'Inter Tight',Helvetica,Arial,sans-serif;color:#18181b;">
 <main style="max-width:520px;margin:64px auto;padding:0 16px;">
-<img src="${SITE_URL}/brand/arto-logo-black.png" width="78" height="27" alt="arto">
-<div style="background:#fff;border:1px solid #e4e4e7;border-radius:16px;padding:36px 32px;margin-top:20px;">
+<img src="${SITE_URL}/email/header-${opts.lang}.png" width="520" alt="arto Studio AI" style="display:block;width:100%;height:auto;border-radius:16px 16px 0 0;">
+<div style="background:#fff;border:1px solid #e4e4e7;border-top:0;border-radius:0 0 16px 16px;padding:36px 32px;">
 <h1 style="font-family:'Manrope',Helvetica,Arial,sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px;margin:0;">${esc(opts.title)}</h1>
 <p style="font-size:16px;line-height:25px;color:#52525b;margin:14px 0 0 0;">${esc(opts.body)}</p>
 ${form}

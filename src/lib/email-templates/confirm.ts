@@ -1,5 +1,5 @@
 import { SITE_URL } from "@/lib/site-url";
-import { C, F, button, eyebrow, layout } from "./layout";
+import { C, F, button, hero, layout } from "./layout";
 
 /* Correo de confirmacion del doble opt-in (2026-10-07). Sale a quien marco la casilla de
  * promociones en el Brand Roast o, desde el 2026-10-16, en una lista de espera; hasta que
@@ -47,10 +47,8 @@ export function listConfirmationEmail(lang: "es" | "en", confirmUrl: string, ori
         reason: `You're receiving this because someone asked to add this address to the ARTO Studio AI list ${ORIGIN.en[origin]}.`,
       };
   const body = `
-    ${eyebrow(t.eyebrow, C.accent)}
-    <div class="h1" style="font-family:${F.display};font-size:42px;line-height:46px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${t.h} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:50px;color:${C.accent};">${t.accent}</span></div>
-    <div style="font-family:${F.body};font-size:17px;line-height:27px;color:${C.ink2};margin:18px 0 24px 0;">${t.body}</div>
-    ${button(t.cta, confirmUrl, "accent")}
+    ${hero({ eyebrow: t.eyebrow, title: t.h, accent: t.accent, intro: t.body })}
+    <div style="margin-top:26px;">${button(t.cta, confirmUrl, "accent")}</div>
     <div style="font-family:${F.body};font-size:13px;line-height:20px;color:${C.ink3};margin-top:18px;">${t.note}</div>`;
   return {
     subject: t.subject,

@@ -1,20 +1,144 @@
-import { SITE_URL, SITE_HOST } from "@/lib/site-url";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { EMAIL_FROM } from "@/lib/email";
+import { unsubscribeUrl } from "@/lib/mailer";
+import { digestEmail, type DigestPrompt } from "@/lib/email-templates/digest";
 import { Resend } from "resend";
+import { createHash } from "node:crypto";
+import { DIGEST_STRATEGY, selectDigestPrompts, type DigestCandidate } from "@/lib/digest-selection";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// Lazy-init inside handler to avoid build-time eval
+/* Resumen semanal (cron de los martes a las 14:00 UTC, vercel.json; Victor lo movio del
+ * lunes el 16 oct). Usa la plantilla de marca de src/lib/email-templates/digest.ts: cinco
+ * prompts de la biblioteca, linea editorial y biblioteca, en el idioma del suscriptor. Ya
+ * no lee search_queries: las busquedas de los usuarios y la brecha del catalogo son datos
+ * internos y no van a la lista.
+ *
+ * Seleccion (src/lib/digest-selection.ts): nunca se repite un prompt. Cada envio deja su
+ * fila en digest_sends (migracion 0019) ANTES de mandar, una por dia: una relanzada el
+ * mismo dia reutiliza la seleccion, y si el envio falla esos prompts se dan por usados
+ * (preferimos saltar un prompt a repetirlo).
+ *
+ * Envio por lotes (auditoria de Fable): resend.batch.send de hasta 100 correos por
+ * llamada con una pausa entre lotes (Resend admite 2 solicitudes por segundo), clave de
+ * idempotencia por lote y dia, y solo a quien no recibio el digest en los ultimos 6 dias:
+ * si la funcion se corta o se relanza a mano, no se repite a nadie. */
 
-// Reuse the same digest HTML structure. For brevity here, inline a minimal version.
-function buildHtml(unsubscribeUrl: string, data: { featured: any[]; topQueries: any[]; gap: any | null }) {
-  const f = data.featured.map((p) => `<tr><td style="padding:8px 0;border-bottom:1px solid #e5e5e5"><a href="${SITE_URL}/prompts/${p.id}" style="color:#0a0a0a;text-decoration:none;font-weight:600">${p.title_en}</a><br><span style="font-size:12px;color:#737373">${p.id} · ${p.category}</span></td></tr>`).join("");
-  const q = data.topQueries.length === 0 ? "" : data.topQueries.map((q: any) => `<li>${q.query} <span style="color:#a3a3a3">· ${q.n}×</span></li>`).join("");
-  const gapHtml = data.gap ? `<p><strong>"${data.gap.query}"</strong> — similarity ${Number(data.gap.top_similarity).toFixed(2)}.</p>` : `<p>Catalog is matching most queries well this week.</p>`;
-  return `<html><body style="margin:0;padding:0;background:#fafafa;font-family:'Manrope',sans-serif;color:#0a0a0a"><center><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;margin:0 auto"><tr><td style="height:48px">&nbsp;</td></tr><tr><td style="padding:0 24px"><img src="${SITE_URL}/brand/arto-logo-black.png" alt="ARTO Studio AI" width="69" height="24" style="display:block"></td></tr><tr><td style="height:32px">&nbsp;</td></tr><tr><td style="padding:0 24px"><h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-0.5px">This week in the library.</h1></td></tr><tr><td style="height:24px">&nbsp;</td></tr><tr><td style="padding:0 24px"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff;border:1px solid #e5e5e5;border-radius:12px"><tr><td style="padding:24px"><h2 style="margin:0 0 12px 0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#737373">✨ Featured</h2><table width="100%">${f}</table></td></tr></table></td></tr><tr><td style="height:16px">&nbsp;</td></tr><tr><td style="padding:0 24px"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff;border:1px solid #e5e5e5;border-radius:12px"><tr><td style="padding:24px"><h2 style="margin:0 0 12px 0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#737373">🔍 Top searches</h2><ul style="margin:0;padding-left:20px;color:#525252">${q}</ul></td></tr></table></td></tr><tr><td style="height:16px">&nbsp;</td></tr><tr><td style="padding:0 24px"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff;border:1px solid #e5e5e5;border-radius:12px"><tr><td style="padding:24px"><h2 style="margin:0 0 12px 0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#737373">📡 Gap</h2>${gapHtml}</td></tr></table></td></tr><tr><td style="height:32px">&nbsp;</td></tr><tr><td align="center" style="padding:0 24px"><a href="${SITE_URL}/prompts" style="display:inline-block;background:#0a0a0a;color:#fff;padding:14px 28px;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px">Browse the catalog →</a></td></tr><tr><td style="height:48px">&nbsp;</td></tr><tr><td style="padding:0 24px;font-size:11px;color:#a3a3a3;text-align:center"><a href="${unsubscribeUrl}" style="color:#a3a3a3;text-decoration:underline">Unsubscribe</a> · <a href="${SITE_URL}" style="color:#a3a3a3">${SITE_HOST}</a></td></tr></table></center></body></html>`;
+/** Ventana de «publicados esta semana». prompts no tiene published_at: se usa created_at. */
+const RECENT_DAYS = 7;
+const PAGE = 1000;
+const BATCH = 100;
+const PAUSE_MS = 600;
+const RESEND_EVERY_DAYS = 6;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Tamano de cada `in(...)`: PostgREST lo manda en la URL y una lista larga la rompe. */
+const CHUNK = 150;
+
+function chunks<T>(xs: T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < xs.length; i += CHUNK) out.push(xs.slice(i, i + CHUNK));
+  return out;
+}
+
+/** Idioma guardado del suscriptor: el del registro (profiles.signup_locale) o el de la
+ *  lista de espera (waitlist.locale). Sin dato, espanol. */
+async function languages(
+  admin: ReturnType<typeof createAdminClient>,
+  subs: { email: string; user_id: string | null }[],
+): Promise<Map<string, "es" | "en">> {
+  const out = new Map<string, "es" | "en">();
+  const userIds = subs.map((s) => s.user_id).filter((v): v is string => !!v);
+  const byUser = new Map<string, string>();
+  for (const ids of chunks(userIds)) {
+    const { data, error } = await admin.from("profiles").select("id, signup_locale").in("id", ids);
+    if (error) console.warn("[digest] idioma de profiles:", error.message);
+    for (const p of (data ?? []) as { id: string; signup_locale: string | null }[]) {
+      if (p.signup_locale) byUser.set(p.id, p.signup_locale);
+    }
+  }
+  const byEmail = new Map<string, string>();
+  // waitlist guarda el correo en minusculas; filas viejas de la lista pueden no estarlo.
+  for (const emails of chunks(subs.map((s) => s.email.toLowerCase()))) {
+    const { data, error } = await admin.from("waitlist").select("email, locale").in("email", emails);
+    if (error) console.warn("[digest] idioma de waitlist:", error.message);
+    for (const w of (data ?? []) as { email: string; locale: string | null }[]) {
+      if (w.locale) byEmail.set(w.email.toLowerCase(), w.locale);
+    }
+  }
+  for (const s of subs) {
+    const raw = (s.user_id && byUser.get(s.user_id)) || byEmail.get(s.email.toLowerCase());
+    out.set(s.email, raw === "en" ? "en" : "es");
+  }
+  return out;
+}
+
+type Admin = ReturnType<typeof createAdminClient>;
+
+/** Los prompts de esta semana. Si ya hay fila de hoy en digest_sends, la reutiliza; si no,
+ *  sortea con la regla de digest-selection.ts y la guarda antes de devolverla. Lanza ante
+ *  cualquier error de base: la ruta responde 500 y no manda nada. */
+async function weeklyPrompts(admin: Admin): Promise<DigestPrompt[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const todays = await admin.from("digest_sends").select("prompt_ids").eq("sent_on", today).maybeSingle();
+  if (todays.error) throw new Error(`digest_sends: ${todays.error.message}`);
+  let ids = (todays.data?.prompt_ids as string[] | undefined) ?? null;
+
+  if (!ids) {
+    const past = await admin.from("digest_sends").select("prompt_ids");
+    if (past.error) throw new Error(`digest_sends: ${past.error.message}`);
+    const sentBefore = new Set(((past.data ?? []) as { prompt_ids: string[] }[]).flatMap((r) => r.prompt_ids));
+    const fresh = (p: DigestCandidate) => !sentBefore.has(p.id);
+
+    const recentSince = new Date(Date.now() - RECENT_DAYS * 86_400_000).toISOString();
+    const recent = await admin
+      .from("prompts")
+      .select("id, category, tier, created_at")
+      .eq("is_published", true)
+      .gte("created_at", recentSince)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (recent.error) throw new Error(`prompts recientes: ${recent.error.message}`);
+
+    // Paginacion por cursor (id): no depende del tope de filas que tenga PostgREST.
+    const pool: DigestCandidate[] = [];
+    let after = "";
+    for (let round = 0; round < 50; round++) {
+      let q = admin.from("prompts").select("id, category, tier, created_at").eq("is_published", true);
+      if (after) q = q.gt("id", after);
+      const page = await q.order("id").limit(PAGE);
+      if (page.error) throw new Error(`prompts: ${page.error.message}`);
+      const rows = (page.data ?? []) as DigestCandidate[];
+      if (rows.length === 0) break;
+      pool.push(...rows);
+      after = rows[rows.length - 1].id;
+    }
+
+    // Gancho apagado: «los mas usados de la semana» (por ejemplo, prompt_opens de los
+    // ultimos 7 dias) entraria como `mostUsed`. Victor lo decide despues.
+    const chosen = selectDigestPrompts({
+      recent: ((recent.data ?? []) as DigestCandidate[]).filter(fresh),
+      pool: pool.filter(fresh),
+    });
+    if (chosen.length === 0) return [];
+
+    const ins = await admin.from("digest_sends").insert({ sent_on: today, prompt_ids: chosen.map((p) => p.id), strategy: DIGEST_STRATEGY });
+    if (ins.error) {
+      // Otra ejecucion de hoy guardo primero: se usa la suya.
+      if (ins.error.code !== "23505") throw new Error(`digest_sends insert: ${ins.error.message}`);
+      const again = await admin.from("digest_sends").select("prompt_ids").eq("sent_on", today).maybeSingle();
+      if (again.error || !again.data) throw new Error("digest_sends: no se pudo releer la fila de hoy");
+      ids = again.data.prompt_ids as string[];
+    } else {
+      ids = chosen.map((p) => p.id);
+    }
+  }
+
+  const details = await admin.from("prompts").select("id, title_es, title_en, category, tier").eq("is_published", true).in("id", ids);
+  if (details.error) throw new Error(`prompts detalle: ${details.error.message}`);
+  const byId = new Map(((details.data ?? []) as DigestPrompt[]).map((p) => [p.id, p]));
+  return ids.map((id) => byId.get(id)).filter((p): p is DigestPrompt => !!p);
 }
 
 export async function GET(request: NextRequest) {
@@ -34,46 +158,87 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  // Featured
-  const { data: featured } = await admin.from("prompts").select("id, title_en, category").eq("is_featured", true).eq("is_published", true).order("featured_at", { ascending: false }).limit(5);
-
-  // Top queries last 7 days (raw SQL via admin)
-  const { data: rawQueries } = await admin.from("search_queries").select("query").gte("created_at", new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()).limit(2000);
-  const freq = new Map<string, number>();
-  for (const r of rawQueries ?? []) {
-    const k = (r.query || "").trim().toLowerCase();
-    if (k) freq.set(k, (freq.get(k) ?? 0) + 1);
+  const since = new Date(Date.now() - RESEND_EVERY_DAYS * 86_400_000).toISOString();
+  const { data: subscribers, error: subsError } = await admin
+    .from("newsletter_subscribers")
+    .select("email, unsubscribe_token, user_id")
+    .eq("status", "active")
+    .or(`last_sent_at.is.null,last_sent_at.lt."${since}"`)
+    // Orden estable: en una relanzada el mismo lote da la misma clave de idempotencia.
+    .order("email");
+  if (subsError) {
+    console.error("[digest] suscriptores:", subsError.message);
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
-  const topQueries = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([query, n]) => ({ query, n }));
-
-  // Gap
-  const { data: gapRows } = await admin.from("search_queries").select("query, top_similarity").gte("created_at", new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString()).lt("top_similarity", 0.45).order("top_similarity").limit(1);
-  const gap = gapRows?.[0] ?? null;
-
-  // Subscribers
-  const { data: subscribers } = await admin.from("newsletter_subscribers").select("email, unsubscribe_token").eq("status", "active");
 
   if (!subscribers || subscribers.length === 0) {
     return NextResponse.json({ ok: true, sent: 0, message: "no active subscribers" });
   }
 
+  let prompts: DigestPrompt[];
+  try {
+    prompts = await weeklyPrompts(admin);
+  } catch (err) {
+    console.error("[digest] seleccion:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
+  }
+  // Sin prompts que no se hayan mandado nunca, el correo no tiene nada que decir.
+  if (prompts.length === 0) {
+    return NextResponse.json({ ok: true, sent: 0, message: "no prompts left" });
+  }
+
+  const subs = subscribers as { email: string; unsubscribe_token: string; user_id: string | null }[];
+  const langOf = await languages(admin, subs);
+
+  const day = new Date().toISOString().slice(0, 10);
   let sent = 0, failed = 0;
-  for (const sub of subscribers) {
-    const unsubscribeUrl = `${SITE_URL}/api/newsletter/unsubscribe?token=${encodeURIComponent(sub.unsubscribe_token)}`;
-    try {
-      await resend.emails.send({
+  for (let i = 0; i < subs.length; i += BATCH) {
+    const group = subs.slice(i, i + BATCH);
+    const payload = group.map((sub) => {
+      const lang = langOf.get(sub.email) ?? "es";
+      const unsub = unsubscribeUrl(sub.unsubscribe_token, lang);
+      const m = digestEmail({ lang, prompts, unsubscribeUrl: unsub });
+      return {
         // Mismo remitente que src/lib/email.ts (H-44); antes estaba escrito a mano.
         from: EMAIL_FROM,
         to: sub.email,
-        subject: "Weekly digest — ARTO Studio AI · Prompt Library",
-        html: buildHtml(unsubscribeUrl, { featured: featured ?? [], topQueries, gap }),
-      });
-      await admin.from("newsletter_subscribers").update({ last_sent_at: new Date().toISOString() }).eq("email", sub.email);
-      sent++;
-    } catch {
-      failed++;
+        subject: m.subject,
+        html: m.html,
+        text: m.text,
+        headers: { "List-Unsubscribe": `<${unsub}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+        tags: [{ name: "kind", value: "digest" }],
+      };
+    });
+    // Misma clave para el mismo lote el mismo dia: Resend no lo manda dos veces.
+    const idempotencyKey = `digest-${day}-${createHash("sha256").update(group.map((g) => g.email).join(",")).digest("hex").slice(0, 32)}`;
+    // permissive: una direccion que Resend rechaza no tumba a los otros 99.
+    const opts = { idempotencyKey, batchValidation: "permissive" as const };
+    let res = await resend.batch.send(payload, opts);
+    if (res.error?.name === "rate_limit_exceeded") {
+      await sleep(1500);
+      res = await resend.batch.send(payload, opts);
     }
+    if (res.error) {
+      console.error("[digest] lote fallo:", res.error.name, res.error.message);
+      failed += group.length;
+    } else {
+      const bad = new Set((res.data?.errors ?? []).map((e) => e.index));
+      for (const e of res.data?.errors ?? []) console.error("[digest] correo rechazado:", e.index, e.message);
+      const ok = group.filter((_, k) => !bad.has(k)).map((g) => g.email);
+      if (ok.length) {
+        const { error } = await admin
+          .from("newsletter_subscribers")
+          .update({ last_sent_at: new Date().toISOString() })
+          .in("email", ok);
+        if (error) console.error("[digest] last_sent_at:", error.message);
+      }
+      sent += ok.length;
+      failed += group.length - ok.length;
+    }
+    if (i + BATCH < subs.length) await sleep(PAUSE_MS);
   }
 
+  // Un martes con fallos no se reintenta solo (Vercel no reintenta el cron): queda en el log.
+  if (failed > 0) console.error(JSON.stringify({ event: "digest_failed", sent, failed, total: subs.length }));
   return NextResponse.json({ ok: true, sent, failed });
 }

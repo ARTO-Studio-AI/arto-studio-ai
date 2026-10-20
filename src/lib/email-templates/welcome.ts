@@ -1,5 +1,5 @@
 import { SITE_URL } from "@/lib/site-url";
-import { C, F, button, esc, eyebrow, layout } from "./layout";
+import { C, F, button, esc, eyebrow, hero, layout, signoff } from "./layout";
 
 /* Correo de bienvenida a la lista (2026-10-07). Sale a quien marco la casilla de
  * promociones (registro o roast). El contenido se edita desde /admin/emails y vive en
@@ -94,9 +94,10 @@ export function welcomeEmail(content: WelcomeContent, lang: "es" | "en", unsubsc
   const items = content.items
     .map(
       (it) => `
-      <tr><td style="padding:16px 0;border-top:1px solid ${C.line};">
+      <tr><td width="36" valign="top" style="padding:18px 0 16px 0;border-top:1px solid ${C.line};"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="22" height="22" bgcolor="${C.accent}" align="center" valign="middle" style="width:22px;height:22px;background:${C.accent};border-radius:6px;color:${C.white};font-family:${F.meta};font-size:14px;line-height:22px;font-weight:700;">&#10003;</td></tr></table></td>
+        <td style="padding:16px 0;border-top:1px solid ${C.line};">
         <a href="${esc(abs(it.url, lang))}" style="text-decoration:none;">
-          <div style="font-family:${F.display};font-size:19px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;">${esc(L(it.title_es, it.title_en))} <span style="color:${C.accent};">→</span></div>
+          <div style="font-family:${F.display};font-size:19px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;">${esc(L(it.title_es, it.title_en))} <span style="color:${C.accent};">&rarr;</span></div>
           <div style="font-family:${F.body};font-size:15px;line-height:23px;color:${C.ink2};margin-top:4px;">${esc(L(it.body_es, it.body_en))}</div>
         </a>
       </td></tr>`,
@@ -113,14 +114,11 @@ export function welcomeEmail(content: WelcomeContent, lang: "es" | "en", unsubsc
     : "";
 
   const body = `
-    ${eyebrow(es ? "Bienvenida" : "Welcome", C.accent)}
-    <div class="h1" style="font-family:${F.display};font-size:46px;line-height:50px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${esc(L(content.headline_es, content.headline_en))} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:54px;letter-spacing:-0.5px;color:${C.accent};">${esc(L(content.accent_es, content.accent_en))}</span></div>
-    <div style="font-family:${F.body};font-size:17px;line-height:27px;color:${C.ink2};margin:18px 0 26px 0;">${esc(L(content.intro_es, content.intro_en))}</div>
-    ${eyebrow(es ? "Lo que vas a encontrar" : "What you'll find")}
+    ${hero({ eyebrow: es ? "Bienvenida" : "Welcome", title: L(content.headline_es, content.headline_en), accent: L(content.accent_es, content.accent_en), intro: L(content.intro_es, content.intro_en) })}
+    <div style="margin:28px 0 0 0;">${eyebrow(es ? "Lo que vas a encontrar" : "What you'll find")}</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">${items}</table>
     ${promo}
-    <div style="font-family:${F.serif};font-style:italic;font-size:20px;line-height:26px;color:${C.ink};margin:28px 0 0 0;">${es ? "Nos leemos pronto." : "Talk soon."}</div>
-    <div style="font-family:${F.meta};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:${C.ink2};margin-top:6px;">ARTO Studio AI</div>`;
+    ${signoff(es ? "Nos leemos pronto." : "Talk soon.")}`;
 
   const text = [
     `${L(content.headline_es, content.headline_en)} ${L(content.accent_es, content.accent_en)}`,

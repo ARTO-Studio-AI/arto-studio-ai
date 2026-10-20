@@ -72,7 +72,7 @@ siguiente sesión.
 | **Quién** | Victor, 2026-09-10 |
 | **Qué se decidió** | El dominio de producción es `https://creative.artostudio.ai`. `arto-studio-ai.vercel.app` es el alias técnico de Vercel, no el que se comunica |
 | **Por qué** | Consistencia de marca y SEO: un solo host canónico |
-| **Qué NO hacer** | No poner `arto-studio-ai.vercel.app` en correos, OG, sitemap ni copys nuevos. Pendiente: `src/app/api/cron/digest/route.ts` todavía lo usa en el HTML del digest |
+| **Qué NO hacer** | No poner `arto-studio-ai.vercel.app` en correos, OG, sitemap ni copys nuevos. Desde el 2026-10-16 el digest usa `SITE_URL` vía la plantilla de marca (`src/lib/email-templates/digest.ts`) |
 | **Dónde** | `NEXT_PUBLIC_SITE_URL`, `src/app/robots.ts` |
 
 ### D7 · Pricing de lanzamiento: Free con tope de 3 prompts al día
@@ -165,6 +165,17 @@ siguiente sesión.
 | **Quien ya estaba en la lista** | Las filas anteriores al 2026-10-16 nunca aceptaron promociones. La invitación única a confirmar es una propuesta aparte (`docs/propuestas/261016-waitlist-invitacion-confirmar.md`) y no se ejecuta sin el go de Victor |
 | **Dónde** | `src/components/NewsletterForm.tsx`, `src/app/api/waitlist/route.ts`, `src/lib/waitlist.ts`, `src/lib/marketing-list.ts`, `src/app/admin/canales/page.tsx`, migración `0018_waitlist_consentimiento_utm.sql`, aviso de privacidad |
 
+### Resumen semanal: diseño de marca, martes y nunca repetir un prompt
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-16: «rehaz el resumen semanal con el diseño de marca, en español, sin los datos internos» y, al ver la muestra, «haz el cambio [a martes]» y «que los prompts destacados, por lo pronto, vayan cambiando de manera random... pero que nunca repitamos prompts, o podrían ser también los prompts nuevos de la semana. Eso lo puedes definir». La regla la definió Code; auditoría de Fable en el PR #99 |
+| **Qué se decidió** | El digest sale los **martes a las 14:00 UTC** con la plantilla de marca (`digest.ts`), en el idioma guardado del suscriptor. Lleva **cinco prompts**: primero los publicados en los últimos 7 días que nunca se mandaron, del más nuevo al más viejo; lo que falte, al azar entre los publicados nunca enviados, sin repetir vertical mientras se pueda. Gratis y Pro mezclados, con su etiqueta. Cada envío queda en `digest_sends` (una fila por día, migración 0019) antes de mandar |
+| **Por qué** | Las búsquedas de los usuarios y la brecha del catálogo son datos internos. No repetir mantiene el correo útil semana a semana. El copy ya no dice que los eligieron estrategas ni que están probados, porque no es una selección editorial |
+| **Qué NO hacer** | No volver a leer `search_queries` en el digest. No mandar un prompt que ya esté en `digest_sends`. No borrar filas de `digest_sends`: es el registro que impide repetir. «Publicado en los últimos 7 días» usa `created_at` porque `prompts` no tiene fecha de publicación |
+| **Pendiente** | Gancho apagado para «los más usados de la semana» (`mostUsed` en `digest-selection.ts`). Lo activa una decisión de Victor |
+| **Dónde** | `src/lib/email-templates/digest.ts`, `src/lib/digest-selection.ts`, `src/app/api/cron/digest/route.ts`, `vercel.json`, migración `0019_digest_sends.sql` |
+
 ### D10 · Aviso de cookies: solo esenciales por defecto
 
 | | |
@@ -245,3 +256,13 @@ siguiente sesión.
 | **Por qué** | Victor quiere GA para tráfico y adquisición, que es donde se miden las campañas. El consentimiento de la v1 solo cubría PostHog. La vista compartida del roast lleva la marca y el titular en la query y en el título; eso no debe llegar a Google |
 | **Qué NO hacer** | No cargar `gtag.js` sin consentimiento ni desde `next/script` en el layout. No encender Google Signals, remarketing ni vínculos con Google Ads sin decisión de Victor y un aviso nuevo. En el flujo web de GA4, dejar apagado «Cambios de página basados en eventos del historial» de la medición mejorada: si se enciende, salen vistas duplicadas con la URL completa. No mandar a GA email, nombre, empresa ni texto libre |
 | **Dónde** | `src/lib/ga.ts`, `src/components/analytics/GaPageViews.tsx`, `src/lib/analytics.ts`, `src/lib/consent.ts`, `src/components/CookieBanner.tsx`, aviso de privacidad, `docs/METRICS.md` |
+
+### D18 · Todo correo sale con la plantilla de marca y el banner del canal
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-16 («tiene que ser una regla para cada correo») y 2026-10-20 («que tenga más diseño, con los ajustes del branding… incluye este [el banner] porque tiene nuestro tagline»). Implementó Code; auditoría de Fable en el PR #99 |
+| **Qué se decidió** | Todo correo de ASAI pasa por `layout()` (`src/lib/email-templates/layout.ts`). La tarjeta abre con el banner del canal (logotipo «arto Studio AI», «Prompts, skills y agentes · para el mundo creativo» y cuatro personajes), en `public/email/header-es.png` y `header-en.png`, y el pie repite el tagline. Los cuerpos usan los bloques comunes: `hero()` (etiqueta, titular con la palabra clave en Cormorant naranja e intro), `checks()` (casilla naranja), `tiles()` (dos tarjetas con personaje), `button()` (redondo) y `signoff()`. Las plantillas de acceso de Supabase se generan con `supabase-auth.ts` y se suben con `scripts/supabase-auth-templates.ts` |
+| **Por qué** | El banner le recuerda a quien lo lee qué es el producto. Con los bloques comunes, un correo nuevo sale de marca sin rediseñar cada vez |
+| **Qué NO hacer** | No mandar HTML suelto, texto sin plantilla ni correos armados en el editor de Resend. No editar las plantillas de acceso a mano en el panel de Supabase: se cambian en el repo y se suben con el script. Si cambia la marca, se regenera el banner y se cambia aquí |
+| **Dónde** | `src/lib/email-templates/`, `src/lib/email.ts`, `public/email/`, `scripts/supabase-auth-templates.ts` |
