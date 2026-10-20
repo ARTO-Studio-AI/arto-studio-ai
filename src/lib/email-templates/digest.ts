@@ -1,6 +1,6 @@
 import { SITE_URL } from "@/lib/site-url";
 import { VERTICALS, type Category } from "@/types/prompt";
-import { C, F, button, esc, eyebrow, layout } from "./layout";
+import { C, F, button, esc, eyebrow, hero, layout, signoff, tiles } from "./layout";
 
 /* Resumen semanal de la lista (2026-10-16). Sustituye el HTML suelto que armaba
  * /api/cron/digest: en ingles, con emojis y con dos secciones internas (las busquedas
@@ -49,7 +49,15 @@ const COPY = {
     list: "Cinco prompts",
     free: "Gratis",
     pro: "Pro",
+    open: "Abrir prompt",
     cta: "Ver toda la biblioteca",
+    studio: "Del estudio",
+    roastT: "Brand Roast gratis",
+    roastB: "Tu marca calificada en 20 segundos, con citas de tu propio copy.",
+    roastC: "Hacer mi roast",
+    packT: "Pack ARTO de Estrategia de Marca",
+    packB: "Cinco skills para Claude y ChatGPT. Anótate y te avisamos primero.",
+    packC: "Unirme a la lista",
     sign: "Nos leemos el próximo martes.",
     reason: "Recibes este correo porque te inscribiste a la lista de ARTO Studio AI.",
     unsub: "Darme de baja",
@@ -66,7 +74,15 @@ const COPY = {
     list: "Five prompts",
     free: "Free",
     pro: "Pro",
+    open: "Open prompt",
     cta: "Browse the full library",
+    studio: "From the studio",
+    roastT: "Free Brand Roast",
+    roastB: "Your brand scored in 20 seconds, quoting your own copy.",
+    roastC: "Roast my brand",
+    packT: "ARTO Brand Strategy Pack",
+    packB: "Five skills for Claude and ChatGPT. Join the list and hear first.",
+    packC: "Join the list",
     sign: "Talk next Tuesday.",
     reason: "You're receiving this because you joined the ARTO Studio AI list.",
     unsub: "Unsubscribe",
@@ -80,28 +96,42 @@ export function digestEmail({ lang, prompts, unsubscribeUrl }: DigestInput) {
   const tierLabel = (p: DigestPrompt) => (p.tier === "free" ? t.free : t.pro);
   const title = (p: DigestPrompt) => (lang === "es" ? p.title_es || p.title_en : p.title_en || p.title_es);
 
-  const rows = prompts
-    .map(
-      (p) => `
-      <tr><td style="padding:16px 0;border-top:1px solid ${C.line};">
-        <a href="${esc(digestUrl(`/prompts/${p.id}`, lang, p.id))}" style="text-decoration:none;">
-          <div style="font-family:${F.meta};font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${C.ink3};">${esc(p.id)} · ${esc(categoryLabel(p.category, lang))} · <span style="color:${p.tier === "free" ? C.ink2 : C.accent};">${tierLabel(p)}</span></div>
-          <div style="font-family:${F.display};font-size:19px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;margin-top:4px;">${esc(title(p))} <span style="color:${C.accent};">→</span></div>
+  const pill = (p: DigestPrompt) =>
+    p.tier === "free"
+      ? `<span style="display:inline-block;border:1px solid ${C.line};color:${C.ink2};border-radius:999px;padding:2px 9px;font-size:10px;letter-spacing:1.4px;">${tierLabel(p)}</span>`
+      : `<span style="display:inline-block;background:${C.accent};color:${C.white};border-radius:999px;padding:3px 10px;font-size:10px;letter-spacing:1.4px;">${tierLabel(p)}</span>`;
+
+  const cards = prompts
+    .map((p, i) => {
+      const url = digestUrl(`/prompts/${p.id}`, lang, p.id);
+      return `
+      <tr><td style="padding:0 0 12px 0;">
+        <a href="${esc(url)}" style="text-decoration:none;display:block;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.line};border-radius:14px;"><tr>
+          <td width="58" valign="top" style="padding:18px 0 18px 18px;font-family:${F.serif};font-style:italic;font-weight:600;font-size:34px;line-height:34px;color:${C.accent};">${String(i + 1).padStart(2, "0")}</td>
+          <td valign="top" style="padding:18px 18px 18px 6px;">
+            <div style="font-family:${F.meta};font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${C.ink3};font-weight:600;">${esc(categoryLabel(p.category, lang))} &nbsp;${pill(p)}</div>
+            <div style="font-family:${F.display};font-size:18px;line-height:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;margin-top:7px;">${esc(title(p))}</div>
+            <div style="font-family:${F.meta};font-size:13px;font-weight:600;color:${C.accent};margin-top:9px;">${t.open} &rarr; <span style="color:${C.ink3};font-weight:500;letter-spacing:1px;">${esc(p.id)}</span></div>
+          </td>
+        </tr></table>
         </a>
-      </td></tr>`,
-    )
+      </td></tr>`;
+    })
     .join("");
 
   const libraryUrl = digestUrl("/prompts", lang, "biblioteca");
   const body = `
-    ${eyebrow(t.eyebrow, C.accent)}
-    <div class="h1" style="font-family:${F.display};font-size:42px;line-height:46px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${t.h} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:50px;letter-spacing:-0.5px;color:${C.accent};">${t.accent}</span></div>
-    <div style="font-family:${F.body};font-size:17px;line-height:27px;color:${C.ink2};margin:18px 0 26px 0;">${esc(t.intro)}</div>
-    ${eyebrow(t.list)}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">${rows}</table>
-    <div style="margin-top:26px;">${button(t.cta, libraryUrl, "dark")}</div>
-    <div style="font-family:${F.serif};font-style:italic;font-size:20px;line-height:26px;color:${C.ink};margin:22px 0 0 0;">${t.sign}</div>
-    <div style="font-family:${F.meta};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:${C.ink2};margin-top:6px;">ARTO Studio AI</div>`;
+    ${hero({ eyebrow: t.eyebrow, title: t.h, accent: t.accent, intro: t.intro })}
+    <div style="margin:28px 0 12px 0;">${eyebrow(t.list)}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${cards}</table>
+    <div style="margin-top:14px;">${button(t.cta, libraryUrl, "dark")}</div>
+    <div style="border-top:1px solid ${C.line};margin:28px 0 18px 0;padding-top:26px;">${eyebrow(t.studio, C.accent)}</div>
+    ${tiles([
+      { character: "hat", title: t.roastT, body: t.roastB, cta: t.roastC, href: digestUrl("/roast", lang, "roast") },
+      { character: "runner", title: t.packT, body: t.packB, cta: t.packC, href: digestUrl("/skills", lang, "pack") },
+    ])}
+    ${signoff(t.sign)}`;
 
   const text = [
     `${t.h} ${t.accent}`,
@@ -111,6 +141,10 @@ export function digestEmail({ lang, prompts, unsubscribeUrl }: DigestInput) {
     ...prompts.map((p) => `- ${title(p)} (${p.id}, ${categoryLabel(p.category, lang)}, ${tierLabel(p)}): ${digestUrl(`/prompts/${p.id}`, lang, p.id)}`),
     "",
     `${t.cta}: ${libraryUrl}`,
+    "",
+    `${t.studio}:`,
+    `- ${t.roastT}: ${t.roastB} ${digestUrl("/roast", lang, "roast")}`,
+    `- ${t.packT}: ${t.packB} ${digestUrl("/skills", lang, "pack")}`,
     "",
     t.sign,
     "ARTO Studio AI",

@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/site-url";
 import { Resend } from "resend";
+import { C, F, button, checks, esc, eyebrow, hero, layout, signoff } from "@/lib/email-templates/layout";
 
 /**
  * Resend wrapper + transactional email templates for ARTO Studio AI.
@@ -58,7 +59,13 @@ async function send(params: {
   }
 }
 
-/* ── Templates ────────────────────────────────────────── */
+/* ── Templates ──────────────────────────────────────────
+ * Desde el 2026-10-20 (regla de Victor del 16 oct) estos dos correos tambien van con
+ * el diseno de marca de `layout()`. Son de la API de skills (clientes que ya tienen
+ * llave), en ingles como siempre. Starter ya no se vende (D7): la bienvenida de prueba
+ * manda a escribir a contact@artogroup.com en vez de ofrecer el plan. */
+
+const CODE_STYLE = `display:block;padding:14px 16px;background:${C.paper};border:1px solid ${C.line};border-radius:10px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:18px;color:${C.ink};word-break:break-all;white-space:pre-wrap;`;
 
 export async function sendTrialWelcomeEmail(params: {
   to: string;
@@ -67,55 +74,46 @@ export async function sendTrialWelcomeEmail(params: {
   trialCalls: number;
   upgradeUrl: string;
 }): Promise<boolean> {
-  const { to, name, apiKey, trialCalls, upgradeUrl } = params;
+  const { to, name, apiKey, trialCalls } = params;
   const subject = "Your ARTO Studio AI API key";
   const firstName = name.trim().split(" ")[0] || "there";
+  const curl = `curl -X POST ${SITE_URL}/api/skills/brand-positioning \\
+  -H "Content-Type: application/json" \\
+  -H "x-arto-api-key: ${apiKey}" \\
+  -d '{"brandName":"Your Brand","industry":"your industry","targetAudience":"who you serve","competitors":["competitor1","competitor2"]}'`;
+  const reason = "You're receiving this because you requested an ARTO Studio AI API key.";
 
   const text = `Hi ${firstName},
 
-Welcome to ARTO Studio AI. Your trial includes ${trialCalls} free calls to Brand Positioning — ARTO's proprietary methodology applied to your brand.
+Welcome to ARTO Studio AI. Your trial includes ${trialCalls} free calls to Brand Positioning, ARTO's methodology applied to your brand.
 
-Your API key (store it securely — it will only be shown this one time):
+Your API key (store it securely: it is only shown this one time):
 
 ${apiKey}
 
 Quick start:
 
-curl -X POST ${SITE_URL}/api/skills/brand-positioning \\
-  -H "Content-Type: application/json" \\
-  -H "x-arto-api-key: ${apiKey}" \\
-  -d '{"brandName":"Your Brand","industry":"your industry","targetAudience":"who you serve","competitors":["competitor1","competitor2"]}'
+${curl}
 
-When you run out of trial calls, upgrade to Starter for $99/mo (unlimited calls):
-${upgradeUrl}
+When your trial calls run out, write to contact@artogroup.com to keep using it.
 
-— ARTO Studio AI`;
+ARTO Studio AI
 
-  const html = `<!DOCTYPE html>
-<html>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #111;">
-  <h1 style="font-size: 24px; margin: 0 0 16px;">Welcome to ARTO Studio AI</h1>
-  <p>Hi ${escapeHtml(firstName)},</p>
-  <p>Your trial includes <strong>${trialCalls} free calls</strong> to <strong>Brand Positioning</strong> — ARTO's proprietary methodology applied to your brand.</p>
+--
+${reason}`;
 
-  <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-top: 32px;">Your API key</h2>
-  <p style="font-size: 13px; color: #666; margin: 0 0 8px;">Store this securely — it will only be shown once.</p>
-  <code style="display: block; padding: 12px 16px; background: #f5f5f5; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 13px; word-break: break-all;">${escapeHtml(apiKey)}</code>
+  const body = `
+    ${hero({ eyebrow: "Your API key", title: "Welcome to", accent: "the studio.", intro: `Hi ${firstName}, your trial includes ${trialCalls} free calls to Brand Positioning, ARTO's methodology applied to your brand.` })}
+    <div style="margin:28px 0 8px 0;">${eyebrow("Your key")}</div>
+    <div style="font-family:${F.body};font-size:13px;line-height:20px;color:${C.ink2};margin:0 0 10px 0;">Store it securely: it is only shown this one time.</div>
+    <code style="${CODE_STYLE}">${esc(apiKey)}</code>
+    <div style="margin:28px 0 10px 0;">${eyebrow("Quick start")}</div>
+    <pre style="${CODE_STYLE}margin:0;">${esc(curl)}</pre>
+    <div style="font-family:${F.body};font-size:15px;line-height:23px;color:${C.ink2};margin:24px 0 16px 0;">When your trial calls run out, write to us and we'll keep you going.</div>
+    ${button("Write to ARTO", "mailto:contact@artogroup.com", "dark")}
+    ${signoff("Talk soon.")}`;
 
-  <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-top: 32px;">Quick start</h2>
-  <pre style="padding: 12px 16px; background: #f5f5f5; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">curl -X POST ${SITE_URL}/api/skills/brand-positioning \\
-  -H "Content-Type: application/json" \\
-  -H "x-arto-api-key: ${escapeHtml(apiKey)}" \\
-  -d '{"brandName":"Your Brand","industry":"your industry","targetAudience":"who you serve","competitors":["competitor1","competitor2"]}'</pre>
-
-  <p style="margin-top: 32px;">When you run out of trial calls, you can upgrade to Starter ($99/mo, unlimited calls):</p>
-  <p><a href="${escapeHtml(upgradeUrl)}" style="display: inline-block; padding: 12px 24px; background: #111; color: white; text-decoration: none; border-radius: 999px; font-weight: 500;">Upgrade to Starter</a></p>
-
-  <hr style="border: none; border-top: 1px solid #eee; margin: 40px 0 16px;">
-  <p style="font-size: 12px; color: #999;">— ARTO Studio AI</p>
-</body>
-</html>`;
-
+  const html = layout({ lang: "en", preheader: "Your ARTO Studio AI API key and a quick start.", body, reason });
   return send({ to, subject, html, text });
 }
 
@@ -126,38 +124,26 @@ export async function sendUpgradeConfirmationEmail(params: {
   const { to, name } = params;
   const subject = "You're now on ARTO Studio AI Starter";
   const firstName = name.trim().split(" ")[0] || "there";
+  const reason = "You're receiving this because you upgraded your ARTO Studio AI API plan.";
 
   const text = `Hi ${firstName},
 
 You've upgraded to ARTO Studio AI Starter. Your API key now has unlimited access to Brand Positioning.
 
-Your existing key still works — no need to regenerate.
+Your existing key still works: no need to regenerate it.
 
 Thanks for backing us.
 
-— ARTO Studio AI`;
+ARTO Studio AI
 
-  const html = `<!DOCTYPE html>
-<html>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #111;">
-  <h1 style="font-size: 24px; margin: 0 0 16px;">You're in 🎉</h1>
-  <p>Hi ${escapeHtml(firstName)},</p>
-  <p>You've upgraded to <strong>ARTO Studio AI Starter</strong>. Your API key now has unlimited access to Brand Positioning.</p>
-  <p>Your existing key still works — no need to regenerate.</p>
-  <p>Thanks for backing us.</p>
-  <hr style="border: none; border-top: 1px solid #eee; margin: 40px 0 16px;">
-  <p style="font-size: 12px; color: #999;">— ARTO Studio AI</p>
-</body>
-</html>`;
+--
+${reason}`;
 
+  const body = `
+    ${hero({ eyebrow: "Starter", title: "You're", accent: "in.", intro: `Hi ${firstName}, you've upgraded to ARTO Studio AI Starter.` })}
+    <div style="margin-top:26px;">${checks(["Your API key now has unlimited access to Brand Positioning.", "Your existing key still works: no need to regenerate it."])}</div>
+    ${signoff("Thanks for backing us.")}`;
+
+  const html = layout({ lang: "en", preheader: "Your API key now has unlimited access to Brand Positioning.", body, reason });
   return send({ to, subject, html, text });
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

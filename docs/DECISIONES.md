@@ -256,3 +256,13 @@ siguiente sesión.
 | **Por qué** | Victor quiere GA para tráfico y adquisición, que es donde se miden las campañas. El consentimiento de la v1 solo cubría PostHog. La vista compartida del roast lleva la marca y el titular en la query y en el título; eso no debe llegar a Google |
 | **Qué NO hacer** | No cargar `gtag.js` sin consentimiento ni desde `next/script` en el layout. No encender Google Signals, remarketing ni vínculos con Google Ads sin decisión de Victor y un aviso nuevo. En el flujo web de GA4, dejar apagado «Cambios de página basados en eventos del historial» de la medición mejorada: si se enciende, salen vistas duplicadas con la URL completa. No mandar a GA email, nombre, empresa ni texto libre |
 | **Dónde** | `src/lib/ga.ts`, `src/components/analytics/GaPageViews.tsx`, `src/lib/analytics.ts`, `src/lib/consent.ts`, `src/components/CookieBanner.tsx`, aviso de privacidad, `docs/METRICS.md` |
+
+### D18 · Todo correo sale con la plantilla de marca y el banner del canal
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-16 («tiene que ser una regla para cada correo») y 2026-10-20 («que tenga más diseño, con los ajustes del branding… incluye este [el banner] porque tiene nuestro tagline»). Implementó Code; auditoría de Fable en el PR #99 |
+| **Qué se decidió** | Todo correo de ASAI pasa por `layout()` (`src/lib/email-templates/layout.ts`). La tarjeta abre con el banner del canal (logotipo «arto Studio AI», «Prompts, skills y agentes · para el mundo creativo» y cuatro personajes), en `public/email/header-es.png` y `header-en.png`, y el pie repite el tagline. Los cuerpos usan los bloques comunes: `hero()` (etiqueta, titular con la palabra clave en Cormorant naranja e intro), `checks()` (casilla naranja), `tiles()` (dos tarjetas con personaje), `button()` (redondo) y `signoff()`. Las plantillas de acceso de Supabase se generan con `supabase-auth.ts` y se suben con `scripts/supabase-auth-templates.ts` |
+| **Por qué** | El banner le recuerda a quien lo lee qué es el producto. Con los bloques comunes, un correo nuevo sale de marca sin rediseñar cada vez |
+| **Qué NO hacer** | No mandar HTML suelto, texto sin plantilla ni correos armados en el editor de Resend. No editar las plantillas de acceso a mano en el panel de Supabase: se cambian en el repo y se suben con el script. Si cambia la marca, se regenera el banner y se cambia aquí |
+| **Dónde** | `src/lib/email-templates/`, `src/lib/email.ts`, `public/email/`, `scripts/supabase-auth-templates.ts` |
