@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import localFont from "next/font/local";
@@ -7,6 +8,7 @@ import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
 import { DEFAULT_OG_IMAGE_PATH, LOCALE_HEADER, SITE_NAME, absoluteUrl, siteUrl } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import PostHogProvider from "@/components/analytics/PostHogProvider";
+import GaPageViews from "@/components/analytics/GaPageViews";
 import CookieBanner from "@/components/CookieBanner";
 import "./globals.css";
 
@@ -112,6 +114,9 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <PostHogProvider userId={userId}>{children}</PostHogProvider>
         <CookieBanner locale={lang} />
+        <Suspense fallback={null}>
+          <GaPageViews />
+        </Suspense>
         <Analytics />
         <SpeedInsights />
       </body>

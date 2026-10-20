@@ -3,8 +3,8 @@
  * La cookie `asai_consent` guarda lo que eligio la persona en el aviso de cookies:
  *   - "essential": solo lo necesario para que el sitio funcione (sesion, idioma,
  *     contador free, esta misma cookie). Es el default: sin respuesta no hay analitica.
- *   - "all": ademas PostHog (analitica de producto) y `asai_utm` (atribucion de
- *     primera visita).
+ *   - "all": ademas PostHog (analitica de producto), Google Analytics 4 y `asai_utm`
+ *     (atribucion de primera visita).
  *
  * Se lee en tres sitios:
  *   - src/proxy.ts: sin "all" no se escribe asai_utm.
@@ -18,7 +18,9 @@
  * Este modulo no importa nada de Next para que se pueda probar con vitest en node. */
 
 export const CONSENT_COOKIE = "asai_consent";
-export const CONSENT_VERSION = "v1-2026-10-09";
+// v2 (20 oct 2026): el aviso suma Google Analytics. Quien acepto la v1 solo acepto PostHog,
+// asi que el aviso vuelve a salir para todos.
+export const CONSENT_VERSION = "v2-2026-10-20";
 export const CONSENT_MAX_AGE = 60 * 60 * 24 * 180; // 6 meses
 
 /** Evento de window que abre el aviso otra vez (enlace "Cookies" del footer). */
