@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { WelcomeContent, WelcomeItem } from "@/lib/email-templates/welcome";
+import { EMAIL_KINDS, type EmailKind } from "@/lib/email-kinds";
 
 /* /admin/emails (2026-10-07): correos de marca. Edita la bienvenida a la lista, ve la
  * vista previa en vivo (ES/EN) y mandate una prueba. El reporte del roast no se edita:
@@ -14,7 +15,7 @@ const FIELD = "mt-1 w-full rounded-[var(--radius-sm)] border border-zinc-300 bg-
 export default function EmailsAdminPage() {
   const [content, setContent] = useState<WelcomeContent | null>(null);
   const [lang, setLang] = useState<Lang>("es");
-  const [kind, setKind] = useState<"welcome" | "roast">("welcome");
+  const [kind, setKind] = useState<EmailKind>("welcome");
   const [status, setStatus] = useState("");
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -69,14 +70,14 @@ export default function EmailsAdminPage() {
         <p className="text-eyebrow text-[var(--accent)]">Marketing</p>
         <h1 className="text-h1 mt-1">Correos</h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-600">
-          Bienvenida a la lista: sale a quien marca la casilla de promociones (registro o Brand Roast). Reporte del roast: sale a quien deja su correo para ver el análisis completo.
+          Todos los correos del sitio, con su diseño real. Elige uno, revisa la vista previa en español o inglés y mándate una prueba: sale por el mismo camino que el envío real.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {(["welcome", "roast"] as const).map((k) => (
-          <button key={k} type="button" onClick={() => setKind(k)} className={`rounded-[var(--radius-sm)] border px-3 py-1.5 text-sm ${kind === k ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white"}`}>
-            {k === "welcome" ? "Bienvenida a la lista" : "Reporte del roast"}
+        {EMAIL_KINDS.map((k) => (
+          <button key={k.id} type="button" onClick={() => setKind(k.id)} className={`rounded-[var(--radius-sm)] border px-3 py-1.5 text-sm ${kind === k.id ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white"}`}>
+            {k.label}
           </button>
         ))}
         <span className="mx-2 h-5 w-px bg-zinc-300" />
@@ -137,7 +138,7 @@ export default function EmailsAdminPage() {
           </div>
         ) : (
           <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
-            El reporte se arma con el resultado de cada roast: score, frase, pilares, veredicto, evidencia, por dónde empezar, imágenes para descargar y enlace para compartir. La vista previa usa un roast de ejemplo.
+            {EMAIL_KINDS.find((k) => k.id === kind)?.note}
           </div>
         )}
         <iframe
