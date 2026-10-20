@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   const preview = url.searchParams.get("preview");
   const lang = url.searchParams.get("lang") === "en" ? "en" : "es";
   if (isEmailKind(preview)) {
-    const m = await sampleEmail(preview, lang, auth.email ?? "tu@correo.com");
+    const m = await sampleEmail(preview, lang, auth.via === "session" && auth.email ? auth.email : "tu@correo.com");
     return new Response(m.html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
   return NextResponse.json({ welcome: await getWelcomeContent() });
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
   if (!auth.ok || auth.via !== "session") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = (await request.json().catch(() => ({}))) as { kind?: string; lang?: string };
   const lang = body.lang === "en" ? "en" : "es";
+  if (body.kind !== undefined && !isEmailKind(body.kind)) return NextResponse.json({ error: "kind invalido" }, { status: 400 });
   const kind = isEmailKind(body.kind) ? body.kind : "welcome";
   const sent = await sendTestEmail(auth.email, await sampleEmail(kind, lang, auth.email), kind);
   return NextResponse.json({ ok: sent, to: auth.email, kind });

@@ -66,11 +66,11 @@ export async function GET(req: NextRequest) {
   const pad = wide ? 56 : 72;
   /* El nombre va en un solo renglon y el tamano baja con el largo: en dos renglones se
    * montaba sobre la calificacion (Victor, 20 oct 2026, «Marca de ejemplo»). Manrope 800
-   * mide unos 0.62 em por caracter; se deja margen. */
+   * mide unos 0.62 em por caracter en promedio y hasta 0.9 en mayusculas anchas; se usa 0.72. */
   const brandText = clip(share.brand, story ? 26 : 22);
   const brandBox = wide ? 470 : size.width - pad * 2;
   const brandMax = wide ? 64 : story ? 104 : 76;
-  const brandSize = Math.max(28, Math.min(brandMax, Math.floor(brandBox / (Math.max(brandText.length, 1) * 0.62))));
+  const brandSize = Math.max(28, Math.min(brandMax, Math.floor(brandBox / (Math.max(brandText.length, 1) * 0.72))));
   const scoreSize = wide ? 230 : story ? 420 : 250;
   const headlineSize = wide ? 34 : story ? 58 : 38;
   const headline = share.h ? clip(share.h, wide ? 110 : story ? 150 : 120) : "";
