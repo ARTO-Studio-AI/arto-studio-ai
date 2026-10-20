@@ -123,6 +123,9 @@ describe("ga (cliente)", () => {
     );
     expect(mod.gaPageTitle("/es/roast", "Juan Pérez: 3/10")).toBe("Brand Roast · ARTO Studio AI");
     expect(mod.gaPageTitle("/es/prompts", "Prompts")).toBe("Prompts");
+    expect(mod.gaPageTitle("/en/roast", "Mi Marca")).toBe("Brand Roast · ARTO Studio AI");
+    expect(mod.gaPageTitle("/es/roast/og", "Mi Marca")).toBe("Mi Marca");
+    expect(mod.gaPageTitle("/admin/roasts", "Roasts")).toBe("Roasts");
   });
 
   it("una sola vista por URL", async () => {
@@ -132,6 +135,23 @@ describe("ga (cliente)", () => {
     mod.gaPageView();
     const views = (win.dataLayer as IArguments[]).map((a) => Array.from(a)).filter((c) => c[1] === "page_view");
     expect(views).toHaveLength(1);
+  });
+
+  it("A, B y de vuelta A cuentan tres vistas", async () => {
+    const { mod, win } = await setup({ href: "https://creative.artostudio.ai/es/prompts" });
+    mod.initGA();
+    const go = (path: string) =>
+      vi.stubGlobal("location", { hostname: "creative.artostudio.ai", href: `https://creative.artostudio.ai${path}`, pathname: path });
+    go("/es/pricing");
+    mod.gaPageView();
+    go("/es/prompts");
+    mod.gaPageView();
+    const views = (win.dataLayer as IArguments[]).map((a) => Array.from(a)).filter((c) => c[1] === "page_view");
+    expect(views.map((v) => (v[2] as { page_location: string }).page_location)).toEqual([
+      "https://creative.artostudio.ai/es/prompts",
+      "https://creative.artostudio.ai/es/pricing",
+      "https://creative.artostudio.ai/es/prompts",
+    ]);
   });
 
   it("gaEvent solo manda con GA cargado", async () => {
