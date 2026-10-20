@@ -74,8 +74,9 @@ autocapture apagado (solo eventos con nombre); pageviews por `history_change` pa
 Reglas de GA4 (`src/lib/ga.ts`): sin `NEXT_PUBLIC_GA_MEASUREMENT_ID` no carga; solo con `asai_consent = all`
 (aviso v2 del 20 oct 2026, que nombra a Google Analytics) y sin DNT; Consent Mode v2 con todo lo de anuncios en
 `denied`, Google Signals y personalización de anuncios apagados; cookie `_ga` solo en el host; al retirar el
-consentimiento se apaga y se borran `_ga` y `_ga_<id>`. Las vistas de página las cuenta la medición mejorada
-de GA4 (cambios del history). Los eventos de la sección 4 llegan a GA con el mismo nombre; `signup_completed`
+consentimiento se apaga y se borran `_ga` y `_ga_<id>`. Las vistas de página van a mano desde `GaPageViews`
+(`send_page_view: false`), con la URL sin query salvo los `utm_*` y título fijo en `/roast`; en el flujo web de GA4
+hay que apagar «Cambios de página basados en eventos del historial» (D17). Los eventos de la sección 4 llegan a GA con el mismo nombre; `signup_completed`
 y `login_completed` no, porque salen del servidor.
 
 **Variables.** Producción ya tiene `NEXT_PUBLIC_POSTHOG_KEY` y `NEXT_PUBLIC_POSTHOG_HOST`. Preview no las

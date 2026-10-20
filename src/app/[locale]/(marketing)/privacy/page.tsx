@@ -56,7 +56,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "PostHog", what: "Analítica de producto, solo si la aceptas en el aviso de cookies. Te identificamos con un número interno, nunca con tu correo. Sin grabación de sesiones." },
     { name: "Anthropic", what: "Escribe las recomendaciones de la búsqueda y el análisis del Brand Roast. Recibe el texto de tu búsqueda o, en el roast, el nombre, industria, tamaño, sitio y descripción de la marca, más el texto público que leemos de ese sitio." },
     { name: "OpenAI", what: "Convierte el texto de tu búsqueda en un vector para encontrar los prompts más parecidos." },
-    { name: "Google", what: "Si eliges iniciar sesión con Google, nos comparte tu nombre, correo y foto. Y, solo si aceptas la analítica en el aviso de cookies, Google Analytics mide visitas y páginas vistas con un identificador anónimo; tenemos apagadas sus funciones de publicidad y Google Signals." },
+    { name: "Google", what: "Si eliges iniciar sesión con Google, nos comparte tu nombre, correo y foto. Y, solo si aceptas la analítica en el aviso de cookies, Google Analytics mide visitas y páginas vistas con un identificador seudónimo (un número aleatorio, no tu nombre ni tu correo); tenemos apagadas sus funciones de publicidad y Google Signals." },
     { name: "Stripe", what: "Procesa los pagos si contratas un plan. Nosotros solo guardamos tu id de cliente y el estado de la suscripción, nunca tu tarjeta." },
   ],
   en: [
@@ -66,7 +66,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "PostHog", what: "Product analytics, only if you accept it in the cookie notice. We identify you by an internal number, never by your email. No session recording." },
     { name: "Anthropic", what: "Writes the search recommendations and the Brand Roast analysis. Receives your search text or, in the roast, the brand's name, industry, size, website and description, plus the public text we read from that website." },
     { name: "OpenAI", what: "Turns your search text into a vector to find the closest prompts." },
-    { name: "Google", what: "If you choose to sign in with Google, it shares your name, email and photo with us. And, only if you accept analytics in the cookie notice, Google Analytics measures visits and page views with an anonymous identifier; its advertising features and Google Signals are turned off." },
+    { name: "Google", what: "If you choose to sign in with Google, it shares your name, email and photo with us. And, only if you accept analytics in the cookie notice, Google Analytics measures visits and page views with a pseudonymous identifier (a random number, not your name or email); its advertising features and Google Signals are turned off." },
     { name: "Stripe", what: "Processes payments if you buy a plan. We only keep your customer id and subscription status, never your card." },
   ],
 };

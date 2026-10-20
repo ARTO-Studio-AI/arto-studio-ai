@@ -31,7 +31,7 @@ function fakeDom(cookies: string) {
   return { document, scripts, jar };
 }
 
-async function setup(opts: { cookies?: string; id?: string | null; dnt?: string | null }) {
+async function setup(opts: { cookies?: string; id?: string | null; dnt?: string | null; href?: string }) {
   vi.resetModules();
   if (opts.id === null) delete process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   else process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID = opts.id ?? ID;
@@ -39,7 +39,9 @@ async function setup(opts: { cookies?: string; id?: string | null; dnt?: string 
   const win: Record<string, unknown> = {};
   vi.stubGlobal("document", dom.document);
   vi.stubGlobal("window", win);
-  vi.stubGlobal("location", { hostname: "creative.artostudio.ai" });
+  const url = new URL(opts.href ?? "https://creative.artostudio.ai/es/prompts?q=logo&utm_source=ig");
+  vi.stubGlobal("location", { hostname: url.hostname, href: url.href, pathname: url.pathname });
+  (dom.document as unknown as { title: string }).title = "Página con Mi Marca";
   vi.stubGlobal("navigator", { doNotTrack: opts.dnt ?? null });
   const mod = await import("./ga");
   return { mod, dom, win };
@@ -100,7 +102,36 @@ describe("ga (cliente)", () => {
     });
     const config = calls.find((c) => c[0] === "config");
     expect(config?.[1]).toBe(ID);
-    expect(config?.[2]).toMatchObject({ allow_google_signals: false, allow_ad_personalization_signals: false });
+    expect(config?.[2]).toMatchObject({
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      send_page_view: false,
+    });
+    // La vista inicial sale a mano, sin la query salvo los utm_*.
+    const views = calls.filter((c) => c[0] === "event" && c[1] === "page_view");
+    expect(views).toHaveLength(1);
+    expect(views[0][2]).toEqual({
+      page_location: "https://creative.artostudio.ai/es/prompts?utm_source=ig",
+      page_title: "Página con Mi Marca",
+    });
+  });
+
+  it("limpia la URL y el titulo del roast compartido", async () => {
+    const { mod } = await setup({});
+    expect(mod.gaPageLocation("https://creative.artostudio.ai/es/roast?brand=Juan%20P%C3%A9rez&h=Malo&utm_campaign=lz")).toBe(
+      "https://creative.artostudio.ai/es/roast?utm_campaign=lz",
+    );
+    expect(mod.gaPageTitle("/es/roast", "Juan Pérez: 3/10")).toBe("Brand Roast · ARTO Studio AI");
+    expect(mod.gaPageTitle("/es/prompts", "Prompts")).toBe("Prompts");
+  });
+
+  it("una sola vista por URL", async () => {
+    const { mod, win } = await setup({});
+    mod.initGA();
+    mod.gaPageView();
+    mod.gaPageView();
+    const views = (win.dataLayer as IArguments[]).map((a) => Array.from(a)).filter((c) => c[1] === "page_view");
+    expect(views).toHaveLength(1);
   });
 
   it("gaEvent solo manda con GA cargado", async () => {
@@ -123,5 +154,23 @@ describe("ga (cliente)", () => {
     expect([...dom.jar.keys()].sort()).toEqual(["asai_consent", "otra"]);
     const last = Array.from((win.dataLayer as IArguments[]).at(-1)!);
     expect(last).toEqual(["consent", "update", { analytics_storage: "denied" }]);
+    // Tras revocar, window.gtag ya no llega a dataLayer.
+    const before = (win.dataLayer as IArguments[]).length;
+    (win.gtag as (...a: unknown[]) => void)("event", "x", {});
+    mod.gaEvent("roast_completed", { overall: 1 });
+    expect((win.dataLayer as IArguments[]).length).toBe(before);
+  });
+
+  it("aceptar, revocar y volver a aceptar en la misma carga vuelve a medir", async () => {
+    const { mod, dom, win } = await setup({});
+    mod.initGA();
+    mod.revokeGA();
+    dom.document.cookie = `asai_consent=${serializeConsent("all")}`;
+    expect(mod.initGA()).toBe(true);
+    expect(win[`ga-disable-${ID}`]).toBe(false);
+    expect(dom.scripts).toHaveLength(1);
+    const calls = (win.dataLayer as IArguments[]).map((a) => Array.from(a));
+    expect(calls.at(-2)).toEqual(["consent", "update", { analytics_storage: "granted" }]);
+    expect(calls.at(-1)?.[1]).toBe("page_view");
   });
 });
