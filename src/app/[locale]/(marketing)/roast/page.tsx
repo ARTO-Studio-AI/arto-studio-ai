@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata, localeOf, pageMetadata, siteUrl } from "@/lib/seo";
 import { readShareParams } from "@/lib/roast-share";
 import RoastClient from "./RoastClient";
+import { ROAST_OG_VERSION } from "@/lib/roast-og-version";
 
 /* Brand Roast dentro del arbol [locale] (2026-10-06): hereda Nav y Footer del layout de
  * marketing. /roast?lang=xx y /roast redirigen aqui desde src/proxy.ts; la imagen OG
@@ -50,7 +51,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         ? "¿Y tu marca? Roastéala gratis en 20 segundos con la metodología de ARTO."
         : "What about your brand? Roast it free in 20 seconds with ARTO's methodology.",
     // URL absoluta: absoluteUrl() de seo.ts quita la query, y aqui la query es la imagen.
-    ogImage: `${siteUrl()}/roast/og?${q.toString()}`,
+    ogImage: `${siteUrl()}/roast/og?${q.toString()}&v=${ROAST_OG_VERSION}`,
   });
 }
 

@@ -1,6 +1,7 @@
 import type { RoastLang, RoastResult } from "@/lib/roast-types";
 import { SITE_URL } from "@/lib/site-url";
 import { C, F, button, esc, eyebrow, layout, scoreColor } from "./layout";
+import { ROAST_OG_VERSION } from "@/lib/roast-og-version";
 
 /* Correo "Tu Brand Roast" (2026-10-07). Transaccional: lo pidio la persona al dejar su
  * correo para ver el reporte. Lleva el roast completo, la imagen del resultado y los
@@ -18,7 +19,7 @@ export interface RoastReportInput {
 export function roastReportEmail({ lang, brand, result, shareQuery }: RoastReportInput) {
   const es = lang === "es";
   const shareUrl = `${SITE_URL}/${lang}/roast?${shareQuery}`;
-  const img = (format: string) => `${SITE_URL}/roast/og?${shareQuery}&format=${format}`;
+  const img = (format: string) => `${SITE_URL}/roast/og?${shareQuery}&format=${format}&v=${ROAST_OG_VERSION}`;
   const linkedin = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
   const xText = es
     ? `Mi marca "${brand}" sacó ${result.overall}/10 en el Brand Roast de ARTO. ¿Y la tuya?`
