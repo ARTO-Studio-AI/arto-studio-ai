@@ -7,6 +7,7 @@ import { addToMarketingList } from "@/lib/marketing-list";
 import { sendListConfirmation, sendRoastReport } from "@/lib/mailer";
 import { signShare, verifyReportToken } from "@/lib/roast-share";
 import type { RoastResult } from "@/lib/roast-types";
+import { cleanEventId, metaIndustry, queueMetaServerEvent } from "@/lib/meta-capi";
 
 // Load .env.local explicitly (workaround for Next.js 16 Turbopack env loading)
 config({
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { email?: string; reportToken?: string; marketing?: boolean };
+  let body: { email?: string; reportToken?: string; marketing?: boolean; metaEventId?: string };
   try {
     body = await request.json();
   } catch {
@@ -131,6 +132,21 @@ export async function POST(request: NextRequest) {
     q.set("sig", sig);
   }
   const reportSent = await sendRoastReport(email, { lang, brand, industry: input.industry, result, shareQuery: q.toString() });
+
+  // API de conversiones (D19 fase 2): Lead con el correo en SHA-256 y el mismo event_id
+  // que el pixel. Solo con la publicidad aceptada; ver src/lib/meta-capi.ts.
+  // Corre despues de responder: no le suma espera al reporte. Sin event_id del navegador
+  // (pagina vieja en cache o cliente externo) no se manda: Meta lo contaria dos veces.
+  const metaEventId = cleanEventId(body.metaEventId);
+  if (metaEventId) {
+    queueMetaServerEvent({
+      name: "Lead",
+      request,
+      eventId: metaEventId,
+      email,
+      customData: { content_name: "roast_report", content_category: metaIndustry(input.industry) },
+    });
+  }
 
   // Promociones: doble opt-in. Queda pendiente hasta que confirme desde su buzon.
   let confirmationSent = false;

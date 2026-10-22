@@ -8,6 +8,7 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
 import { signReportToken, signShare } from "@/lib/roast-share";
+import { cleanEventId, metaIndustry, queueMetaServerEvent } from "@/lib/meta-capi";
 
 /**
  * Legacy alias: /api/roast → brand-roast skill.
@@ -114,6 +115,19 @@ export async function POST(request: NextRequest) {
       share: { brand: input.brandName.slice(0, 100), h, lang, sig },
       report_token: skillResp.traceId ? signReportToken(skillResp.traceId) : null,
     };
+    // API de conversiones (D19 fase 2): mismo event_id que el pixel. Sin la cookie de
+    // publicidad aceptada no sale nada, asi que los clientes externos de esta API no cuentan.
+    // Corre despues de responder: no le suma espera al roast. Sin event_id del navegador
+    // (pagina vieja en cache o cliente externo) no se manda: Meta lo contaria dos veces.
+    const metaEventId = cleanEventId((body as { metaEventId?: unknown }).metaEventId);
+    if (metaEventId) {
+      queueMetaServerEvent({
+        name: "RoastCompleted",
+        request,
+        eventId: metaEventId,
+        customData: { industry: metaIndustry(input.industry), overall: out.overall },
+      });
+    }
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {
     if (error instanceof SkillExecutionError) {

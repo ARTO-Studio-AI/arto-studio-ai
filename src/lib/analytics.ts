@@ -183,10 +183,11 @@ export function initAnalytics(): Promise<PostHog | null> {
   return initPromise;
 }
 
-/** Manda un evento tipado. No-op silencioso si no hay cliente. */
-export function track<E extends AnalyticsEvent>(event: E, props: AnalyticsEvents[E]): void {
+/** Manda un evento tipado. No-op silencioso si no hay cliente.
+ * metaEventId solo va al pixel de Meta (dedupe con la API de conversiones), no a PostHog ni GA. */
+export function track<E extends AnalyticsEvent>(event: E, props: AnalyticsEvents[E], opts?: { metaEventId?: string }): void {
   gaEvent(event, props as unknown as Record<string, unknown>);
-  metaEvent(event, props as unknown as Record<string, unknown>);
+  metaEvent(event, props as unknown as Record<string, unknown>, opts?.metaEventId);
   if (client) {
     try {
       client.capture(event, props);
