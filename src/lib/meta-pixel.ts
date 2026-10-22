@@ -147,13 +147,16 @@ export function revokeMetaPixel(): void {
     /* nunca romper la UI por publicidad */
   }
   lastPageView = null;
-  const labels = typeof location === "undefined" ? [] : location.hostname.split(".");
-  const parent = labels.length > 1 ? `; domain=.${labels.slice(-2).join(".")}` : "";
+  // fbevents.js escribe _fbp con domain= explicito (el dominio registrable, o el host
+  // completo cuando es un sufijo publico como vercel.app). Una cookie con domain= no se
+  // borra sin el mismo domain=, asi que se intenta sin dominio, con el host y con el padre.
+  const host = typeof location === "undefined" ? "" : location.hostname;
+  const labels = host.split(".");
+  const domains = ["", host ? `; domain=${host}` : "", labels.length > 1 ? `; domain=.${labels.slice(-2).join(".")}` : ""];
   for (const part of document.cookie.split(";")) {
     const name = part.split("=")[0]?.trim();
     if (name !== "_fbp" && name !== "_fbc") continue;
-    document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
-    if (parent) document.cookie = `${name}=; path=/; max-age=0; samesite=lax${parent}`;
+    for (const domain of new Set(domains)) document.cookie = `${name}=; path=/; max-age=0; samesite=lax${domain}`;
   }
 }
 
