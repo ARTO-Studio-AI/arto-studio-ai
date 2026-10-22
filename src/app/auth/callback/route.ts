@@ -10,6 +10,7 @@ import { sendWelcome } from "@/lib/mailer";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
 import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
+import { sendMetaServerEvent } from "@/lib/meta-capi";
 import {
   MARKETING_CONSENT_VERSION,
   NEXT_COOKIE,
@@ -49,7 +50,8 @@ type ProfileCapture = Partial<Record<CaptureColumn, string | null>> & { full_nam
  *   1. Decide si es signup o login (ventana de 24 h + ausencia de fila).
  *   2. Signup: completa profiles con lo que el trigger no pudo copiar (Google no
  *      manda options.data), escribe attribution_events, manda signup_completed
- *      a PostHog y da de alta el contacto en la audiencia de Resend.
+ *      a PostHog, CompleteRegistration a Meta (solo con publicidad aceptada) y da de
+ *      alta el contacto en la audiencia de Resend.
  *   3. Login: manda login_completed.
  */
 async function recordSignupOrLogin(request: NextRequest, user: User): Promise<void> {
@@ -170,6 +172,17 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
     locale: locale ?? "en",
     has_company: !!company,
     has_role: !!role,
+  });
+
+  // API de conversiones (D19 fase 2): solo con la publicidad aceptada. El event_id es fijo
+  // por persona, asi un callback repetido no cuenta dos altas.
+  await sendMetaServerEvent({
+    name: "CompleteRegistration",
+    request,
+    eventId: `signup-${user.id}`,
+    email: user.email,
+    externalId: user.id,
+    customData: { content_name: provider, status: "completed" },
   });
 
   // Solo quien marco la casilla entra a la audiencia de correos (antes entraban todos).

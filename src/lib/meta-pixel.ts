@@ -23,8 +23,9 @@ import { browserAdsAllowed } from "@/lib/consent";
  *   - PageView en cada navegacion (metaPageView, desde GaPageViews).
  *   - roast_completed con source "ai"  -> RoastCompleted (personalizado).
  *   - roast_email_submitted            -> Lead (estandar).
- * El registro (signup_completed) ocurre en el servidor; va con la API de conversiones,
- * en la segunda fase. */
+ * Fase 2 (22 oct 2026): src/lib/meta-capi.ts manda RoastCompleted, Lead y
+ * CompleteRegistration desde el servidor. Para que Meta no cuente dos veces, el navegador
+ * genera el event_id (newMetaEventId), lo manda en el body de la peticion y lo usa aqui. */
 
 type Fbq = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void;
@@ -123,15 +124,27 @@ export function metaPageView(): void {
   }
 }
 
-/** Traduce un evento de AnalyticsEvents al de Meta, si tiene uno. Nunca lanza. */
-export function metaEvent(name: string, props: Record<string, unknown>): void {
+/** event_id para juntar el evento del pixel con el de la API de conversiones. */
+export function newMetaEventId(): string {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  } catch {
+    /* sin crypto: cae al de abajo */
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+/** Traduce un evento de AnalyticsEvents al de Meta, si tiene uno. Nunca lanza.
+ * eventId es el mismo que se mando al servidor (dedupe con la API de conversiones). */
+export function metaEvent(name: string, props: Record<string, unknown>, eventId?: string): void {
   if (!canSend()) return;
   const fbq = (window as unknown as MetaWindow).fbq;
+  const options = eventId ? { eventID: eventId } : undefined;
   try {
     if (name === "roast_completed" && props.source === "ai") {
-      fbq?.("trackCustom", "RoastCompleted", { industry: props.industry, overall: props.overall });
+      fbq?.("trackCustom", "RoastCompleted", { industry: props.industry, overall: props.overall }, options);
     } else if (name === "roast_email_submitted") {
-      fbq?.("track", "Lead", { content_name: "roast_report", content_category: props.industry });
+      fbq?.("track", "Lead", { content_name: "roast_report", content_category: props.industry }, options);
     }
   } catch {
     /* nunca romper la UI por publicidad */

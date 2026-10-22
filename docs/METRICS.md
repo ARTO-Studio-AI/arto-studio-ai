@@ -84,8 +84,13 @@ del portafolio artostudio, conectado a la cuenta publicitaria «ARTO Studio». S
 solo con `asai_consent = all` («Aceptar todo») y sin DNT; `autoConfig` apagado. Eventos: `PageView` en cada
 navegación, `RoastCompleted` (personalizado, `roast_completed` con `source = ai`, con industria y calificación) y
 `Lead` (`roast_email_submitted`). En URLs con parámetros que no son `utm_*` (vista compartida del roast) no sale nada.
-Al retirar la publicidad se manda `consent revoke` y se borran `_fbp` y `_fbc`. El registro (`CompleteRegistration`)
-va con la API de conversiones en la segunda fase, porque ocurre en el servidor.
+Al retirar la publicidad se manda `consent revoke` y se borran `_fbp` y `_fbc`.
+
+API de conversiones (`src/lib/meta-capi.ts`, 22 oct 2026, D19 fase 2): el servidor manda `RoastCompleted`
+(`/api/roast`), `Lead` (`/api/roast/email`) y `CompleteRegistration` (`/auth/callback`, solo en el alta) al mismo
+conjunto de datos, con la misma puerta (`asai_consent = all`, sin DNT ni GPC). `RoastCompleted` y `Lead` llevan el
+`event_id` que generó el navegador, así Meta junta pixel y servidor y cuenta uno. Correo e id de Supabase van con
+SHA-256. Para probar en una vista previa se pone `META_CAPI_TEST_EVENT_CODE` con el código de «Probar eventos».
 
 **Variables.** Producción ya tiene `NEXT_PUBLIC_POSTHOG_KEY` y `NEXT_PUBLIC_POSTHOG_HOST`. Preview no las
 tiene: los previews no miden (a propósito hasta que Victor decida si quiere un proyecto de PostHog aparte

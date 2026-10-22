@@ -8,10 +8,11 @@
  *   - "all": la analitica y ademas el pixel de Meta (publicidad), que mide que anuncios
  *     traen gente al roast. Ver src/lib/meta-pixel.ts.
  *
- * Se lee en cuatro sitios:
+ * Se lee en cinco sitios:
  *   - src/proxy.ts: sin analitica no se escribe asai_utm.
  *   - src/lib/analytics.ts y src/lib/ga.ts: sin analitica PostHog y GA no se inicializan.
  *   - src/lib/meta-pixel.ts: sin "all" el pixel de Meta no se carga.
+ *   - src/lib/meta-capi.ts: sin "all" no sale nada a la API de conversiones de Meta.
  *   - src/app/auth/callback: sin analitica no se manda signup/login a PostHog desde el servidor.
  *
  * Formato: "<eleccion>.<version>" (p. ej. "all.v1-2026-10-09"). Si el texto del aviso

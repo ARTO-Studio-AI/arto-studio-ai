@@ -33,7 +33,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_utm", purpose: "De qué campaña o sitio llegaste la primera vez (parámetros utm y sitio de origen, sin datos personales).", duration: "30 días", kind: "Analítica, solo con tu permiso" },
     { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan. PostHog guarda también un registro en el almacenamiento local del navegador.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: cuántas personas visitan el sitio, qué páginas ven y de dónde llegan. Sin funciones de publicidad.", duration: "2 años", kind: "Analítica, solo con tu permiso" },
-    { name: "_fbp, _fbc", purpose: "Pixel de Meta: nos dice si llegaste desde un anuncio de Instagram o Facebook y si después hiciste el Brand Roast o dejaste tu correo, para saber qué anuncios funcionan.", duration: "90 días", kind: "Publicidad, solo si eliges «Aceptar todo»" },
+    { name: "_fbp, _fbc", purpose: "Pixel de Meta: nos dice si llegaste desde un anuncio de Instagram o Facebook y si después hiciste el Brand Roast, dejaste tu correo o creaste una cuenta, para saber qué anuncios funcionan.", duration: "90 días", kind: "Publicidad, solo si eliges «Aceptar todo»" },
   ],
   en: [
     { name: "sb-…-auth-token(.N)", purpose: "Keeps you signed in (Supabase).", duration: "Up to 400 days or until you sign out", kind: "Essential" },
@@ -44,7 +44,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_utm", purpose: "Which campaign or site brought you here the first time (utm parameters and referring site, no personal data).", duration: "30 days", kind: "Analytics, only with your permission" },
     { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used. PostHog also keeps a record in the browser's local storage.", duration: "1 year", kind: "Analytics, only with your permission" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: how many people visit the site, which pages they see and where they come from. No advertising features.", duration: "2 years", kind: "Analytics, only with your permission" },
-    { name: "_fbp, _fbc", purpose: "Meta pixel: tells us whether you came from an Instagram or Facebook ad and whether you then ran the Brand Roast or left your email, so we know which ads work.", duration: "90 days", kind: "Advertising, only if you choose \"Accept all\"" },
+    { name: "_fbp, _fbc", purpose: "Meta pixel: tells us whether you came from an Instagram or Facebook ad and whether you then ran the Brand Roast, left your email or created an account, so we know which ads work.", duration: "90 days", kind: "Advertising, only if you choose \"Accept all\"" },
   ],
 };
 
@@ -60,7 +60,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "OpenAI", what: "Convierte el texto de tu búsqueda en un vector para encontrar los prompts más parecidos." },
     { name: "Google", what: "Si eliges iniciar sesión con Google, nos comparte tu nombre, correo y foto. Y, solo si aceptas la analítica en el aviso de cookies, Google Analytics mide visitas y páginas vistas con un identificador seudónimo (un número aleatorio, no tu nombre ni tu correo); tenemos apagadas sus funciones de publicidad y Google Signals." },
     { name: "Stripe", what: "Procesa los pagos si contratas un plan. Nosotros solo guardamos tu id de cliente y el estado de la suscripción, nunca tu tarjeta." },
-    { name: "Meta", what: "Solo si eliges «Aceptar todo» en el aviso de cookies, el pixel de Meta registra las páginas que ves, si haces el Brand Roast (industria y calificación) y si dejas tu correo para recibir el reporte, sin mandar el correo ni el nombre de la marca. Meta lo cruza con tu cuenta de Instagram o Facebook, si tienes una, y lo usa para medir nuestros anuncios y mostrarlos a personas parecidas. En las páginas de un roast compartido no se manda nada." },
+    { name: "Meta", what: "Solo si eliges «Aceptar todo» en el aviso de cookies, el pixel de Meta registra las páginas que ves, si haces el Brand Roast (industria y calificación), si dejas tu correo para recibir el reporte y si creas una cuenta. Esos mismos eventos también los mandamos a Meta desde nuestro servidor, con tu correo cifrado (un código irreversible, nunca el correo en claro), tu dirección IP, tu navegador y las cookies _fbp y _fbc; si creas una cuenta, también un código irreversible de tu número de usuario. Nunca mandamos el nombre de la marca ni lo que escribes. Meta lo cruza con tu cuenta de Instagram o Facebook, si tienes una, y lo usa para medir nuestros anuncios y mostrarlos a personas parecidas. En las páginas de un roast compartido no se manda nada." },
   ],
   en: [
     { name: "Supabase", what: "Database and authentication (magic link and Google). Stores your account, favorites, collections and searches." },
@@ -71,7 +71,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "OpenAI", what: "Turns your search text into a vector to find the closest prompts." },
     { name: "Google", what: "If you choose to sign in with Google, it shares your name, email and photo with us. And, only if you accept analytics in the cookie notice, Google Analytics measures visits and page views with a pseudonymous identifier (a random number, not your name or email); its advertising features and Google Signals are turned off." },
     { name: "Stripe", what: "Processes payments if you buy a plan. We only keep your customer id and subscription status, never your card." },
-    { name: "Meta", what: "Only if you choose \"Accept all\" in the cookie notice, the Meta pixel records the pages you see, whether you run the Brand Roast (industry and score) and whether you leave your email to get the report, without sending the email or the brand name. Meta matches it with your Instagram or Facebook account, if you have one, and uses it to measure our ads and show them to similar people. Nothing is sent on shared roast pages." },
+    { name: "Meta", what: "Only if you choose \"Accept all\" in the cookie notice, the Meta pixel records the pages you see, whether you run the Brand Roast (industry and score), whether you leave your email to get the report and whether you create an account. We also send those same events to Meta from our server, with your email hashed (an irreversible code, never the email itself), your IP address, your browser and the _fbp and _fbc cookies; if you create an account, also an irreversible code of your user ID. We never send the brand name or anything you type. Meta matches it with your Instagram or Facebook account, if you have one, and uses it to measure our ads and show them to similar people. Nothing is sent on shared roast pages." },
   ],
 };
 

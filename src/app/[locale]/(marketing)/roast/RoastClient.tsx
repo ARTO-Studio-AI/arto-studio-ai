@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { RoastLang, RoastResult } from "@/lib/roast-types";
 import { track } from "@/lib/analytics";
+import { newMetaEventId } from "@/lib/meta-pixel";
 import { ROAST_OG_VERSION } from "@/lib/roast-og-version";
 
 /* Brand Roast v2 (2026-10-06)
@@ -754,10 +755,11 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
     const controller = new AbortController();
     const abortTimer = setTimeout(() => controller.abort(), 70_000);
 
+    const roastMetaId = newMetaEventId();
     fetch("/api/roast", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ brandName, websiteUrl, industry, companySize, description, lang }),
+      body: JSON.stringify({ brandName, websiteUrl, industry, companySize, description, lang, metaEventId: roastMetaId }),
       signal: controller.signal,
     })
       .then(async (res) => {
@@ -770,7 +772,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
         setResult(roastResult);
         setShareInfo(data?.share && typeof data.share === "object" ? (data.share as ShareInfo) : null);
         setReportToken(typeof data?.report_token === "string" ? data.report_token : null);
-        track("roast_completed", { industry, overall: roastResult.overall, source: "ai" });
+        track("roast_completed", { industry, overall: roastResult.overall, source: "ai" }, { metaEventId: roastMetaId });
         setHistory(
           saveToHistory({
             brandName,
@@ -1104,11 +1106,12 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                           setEmailError("");
                           storageSet("arto_roast_email", value);
                           setEmailUnlocked(true);
-                          track("roast_email_submitted", { industry, overall: result.overall });
+                          const leadMetaId = newMetaEventId();
+                          track("roast_email_submitted", { industry, overall: result.overall }, { metaEventId: leadMetaId });
                           fetch("/api/roast/email", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: value, reportToken, marketing: emailMarketing }),
+                            body: JSON.stringify({ email: value, reportToken, marketing: emailMarketing, metaEventId: leadMetaId }),
                           })
                             .then((r) => (r.ok ? r.json() : null))
                             .then((d) => {
