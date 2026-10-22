@@ -71,13 +71,21 @@ Reglas del wrapper (`src/lib/analytics.ts`): sin `NEXT_PUBLIC_POSTHOG_KEY` todo 
 se respeta `navigator.doNotTrack`; `person_profiles: identified_only`; `identify(user.id)` sin email;
 autocapture apagado (solo eventos con nombre); pageviews por `history_change` para el App Router.
 
-Reglas de GA4 (`src/lib/ga.ts`): sin `NEXT_PUBLIC_GA_MEASUREMENT_ID` no carga; solo con `asai_consent = all`
-(aviso v2 del 20 oct 2026, que nombra a Google Analytics) y sin DNT; Consent Mode v2 con todo lo de anuncios en
+Reglas de GA4 (`src/lib/ga.ts`): sin `NEXT_PUBLIC_GA_MEASUREMENT_ID` no carga; solo con analítica aceptada,
+`asai_consent = analytics` o `all` (aviso v3 del 22 oct 2026) y sin DNT; Consent Mode v2 con todo lo de anuncios en
 `denied`, Google Signals y personalización de anuncios apagados; cookie `_ga` solo en el host; al retirar el
 consentimiento se apaga y se borran `_ga` y `_ga_<id>`. Las vistas de página van a mano desde `GaPageViews`
 (`send_page_view: false`), con la URL sin query salvo los `utm_*` y título fijo en `/roast`; en el flujo web de GA4
 hay que apagar «Cambios de página basados en eventos del historial» (D17). Los eventos de la sección 4 llegan a GA con el mismo nombre; `signup_completed`
 y `login_completed` no, porque salen del servidor.
+
+Pixel de Meta (`src/lib/meta-pixel.ts`, 22 oct 2026, D19): conjunto de datos «ARTO Studio AI» `1786082372609082`
+del portafolio artostudio, conectado a la cuenta publicitaria «ARTO Studio». Sin `NEXT_PUBLIC_META_PIXEL_ID` no carga;
+solo con `asai_consent = all` («Aceptar todo») y sin DNT; `autoConfig` apagado. Eventos: `PageView` en cada
+navegación, `RoastCompleted` (personalizado, `roast_completed` con `source = ai`, con industria y calificación) y
+`Lead` (`roast_email_submitted`). En URLs con parámetros que no son `utm_*` (vista compartida del roast) no sale nada.
+Al retirar la publicidad se manda `consent revoke` y se borran `_fbp` y `_fbc`. El registro (`CompleteRegistration`)
+va con la API de conversiones en la segunda fase, porque ocurre en el servidor.
 
 **Variables.** Producción ya tiene `NEXT_PUBLIC_POSTHOG_KEY` y `NEXT_PUBLIC_POSTHOG_HOST`. Preview no las
 tiene: los previews no miden (a propósito hasta que Victor decida si quiere un proyecto de PostHog aparte

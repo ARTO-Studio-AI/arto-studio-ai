@@ -1,4 +1,4 @@
-import { browserConsent } from "@/lib/consent";
+import { browserAnalyticsAllowed } from "@/lib/consent";
 
 /* Google Analytics 4 en el navegador (20 oct 2026, pedido por Victor). Decision D17.
  *
@@ -69,7 +69,7 @@ export function gaPageTitle(pathname: string, title: string): string {
 export function initGA(): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   const id = gaMeasurementId();
-  if (!id || browserConsent() !== "all" || gaDoNotTrack()) return false;
+  if (!id || !browserAnalyticsAllowed() || gaDoNotTrack()) return false;
   const w = window as unknown as GaWindow;
   try {
     // Si la persona habia retirado el consentimiento en esta misma carga, se reactiva.
@@ -120,7 +120,7 @@ export function initGA(): boolean {
 /** Manda la vista de la pagina actual con la URL limpia. Una por URL. Nunca lanza. */
 export function gaPageView(): void {
   if (typeof window === "undefined" || typeof location === "undefined" || !loadedId) return;
-  if (browserConsent() !== "all") return;
+  if (!browserAnalyticsAllowed()) return;
   const pageLocation = gaPageLocation(location.href);
   if (!pageLocation || pageLocation === lastPageView) return;
   const w = window as unknown as GaWindow;
@@ -138,7 +138,7 @@ export function gaPageView(): void {
 /** Reenvia un evento a GA4. No-op si GA no esta cargado. Nunca lanza. */
 export function gaEvent(name: string, params: Record<string, unknown>): void {
   if (typeof window === "undefined" || !loadedId) return;
-  if (browserConsent() !== "all") return;
+  if (!browserAnalyticsAllowed()) return;
   const w = window as unknown as GaWindow;
   try {
     w.gtag?.("event", name, params);

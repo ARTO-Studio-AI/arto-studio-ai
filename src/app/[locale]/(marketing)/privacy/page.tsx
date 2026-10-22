@@ -6,7 +6,7 @@ import { CookieSettingsButton } from "@/components/CookieBanner";
 /* Aviso de privacidad (reescrito el 9 oct 2026, punto 13 de Victor). Describe lo que
  * el codigo hace hoy, nada mas: si cambia un proveedor, una cookie o una retencion,
  * se cambia aqui en el mismo PR. Fuentes: src/lib/consent.ts (cookies y aviso),
- * src/lib/analytics.ts (PostHog), src/lib/ga.ts (Google Analytics), src/lib/attribution.ts (asai_utm), src/proxy.ts
+ * src/lib/analytics.ts (PostHog), src/lib/ga.ts (Google Analytics), src/lib/meta-pixel.ts (pixel de Meta), src/lib/attribution.ts (asai_utm), src/proxy.ts
  * (asai_vid), src/lib/marketing-list.ts (lista y doble opt-in), docs/DECISIONES.md D9. */
 
 export async function generateMetadata({
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }
 
 const CONTACT = "contact@artogroup.com";
-const UPDATED = { es: "20 de octubre de 2026", en: "October 20, 2026" };
+const UPDATED = { es: "22 de octubre de 2026", en: "October 22, 2026" };
 
 type Cookie = { name: string; purpose: string; duration: string; kind: string };
 
@@ -33,6 +33,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_utm", purpose: "De qué campaña o sitio llegaste la primera vez (parámetros utm y sitio de origen, sin datos personales).", duration: "30 días", kind: "Analítica, solo con tu permiso" },
     { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan. PostHog guarda también un registro en el almacenamiento local del navegador.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: cuántas personas visitan el sitio, qué páginas ven y de dónde llegan. Sin funciones de publicidad.", duration: "2 años", kind: "Analítica, solo con tu permiso" },
+    { name: "_fbp, _fbc", purpose: "Pixel de Meta: nos dice si llegaste desde un anuncio de Instagram o Facebook y si después hiciste el Brand Roast o dejaste tu correo, para saber qué anuncios funcionan.", duration: "90 días", kind: "Publicidad, solo si eliges «Aceptar todo»" },
   ],
   en: [
     { name: "sb-…-auth-token(.N)", purpose: "Keeps you signed in (Supabase).", duration: "Up to 400 days or until you sign out", kind: "Essential" },
@@ -43,6 +44,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "asai_utm", purpose: "Which campaign or site brought you here the first time (utm parameters and referring site, no personal data).", duration: "30 days", kind: "Analytics, only with your permission" },
     { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used. PostHog also keeps a record in the browser's local storage.", duration: "1 year", kind: "Analytics, only with your permission" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: how many people visit the site, which pages they see and where they come from. No advertising features.", duration: "2 years", kind: "Analytics, only with your permission" },
+    { name: "_fbp, _fbc", purpose: "Meta pixel: tells us whether you came from an Instagram or Facebook ad and whether you then ran the Brand Roast or left your email, so we know which ads work.", duration: "90 days", kind: "Advertising, only if you choose \"Accept all\"" },
   ],
 };
 
@@ -58,6 +60,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "OpenAI", what: "Convierte el texto de tu búsqueda en un vector para encontrar los prompts más parecidos." },
     { name: "Google", what: "Si eliges iniciar sesión con Google, nos comparte tu nombre, correo y foto. Y, solo si aceptas la analítica en el aviso de cookies, Google Analytics mide visitas y páginas vistas con un identificador seudónimo (un número aleatorio, no tu nombre ni tu correo); tenemos apagadas sus funciones de publicidad y Google Signals." },
     { name: "Stripe", what: "Procesa los pagos si contratas un plan. Nosotros solo guardamos tu id de cliente y el estado de la suscripción, nunca tu tarjeta." },
+    { name: "Meta", what: "Solo si eliges «Aceptar todo» en el aviso de cookies, el pixel de Meta registra las páginas que ves, si haces el Brand Roast (industria y calificación) y si dejas tu correo para recibir el reporte, sin mandar el correo ni el nombre de la marca. Meta lo cruza con tu cuenta de Instagram o Facebook, si tienes una, y lo usa para medir nuestros anuncios y mostrarlos a personas parecidas. En las páginas de un roast compartido no se manda nada." },
   ],
   en: [
     { name: "Supabase", what: "Database and authentication (magic link and Google). Stores your account, favorites, collections and searches." },
@@ -68,6 +71,7 @@ const PROVIDERS: Record<"es" | "en", Provider[]> = {
     { name: "OpenAI", what: "Turns your search text into a vector to find the closest prompts." },
     { name: "Google", what: "If you choose to sign in with Google, it shares your name, email and photo with us. And, only if you accept analytics in the cookie notice, Google Analytics measures visits and page views with a pseudonymous identifier (a random number, not your name or email); its advertising features and Google Signals are turned off." },
     { name: "Stripe", what: "Processes payments if you buy a plan. We only keep your customer id and subscription status, never your card." },
+    { name: "Meta", what: "Only if you choose \"Accept all\" in the cookie notice, the Meta pixel records the pages you see, whether you run the Brand Roast (industry and score) and whether you leave your email to get the report, without sending the email or the brand name. Meta matches it with your Instagram or Facebook account, if you have one, and uses it to measure our ads and show them to similar people. Nothing is sent on shared roast pages." },
   ],
 };
 
@@ -151,6 +155,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
                 "Mejorar el catálogo con lo que la gente busca y no encuentra.",
                 "Cobrar tu plan, si contratas uno.",
                 "Medir qué funciona del sitio, solo si aceptas la analítica.",
+                "Medir qué anuncios de Instagram y Facebook traen gente al sitio y mostrarlos a personas parecidas, solo si eliges «Aceptar todo».",
                 "Mandarte promociones, prompts nuevos y lanzamientos, solo si marcaste la casilla para recibirlos.",
               ]
             : [
@@ -160,6 +165,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
                 "Improve the catalog with what people search for and don't find.",
                 "Charge your plan, if you buy one.",
                 "Measure what works on the site, only if you accept analytics.",
+                "Measure which Instagram and Facebook ads bring people to the site and show them to similar people, only if you choose \"Accept all\".",
                 "Send you promotions, new prompts and launches, only if you ticked the box to receive them.",
               ]
           ).map((line) => (
@@ -196,8 +202,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         <h2 id="cookies">Cookies</h2>
         <p>
           {es
-            ? "Usamos cookies esenciales sin pedirte permiso, porque sin ellas el sitio no funciona. La analítica solo se activa si la aceptas en el aviso de cookies; si eliges «Solo esenciales» o no respondes, no se activa. No usamos cookies de publicidad. Puedes cambiar tu elección cuando quieras:"
-            : "We use essential cookies without asking, because the site doesn't work without them. Analytics only turns on if you accept it in the cookie notice; if you choose \"Essential only\" or don't answer, it stays off. We don't use advertising cookies. You can change your choice at any time:"}{" "}
+            ? "Usamos cookies esenciales sin pedirte permiso, porque sin ellas el sitio no funciona. El aviso tiene tres opciones: «Solo esenciales», «Solo analítica» (PostHog y Google Analytics) y «Aceptar todo», que suma el pixel de Meta para medir anuncios. Si no respondes, solo usamos las esenciales. Puedes cambiar tu elección cuando quieras:"
+            : "We use essential cookies without asking, because the site doesn't work without them. The notice has three options: \"Essential only\", \"Analytics only\" (PostHog and Google Analytics) and \"Accept all\", which adds the Meta pixel to measure ads. If you don't answer, we only use essential cookies. You can change your choice at any time:"}{" "}
           <CookieSettingsButton label={es ? "abrir preferencias de cookies" : "open cookie preferences"} className="underline" />.
         </p>
         <div className="not-prose overflow-x-auto">
@@ -224,8 +230,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </div>
         <p>
           {es
-            ? "Si visitaste otros sitios de artostudio.ai, tu navegador puede mostrar cookies de esos sitios (por ejemplo de Google Analytics o Meta). Este Servicio no las crea ni las lee."
-            : "If you visited other artostudio.ai sites, your browser may show cookies from them (for example Google Analytics or Meta). This Service doesn't create or read them."}
+            ? "Si visitaste otros sitios de artostudio.ai, tu navegador puede mostrar cookies de esos sitios (por ejemplo de Google Analytics o Meta). Este Servicio solo usa las que aparecen en la tabla."
+            : "If you visited other artostudio.ai sites, your browser may show cookies from them (for example Google Analytics or Meta). This Service only uses the ones listed in the table."}
         </p>
 
         <h2>{es ? "Cuánto tiempo los guardamos" : "How long we keep it"}</h2>

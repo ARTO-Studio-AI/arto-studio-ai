@@ -266,3 +266,14 @@ siguiente sesión.
 | **Por qué** | El banner le recuerda a quien lo lee qué es el producto. Con los bloques comunes, un correo nuevo sale de marca sin rediseñar cada vez |
 | **Qué NO hacer** | No mandar HTML suelto, texto sin plantilla ni correos armados en el editor de Resend. No editar las plantillas de acceso a mano en el panel de Supabase: se cambian en el repo y se suben con el script. Si cambia la marca, se regenera el banner y se cambia aquí |
 | **Dónde** | `src/lib/email-templates/`, `src/lib/email.ts`, `public/email/`, `scripts/supabase-auth-templates.ts` |
+
+### D19 · Pixel de Meta propio de ASAI, con la publicidad como opción aparte
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-10-22 («Todo sí, y si tenemos que cambiar el aviso de privacidad, cámbialo de una vez para que todo haga sentido»). Creó el pixel en Meta con Code; implementó Code |
+| **Qué se decidió** | ASAI tiene su propio conjunto de datos de Meta, «ARTO Studio AI» (`1786082372609082`), en el portafolio artostudio y conectado a la cuenta publicitaria compartida «ARTO Studio» (`1117694250907304`). No se usa el pixel de Nómina. El aviso de cookies pasa a tres opciones del mismo peso: «Solo esenciales», «Solo analítica» (PostHog y GA4) y «Aceptar todo» (suma el pixel de Meta). `asai_consent` admite `essential`, `analytics` y `all`; versión `v3-2026-10-22`, así que el aviso vuelve a salir para todos. Eventos: `PageView`, `RoastCompleted` y `Lead`. El aviso de privacidad (ES/EN) suma a Meta como proveedor, las cookies `_fbp` y `_fbc`, y la finalidad de medir anuncios |
+| **Por qué** | Las campañas de ASAI en Meta necesitan medir qué anuncio trae roasts y correos. El aviso anterior prometía «no usamos cookies de publicidad», así que había que pedir permiso aparte y decirlo en el aviso de privacidad |
+| **Qué NO hacer** | No cargar el pixel con «Solo analítica» ni sin respuesta. No encender `autoConfig` ni la coincidencia avanzada automática. No mandar a Meta correo, nombre de la marca ni texto libre; en URLs con parámetros que no son `utm_*` no sale nada. No usar el pixel de Nómina en campañas de ASAI. Las campañas de ASAI en la cuenta compartida empiezan con «ASAI ·» |
+| **Pendiente (fase 2)** | API de conversiones para `Lead` y `CompleteRegistration` desde el servidor, con el token que genere Victor en el Administrador de eventos |
+| **Dónde** | `src/lib/meta-pixel.ts`, `src/lib/consent.ts`, `src/lib/analytics.ts`, `src/components/CookieBanner.tsx`, `src/components/analytics/GaPageViews.tsx`, aviso de privacidad, `docs/METRICS.md` |

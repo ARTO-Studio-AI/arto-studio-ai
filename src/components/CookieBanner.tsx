@@ -14,10 +14,13 @@ import {
   type ConsentChoice,
 } from "@/lib/consent";
 import { initAnalytics, revokeAnalytics } from "@/lib/analytics";
+import { revokeMetaPixel } from "@/lib/meta-pixel";
 
 /* Aviso de cookies (H-48, 9 oct 2026). Sale mientras no haya una eleccion vigente en
  * asai_consent y vuelve a salir con el enlace "Cookies" del footer. Sin respuesta no
- * se activa nada: el default es "solo esenciales". Las dos opciones pesan lo mismo.
+ * se activa nada: el default es "solo esenciales". Las tres opciones pesan lo mismo.
+ * Desde el 22 oct 2026 (D19) la publicidad (pixel de Meta) va aparte: «Solo analitica»
+ * activa PostHog y GA, y solo «Aceptar todo» activa tambien Meta.
  *
  * La pagina de llegada se guarda en memoria al cargar el modulo (no en una cookie ni
  * en localStorage): si la persona acepta despues de navegar, asai_utm registra su
@@ -31,17 +34,19 @@ const LANDING =
 const COPY = {
   es: {
     title: "Cookies",
-    body: "Usamos cookies esenciales para tu sesión, tu idioma y el contador de prompts gratis. Con tu permiso, también usamos analítica (PostHog y Google Analytics) para entender qué partes del sitio sirven y de dónde llegas. No vendemos tus datos ni usamos cookies de publicidad.",
+    body: "Usamos cookies esenciales para tu sesión, tu idioma y el contador de prompts gratis. Con tu permiso, también usamos analítica (PostHog y Google Analytics) para entender qué partes del sitio sirven y de dónde llegas, y el pixel de Meta para saber qué anuncios de Instagram y Facebook te trajeron aquí. Tú eliges qué aceptas. No vendemos tus datos.",
     more: "Aviso de privacidad",
     essential: "Solo esenciales",
-    all: "Aceptar analítica",
+    analytics: "Solo analítica",
+    all: "Aceptar todo",
   },
   en: {
     title: "Cookies",
-    body: "We use essential cookies for your session, your language and the free prompt counter. With your permission, we also use analytics (PostHog and Google Analytics) to learn which parts of the site work and where you came from. We don't sell your data or use advertising cookies.",
+    body: "We use essential cookies for your session, your language and the free prompt counter. With your permission, we also use analytics (PostHog and Google Analytics) to learn which parts of the site work and where you came from, and the Meta pixel to know which Instagram and Facebook ads brought you here. You choose what to accept. We don't sell your data.",
     more: "Privacy policy",
     essential: "Essential only",
-    all: "Accept analytics",
+    analytics: "Analytics only",
+    all: "Accept all",
   },
 } as const;
 
@@ -85,7 +90,9 @@ export default function CookieBanner({ locale }: { locale: string }) {
 
   function choose(choice: ConsentChoice) {
     setCookie(CONSENT_COOKIE, serializeConsent(choice), CONSENT_MAX_AGE);
-    if (choice === "all") {
+    if (choice === "all" || choice === "analytics") {
+      // Con «Solo analitica» se apaga Meta si estaba activo y sigue lo demas.
+      if (choice === "analytics") revokeMetaPixel();
       writeFirstTouch();
       void initAnalytics();
     } else {
@@ -124,6 +131,9 @@ export default function CookieBanner({ locale }: { locale: string }) {
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" className={button} onClick={() => choose("essential")}>
           {t.essential}
+        </button>
+        <button type="button" className={button} onClick={() => choose("analytics")}>
+          {t.analytics}
         </button>
         <button type="button" className={button} onClick={() => choose("all")}>
           {t.all}

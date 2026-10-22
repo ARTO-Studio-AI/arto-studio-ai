@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { CONSENT_VERSION, analyticsAllowed, parseConsent, readCookie, serializeConsent } from "./consent";
+import { CONSENT_VERSION, adsAllowed, analyticsAllowed, parseConsent, readCookie, serializeConsent } from "./consent";
 
 /* Cookie asai_consent (H-48, 9 oct 2026): sin respuesta, con otra version o con un
  * valor raro no hay analitica. */
 
 describe("consent", () => {
-  it("lee las dos elecciones de la version vigente", () => {
+  it("lee las tres elecciones de la version vigente", () => {
     expect(parseConsent(serializeConsent("all"))).toBe("all");
     expect(parseConsent(serializeConsent("essential"))).toBe("essential");
+    expect(parseConsent(serializeConsent("analytics"))).toBe("analytics");
     expect(parseConsent(encodeURIComponent(serializeConsent("all")))).toBe("all");
   });
 
@@ -21,6 +22,7 @@ describe("consent", () => {
 
   it("solo 'all' permite analitica", () => {
     expect(analyticsAllowed(serializeConsent("all"))).toBe(true);
+    expect(analyticsAllowed(serializeConsent("analytics"))).toBe(true);
     expect(analyticsAllowed(serializeConsent("essential"))).toBe(false);
     expect(analyticsAllowed(undefined)).toBe(false);
   });
@@ -30,5 +32,13 @@ describe("consent", () => {
     expect(readCookie(jar, "asai_consent")).toBe("all.v1");
     expect(readCookie(jar, "nada")).toBeUndefined();
     expect(readCookie(undefined, "asai_consent")).toBeUndefined();
+  });
+
+  it("la publicidad solo con «all» de la version vigente", () => {
+    expect(adsAllowed(serializeConsent("all"))).toBe(true);
+    expect(adsAllowed(serializeConsent("analytics"))).toBe(false);
+    expect(adsAllowed(serializeConsent("essential"))).toBe(false);
+    expect(adsAllowed("all.v2-2026-10-20")).toBe(false);
+    expect(adsAllowed(undefined)).toBe(false);
   });
 });
