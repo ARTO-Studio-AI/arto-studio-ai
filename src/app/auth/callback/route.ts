@@ -10,7 +10,7 @@ import { sendWelcome } from "@/lib/mailer";
 import { isLocale } from "@/i18n/config";
 import { safeNextPath } from "@/lib/safe-next";
 import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
-import { sendMetaServerEvent } from "@/lib/meta-capi";
+import { queueMetaServerEvent } from "@/lib/meta-capi";
 import {
   MARKETING_CONSENT_VERSION,
   NEXT_COOKIE,
@@ -175,8 +175,9 @@ async function recordSignupOrLogin(request: NextRequest, user: User): Promise<vo
   });
 
   // API de conversiones (D19 fase 2): solo con la publicidad aceptada. El event_id es fijo
-  // por persona, asi un callback repetido no cuenta dos altas.
-  await sendMetaServerEvent({
+  // por persona, asi un callback repetido no cuenta dos altas. Con after() corre despues del
+  // redirect: Meta lenta no frena el login.
+  queueMetaServerEvent({
     name: "CompleteRegistration",
     request,
     eventId: `signup-${user.id}`,

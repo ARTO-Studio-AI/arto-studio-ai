@@ -95,6 +95,17 @@ describe("meta-pixel (cliente)", () => {
     expect(calls().slice(-2)).toEqual(["trackCustom RoastCompleted", "track Lead"]);
   });
 
+  it("manda el eventID que comparte con la API de conversiones", async () => {
+    const { mod, win } = await setup({});
+    mod.initMetaPixel();
+    const id = mod.newMetaEventId();
+    mod.metaEvent("roast_email_submitted", { industry: "cafe", overall: 7 }, id);
+    mod.metaEvent("roast_completed", { industry: "cafe", overall: 7, source: "ai" });
+    const queue = (win.fbq as unknown as { queue: unknown[][] }).queue;
+    expect(queue.at(-2)?.[3]).toEqual({ eventID: id });
+    expect(queue.at(-1)?.[3]).toBeUndefined();
+  });
+
   it("no manda nada en URLs con parametros que no son utm_*", async () => {
     expect((await setup({})).mod.metaSafeUrl("https://creative.artostudio.ai/es/roast?utm_source=x")).toBe(true);
     const { mod, calls } = await setup({ href: "https://creative.artostudio.ai/es/roast?b=Mi%20Marca&h=titular" });

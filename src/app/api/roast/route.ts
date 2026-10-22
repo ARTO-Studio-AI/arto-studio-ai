@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, after } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { config } from "dotenv";
 import path from "path";
 import "@/lib/skills"; // side-effect: register all skills
@@ -8,7 +8,7 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { RoastRequest, RoastResult, RoastResponse } from "@/lib/roast-types";
 import type { SkillContext } from "@/lib/skills/types";
 import { signReportToken, signShare } from "@/lib/roast-share";
-import { cleanEventId, sendMetaServerEvent } from "@/lib/meta-capi";
+import { cleanEventId, metaIndustry, queueMetaServerEvent } from "@/lib/meta-capi";
 
 /**
  * Legacy alias: /api/roast → brand-roast skill.
@@ -117,16 +117,17 @@ export async function POST(request: NextRequest) {
     };
     // API de conversiones (D19 fase 2): mismo event_id que el pixel. Sin la cookie de
     // publicidad aceptada no sale nada, asi que los clientes externos de esta API no cuentan.
-    // Corre despues de responder: no le suma espera al roast.
+    // Corre despues de responder: no le suma espera al roast. Sin event_id del navegador
+    // (pagina vieja en cache o cliente externo) no se manda: Meta lo contaria dos veces.
     const metaEventId = cleanEventId((body as { metaEventId?: unknown }).metaEventId);
-    after(() =>
-      sendMetaServerEvent({
+    if (metaEventId) {
+      queueMetaServerEvent({
         name: "RoastCompleted",
         request,
         eventId: metaEventId,
-        customData: { industry: input.industry.slice(0, 60), overall: out.overall },
-      }),
-    );
+        customData: { industry: metaIndustry(input.industry), overall: out.overall },
+      });
+    }
     return NextResponse.json(legacy, { headers: corsHeaders });
   } catch (error) {
     if (error instanceof SkillExecutionError) {

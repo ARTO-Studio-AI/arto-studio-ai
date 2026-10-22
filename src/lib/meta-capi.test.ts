@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { newMetaEventId } from "@/lib/meta-pixel";
 import {
   buildMetaServerPayload,
   cleanEventId,
   eventSourceUrl,
   hashEmail,
+  metaIndustry,
+  queueMetaServerEvent,
   sendMetaServerEvent,
   serverAdsAllowed,
   type MetaRequestLike,
@@ -36,6 +39,19 @@ describe("hashEmail y cleanEventId", () => {
     expect(cleanEventId("corto")).toBeNull();
     expect(cleanEventId("con espacios y <html>")).toBeNull();
     expect(cleanEventId(42)).toBeNull();
+  });
+
+  it("acepta los ids que generan el navegador y el alta", () => {
+    const id = newMetaEventId();
+    expect(cleanEventId(id)).toBe(id);
+    const signup = "signup-3f2b8c1e-aaaa-bbbb-cccc-123456789012";
+    expect(cleanEventId(signup)).toBe(signup);
+  });
+
+  it("la industria solo sale si es de la lista del roast", () => {
+    expect(metaIndustry("Agency")).toBe("Agency");
+    expect(metaIndustry("Panaderia de Ana en Calle 5")).toBeUndefined();
+    expect(metaIndustry(undefined)).toBeUndefined();
   });
 });
 
@@ -143,11 +159,17 @@ describe("sendMetaServerEvent", () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ events_received: 1 }), { status: 200 }));
     expect(await sendMetaServerEvent({ name: "CompleteRegistration", request: allowed(), email: "a@b.co" })).toBe(true);
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe(`https://graph.facebook.com/v21.0/${PIXEL}/events`);
+    expect(url).toBe(`https://graph.facebook.com/v26.0/${PIXEL}/events`);
     const form = init.body as URLSearchParams;
     expect(form.get("access_token")).toBe("token-de-prueba");
     expect(form.get("test_event_code")).toBe("TEST123");
     expect(JSON.parse(form.get("data")!)[0].event_name).toBe("CompleteRegistration");
+  });
+
+  it("queueMetaServerEvent fuera de una peticion no lanza y manda igual", async () => {
+    fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
+    expect(() => queueMetaServerEvent({ name: "Lead", request: allowed(), eventId: "abcdefgh-1234" })).not.toThrow();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
   it("nunca lanza: error de Meta o de red devuelve false", async () => {

@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { CONSENT_COOKIE, adsAllowed, readCookie } from "@/lib/consent";
 import { metaPixelId, metaSafeUrl } from "@/lib/meta-pixel";
 import { SITE_URL } from "@/lib/site-url";
@@ -24,11 +25,30 @@ import { SITE_URL } from "@/lib/site-url";
  *   - La URL del evento es la pagina de origen solo si es de este sitio y no trae
  *     parametros que no sean utm_*; si no, la raiz del sitio.
  *   - Nunca lanza y no espera mas de 3 s: la publicidad no puede tumbar el login ni el roast.
+ *     Las rutas usan queueMetaServerEvent, que corre despues de responder.
  *   - META_CAPI_TEST_EVENT_CODE (solo vista previa) manda todo a «Probar eventos». */
 
-const GRAPH_VERSION = "v21.0";
+// v26.0 (jul 2026) es la ultima; cada version vive unos dos anos. Al caer, Meta responde
+// error y aqui solo queda un console.error: revisar en cada auditoria (Fable, 22 oct 2026).
+const GRAPH_VERSION = "v26.0";
 const TIMEOUT_MS = 3000;
 const EVENT_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
+
+/* Valores del <select> de industria del roast (INDUSTRIES en RoastClient.tsx). La API del
+ * roast acepta cualquier texto, asi que a Meta solo va la industria si es una de estas:
+ * nunca texto libre. Si la lista del roast cambia, cambiar tambien aqui. */
+const ROAST_INDUSTRIES = new Set([
+  "SaaS / B2B Software", "Consumer Tech", "Fintech", "Healthtech", "Edtech", "Proptech", "AI / Data",
+  "E-commerce", "Fashion & Beauty", "Food & Beverage", "Restaurants", "CPG", "Luxury", "Agency",
+  "Professional Services", "Legal", "Finance", "Real Estate", "Education", "Health & Wellness",
+  "Travel & Hospitality", "Manufacturing", "Automotive", "Energy", "Construction", "Logistics",
+  "Entertainment", "Sports & Fitness", "Arts & Culture", "NGO / Social Impact", "Politics & Public Sector", "Other",
+]);
+
+/** Industria del roast si es de la lista; si no, undefined (no se manda). */
+export function metaIndustry(raw: unknown): string | undefined {
+  return typeof raw === "string" && ROAST_INDUSTRIES.has(raw) ? raw : undefined;
+}
 
 export type MetaServerEventName = "CompleteRegistration" | "Lead" | "RoastCompleted";
 
@@ -149,5 +169,16 @@ export async function sendMetaServerEvent(event: MetaServerEvent): Promise<boole
   } catch (error) {
     console.error(`[meta-capi] no se pudo mandar ${event.name}:`, error instanceof Error ? error.name : "error");
     return false;
+  }
+}
+
+/** Manda el evento despues de responder (after() de Next), sin frenar la respuesta.
+ * Fuera del contexto de una peticion (pruebas, scripts) after() lanza: entonces se manda
+ * sin esperar. Nunca lanza, asi no se salta lo que venga despues en la ruta. */
+export function queueMetaServerEvent(event: MetaServerEvent): void {
+  try {
+    after(() => sendMetaServerEvent(event));
+  } catch {
+    void sendMetaServerEvent(event);
   }
 }
