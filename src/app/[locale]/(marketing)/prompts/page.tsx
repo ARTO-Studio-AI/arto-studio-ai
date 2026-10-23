@@ -240,7 +240,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
         {(sp.category || sp.difficulty || sp.tier || sp.group || sp.q) && (
           <div>
-            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="text-xs text-zinc-500 underline">
+            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="inline-flex min-h-[44px] items-center text-xs text-zinc-500 underline sm:min-h-0">
               {dict.clear_filters}
             </Link>
           </div>
