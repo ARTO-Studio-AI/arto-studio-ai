@@ -65,6 +65,7 @@ export interface AnalyticsEvents {
   signup_wall_clicked: { prompt_id: string; locale: string };
   prompt_copied: { prompt_id: string; prompt_tier: string; locale: string };
   search_performed: { lang: string; query_length: number; results_count: number; ok: boolean };
+  catalog_search: { lang: string; query_length: number; results_count: number };
   favorite_added: { prompt_id: string };
   pricing_viewed: { locale: string; signed_in: boolean };
   checkout_started: { plan: "pro"; price_usd: number; locale: string; signed_in: boolean };

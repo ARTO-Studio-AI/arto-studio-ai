@@ -117,6 +117,7 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `limit_cta_clicked` | clic en un CTA de la pantalla de tope | `cta` (`pricing` \| `library` \| `signup`), `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/PromptLimitReached.tsx` |
 | `prompt_copied` | clic en Copiar | `prompt_id`, `prompt_tier`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/CopyButton.tsx` |
 | `search_performed` | respuesta de `/api/search` (ok o error) | `lang`, `query_length`, `results_count`, `ok` | `src/app/[locale]/(marketing)/prompts/SmartSearch.tsx` |
+| `catalog_search` | la búsqueda por palabra del catálogo mostró resultados para una consulta (D28) | `lang`, `query_length`, `results_count` | `src/app/[locale]/(marketing)/prompts/KeywordSearch.tsx` |
 | `favorite_added` | favorito guardado con éxito (quitar no cuenta) | `prompt_id` | `src/app/[locale]/(marketing)/prompts/[id]/FavoriteButton.tsx` |
 | `pricing_viewed` | al montar `/[locale]/pricing` | `locale`, `signed_in` | `src/app/[locale]/(marketing)/pricing/page.tsx` |
 | `checkout_started` | clic en el CTA de Pro, antes de crear la sesión de Stripe | `plan` (`pro`), `price_usd`, `locale`, `signed_in` | `src/app/[locale]/(marketing)/pricing/ProCheckoutButton.tsx` |
