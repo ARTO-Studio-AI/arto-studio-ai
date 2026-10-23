@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { listPrompts } from "@/lib/supabase/queries";
+import { searchPrompts } from "@/lib/catalog-search-server";
+import { MAX_QUERY_LENGTH } from "@/lib/catalog-search";
 import { createClient } from "@/lib/supabase/server";
 import { getSubject, getUsed, isUnlimitedTier } from "@/lib/prompt-limit";
 import PromptQuota from "@/components/PromptQuota";
@@ -28,6 +30,7 @@ import { isLocale, type Locale } from "@/i18n/config";
 import type { Metadata } from "next";
 import { localeOf, pageMetadata } from "@/lib/seo";
 import SmartSearch from "./SmartSearch";
+import KeywordSearch from "./KeywordSearch";
 import DifficultyChip from "@/components/DifficultyChip";
 import { Badge } from "@/components/ui";
 
@@ -37,6 +40,12 @@ const CATEGORIES: Category[] = [
 const DIFFICULTIES: Difficulty[] = ["beginner","intermediate","advanced","expert"];
 const TIERS: Tier[] = ["free","pro","enterprise"];
 const AI_GROUP_LIST: AiGroup[] = ["text","image","video","music","voice","any"];
+
+/* Pildoras de filtro (H-70, D28): solo la activa va rellena; las demas en contorno. En celular
+ * miden 44 px de alto para el dedo; desde sm vuelven a su tamano compacto. */
+const PILL = "inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1 text-xs sm:min-h-0";
+const PILL_ACTIVE = `${PILL} bg-zinc-900 font-semibold text-white`;
+const PILL_OUTLINE = `${PILL} border border-zinc-300 bg-white text-zinc-700 hover:border-zinc-900`;
 
 interface SearchParams {
   category?: string;
@@ -69,17 +78,23 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const sp = await searchParams;
   const page = Math.max(1, parseInt(sp.page || "1", 10));
 
-  const { prompts, total, totalPages } = await listPrompts(
-    {
-      category: sp.category as Category | undefined,
-      difficulty: sp.difficulty as Difficulty | undefined,
-      tier: sp.tier as Tier | undefined,
-      aiGroup: sp.group as AiGroup | undefined,
-      search: sp.q || undefined,
-      lang,
-    },
-    page,
-  );
+  const q = (sp.q ?? "").trim().slice(0, MAX_QUERY_LENGTH);
+  const filters = {
+    category: sp.category as Category | undefined,
+    difficulty: sp.difficulty as Difficulty | undefined,
+    tier: sp.tier as Tier | undefined,
+    aiGroup: sp.group as AiGroup | undefined,
+  };
+  // Con palabra, el indice en memoria (acentos, ambos idiomas, errores de dedo); sin ella, la base.
+  const { prompts, total, totalPages } = q
+    ? await searchPrompts(q, filters, lang, page)
+    : await listPrompts({ ...filters, lang }, page);
+
+  // Filtros activos sin q ni page, para que el campo de busqueda no los pierda.
+  const activeFilters: Record<string, string> = {};
+  for (const k of ["category", "difficulty", "tier", "group"] as const) {
+    if (sp[k]) activeFilters[k] = sp[k] as string;
+  }
 
   /* Indicador del contador free (D7): "Te quedan N de 3 prompts hoy". Solo
    * para free y anonimos; el listado en si no cuenta como apertura. */
@@ -130,7 +145,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         <div>
           <h1 className="text-h1">{dict.catalog}</h1>
           <p className="mt-1 font-mono text-sm text-zinc-500">
-            {total.toLocaleString()} prompts · {dict.page_label(page, totalPages || 1)}
+            {total.toLocaleString()} {total === 1 ? "prompt" : "prompts"} · {dict.page_label(page, totalPages || 1)}
           </p>
         </div>
         {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
@@ -145,7 +160,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         )}
       </div>
 
-      <div className="mt-6"><SmartSearch lang={lang} /></div>
+      <div className="mt-6">
+        <KeywordSearch lang={lang} q={q} filters={activeFilters} resultsCount={total} />
+      </div>
+
+      <div className="mt-4"><SmartSearch lang={lang} /></div>
 
       <div className="mt-4 space-y-3 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 text-sm">
         <div className="flex flex-wrap items-center gap-2">
@@ -154,9 +173,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
             const active = sp.category === v;
             const style = CATEGORY_STYLES[v];
             const next = qs({ category: active ? "" : v, page: "1" });
-            const cls = active
-              ? `inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white`
-              : `rounded-full ${style.chip} px-3 py-1 text-xs hover:bg-zinc-200`;
+            const cls = active ? PILL_ACTIVE : `${PILL} ${style.chip} hover:bg-zinc-200`;
             return (
               <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
@@ -172,9 +189,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
             const active = sp.group === v;
             const meta = AI_GROUPS[v];
             const next = qs({ group: active ? "" : v, page: "1" });
-            const cls = active
-              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
-              : `rounded-full ${meta.chip} px-3 py-1 text-xs hover:bg-zinc-100`;
+            const cls = active ? PILL_ACTIVE : `${PILL} ${meta.chip} hover:bg-zinc-100`;
             return (
               <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
@@ -189,19 +204,19 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           {DIFFICULTIES.map((v) => {
             const active = sp.difficulty === v;
             const next = qs({ difficulty: active ? "" : v, page: "1" });
-            const cls = active
-              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
-              : "inline-flex rounded-full text-xs hover:opacity-80";
+            const dots = DIFFICULTY_STYLES[v].dots;
             return (
-              <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
+              <Link key={v} href={next} className={active ? PILL_ACTIVE : PILL_OUTLINE} aria-current={active ? "true" : undefined}>
                 {active ? (
-                  <>
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-                    {labelDifficulty(v)}
-                  </>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
                 ) : (
-                  <DifficultyChip level={v} label={labelDifficulty(v)} />
+                  <span className="flex items-center gap-0.5" aria-hidden="true">
+                    {[1, 2, 3, 4].map((i) => (
+                      <span key={i} className={`h-1.5 w-1.5 rounded-full ${i <= dots ? "bg-zinc-700" : "bg-zinc-300"}`} />
+                    ))}
+                  </span>
                 )}
+                {labelDifficulty(v)}
               </Link>
             );
           })}
@@ -213,9 +228,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
             const active = sp.tier === v;
             const style = TIER_STYLES[v];
             const next = qs({ tier: active ? "" : v, page: "1" });
-            const cls = active
-              ? "inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white"
-              : `rounded-full ${style.chip} px-3 py-1 text-xs hover:opacity-80`;
+            const cls = active ? PILL_ACTIVE : PILL_OUTLINE;
             return (
               <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
