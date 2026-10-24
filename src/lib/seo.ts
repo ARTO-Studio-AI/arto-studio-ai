@@ -327,12 +327,12 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
       en: {
         title: "Brand Roast: an honest, free brand analysis · ARTO Studio AI",
         description:
-          "We read your website and score your brand on Strategy, Creativity, Narrative and Digital with ARTO's methodology, a brand agency since 2009. Free, no signup.",
+          "We read your website and score your brand on Strategy, Creativity, Narrative and Digital with ARTO's methodology, a creative agency since 2009. Free, no signup.",
       },
       es: {
         title: "Brand Roast: análisis honesto de tu marca, gratis · ARTO Studio AI",
         description:
-          "Leemos tu sitio y calificamos tu marca en Estrategia, Creatividad, Narrativa y Digital con la metodología de ARTO, agencia de marca desde 2009. Gratis, sin registro.",
+          "Leemos tu sitio y calificamos tu marca en Estrategia, Creatividad, Narrativa y Digital con la metodología de ARTO, agencia creativa desde 2009. Gratis, sin registro.",
       },
     },
   },

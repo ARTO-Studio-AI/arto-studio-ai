@@ -184,7 +184,7 @@ export function layout({ lang, preheader, body, reason, unsubscribeUrl }: Layout
       <tr><td align="center" style="padding:26px 6px 0 6px;font-family:${F.meta};font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:${C.ink2};">${esc(TAGLINE[lang])}</td></tr>
       <tr><td align="center" style="padding:12px 6px 0 6px;font-family:${F.body};font-size:12px;line-height:18px;color:${C.ink2};">
         ${esc(reason)}<br>
-        ARTO Group · ${lang === "es" ? "Agencia de marca desde 2009" : "Brand agency since 2009"} · <a href="${SITE_URL}/${lang}/privacy" style="color:${C.ink2};text-decoration:underline;">${lang === "es" ? "Aviso de privacidad" : "Privacy"}</a>${unsub}
+        ARTO Group · ${lang === "es" ? "Agencia creativa desde 2009" : "Creative agency since 2009"} · <a href="${SITE_URL}/${lang}/privacy" style="color:${C.ink2};text-decoration:underline;">${lang === "es" ? "Aviso de privacidad" : "Privacy"}</a>${unsub}
       </td></tr>
     </table>
   </td></tr>
