@@ -62,7 +62,7 @@ const COPY = {
     reason: "Recibes este correo porque te inscribiste a la lista de ARTO Studio AI.",
     unsub: "Darme de baja",
     privacy: "Aviso de privacidad",
-    sender: "ARTO Group · Agencia de marca desde 2009",
+    sender: "ARTO Group · Agencia creativa desde 2009",
   },
   en: {
     subject: "Worth opening this week · ARTO Studio AI",
@@ -87,7 +87,7 @@ const COPY = {
     reason: "You're receiving this because you joined the ARTO Studio AI list.",
     unsub: "Unsubscribe",
     privacy: "Privacy",
-    sender: "ARTO Group · Brand agency since 2009",
+    sender: "ARTO Group · Creative agency since 2009",
   },
 } as const;
 

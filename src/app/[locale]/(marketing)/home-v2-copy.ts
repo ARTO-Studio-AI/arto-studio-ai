@@ -35,7 +35,7 @@ export const HOME_V2: Record<Locale, {
   quote_by: string;
 }> = {
   es: {
-    eyebrow: "Por ARTO Group · Agencia de marca desde 2009",
+    eyebrow: "Por ARTO Group · Agencia creativa desde 2009",
     h1_before: "El estudio creativo que nunca",
     h1_accent: "duerme.",
     lead: "Elige un prompt hecho por estrategas de ARTO, pégalo en Claude o ChatGPT y entrega trabajo de marca el mismo día. En español y en inglés.",
@@ -67,7 +67,7 @@ export const HOME_V2: Record<Locale, {
     quote_by: "ARTO Group · 98 marcas en Latinoamérica desde 2009",
   },
   en: {
-    eyebrow: "By ARTO Group · Brand agency since 2009",
+    eyebrow: "By ARTO Group · Creative agency since 2009",
     h1_before: "The creative studio that never",
     h1_accent: "sleeps.",
     lead: "Pick a prompt written by ARTO strategists, paste it into Claude or ChatGPT, and ship brand work the same day. In English and Spanish.",
