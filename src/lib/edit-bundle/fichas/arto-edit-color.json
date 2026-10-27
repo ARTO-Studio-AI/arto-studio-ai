@@ -1,0 +1,47 @@
+{
+  "slug": "arto-edit-color",
+  "order": 6,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Color",
+    "en": "Color"
+  },
+  "tagline": {
+    "es": "Looks de color listos: cálido, oscuro, limpio y blanco y negro.",
+    "en": "Ready color looks: warm, dark, clean and black and white."
+  },
+  "what": {
+    "es": "Aplica un look con ffmpeg. El oscuro baja las luces, quita 15 % de saturación y suma una viñeta suave. Si lo pides, te entrega un antes y después con barra deslizante.",
+    "en": "It applies a look with ffmpeg. Dark pulls the highlights down, removes 15% saturation and adds a soft vignette. On request it gives you a before and after with a sliding bar."
+  },
+  "you_say": {
+    "es": [
+      "Dale un look oscuro a mi video",
+      "Hazlo más cálido",
+      "Enséñame el antes y después con barra"
+    ],
+    "en": [
+      "Give my video a dark look",
+      "Make it warmer",
+      "Show me the before and after with a slider"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer"
+    ]
+  },
+  "time": {
+    "es": "Menos de 1 minuto por minuto de video.",
+    "en": "Under 1 minute per minute of video."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

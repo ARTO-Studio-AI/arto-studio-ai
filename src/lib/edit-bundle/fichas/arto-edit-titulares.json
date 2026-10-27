@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-titulares",
+  "order": 5,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Titulares",
+    "en": "Headlines"
+  },
+  "tagline": {
+    "es": "Titular grande de portada de revista, con entrada animada.",
+    "en": "A big magazine-cover headline with an animated entrance."
+  },
+  "what": {
+    "es": "Compone un titular grande en serif condensada, con jerarquía entre la frase principal y la de apoyo, y lo hace entrar con animación. Se combina con Letras detrás.",
+    "en": "It sets a big condensed serif headline, with hierarchy between the main line and the support line, and animates it in. It pairs with Text behind you."
+  },
+  "you_say": {
+    "es": [
+      "Ponle un titular de portada al arranque",
+      "Titular «3 errores al abrir tu café» en los primeros 2 segundos",
+      "Haz el titular más grande y en dos líneas"
+    ],
+    "en": [
+      "Add a cover headline at the start",
+      "Headline \"3 mistakes when opening your café\" in the first 2 seconds",
+      "Make the headline bigger, on two lines"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "Pillow (el skill lo instala)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "Pillow (the skill installs it)"
+    ]
+  },
+  "time": {
+    "es": "De 1 a 2 minutos.",
+    "en": "1 to 2 minutes."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

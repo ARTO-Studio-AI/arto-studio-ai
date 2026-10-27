@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-zooms",
+  "order": 7,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Zooms",
+    "en": "Zooms"
+  },
+  "tagline": {
+    "es": "Zooms suaves de empuje en las frases que importan.",
+    "en": "Smooth push-in zooms on the lines that matter."
+  },
+  "what": {
+    "es": "Hace zooms de empuje suaves en las frases que marques o en las que elija el skill. Pone como máximo uno cada 6 segundos y nunca corta la cabeza.",
+    "en": "It adds smooth push-in zooms on the lines you mark or on the ones the skill picks. At most one every 6 seconds, and it never crops the head."
+  },
+  "you_say": {
+    "es": [
+      "Ponle zooms en las frases clave",
+      "Zoom cuando digo «esto cambia todo»",
+      "Menos zooms, solo uno al final"
+    ],
+    "en": [
+      "Add zooms on the key lines",
+      "Zoom in when I say \"this changes everything\"",
+      "Fewer zooms, just one at the end"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "Whisper (el skill lo instala)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "Whisper (the skill installs it)"
+    ]
+  },
+  "time": {
+    "es": "Menos de 1 minuto por minuto de video.",
+    "en": "Under 1 minute per minute of video."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

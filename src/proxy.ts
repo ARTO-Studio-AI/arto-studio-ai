@@ -79,7 +79,7 @@ const ATTRIBUTION_SKIP_PREFIXES = ["/api/", "/auth/", "/_next/", "/_vercel/", "/
 function isAttributionSkipped(pathname: string): boolean {
   return (
     ATTRIBUTION_SKIP_PREFIXES.some((p) => pathname === p || pathname.startsWith(p)) ||
-    /\.(?:xml|txt|ico|svg|png|jpg|jpeg|gif|webp|js|css|map)$/i.test(pathname)
+    /\.(?:xml|txt|ico|svg|png|jpg|jpeg|gif|webp|mp4|js|css|map)$/i.test(pathname)
   );
 }
 
@@ -229,7 +229,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_vercel/|\\.well-known/|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|_vercel/|\\.well-known/|favicon.ico|brand/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4)$).*)",
   ],
 };
 

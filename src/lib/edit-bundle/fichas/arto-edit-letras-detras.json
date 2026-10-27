@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-letras-detras",
+  "order": 3,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Letras detrás",
+    "en": "Text behind you"
+  },
+  "tagline": {
+    "es": "El titular va detrás de ti, como en portada de revista.",
+    "en": "The headline sits behind you, like a magazine cover."
+  },
+  "what": {
+    "es": "Recorta a la persona cuadro por cuadro con rembg y pone el titular detrás de ella. Está pensado para tramos cortos, de 2 a 4 segundos, donde el efecto pega más.",
+    "en": "It cuts out the person frame by frame with rembg and places the headline behind them. It is made for short stretches, 2 to 4 seconds, where the effect hits hardest."
+  },
+  "you_say": {
+    "es": [
+      "Pon el título detrás de mí en los primeros 3 segundos",
+      "Hazme el efecto de letras detrás con «Café Ladera»",
+      "Texto detrás de la persona en el arranque"
+    ],
+    "en": [
+      "Put the title behind me in the first 3 seconds",
+      "Do the text-behind effect with \"Café Ladera\"",
+      "Text behind the person at the start"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "rembg y Pillow (el skill los instala)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "rembg and Pillow (the skill installs them)"
+    ]
+  },
+  "time": {
+    "es": "Unos 10 segundos por cuadro en CPU: un tramo de 3 segundos tarda de 10 a 15 minutos.",
+    "en": "About 10 seconds per frame on CPU: a 3 second stretch takes 10 to 15 minutes."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

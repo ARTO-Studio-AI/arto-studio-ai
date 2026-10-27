@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-cortes",
+  "order": 1,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Cortes",
+    "en": "Cuts"
+  },
+  "tagline": {
+    "es": "Quita silencios, muletillas y tomas repetidas.",
+    "en": "Removes silences, filler words and repeated takes."
+  },
+  "what": {
+    "es": "Transcribe tu video con marcas de tiempo por palabra y encuentra los silencios con ffmpeg. Te entrega la lista de cortes para que la apruebes y solo entonces corta. Tu archivo original no se toca.",
+    "en": "It transcribes your video with word-level timestamps and finds the silences with ffmpeg. You get the list of cuts to approve, and only then does it cut. Your original file is never touched."
+  },
+  "you_say": {
+    "es": [
+      "Quítale los silencios a mi video",
+      "Corta las muletillas y las tomas repetidas",
+      "Déjalo más ágil, sin pausas"
+    ],
+    "en": [
+      "Remove the silences from my video",
+      "Cut the filler words and repeated takes",
+      "Tighten it up, no pauses"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "Whisper (el skill lo instala)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "Whisper (the skill installs it)"
+    ]
+  },
+  "time": {
+    "es": "Unos 2 minutos por minuto de video.",
+    "en": "About 2 minutes per minute of video."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

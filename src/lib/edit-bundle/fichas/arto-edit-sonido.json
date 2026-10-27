@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-sonido",
+  "order": 8,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Sonido",
+    "en": "Sound"
+  },
+  "tagline": {
+    "es": "Música con ducking, whooshes y volumen listo para redes.",
+    "en": "Music with ducking, whooshes and loudness ready for social."
+  },
+  "what": {
+    "es": "Mete la música y la baja sola cuando hablas, pone un whoosh en cada corte y un efecto en cada aparición. Deja el volumen final a -14 LUFS con pico de -2 dB, en dos pasadas.",
+    "en": "It lays in the music and ducks it under your voice, adds a whoosh on every cut and a hit on every pop-in. Final loudness lands at -14 LUFS with a -2 dB peak, in two passes."
+  },
+  "you_say": {
+    "es": [
+      "Ponle música y que baje cuando hablo",
+      "Whoosh en cada corte",
+      "Deja el volumen listo para Instagram"
+    ],
+    "en": [
+      "Add music that ducks when I talk",
+      "Whoosh on every cut",
+      "Get the loudness ready for Instagram"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "La música que quieras usar (o la que trae el skill)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "The music you want to use (or the one the skill ships with)"
+    ]
+  },
+  "time": {
+    "es": "De 1 a 2 minutos.",
+    "en": "1 to 2 minutes."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

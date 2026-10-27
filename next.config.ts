@@ -52,6 +52,9 @@ const nextConfig: NextConfig = {
    * de ejecucion (src/lib/og-kit.tsx). Se incluyen en el trazado de todas las funciones. */
   outputFileTracingIncludes: {
     "/**": ["./src/app/_og/**"],
+    /* ARTO Edit Bundle #1 (Victor, 27 oct 2026): los .skill y el .zip viven fuera de public/ y solo los lee
+     * la ruta de descarga, que revisa sesion y la regla de fecha o Pro. */
+    "/api/skill-downloads/[slug]": ["./private/skills/**"],
   },
   images: {
     remotePatterns: [

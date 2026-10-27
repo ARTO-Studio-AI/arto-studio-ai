@@ -235,14 +235,14 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
     path: "/skills",
     copy: {
       en: {
-        title: "Skills Studio · ARTO Studio AI",
+        title: "Skills for Claude: video editing and more · ARTO Studio AI",
         description:
-          "AI creative skills that run ARTO's methodology end to end: brand positioning, naming, messaging and more. Structured outputs you can put to work the same day.",
+          "Downloadable skills for Claude Code. Start with the ARTO Edit Bundle #1: 9 skills to edit vertical video. Brand strategy skills are on the way.",
       },
       es: {
-        title: "Skills Studio, skills creativas con IA · ARTO Studio AI",
+        title: "Skills para Claude: edición de video y más · ARTO Studio AI",
         description:
-          "Skills creativas con IA que corren la metodología de ARTO de principio a fin: posicionamiento de marca, naming, mensajes y más. Resultados estructurados listos para usar el mismo día.",
+          "Skills descargables para Claude Code. Empieza con el ARTO Edit Bundle #1: 9 skills para editar video vertical. Los de estrategia de marca vienen en camino.",
       },
     },
   },

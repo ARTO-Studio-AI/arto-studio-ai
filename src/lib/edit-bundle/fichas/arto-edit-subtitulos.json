@@ -1,0 +1,49 @@
+{
+  "slug": "arto-edit-subtitulos",
+  "order": 2,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Subtítulos",
+    "en": "Captions"
+  },
+  "tagline": {
+    "es": "Subtítulos palabra por palabra, de 2 a 3 palabras.",
+    "en": "Word-by-word captions, 2 to 3 words at a time."
+  },
+  "what": {
+    "es": "Transcribe con Whisper y arma subtítulos de 2 a 3 palabras, blancos con sombra y sin caja, en el tercio inferior. Si quieres, resalta la palabra que se está diciendo. Cada subtítulo se dibuja como imagen, así que funciona con cualquier ffmpeg.",
+    "en": "It transcribes with Whisper and builds 2 to 3 word captions, white with a shadow and no box, in the lower third. It can highlight the word being spoken. Each caption is drawn as an image, so it works with any ffmpeg build."
+  },
+  "you_say": {
+    "es": [
+      "Ponle subtítulos a mi video",
+      "Subtítulos palabra por palabra con la palabra activa en naranja",
+      "Pon los subtítulos más arriba, que no tapen el texto"
+    ],
+    "en": [
+      "Add captions to my video",
+      "Word-by-word captions with the active word in orange",
+      "Move the captions up so they do not cover the text"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "Whisper y Pillow (el skill los instala)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "Whisper and Pillow (the skill installs them)"
+    ]
+  },
+  "time": {
+    "es": "Unos 2 minutos por minuto de video.",
+    "en": "About 2 minutes per minute of video."
+  },
+  "version": "1.0",
+  "placeholder": true
+}

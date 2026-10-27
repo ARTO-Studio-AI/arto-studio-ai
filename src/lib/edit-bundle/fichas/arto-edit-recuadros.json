@@ -1,0 +1,51 @@
+{
+  "slug": "arto-edit-recuadros",
+  "order": 4,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Recuadros",
+    "en": "Pop-up cards"
+  },
+  "tagline": {
+    "es": "Tarjetas flotantes que entran cuando las mencionas.",
+    "en": "Floating cards that pop in when you mention them."
+  },
+  "what": {
+    "es": "Pone tarjetas con esquinas redondeadas y sombra: una captura, un video, una tarjeta de prompt estilo chat o un ícono. Entran y salen con animación justo en la palabra que las menciona.",
+    "en": "It adds cards with rounded corners and a shadow: a screenshot, a clip, a chat-style prompt card or an icon. They animate in and out right on the word that mentions them."
+  },
+  "you_say": {
+    "es": [
+      "Cuando digo «la página», pon esta captura en un recuadro",
+      "Mete una tarjeta de prompt cuando hablo del prompt",
+      "Agrega el ícono de correo cuando digo correo"
+    ],
+    "en": [
+      "When I say \"the website\", show this screenshot in a card",
+      "Add a prompt card when I talk about the prompt",
+      "Pop in the email icon when I say email"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "Pillow (el skill lo instala)",
+      "Las capturas o clips que quieras mostrar"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "Pillow (the skill installs it)",
+      "The screenshots or clips you want to show"
+    ]
+  },
+  "time": {
+    "es": "De 1 a 3 minutos por tarjeta.",
+    "en": "1 to 3 minutes per card."
+  },
+  "version": "1.0",
+  "placeholder": true
+}
