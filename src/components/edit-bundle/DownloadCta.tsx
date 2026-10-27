@@ -65,8 +65,10 @@ export default function DownloadCta({ locale, slug, viewer, t, size = "lg", now 
 
   return (
     <div>
-      {/* <a> plano: las rutas /api/ no se prefetchean (H-42). */}
-      <a href={`/api/skill-downloads/${slug}?locale=${locale}`} className={buttonClass("primary", size)} download>
+      {/* <a> plano: las rutas /api/ no se prefetchean (H-42). Sin atributo download: si la sesion
+       * caduca o pasa el corte, el 302 a login o pricing tiene que navegar, no bajarse como archivo
+       * (auditoria de Fable). Content-Disposition: attachment ya fuerza la descarga. */}
+      <a href={`/api/skill-downloads/${slug}?locale=${locale}`} className={buttonClass("primary", size)}>
         {isBundle ? t.cta_download_bundle : t.cta_download_skill}
       </a>
       <p className="mt-2 text-xs text-zinc-500">{note}</p>

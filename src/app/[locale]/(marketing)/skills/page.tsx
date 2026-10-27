@@ -14,6 +14,10 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
+/* La etiqueta Gratis/Pro depende de la hora: sin esto la pagina se prerenderiza en el build y
+ * seguiria diciendo «Gratis hasta el 2 nov» despues del corte (auditoria de Fable). */
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata("skills", localeOf(locale));

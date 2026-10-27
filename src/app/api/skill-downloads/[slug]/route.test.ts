@@ -134,6 +134,15 @@ describe("registro y archivo", () => {
     expect(captureServer).not.toHaveBeenCalled();
   });
 
+  it("un paquete de mas de 4.4 MB responde 503 en vez de romper la funcion", async () => {
+    vi.setSystemTime(BEFORE);
+    getViewer.mockResolvedValue({ signedIn: true, userId: "u1", tier: "free" });
+    readFile.mockResolvedValue(Buffer.alloc(Math.floor(4.4 * 1024 * 1024) + 1));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await req("arto-edit-director");
+    expect(res.status).toBe(503);
+  });
+
   it("si el paquete aun no se sincroniza responde 404 not_available", async () => {
     vi.setSystemTime(BEFORE);
     getViewer.mockResolvedValue({ signedIn: true, userId: "u1", tier: "free" });

@@ -31,6 +31,10 @@ export const dynamic = "force-dynamic";
 
 const NO_STORE = { "Cache-Control": "private, no-store, max-age=0" };
 
+/* Vercel no responde mas de 4.5 MB desde una funcion; scripts/edit-bundle-manifest.mjs ya rechaza
+ * paquetes de mas de 4.4 MB, y aqui se repite por si alguien copio uno sin correrlo. */
+const MAX_BYTES = Math.floor(4.4 * 1024 * 1024);
+
 const PRIVATE_DIR = path.join(/* turbopackIgnore: true */ process.cwd(), "private", "skills");
 
 function requestLocale(request: NextRequest): Locale {
@@ -73,6 +77,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     body = await readFile(path.join(PRIVATE_DIR, item.file));
   } catch {
     return NextResponse.json({ error: "not_available" }, { status: 404, headers: NO_STORE });
+  }
+  if (body.byteLength > MAX_BYTES) {
+    console.error(`[skill-downloads] ${item.file} pesa ${body.byteLength} bytes, mas de lo que entrega una funcion`);
+    return NextResponse.json({ error: "too_large" }, { status: 503, headers: NO_STORE });
   }
 
   const promo = isPromoActive(now);
