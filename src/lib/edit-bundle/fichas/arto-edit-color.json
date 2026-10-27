@@ -7,41 +7,46 @@
     "en": "Color"
   },
   "tagline": {
-    "es": "Looks de color listos: cálido, oscuro, limpio y blanco y negro.",
-    "en": "Ready color looks: warm, dark, clean and black and white."
+    "es": "Cuatro looks de color y un antes y después con barra, sin quemar la piel.",
+    "en": "Four color looks and a before and after slider that keep skin natural."
   },
   "what": {
-    "es": "Aplica un look con ffmpeg. El oscuro baja las luces, quita 15 % de saturación y suma una viñeta suave. Si lo pides, te entrega un antes y después con barra deslizante.",
-    "en": "It applies a look with ffmpeg. Dark pulls the highlights down, removes 15% saturation and adds a soft vignette. On request it gives you a before and after with a sliding bar."
+    "es": "Le pone a tu video un look cálido, oscuro, limpio o en blanco y negro, con la intensidad que quieras, o lo ajusta con palabras como «un poco más cálido». Puede entregar un antes y después con barra deslizante y revisa en una hoja de cuadros que la piel no se queme.",
+    "en": "Gives your video a warm, dark, clean or black and white look at the strength you want, or adjusts it from plain words like \"a bit warmer\". It can deliver a before and after slider and checks a frame sheet so skin never gets blown out."
   },
   "you_say": {
     "es": [
-      "Dale un look oscuro a mi video",
-      "Hazlo más cálido",
+      "Dale un look cálido a mi video",
+      "Hazlo más oscuro, tipo cine",
+      "Pásalo a blanco y negro",
+      "Un poco más cálido y menos contraste",
       "Enséñame el antes y después con barra"
     ],
     "en": [
-      "Give my video a dark look",
-      "Make it warmer",
-      "Show me the before and after with a slider"
+      "Give my video a warm look",
+      "Make it darker and moodier",
+      "Turn it black and white",
+      "A bit warmer and less contrast",
+      "Show me a before and after slider"
     ]
   },
   "needs": {
     "es": [
       "Claude Code",
       "ffmpeg",
-      "Python 3.9 o más nuevo"
+      "Python 3.9 o más nuevo con Pillow y numpy",
+      "rembg (opcional)"
     ],
     "en": [
       "Claude Code",
       "ffmpeg",
-      "Python 3.9 or newer"
+      "Python 3.9+ with Pillow and numpy",
+      "rembg (optional)"
     ]
   },
   "time": {
-    "es": "Menos de 1 minuto por minuto de video.",
-    "en": "Under 1 minute per minute of video."
+    "es": "unos 2 a 4 segundos por cada 10 segundos de video",
+    "en": "about 2 to 4 seconds per 10 seconds of video"
   },
-  "version": "1.0",
-  "placeholder": true
+  "version": "1.0"
 }

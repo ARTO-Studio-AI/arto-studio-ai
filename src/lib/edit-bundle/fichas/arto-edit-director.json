@@ -7,43 +7,46 @@
     "en": "Director"
   },
   "tagline": {
-    "es": "Storyboard escena por escena y edición completa.",
-    "en": "Scene-by-scene storyboard and full edit."
+    "es": "Primero el storyboard, después la edición completa con los otros 8 skills.",
+    "en": "Storyboard first, then the full edit with the other 8 skills."
   },
   "what": {
-    "es": "Lee tu video y propone un storyboard escena por escena: tiempo, lo que se dice, efecto y recurso. No edita nada hasta que lo apruebas. Después llama a los otros 8 skills en orden y revisa el resultado con una hoja de cuadros.",
-    "en": "It reads your video and proposes a scene-by-scene storyboard: timing, what is said, effect and asset. It edits nothing until you approve. Then it calls the other 8 skills in order and checks the result with a contact sheet."
+    "es": "Lee tu video, te propone un storyboard escena por escena con lo que se dice, el efecto y el recurso, y no edita nada hasta que lo apruebas. Luego llama a los otros skills del bundle en orden, ajusta los tiempos después de cortar y al final verifica con hoja de cuadros y Whisper contra el guion.",
+    "en": "Reads your video, proposes a scene by scene storyboard with what is said, the effect and the asset, and edits nothing until you approve it. Then it runs the other bundle skills in order, updates the timing after cuts and checks the result with a frame sheet and Whisper against the script."
   },
   "you_say": {
     "es": [
       "Edita mi video completo",
-      "Hazme el storyboard antes de editar",
-      "Edítalo como reel, con subtítulos y música"
+      "Arma primero el storyboard",
+      "¿Qué le pondrías a este video?",
+      "Aprobado, edítalo"
     ],
     "en": [
       "Edit my whole video",
-      "Give me the storyboard before editing",
-      "Edit it as a reel, with captions and music"
+      "Make a storyboard first",
+      "What would you add to this video?",
+      "Approved, go ahead and edit"
     ]
   },
   "needs": {
     "es": [
       "Claude Code",
       "ffmpeg",
-      "Python 3.9 o más nuevo",
-      "Los otros 8 skills del bundle"
+      "Python 3.9 o más nuevo con Pillow y numpy",
+      "Whisper",
+      "Los skills del ARTO Edit Bundle #1 que use el storyboard"
     ],
     "en": [
       "Claude Code",
       "ffmpeg",
-      "Python 3.9 or newer",
-      "The other 8 skills in the bundle"
+      "Python 3.9+ with Pillow and numpy",
+      "Whisper",
+      "The ARTO Edit Bundle #1 skills the storyboard uses"
     ]
   },
   "time": {
-    "es": "Depende de los efectos: de 15 a 40 minutos para un video de 1 minuto.",
-    "en": "Depends on the effects: 15 to 40 minutes for a 1 minute video."
+    "es": "el storyboard en menos de un minuto; la edición, la suma de los skills que use",
+    "en": "the storyboard in under a minute; the edit takes the sum of the skills it uses"
   },
-  "version": "1.0",
-  "placeholder": true
+  "version": "1.0"
 }

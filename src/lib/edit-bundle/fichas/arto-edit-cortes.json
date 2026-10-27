@@ -7,23 +7,23 @@
     "en": "Cuts"
   },
   "tagline": {
-    "es": "Quita silencios, muletillas y tomas repetidas.",
-    "en": "Removes silences, filler words and repeated takes."
+    "es": "Quita silencios, muletillas y tomas repetidas sin perder la sincronía.",
+    "en": "Removes silences, filler words and repeated takes without breaking sync."
   },
   "what": {
-    "es": "Transcribe tu video con marcas de tiempo por palabra y encuentra los silencios con ffmpeg. Te entrega la lista de cortes para que la apruebes y solo entonces corta. Tu archivo original no se toca.",
-    "en": "It transcribes your video with word-level timestamps and finds the silences with ffmpeg. You get the list of cuts to approve, and only then does it cut. Your original file is never touched."
+    "es": "Transcribe tu video palabra por palabra, mide los silencios y te enseña la lista de cortes en una tabla. Cuando dices que sí, corta dejando 0.08 s de aire y comprueba que audio y video siguen juntos. La lista queda en JSON para poner whooshes después.",
+    "en": "Transcribes your video word by word, measures the silences and shows you the list of cuts in a table. Once you say yes, it cuts with 0.08 s of breathing room and checks that audio and video still line up. The list is saved as JSON so you can add whooshes later."
   },
   "you_say": {
     "es": [
-      "Quítale los silencios a mi video",
-      "Corta las muletillas y las tomas repetidas",
-      "Déjalo más ágil, sin pausas"
+      "Quita los silencios de mi video",
+      "Quita las muletillas y la toma repetida",
+      "Hazlo más dinámico"
     ],
     "en": [
       "Remove the silences from my video",
-      "Cut the filler words and repeated takes",
-      "Tighten it up, no pauses"
+      "Cut the filler words and the repeated take",
+      "Make it snappier"
     ]
   },
   "needs": {
@@ -31,19 +31,18 @@
       "Claude Code",
       "ffmpeg",
       "Python 3.9 o más nuevo",
-      "Whisper (el skill lo instala)"
+      "Whisper (mlx-whisper en Mac con chip M u openai-whisper)"
     ],
     "en": [
       "Claude Code",
       "ffmpeg",
       "Python 3.9 or newer",
-      "Whisper (the skill installs it)"
+      "Whisper (mlx-whisper on Apple Silicon or openai-whisper)"
     ]
   },
   "time": {
-    "es": "Unos 2 minutos por minuto de video.",
-    "en": "About 2 minutes per minute of video."
+    "es": "unos 30 s por minuto de video en Mac con chip M",
+    "en": "about 30 s per minute of video on Apple Silicon"
   },
-  "version": "1.0",
-  "placeholder": true
+  "version": "1.0"
 }

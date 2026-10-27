@@ -7,43 +7,42 @@
     "en": "Captions"
   },
   "tagline": {
-    "es": "Subtítulos palabra por palabra, de 2 a 3 palabras.",
-    "en": "Word-by-word captions, 2 to 3 words at a time."
+    "es": "Subtítulos palabra por palabra, limpios y en el tercio inferior.",
+    "en": "Clean word-by-word captions in the lower third."
   },
   "what": {
-    "es": "Transcribe con Whisper y arma subtítulos de 2 a 3 palabras, blancos con sombra y sin caja, en el tercio inferior. Si quieres, resalta la palabra que se está diciendo. Cada subtítulo se dibuja como imagen, así que funciona con cualquier ffmpeg.",
-    "en": "It transcribes with Whisper and builds 2 to 3 word captions, white with a shadow and no box, in the lower third. It can highlight the word being spoken. Each caption is drawn as an image, so it works with any ffmpeg build."
+    "es": "Pone subtítulos de 2 a 3 palabras en blanco con sombra suave, sin caja, que nunca juntan dos frases ni se salen del margen. Si quieres, la palabra que se está diciendo va en naranja. También te da el .srt.",
+    "en": "Adds 2 to 3 word captions in white with a soft shadow and no box, never mixing two sentences or leaving the safe margin. Optionally, the word being spoken turns orange. You also get the .srt file."
   },
   "you_say": {
     "es": [
       "Ponle subtítulos a mi video",
-      "Subtítulos palabra por palabra con la palabra activa en naranja",
-      "Pon los subtítulos más arriba, que no tapen el texto"
+      "Subtítulos con la palabra resaltada",
+      "Sácame el srt"
     ],
     "en": [
       "Add captions to my video",
-      "Word-by-word captions with the active word in orange",
-      "Move the captions up so they do not cover the text"
+      "Captions with the active word highlighted",
+      "Make me an srt"
     ]
   },
   "needs": {
     "es": [
       "Claude Code",
-      "ffmpeg",
-      "Python 3.9 o más nuevo",
-      "Whisper y Pillow (el skill los instala)"
+      "ffmpeg (no necesita libass)",
+      "Python 3.9 o más nuevo con Pillow",
+      "Whisper (mlx-whisper en Mac con chip M u openai-whisper)"
     ],
     "en": [
       "Claude Code",
-      "ffmpeg",
-      "Python 3.9 or newer",
-      "Whisper and Pillow (the skill installs them)"
+      "ffmpeg (no libass needed)",
+      "Python 3.9 or newer with Pillow",
+      "Whisper (mlx-whisper on Apple Silicon or openai-whisper)"
     ]
   },
   "time": {
-    "es": "Unos 2 minutos por minuto de video.",
-    "en": "About 2 minutes per minute of video."
+    "es": "unos 35 s por minuto de video en Mac con chip M",
+    "en": "about 35 s per minute of video on Apple Silicon"
   },
-  "version": "1.0",
-  "placeholder": true
+  "version": "1.0"
 }
