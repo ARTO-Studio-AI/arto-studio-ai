@@ -1,0 +1,48 @@
+{
+  "slug": "arto-edit-letras-detras",
+  "order": 3,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Letras detrás",
+    "en": "Text behind you"
+  },
+  "tagline": {
+    "es": "Tu titular, detrás de tu cabeza.",
+    "en": "Your headline, behind your head."
+  },
+  "what": {
+    "es": "Recorta a la persona cuadro por cuadro y pone un titular grande de una o dos palabras detrás de ella, con una entrada animada. La cabeza tapa parte de las letras y el resto del video queda igual.",
+    "en": "It cuts out the person frame by frame and places a big one or two word headline behind them, with an animated entrance. Your head covers part of the letters and the rest of the video stays the same."
+  },
+  "you_say": {
+    "es": [
+      "Pon «EL PLAN» detrás de mí en el segundo 3",
+      "Pon letras detrás de mi cabeza cuando digo «criterio»",
+      "Hazlo en blanco y con Manrope"
+    ],
+    "en": [
+      "Put \"THE PLAN\" behind me at second 3",
+      "Put the text behind my head when I say \"criteria\"",
+      "Make it white, in Manrope"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "rembg (se instala solo)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "rembg (installs itself)"
+    ]
+  },
+  "time": {
+    "es": "unos 16 segundos por un tramo de 3 s en una Mac con chip M",
+    "en": "about 16 seconds for a 3 s segment on an Apple silicon Mac"
+  },
+  "version": "1.0"
+}

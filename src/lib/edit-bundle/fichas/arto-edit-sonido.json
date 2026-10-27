@@ -1,0 +1,48 @@
+{
+  "slug": "arto-edit-sonido",
+  "order": 8,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Sonido",
+    "en": "Sound"
+  },
+  "tagline": {
+    "es": "Música que baja cuando hablas, whooshes en los cortes y volumen listo para redes.",
+    "en": "Music that ducks under your voice, whooshes on every cut and loudness ready for social."
+  },
+  "what": {
+    "es": "Mezcla tu música con ducking bajo la voz, pone un whoosh antes de cada corte y un pop en cada aparición, y deja el master a -14 LUFS con pico de -2 dB en doble pasada. Al final mide el archivo y te dice el resultado. Trae sus propios efectos, libres para usar.",
+    "en": "Mixes your music with ducking under the voice, adds a whoosh before every cut and a pop on every pop-up, and masters to -14 LUFS with a -2 dB peak in two passes. It measures the final file and tells you the numbers. Ships with its own royalty-free effects."
+  },
+  "you_say": {
+    "es": [
+      "Ponle música y baja la música cuando hablo",
+      "Ponle whooshes en los cortes",
+      "Déjalo a -14 LUFS"
+    ],
+    "en": [
+      "Add music and duck it under my voice",
+      "Add whooshes on the cuts",
+      "Master it to -14 LUFS"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo con numpy",
+      "Tu música (o la cama de prueba incluida)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer with numpy",
+      "Your own music (or the included test bed)"
+    ]
+  },
+  "time": {
+    "es": "unos 5 s por minuto de video",
+    "en": "about 5 s per minute of video"
+  },
+  "version": "1.0"
+}

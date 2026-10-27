@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-10-27T12:58:06.394Z",
+  "demos": {
+    "arto-edit-cortes": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-subtitulos": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-letras-detras": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-recuadros": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-titulares": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-color": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-zooms": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-sonido": {
+      "mp4": true,
+      "jpg": true
+    },
+    "arto-edit-director": {
+      "mp4": true,
+      "jpg": true
+    }
+  },
+  "packages": {
+    "arto-edit-cortes": {
+      "bytes": 21265,
+      "sha256": "a9636f02646a48055b061ce47502954c0233a3fbe7bf5fd65d0fb4013b4d6109"
+    },
+    "arto-edit-subtitulos": {
+      "bytes": 397461,
+      "sha256": "8b3550123fdf4ec1568c0b965e4ed9d78c02679347cccc416e65e732536eea80"
+    },
+    "arto-edit-letras-detras": {
+      "bytes": 124003,
+      "sha256": "b8aa0b96833be6c63630f5f7b085018597b4a028253852523dacd107ffd54a30"
+    },
+    "arto-edit-recuadros": {
+      "bytes": 339660,
+      "sha256": "d6a26ac2f755ef5a30e237d59e8d28bc0d32e9c5f812cb8eb846f5b4d9584d35"
+    },
+    "arto-edit-titulares": {
+      "bytes": 876150,
+      "sha256": "a24465480861d9dbc894acd090b778d9730e5fb852e430de1829c3de06efedce"
+    },
+    "arto-edit-color": {
+      "bytes": 332943,
+      "sha256": "649acd32543c353225ad70c8c9df69542165e2d33d162d007f33e217f8643149"
+    },
+    "arto-edit-zooms": {
+      "bytes": 20517,
+      "sha256": "d1d8d70e3bbc3c3cab22741a67fdd042764784de673dfc147f3e112f313c2b3d"
+    },
+    "arto-edit-sonido": {
+      "bytes": 99733,
+      "sha256": "e30be1b7b467ba6bcfff9aa9790422dfa2f41cc84d34e746b9d10996c9fec272"
+    },
+    "arto-edit-director": {
+      "bytes": 388995,
+      "sha256": "5a5b99c5e90de820ecb4bfe05b5e04bd285cef98f2bf63b75a655cf128c75c11"
+    },
+    "arto-edit-bundle-1": {
+      "bytes": 2566629,
+      "sha256": "21dd084877ff1e4e7f4229b6271a41058b19a3cbe1cf0ff4f549e988e7f8d237"
+    }
+  }
+}

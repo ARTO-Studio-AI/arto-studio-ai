@@ -1,0 +1,48 @@
+{
+  "slug": "arto-edit-subtitulos",
+  "order": 2,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Subtítulos",
+    "en": "Captions"
+  },
+  "tagline": {
+    "es": "Subtítulos palabra por palabra, limpios y en el tercio inferior.",
+    "en": "Clean word-by-word captions in the lower third."
+  },
+  "what": {
+    "es": "Pone subtítulos de 2 a 3 palabras en blanco con sombra suave, sin caja, que nunca juntan dos frases ni se salen del margen. Si quieres, la palabra que se está diciendo va en naranja. También te da el .srt.",
+    "en": "Adds 2 to 3 word captions in white with a soft shadow and no box, never mixing two sentences or leaving the safe margin. Optionally, the word being spoken turns orange. You also get the .srt file."
+  },
+  "you_say": {
+    "es": [
+      "Ponle subtítulos a mi video",
+      "Subtítulos con la palabra resaltada",
+      "Sácame el srt"
+    ],
+    "en": [
+      "Add captions to my video",
+      "Captions with the active word highlighted",
+      "Make me an srt"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg (no necesita libass)",
+      "Python 3.9 o más nuevo con Pillow",
+      "Whisper (mlx-whisper en Mac con chip M u openai-whisper)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg (no libass needed)",
+      "Python 3.9 or newer with Pillow",
+      "Whisper (mlx-whisper on Apple Silicon or openai-whisper)"
+    ]
+  },
+  "time": {
+    "es": "unos 35 s por minuto de video en Mac con chip M",
+    "en": "about 35 s per minute of video on Apple Silicon"
+  },
+  "version": "1.0"
+}

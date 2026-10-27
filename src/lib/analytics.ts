@@ -69,6 +69,8 @@ export interface AnalyticsEvents {
   favorite_added: { prompt_id: string };
   pricing_viewed: { locale: string; signed_in: boolean };
   checkout_started: { plan: "pro"; price_usd: number; locale: string; signed_in: boolean };
+  /* Servidor (GET /api/skill-downloads/[slug]): descarga entregada de un skill del ARTO Edit Bundle #1. */
+  skill_downloaded: { skill: string; tier: AnalyticsTier; promo: boolean; locale: string };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEvents;

@@ -121,6 +121,7 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `favorite_added` | favorito guardado con éxito (quitar no cuenta) | `prompt_id` | `src/app/[locale]/(marketing)/prompts/[id]/FavoriteButton.tsx` |
 | `pricing_viewed` | al montar `/[locale]/pricing` | `locale`, `signed_in` | `src/app/[locale]/(marketing)/pricing/page.tsx` |
 | `checkout_started` | clic en el CTA de Pro, antes de crear la sesión de Stripe | `plan` (`pro`), `price_usd`, `locale`, `signed_in` | `src/app/[locale]/(marketing)/pricing/ProCheckoutButton.tsx` |
+| `skill_downloaded` | descarga entregada de un skill del ARTO Edit Bundle #1 (Victor, 27 oct 2026). Solo con consentimiento de analítica; aparte, cada descarga deja siempre una línea `skill_download` (user_id, slug, tier, promo, hora) en los logs de Vercel | `skill` (slug), `tier`, `promo`, `locale` | `src/app/api/skill-downloads/[slug]/route.ts` (servidor) |
 
 Lo que **no** se manda a PostHog: email, nombre, empresa, rol, el texto de las búsquedas, el cuerpo de los
 prompts, el referrer completo (solo lo que PostHog captura por su cuenta como `$referrer`).

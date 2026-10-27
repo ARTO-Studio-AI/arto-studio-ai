@@ -1,0 +1,50 @@
+{
+  "slug": "arto-edit-recuadros",
+  "order": 4,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Recuadros",
+    "en": "Pop-up cards"
+  },
+  "tagline": {
+    "es": "Tarjetas que aparecen justo cuando las nombras.",
+    "en": "Cards that pop up right when you say it."
+  },
+  "what": {
+    "es": "Pone tarjetas flotantes con una captura, otro clip, un prompt que se escribe solo o un ícono, con esquinas redondeadas, sombra suave y un pequeño rebote. Entran con la palabra que las menciona y nunca te tapan la cara.",
+    "en": "It adds floating cards with a screenshot, another clip, a prompt that types itself or an icon, with rounded corners, a soft shadow and a little bounce. They come in on the word that mentions them and never cover your face."
+  },
+  "you_say": {
+    "es": [
+      "Muestra el prompt cuando digo «prompts»",
+      "Pon la captura del sitio cuando digo «PRO»",
+      "Pon un check con «Sin tarjeta» en el segundo 1.3"
+    ],
+    "en": [
+      "Show the prompt when I say \"prompts\"",
+      "Show the site screenshot when I say \"PRO\"",
+      "Add a check icon saying \"No card\" at second 1.3"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "rembg (se instala solo)",
+      "Whisper, opcional"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "rembg (installs itself)",
+      "Whisper, optional"
+    ]
+  },
+  "time": {
+    "es": "unos 15 segundos por un clip de 8 s con dos tarjetas",
+    "en": "about 15 seconds for an 8 s clip with two cards"
+  },
+  "version": "1.0"
+}

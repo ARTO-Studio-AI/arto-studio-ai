@@ -1,0 +1,52 @@
+{
+  "slug": "arto-edit-zooms",
+  "order": 7,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Zooms",
+    "en": "Zooms"
+  },
+  "tagline": {
+    "es": "Zooms suaves hacia la cara en las frases que importan, sin temblor.",
+    "en": "Smooth push-in zooms on the lines that matter, with no jitter."
+  },
+  "what": {
+    "es": "Hace zooms de empuje de 1.0 a 1.12 en 0.4 s con curva suave, anclados en tu cara para que nunca corten la cabeza y como máximo uno cada 6 segundos. Tú dices los segundos o las frases, o el skill las elige con Whisper.",
+    "en": "Adds push-in zooms from 1.0 to 1.12 in 0.4 s with an ease curve, anchored on your face so your head is never cut, and never more than one every 6 seconds. You pick the seconds or the lines, or the skill picks them with Whisper."
+  },
+  "you_say": {
+    "es": [
+      "Ponle zooms a mi video",
+      "Haz zoom cuando digo «el problema»",
+      "Elige tú dónde van los zooms",
+      "Zoom en el segundo 4 y que regrese de golpe"
+    ],
+    "en": [
+      "Add zooms to my video",
+      "Zoom in when I say \"the problem\"",
+      "You choose where the zooms go",
+      "Zoom at second 4 and snap back"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo con Pillow y numpy",
+      "rembg (recomendado)",
+      "Whisper (para frases o modo automático)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9+ with Pillow and numpy",
+      "rembg (recommended)",
+      "Whisper (for lines or auto mode)"
+    ]
+  },
+  "time": {
+    "es": "unos 15 a 25 segundos por cada 10 segundos de video",
+    "en": "about 15 to 25 seconds per 10 seconds of video"
+  },
+  "version": "1.0"
+}

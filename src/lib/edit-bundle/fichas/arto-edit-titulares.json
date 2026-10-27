@@ -1,0 +1,48 @@
+{
+  "slug": "arto-edit-titulares",
+  "order": 5,
+  "category": "edicion-de-video",
+  "name": {
+    "es": "Titulares",
+    "en": "Headlines"
+  },
+  "tagline": {
+    "es": "Tu video, con portada de revista.",
+    "en": "Your video, with a magazine cover."
+  },
+  "what": {
+    "es": "Pone un masthead grande en serif de revista con una línea fina y una línea de apoyo, con entrada animada. El color se elige solo según el fondo y, si quieres, el masthead queda detrás de ti.",
+    "en": "It adds a big magazine serif masthead with a thin rule and a support line, with an animated entrance. The color adapts to the background and, if you want, the masthead goes behind you."
+  },
+  "you_say": {
+    "es": [
+      "Ponle un titular de revista que diga «Norte»",
+      "Pon «Norte» detrás de mí como portada",
+      "Agrega abajo «Edición 01 · Prompts que sí sirven»"
+    ],
+    "en": [
+      "Add a magazine headline that says \"Norte\"",
+      "Put \"Norte\" behind me like a magazine cover",
+      "Add \"Issue 01 · Prompts that work\" below"
+    ]
+  },
+  "needs": {
+    "es": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 o más nuevo",
+      "rembg para ponerlo detrás (se instala solo)"
+    ],
+    "en": [
+      "Claude Code",
+      "ffmpeg",
+      "Python 3.9 or newer",
+      "rembg to put it behind you (installs itself)"
+    ]
+  },
+  "time": {
+    "es": "de 10 a 20 segundos por titular",
+    "en": "10 to 20 seconds per headline"
+  },
+  "version": "1.0"
+}
