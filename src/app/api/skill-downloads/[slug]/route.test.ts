@@ -21,8 +21,8 @@ vi.mock("next/server", async (orig) => {
 
 const { GET } = await import("./route");
 
-const BEFORE = new Date("2026-11-03T05:59:59Z");
-const AFTER = new Date("2026-11-03T06:00:00Z");
+const BEFORE = new Date("2026-11-08T05:59:59Z");
+const AFTER = new Date("2026-11-08T06:00:00Z");
 const ZIP = Buffer.from("PK\u0003\u0004fake");
 
 function req(slug: string, cookies: Record<string, string> = {}) {

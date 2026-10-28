@@ -2,15 +2,15 @@
  * docs/DECISIONES.md, «ARTO Edit Bundle #1»).
  *
  *  - Los 9 skills y el bundle son parte de Pro (el Pro de 9 USD que ya existe en Stripe).
- *  - Promocion: del 27 oct al 2 nov de 2026 se descargan gratis con cualquier cuenta gratis.
- *  - Desde el 3 nov a las 00:00 de Ciudad de Mexico (06:00 UTC) solo Pro.
+ *  - Promocion: del 27 oct al 7 nov de 2026 (Victor la amplio el 28 oct, antes era al 2 nov) se descargan gratis con cualquier cuenta gratis.
+ *  - Desde el 8 nov a las 00:00 de Ciudad de Mexico (06:00 UTC) solo Pro.
  *
  * El corte vive en UNA constante para que nadie tenga que acordarse de quitarlo. Las pruebas
  * (access.test.ts) revisan los dos lados de la fecha. Este archivo no toca base ni red: es
  * logica pura, la usan las paginas (etiqueta y boton) y la ruta de descarga (permiso). */
 
-/** Primer instante en que la descarga gratis YA NO aplica. 2026-11-03 00:00 en CDMX (UTC-6). */
-export const EDIT_BUNDLE_FREE_UNTIL = "2026-11-03T06:00:00Z";
+/** Primer instante en que la descarga gratis YA NO aplica. 2026-11-08 00:00 en CDMX (UTC-6). */
+export const EDIT_BUNDLE_FREE_UNTIL = "2026-11-08T06:00:00Z";
 
 const FREE_UNTIL_MS = Date.parse(EDIT_BUNDLE_FREE_UNTIL);
 
@@ -40,7 +40,7 @@ export function downloadAccess(viewer: Viewer, now: Date = new Date()): Download
   return isPromoActive(now) ? "download" : "upgrade";
 }
 
-/** Etiqueta de las tarjetas: "free" (Gratis hasta el 2 nov) o "pro". */
+/** Etiqueta de las tarjetas: "free" (Gratis hasta el 7 nov) o "pro". */
 export function priceLabel(now: Date = new Date()): "free" | "pro" {
   return isPromoActive(now) ? "free" : "pro";
 }
