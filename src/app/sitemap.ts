@@ -36,6 +36,7 @@ const STATIC_MARKETING_PATHS = [
   { path: "/skills", changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
   { path: EDIT_BUNDLE_PAGE, changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
   ...EDIT_SKILL_SLUGS.map((slug) => ({ path: `/skills/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
+  { path: "/mods", changeFrequency: "weekly" as ChangeFreq, priority: 0.7 },
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/prompts", changeFrequency: "daily" as ChangeFreq, priority: 0.9 },

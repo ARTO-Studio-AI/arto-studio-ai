@@ -146,6 +146,7 @@ export type SeoPageKey =
   | "learn"
   | "skills"
   | "agents"
+  | "mods"
   | "work"
   | "tools"
   | "privacy"
@@ -243,6 +244,21 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
         title: "Skills para Claude: edición de video y más · ARTO Studio AI",
         description:
           "Skills descargables para Claude Code. Empieza con el ARTO Edit Bundle #1: 9 skills para editar video vertical. Los de estrategia de marca vienen en camino.",
+      },
+    },
+  },
+  mods: {
+    path: "/mods",
+    copy: {
+      en: {
+        title: "Mods for Claude Code · ARTO Studio AI",
+        description:
+          "Plugins and hooks for Claude Code audited line by line by ARTO Studio AI. Install the exact copy we reviewed, with a guide and checksums.",
+      },
+      es: {
+        title: "Mods para Claude Code · ARTO Studio AI",
+        description:
+          "Plugins y hooks para Claude Code auditados línea por línea por ARTO Studio AI. Instala la copia exacta que revisamos, con guía y huellas.",
       },
     },
   },

@@ -33,6 +33,7 @@ export default function Footer({ locale, footer }: Props) {
                 {footer.skills}
                 <Badge tone="soon">{locale === "es" ? "Pronto" : "Soon"}</Badge>
               </Link>
+              <Link href={lp("/mods")} className={link}>{footer.mods}</Link>
               <Link href={lp("/agents")} className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-600">
                 {footer.agents}
                 <Badge tone="soon">{locale === "es" ? "Pronto" : "Soon"}</Badge>

@@ -76,6 +76,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
   const products = [
     { href: LIBRARY_HREF, title: nav.prompt_library, blurb: nav.prompt_library_blurb, badge: nav.badge_live, tone: "live" as const },
     { href: lp("/skills"), title: nav.skills_studio, blurb: nav.skills_studio_blurb, badge: nav.badge_soon, tone: "soon" as const },
+    { href: lp("/mods"), title: nav.mods, blurb: nav.mods_blurb, badge: nav.badge_soon, tone: "soon" as const },
     { href: lp("/agents"), title: nav.ai_agents, blurb: nav.ai_agents_blurb, badge: nav.badge_soon, tone: "soon" as const },
   ];
 
