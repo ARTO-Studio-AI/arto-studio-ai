@@ -59,9 +59,19 @@ describe("activeNavId", () => {
     expect(activeNavId("/es/account", "es")).toBe("account");
   });
 
-  it("en /learn marca Tutoriales, no el atajo Lo nuevo", () => {
-    expect(activeNavId("/es/learn", "es")).toBe("tutorials");
-    expect(activeNavId("/es/learn/branding", "es")).toBe("tutorials");
+  it("separa Lo nuevo (/learn) de Tutoriales (/tutoriales y su alias /tutorials)", () => {
+    expect(activeNavId("/es/learn", "es")).toBe("new");
+    expect(activeNavId("/es/learn/branding", "es")).toBe("new");
+    expect(activeNavId("/es/tutoriales", "es")).toBe("tutorials");
+    expect(activeNavId("/en/tutoriales/claude-code", "en")).toBe("tutorials");
+    expect(activeNavId("/en/tutorials", "en")).toBe("tutorials");
+  });
+
+  it("ningun destino comparte ruta con otro", () => {
+    const hrefs = allNavItems().map((i) => i.href.split(/[?#]/)[0]);
+    const withMatch = allNavItems().filter((i) => i.match.length > 0).map((i) => i.href.split(/[?#]/)[0]);
+    expect(new Set(withMatch).size).toBe(withMatch.length);
+    expect(hrefs.length).toBeGreaterThan(0);
   });
 
   it("no marca nada en rutas fuera del menu", () => {

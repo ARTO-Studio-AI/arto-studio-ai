@@ -14,8 +14,8 @@ import type { Category } from "@/types/prompt";
  *
  * Brand Positioning no tiene pagina para el usuario con sesion: solo corre en /studio, detras de
  * una API key de cliente y sin version bilingue. Se omite hasta que exista esa pagina.
- * «Lo nuevo» apunta a /learn, que se refresca cada 60 s con lo que publica la Content Factory;
- * «Tutoriales y guias» tambien va a /learn mientras no exista una ruta propia de tutoriales. */
+ * «Lo nuevo» apunta a /learn (guias y articulos, se refresca cada 60 s). «Tutoriales» va a
+ * /tutoriales (PR #115); /tutorials es su alias en ingles y redirige ahi. */
 
 export type AppNavId =
   | "new"
@@ -51,7 +51,7 @@ export const APP_NAV_GROUPS: AppNavGroup[] = [
   {
     id: "home",
     items: [
-      { id: "new", href: "/learn", match: [] },
+      { id: "new", href: "/learn", match: ["/learn"] },
       { id: "favorites", href: "/favorites", match: ["/favorites"] },
       { id: "collections", href: "/collections", match: ["/collections"] },
     ],
@@ -70,7 +70,7 @@ export const APP_NAV_GROUPS: AppNavGroup[] = [
     id: "library",
     items: [
       { id: "prompts", href: "/prompts", match: ["/prompts"] },
-      { id: "tutorials", href: "/learn", match: ["/learn"] },
+      { id: "tutorials", href: "/tutoriales", match: ["/tutoriales", "/tutorials"] },
       { id: "skills", href: "/skills", match: ["/skills"] },
       { id: "mods", href: "/mods", match: ["/mods"] },
     ],
