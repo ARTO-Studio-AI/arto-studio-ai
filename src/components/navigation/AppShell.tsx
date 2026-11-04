@@ -39,7 +39,7 @@ export default function AppShell({ locale, labels, footer, children }: Props) {
     <>
       <div className="flex flex-1">
         <AppSidebar locale={locale} labels={labels} active={active} />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-clip">{children}</main>
       </div>
       {footer}
       <div aria-hidden="true" className="h-[calc(3.5rem+1px+env(safe-area-inset-bottom))] shrink-0 md:hidden" />

@@ -53,9 +53,16 @@ export default function AppBottomNav({ locale, labels, active }: Props) {
         return;
       }
       if (e.key !== "Tab" || !panelRef.current) return;
-      const focusables = panelRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
-      );
+      /* Solo lo visible: los enlaces dentro de un <details> cerrado no reciben foco. */
+      const focusables = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => {
+        const details = el.closest("details");
+        if (details && !details.open && el.tagName !== "SUMMARY") return false;
+        return el.getClientRects().length > 0;
+      });
       if (focusables.length === 0) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
