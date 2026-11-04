@@ -53,6 +53,8 @@ export default function SmartSearch({ lang = "en" }: { lang?: Lang }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SearchResult | null>(null);
+  // Las tarjetas llegan antes que la explicacion: mientras, se dice que se esta escribiendo.
+  const [explaining, setExplaining] = useState(false);
 
   const examples = lang === "es" ? EXAMPLES_ES : EXAMPLES_EN;
 
@@ -60,31 +62,76 @@ export default function SmartSearch({ lang = "en" }: { lang?: Lang }) {
     e.preventDefault();
     if (loading || query.trim().length < 8) return;
     setLoading(true);
+    setExplaining(false);
     setError(null);
     setResult(null);
+    const started = performance.now();
+    let firstMs: number | undefined;
     try {
       const resp = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim(), lang }),
+        body: JSON.stringify({ query: query.trim(), lang, stream: true }),
       });
-      const data = await resp.json();
+      const isStream = resp.ok && (resp.headers.get("content-type") ?? "").includes("ndjson") && resp.body;
+      if (!isStream) {
+        // Errores (400, 429) y la busqueda sin coincidencias siguen llegando como JSON.
+        const data = await resp.json();
+        track("search_performed", {
+          lang,
+          query_length: query.trim().length,
+          results_count: resp.ok && Array.isArray(data?.prompts) ? data.prompts.length : 0,
+          ok: resp.ok,
+          total_ms: Math.round(performance.now() - started),
+        });
+        if (!resp.ok) setError(data.error || "Search failed");
+        else setResult(data);
+        return;
+      }
+      const reader = resp.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let count = 0;
+      let ok = true;
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (value) buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = done ? "" : lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const msg = JSON.parse(line);
+          if (msg.type === "prompts") {
+            firstMs = Math.round(performance.now() - started);
+            count = msg.prompts.length;
+            setResult({ explanation: "", prompts: msg.prompts, lang: msg.lang });
+            setLoading(false);
+            setExplaining(true);
+          } else if (msg.type === "final") {
+            count = msg.prompts.length;
+            setResult({ explanation: msg.explanation, prompts: msg.prompts, lang: msg.lang });
+          } else if (msg.type === "error") {
+            ok = false;
+            // Si ya hay tarjetas se quedan; solo falta la explicacion.
+            if (firstMs === undefined) setError(msg.error || "Search failed");
+          }
+        }
+        if (done) break;
+      }
       track("search_performed", {
         lang,
         query_length: query.trim().length,
-        results_count: resp.ok && Array.isArray(data?.prompts) ? data.prompts.length : 0,
-        ok: resp.ok,
+        results_count: count,
+        ok,
+        first_results_ms: firstMs,
+        total_ms: Math.round(performance.now() - started),
       });
-      if (!resp.ok) {
-        setError(data.error || "Search failed");
-      } else {
-        setResult(data);
-      }
     } catch {
       track("search_performed", { lang, query_length: query.trim().length, results_count: 0, ok: false });
       setError(lang === "es" ? "Error de red. Intenta otra vez." : "Network error. Try again.");
     } finally {
       setLoading(false);
+      setExplaining(false);
     }
   }
 
@@ -140,8 +187,21 @@ export default function SmartSearch({ lang = "en" }: { lang?: Lang }) {
         </div>
       )}
 
+      {loading && (
+        <p className="mt-4 flex items-center gap-2 text-sm text-zinc-500" role="status">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" aria-hidden="true" />
+          {dict.smart_search_finding}
+        </p>
+      )}
+
       {result && (
         <div className="mt-6 space-y-5">
+          {explaining && !result.explanation && (
+            <p className="flex items-center gap-2 text-sm text-zinc-500" role="status">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" aria-hidden="true" />
+              {dict.smart_search_explaining}
+            </p>
+          )}
           {result.explanation && (
             <div className="rounded-[var(--radius-lg)] border border-zinc-200 border-l-4 border-l-[var(--accent)] bg-white p-6 shadow-[var(--shadow-sm)]">
               <div className="mb-3 flex items-center gap-2 text-eyebrow text-zinc-500">
