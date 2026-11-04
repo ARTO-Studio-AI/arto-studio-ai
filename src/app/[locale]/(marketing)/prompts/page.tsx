@@ -7,6 +7,11 @@ import { MAX_QUERY_LENGTH } from "@/lib/catalog-search";
 import { createClient } from "@/lib/supabase/server";
 import { getSubject, getUsed, isUnlimitedTier } from "@/lib/prompt-limit";
 import PromptQuota from "@/components/PromptQuota";
+import ProUnlockBanner from "@/components/ProUnlockBanner";
+import LockIcon from "@/components/LockIcon";
+import { getProPromptCount } from "@/lib/pro-count";
+import { isAdminEmailAsync } from "@/lib/auth";
+import { getDictionary } from "@/i18n/dictionaries";
 import {
   AI_GROUPS,
   CATEGORY_STYLES,
@@ -100,6 +105,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
    * para free y anonimos; el listado en si no cuenta como apertura. */
   let quotaUsed: number | null = null;
   let signedIn = false;
+  // Pro, enterprise, grants y admins ya tienen todo: no ven franja ni candados (D28, 2026-11-05).
+  let viewerUnlimited = false;
   try {
     const sb = await createClient();
     const { data: { user } } = await sb.auth.getUser();
@@ -108,6 +115,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     if (user) {
       const { data: profile } = await sb.from("profiles").select("tier").eq("id", user.id).maybeSingle();
       tier = (profile?.tier as string | null) ?? "free";
+      viewerUnlimited = isUnlimitedTier(tier) || (await isAdminEmailAsync(user.email));
     }
     // Sin sesion no hay contador: abrir un prompt pide cuenta gratis (2026-10-06).
     if (user && !isUnlimitedTier(tier)) {
@@ -122,6 +130,10 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   } catch {
     quotaUsed = null;
   }
+
+  // Conteo real de prompts Pro (cache de una hora) para la franja; solo si se va a pintar.
+  const proCount = viewerUnlimited ? null : await getProPromptCount();
+  const proDict = getDictionary(locale).pro_unlock;
 
   // qs() preserves filter state across links. Locale lives in the path,
   // not the query, so the language toggle moved to the Nav LangSwitcher.
@@ -159,6 +171,10 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           </Link>
         )}
       </div>
+
+      {!viewerUnlimited && (
+        <ProUnlockBanner locale={locale} count={proCount} placement="catalog" className="mt-6" />
+      )}
 
       <div className="mt-6">
         <KeywordSearch lang={lang} q={q} filters={activeFilters} resultsCount={total} />
@@ -257,17 +273,24 @@ export default async function CatalogPage({ params, searchParams }: Props) {
             const tier = TIER_STYLES[p.tier];
             const aiGroup = aiGroupOf(p.ai_model);
             const aiInfo = AI_GROUPS[aiGroup];
+            // Tarjeta Pro con candado para visitantes y Free: se ve y se abre la ficha (vista previa).
+            const locked = p.tier !== "free" && !viewerUnlimited;
             return (
               <li key={p.id}>
                 <Link
                   href={`/${locale}/prompts/${p.id}`}
                   className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)]"
+                  title={locked ? proDict.card_locked_title : undefined}
+                  data-locked={locked ? "true" : undefined}
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-mono text-zinc-500">{p.id}</span>
                     <div className="flex items-center gap-1.5">
                       {p.is_featured && <span title="Editor's pick" className="text-[var(--accent)]" aria-label="Featured">★</span>}
-                      <Badge tone={p.tier === "free" ? "tier" : "inverse"}>{tier.label}</Badge>
+                      <Badge tone={p.tier === "free" ? "tier" : "inverse"} dot={locked ? false : undefined}>
+                        {locked && <LockIcon className="h-2.5 w-2.5" />}
+                        {tier.label}
+                      </Badge>
                     </div>
                   </div>
                   <h3 className="mt-2 line-clamp-2 font-medium">{title}</h3>
@@ -280,6 +303,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       {labelAiGroup(aiGroup)}
                     </span>
                   </div>
+                  {locked && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 group-hover:text-zinc-900">
+                      <LockIcon className="h-3 w-3" />
+                      {proDict.card_locked}
+                    </p>
+                  )}
                 </Link>
               </li>
             );

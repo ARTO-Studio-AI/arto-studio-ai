@@ -276,6 +276,21 @@ export const DICTIONARIES = {
       meta_title: "Pricing — ARTO Studio AI",
       meta_description: "Start free with 3 prompts a day. Unlock all 3,001 prompts for $9 USD a month. Studio and AI Agents coming soon.",
     },
+    // Lo Pro a la vista (D28, 2026-11-05): franja con conteo real, candado en tarjetas y ficha Pro bloqueada.
+    // {count} se reemplaza por el numero de prompts Pro leido de la base.
+    pro_unlock: {
+      strip_title: "Unlock {count} prompts with Pro",
+      strip_title_fallback: "Unlock the whole library with Pro",
+      strip_cta: "See Pro",
+      card_locked: "Opens with Pro",
+      card_locked_title: "Pro prompt: you see the title and what it does; the full text opens with Pro.",
+      locked_title: "This prompt is part of Pro",
+      locked_body_free: "Go Pro to open this one and the whole library, no daily limit.",
+      locked_body_anon: "Create your free account to open 3 free prompts a day, or go Pro to open this one and the whole library.",
+      locked_cta_pro: "Unlock with Pro",
+      locked_cta_signup: "Create free account",
+      preview_note: "Preview: the title, when to use it and the expected output. The prompt text opens with Pro.",
+    },
     skills: {
       badge: "Coming soon",
       h1: "Skills Studio",
@@ -785,6 +800,21 @@ export const DICTIONARIES = {
       ],
       meta_title: "Precios — ARTO Studio AI",
       meta_description: "Empieza gratis con 3 prompts al día. Desbloquea los 3,001 prompts por $9 USD al mes. Studio y Agentes de IA, próximamente.",
+    },
+    // Lo Pro a la vista (D28, 2026-11-05): franja con conteo real, candado en tarjetas y ficha Pro bloqueada.
+    // {count} se reemplaza por el numero de prompts Pro leido de la base.
+    pro_unlock: {
+      strip_title: "Desbloquea {count} prompts con Pro",
+      strip_title_fallback: "Desbloquea toda la biblioteca con Pro",
+      strip_cta: "Ver Pro",
+      card_locked: "Se abre con Pro",
+      card_locked_title: "Prompt Pro: ves el título y para qué sirve; el texto completo se abre con Pro.",
+      locked_title: "Este prompt es parte de Pro",
+      locked_body_free: "Hazte Pro para abrir este y toda la biblioteca, sin límite diario.",
+      locked_body_anon: "Crea tu cuenta gratis y abre 3 prompts gratis al día, o hazte Pro para abrir este y toda la biblioteca.",
+      locked_cta_pro: "Desbloquear con Pro",
+      locked_cta_signup: "Crear cuenta gratis",
+      preview_note: "Vista previa: el título, cuándo usarlo y el resultado esperado. El texto del prompt se abre con Pro.",
     },
     skills: {
       badge: "Muy pronto",
