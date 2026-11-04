@@ -230,7 +230,7 @@ export default async function HomePage({ params }: Props) {
 
         <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
           {figures.map((f) => (
-            <div key={f.label} className="flex min-w-0 flex-col-reverse gap-1 border-l-2 border-[var(--accent)] pl-4">
+            <div key={f.label} className="flex min-w-0 flex-col-reverse justify-end gap-1 border-l-2 border-[var(--accent)] pl-4">
               <dt className="text-sm text-zinc-500">{f.label}</dt>
               <dd className="font-display text-3xl font-extrabold tracking-[-0.02em] text-zinc-900 sm:text-4xl">{f.value}</dd>
             </div>
