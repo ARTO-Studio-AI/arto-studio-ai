@@ -33,6 +33,24 @@ export const HOME_V2: Record<Locale, {
   quote: string;
   quote_eyebrow: string;
   quote_by: string;
+  /* Para quien es, buscador abierto, cifras y herramientas (2026-11-05). Los textos de las dos
+   * tarjetas son los aprobados por Victor, literales. href va sin locale; la pagina lo antepone. */
+  who_eyebrow: string;
+  who_h2: string;
+  who_cards: { title: string; body: string; cta: string; href: string }[];
+  search_h2: string;
+  search_label: string;
+  search_placeholder: string;
+  search_button: string;
+  search_try: string;
+  search_examples: string[];
+  fig_prompts: string;
+  fig_verticals: string;
+  fig_skills: string;
+  fig_years_value: string;
+  fig_years: string;
+  tools_eyebrow: string;
+  tools_note: string;
 }> = {
   es: {
     eyebrow: "Por ARTO Group · Agencia creativa desde 2009",
@@ -65,6 +83,35 @@ export const HOME_V2: Record<Locale, {
     quote: "“Un prompt bueno no es una instrucción. Es una decisión de estrategia escrita para que la IA la ejecute.”",
     quote_eyebrow: "El método ARTO",
     quote_by: "ARTO Group · 98 marcas en Latinoamérica desde 2009",
+    who_eyebrow: "Para quién es",
+    who_h2: "Para quien hace trabajo creativo con poco equipo, o con ninguno.",
+    who_cards: [
+      {
+        title: "Trabajas solo o estás por arrancar",
+        body: "Vendes un servicio sin equipo, o estás por lanzar tu propio proyecto, y quieres una marca que no suene a lo que escribe cualquiera con IA.",
+        cta: "Empieza por tu posicionamiento",
+        href: "/prompts?q=posicionamiento",
+      },
+      {
+        title: "Tienes una agencia chica",
+        body: "Tu equipo cubre más perfiles de los que tiene y los fees vienen apretados. Usa el método de ARTO para entregar más con el mismo equipo.",
+        cta: "Ver prompts de productividad creativa",
+        href: "/prompts?category=creative_productivity",
+      },
+    ],
+    search_h2: "¿Qué tienes que entregar hoy?",
+    search_label: "Buscar en la biblioteca de prompts",
+    search_placeholder: "Naming, brief, guion…",
+    search_button: "Buscar",
+    search_try: "Prueba con:",
+    search_examples: ["naming", "brief", "guion", "pitch"],
+    fig_prompts: "prompts publicados",
+    fig_verticals: "verticales creativas",
+    fig_skills: "skills disponibles",
+    fig_years_value: "15+",
+    fig_years: "años de ARTO como agencia creativa",
+    tools_eyebrow: "Funcionan con",
+    tools_note: "Ordenadas por cuántos prompts del catálogo hay para cada una.",
   },
   en: {
     eyebrow: "By ARTO Group · Creative agency since 2009",
@@ -97,5 +144,34 @@ export const HOME_V2: Record<Locale, {
     quote: "“A good prompt is not an instruction. It's a strategy decision written for the AI to execute.”",
     quote_eyebrow: "The ARTO method",
     quote_by: "ARTO Group · 98 brands across Latin America since 2009",
+    who_eyebrow: "Who it's for",
+    who_h2: "For people doing creative work with a small team, or none.",
+    who_cards: [
+      {
+        title: "You work solo or you're about to launch",
+        body: "You sell a service without a team, or you're about to launch your own project, and you want a brand that doesn't sound like everyone else's AI output.",
+        cta: "Start with your positioning",
+        href: "/prompts?q=positioning",
+      },
+      {
+        title: "You run a small agency",
+        body: "Your team covers more roles than it has people, and fees keep getting squeezed. Use ARTO's method to deliver more with the same team.",
+        cta: "See creative productivity prompts",
+        href: "/prompts?category=creative_productivity",
+      },
+    ],
+    search_h2: "What do you need to ship today?",
+    search_label: "Search the prompt library",
+    search_placeholder: "Naming, brief, script…",
+    search_button: "Search",
+    search_try: "Try:",
+    search_examples: ["naming", "brief", "script", "pitch"],
+    fig_prompts: "published prompts",
+    fig_verticals: "creative verticals",
+    fig_skills: "skills available",
+    fig_years_value: "15+",
+    fig_years: "years of ARTO as a creative agency",
+    tools_eyebrow: "Works with",
+    tools_note: "Sorted by how many prompts in the catalog are written for each one.",
   },
 };

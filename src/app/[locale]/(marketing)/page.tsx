@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFeaturedPrompts, getStats } from "@/lib/supabase/queries";
+import { getFeaturedPrompts } from "@/lib/supabase/queries";
+import { getHomeFigures } from "@/lib/home-figures-server";
+import { VERTICAL_COUNT, formatPromptCount, type HomeTool } from "@/lib/home-figures";
+import { EDIT_SKILLS, packageAvailable } from "@/lib/edit-bundle/catalog";
 import { getRecentBlogPosts, type RecentBlogPost } from "@/lib/learn-pages";
 import { CATEGORY_STYLES, type Prompt } from "@/types/prompt";
 import { isLocale, type Locale } from "@/i18n/config";
@@ -14,16 +17,7 @@ import HowItWorks from "@/components/HowItWorks";
 import BlogCover from "@/components/BlogCover";
 import { HOME_V2 } from "./home-v2-copy";
 import { PROOF_PROJECTS } from "./work/projects";
-
-/* Round a precise prompt count to a tidy marketing-friendly figure.
- * Below 1k we show the exact number. Above, we round down to the
- * nearest 100 and stick a "+" so the public-facing claim never
- * overstates. Examples: 1842 → "1,800+", 3045 → "3,000+", 12 → "12". */
-function formatPromptCount(n: number): string {
-  if (n < 1000) return String(n);
-  const floored = Math.floor(n / 100) * 100;
-  return `${floored.toLocaleString("en-US")}+`;
-}
+import HomeSearch from "./HomeSearch";
 
 /* Each vertical maps to the catalog filter on /prompts. The code stays as
  * the display label, category is the DB enum used in the query. The human
@@ -120,16 +114,19 @@ export default async function HomePage({ params }: Props) {
   // Pull featured prompts + live total count + latest blog posts in
   // parallel. Each call has its own graceful fallback so a single
   // upstream hiccup doesn't blank-page the home.
-  const [featuredRes, statsRes, recentBlogsRes] = await Promise.allSettled([
+  // Total y herramientas salen de getHomeFigures, con cache de una hora (2026-11-05); antes
+  // getStats() contaba en la base en cada visita.
+  const [featuredRes, figuresRes, recentBlogsRes] = await Promise.allSettled([
     getFeaturedPrompts(6),
-    getStats(),
+    getHomeFigures(),
     getRecentBlogPosts(6),
   ]);
   const featured: Prompt[] =
     featuredRes.status === "fulfilled" ? featuredRes.value : [];
   const promptsTotalRaw =
-    statsRes.status === "fulfilled" ? statsRes.value.total : 3000;
+    figuresRes.status === "fulfilled" && figuresRes.value.promptsTotal > 0 ? figuresRes.value.promptsTotal : 3000;
   const promptsTotal = formatPromptCount(promptsTotalRaw);
+  const tools: HomeTool[] = figuresRes.status === "fulfilled" ? figuresRes.value.tools : [];
   const recentBlogs: RecentBlogPost[] =
     recentBlogsRes.status === "fulfilled" ? recentBlogsRes.value : [];
 
@@ -138,6 +135,17 @@ export default async function HomePage({ params }: Props) {
   // the live number here so the public-facing claim stays accurate as
   // the catalog grows.
   const withCount = (s: string) => s.replace(/\{n\}/g, promptsTotal);
+
+  /* Franja de cifras (2026-11-05): nada escrito a mano que envejezca. Prompts de la base,
+   * verticales del catalogo de tipos, skills con paquete descargable en el repo. El «15+» es
+   * la cifra que el sitio ya usa para los anos de ARTO (seo.ts, dictionaries.ts). */
+  const skillsAvailable = EDIT_SKILLS.filter((s) => packageAvailable(s.slug)).length;
+  const figures = [
+    { value: promptsTotal, label: v2.fig_prompts },
+    { value: String(VERTICAL_COUNT), label: v2.fig_verticals },
+    ...(skillsAvailable > 0 ? [{ value: String(skillsAvailable), label: v2.fig_skills }] : []),
+    { value: v2.fig_years_value, label: v2.fig_years },
+  ];
 
   // Pick the title in the active locale (Prompt type has both title_en and title_es).
   const promptTitle = (p: Prompt) => (locale === "es" ? p.title_es : p.title_en);
@@ -172,6 +180,79 @@ export default async function HomePage({ params }: Props) {
             className="h-auto w-full"
           />
         </div>
+      </section>
+
+      {/* PARA QUIEN ES (2026-11-05): justo debajo del hero. Textos de las tarjetas aprobados por
+        * Victor; cada una lleva a la parte de la biblioteca que le sirve a ese publico. */}
+      <section className="border-t border-zinc-200 py-16">
+        <SectionHead eyebrow={v2.who_eyebrow} title={v2.who_h2} className="mb-10" />
+        <div className="grid gap-4 md:grid-cols-2">
+          {v2.who_cards.map((c) => (
+            <div
+              key={c.title}
+              className="flex flex-col gap-3.5 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 shadow-[var(--shadow-sm)]"
+            >
+              <h3 className="text-2xl font-extrabold leading-tight">{c.title}</h3>
+              <p className="flex-1 text-[15px] text-zinc-600">{c.body}</p>
+              <Button href={lp(c.href)} variant="secondary" className="mt-1 self-start">
+                {c.cta}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* BUSCADOR ABIERTO, CIFRAS Y HERRAMIENTAS (2026-11-05). El buscador es un form GET a
+        * /prompts?q=, funciona sin JS. Las herramientas salen de los ai_model reales del catalogo,
+        * solo texto, sin logos de marcas. */}
+      <section className="border-t border-zinc-200 py-16">
+        <div className="grid gap-4 rounded-[var(--radius-lg)] bg-[var(--paper)] p-5 sm:p-8">
+          <h2 className="text-h2">{v2.search_h2}</h2>
+          <HomeSearch
+            locale={locale}
+            label={v2.search_label}
+            placeholder={v2.search_placeholder}
+            button={v2.search_button}
+          />
+          <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+            <span>{v2.search_try}</span>
+            {v2.search_examples.map((ex) => (
+              <Link
+                key={ex}
+                href={lp(`/prompts?q=${encodeURIComponent(ex)}`)}
+                className="inline-flex min-h-[36px] items-center rounded-full border border-zinc-300 bg-white px-3 text-xs text-zinc-700 hover:border-zinc-900"
+              >
+                {ex}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+          {figures.map((f) => (
+            <div key={f.label} className="flex min-w-0 flex-col-reverse justify-end gap-1 border-l-2 border-[var(--accent)] pl-4">
+              <dt className="text-sm text-zinc-500">{f.label}</dt>
+              <dd className="font-display text-3xl font-extrabold tracking-[-0.02em] text-zinc-900 sm:text-4xl">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {tools.length > 0 && (
+          <div className="mt-10">
+            <p className="text-eyebrow text-zinc-500">{v2.tools_eyebrow}</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {tools.map((tool) => (
+                <li
+                  key={tool.key}
+                  className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-800"
+                >
+                  {tool.label}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-zinc-500">{v2.tools_note}</p>
+          </div>
+        )}
       </section>
 
       {/* COMO FUNCIONA: el grafico de tres pasos que antes ocupaba el hero */}
