@@ -16,6 +16,8 @@ type Dict = {
   smart_search_hint: string;
   smart_search_placeholder: string;
   smart_search_thinking: string;
+  smart_search_finding: string;
+  smart_search_explaining: string;
   smart_search_cta: string;
   smart_search_recommendation: string;
   smart_search_more: string;
@@ -66,6 +68,8 @@ const en: Dict = {
   smart_search_hint: "Describe your project or need in plain language. We'll recommend prompts with reasons.",
   smart_search_placeholder: "e.g. I'm launching a craft beer brand and need naming + visual identity",
   smart_search_thinking: "Thinking…",
+  smart_search_finding: "Looking through the library…",
+  smart_search_explaining: "These are the closest prompts. Writing how to use them together…",
   smart_search_cta: "Find prompts →",
   smart_search_recommendation: "Recommendation",
   smart_search_more: "More from the catalog →",
@@ -116,6 +120,8 @@ const es: Dict = {
   smart_search_hint: "Describe tu proyecto o lo que necesitas. Te vamos a recomendar prompts con razones.",
   smart_search_placeholder: "ej. Estoy lanzando una marca de cerveza artesanal y necesito naming + identidad visual",
   smart_search_thinking: "Pensando…",
+  smart_search_finding: "Buscando en la biblioteca…",
+  smart_search_explaining: "Estos son los prompts más cercanos. Estoy escribiendo cómo usarlos juntos…",
   smart_search_cta: "Buscar prompts →",
   smart_search_recommendation: "Recomendación",
   smart_search_more: "Más del catálogo →",

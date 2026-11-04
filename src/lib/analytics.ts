@@ -64,7 +64,8 @@ export interface AnalyticsEvents {
   signup_wall_viewed: { prompt_id: string; locale: string };
   signup_wall_clicked: { prompt_id: string; locale: string };
   prompt_copied: { prompt_id: string; prompt_tier: string; locale: string };
-  search_performed: { lang: string; query_length: number; results_count: number; ok: boolean };
+  // first_results_ms: hasta que se ven las tarjetas; total_ms: hasta la explicacion (D28).
+  search_performed: { lang: string; query_length: number; results_count: number; ok: boolean; first_results_ms?: number; total_ms?: number };
   catalog_search: { lang: string; query_length: number; results_count: number };
   favorite_added: { prompt_id: string };
   pricing_viewed: { locale: string; signed_in: boolean };

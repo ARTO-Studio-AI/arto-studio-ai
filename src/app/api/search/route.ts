@@ -113,79 +113,109 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ explanation: "", prompts: [], lang });
     }
 
-    const candidatesText = matches
-      .map((c, i) => {
-        const titleField = lang === "es" ? c.title_es : c.title_en;
-        return `${i + 1}. [${c.id}] ${titleField} — category=${c.category}/${c.subcategory}, difficulty=${c.difficulty}, tier=${c.tier}. Use case: ${c.use_case ?? "n/a"}`;
-      })
-      .join("\n");
-
-    const systemPrompt = lang === "es"
-      ? `Eres un coach creativo del catálogo ARTO Studio AI Prompt Library. Hablas español de México (tú/tienes/quieres, NUNCA vos/tenés/acá). Tu trabajo: cuando alguien describe su proyecto, le entregas no solo prompts sino una mini-estrategia de cómo usarlos. Tono directo, accionable, sin relleno corporativo. Evita las palabras prohibidas de ARTO: leverage, empower, robust, holistic, ecosystem, scalable, optimize, elevate, foster.`
-      : `You are a creative coach for the ARTO Studio AI Prompt Library catalog. When someone describes their project, you deliver not only prompts but a mini-strategy on how to use them. Direct tone, actionable, no corporate filler. Avoid: leverage, empower, robust, holistic, ecosystem, scalable, optimize, elevate, foster.`;
-
-    const userPrompt = lang === "es"
-      ? `Un usuario describe lo que necesita:\n"${query}"\n\nTienes 20 prompts del catálogo más cercanos por similitud semántica:\n\n${candidatesText}\n\nElige los 4 a 6 más útiles para su caso y respóndele como un coach. Estructura la respuesta así (todo dentro de "explanation", separa cada bloque con un salto de línea doble):\n\n1. **Lectura del proyecto** (1 frase) — qué entendiste de su necesidad.\n2. **Por qué estos prompts** (2-3 frases) — qué problema resuelven juntos. Menciona los IDs específicos en negritas (**BR-0023**) cuando hables de un prompt concreto.\n3. **Orden sugerido** (3-4 frases o lista numerada) — qué hacer primero, segundo, tercero, con qué prompts. Sé específico.\n4. **Tip clave** (1-2 frases) — un consejo accionable para que aprovechen mejor el set.\n\nRESPONDE SOLO con un objeto JSON:\n{\n  "explanation": "El texto completo siguiendo la estructura. Usa **negritas** con asteriscos donde tenga sentido (IDs, etapas, conceptos clave). Mantén el tono coach: directo, específico, en español de México.",\n  "recommended_ids": ["BR-0023", "..."]\n}`
-      : `A user describes what they need:\n"${query}"\n\nYou have 20 catalog prompts closest by semantic similarity:\n\n${candidatesText}\n\nPick the 4 to 6 most useful for their case and respond as a coach. Structure the answer like this (all inside "explanation", separate each block with a blank line):\n\n1. **Project read** (1 sentence) — what you understood from their need.\n2. **Why these prompts** (2-3 sentences) — what problem they solve together. Mention specific IDs in bold (**BR-0023**) when referencing a particular prompt.\n3. **Suggested order** (3-4 sentences or numbered list) — what to do first, second, third, with which prompts. Be specific.\n4. **Key tip** (1-2 sentences) — one actionable insight to get the most from the set.\n\nReply with ONLY a JSON object:\n{\n  "explanation": "Full text following the structure above. Use **bold** with asterisks where it makes sense (IDs, phases, key concepts). Keep coach tone: direct, specific.",\n  "recommended_ids": ["BR-0023", "..."]\n}`;
-
-    const claudeResp = await getAnthropic().messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
-      max_tokens: 2048,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
-    });
-
-    const text = claudeResp.content[0]?.type === "text" ? claudeResp.content[0].text : "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    let parsed: ClaudeOutput = { explanation: "", recommended_ids: [] };
-    if (jsonMatch) {
-      try {
-        parsed = JSON.parse(jsonMatch[0]) as ClaudeOutput;
-      } catch (e) {
-        console.error("Claude JSON parse failed:", text);
-      }
-    }
-
-    const validIds = new Set(matches.map((m) => m.id));
-    let recIds = (parsed.recommended_ids || []).filter((id) => validIds.has(id));
-    if (recIds.length === 0) recIds = matches.slice(0, 6).map((m) => m.id);
-
-    const { data: full } = await admin
-      .from("prompts")
-      .select("id, title_en, title_es, category, subcategory, ai_model, difficulty, tier, tags")
-      .in("id", recIds);
-
-    const sorted = recIds.map((id) => (full ?? []).find((p) => p.id === id)).filter(Boolean);
-
-    try {
-      let userTier: string | null = null;
-      if (user) {
-        const { data: prof } = await admin.from("profiles").select("tier").eq("id", user.id).maybeSingle();
-        userTier = prof?.tier ?? null;
-      }
-      await admin.from("search_queries").insert({
-        user_id: user?.id ?? null,
-        query,
-        query_lang: lang,
-        results_count: sorted.length,
-        top_result_id: matches[0].id,
-        top_similarity: matches[0].similarity,
-        llm_recommended_ids: recIds,
-        llm_explanation: parsed.explanation,
-        user_tier: userTier,
+    // Con stream: true (D28, 4 nov 2026) la respuesta es NDJSON: primero las tarjetas que ya
+    // da la similitud, en cuanto salen los embeddings, y despues la explicacion de Claude con
+    // su orden. Antes el usuario esperaba de 8 a 18 s sin ver nada.
+    if (body.stream === true) {
+      const enc = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + "\n"));
+          try {
+            send({ type: "prompts", prompts: await promptCards(matches.slice(0, 6).map((m) => m.id)), lang });
+            const done = await recommend(query, lang, matches, user?.id ?? null);
+            send({ type: "final", explanation: done.explanation, prompts: done.prompts, lang });
+          } catch (e) {
+            console.error("/api/search stream error:", e);
+            send({ type: "error", error: e instanceof Error ? e.message : "unknown error" });
+          } finally {
+            controller.close();
+          }
+        },
       });
-    } catch (logErr) {
-      console.error("search log error:", logErr);
+      return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } });
     }
 
-    return NextResponse.json({
-      explanation: parsed.explanation,
-      prompts: sorted,
-      lang,
-    });
+    const done = await recommend(query, lang, matches, user?.id ?? null);
+    return NextResponse.json({ explanation: done.explanation, prompts: done.prompts, lang });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "unknown error";
     console.error("/api/search error:", e);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+/** Las tarjetas de estos prompts, en el orden de los IDs. */
+async function promptCards(ids: string[]) {
+  const { data: full } = await createAdminClient()
+    .from("prompts")
+    .select("id, title_en, title_es, category, subcategory, ai_model, difficulty, tier, tags")
+    .in("id", ids);
+  return ids.map((id) => (full ?? []).find((p) => p.id === id)).filter(Boolean);
+}
+
+/** Claude elige y explica entre los candidatos; deja la busqueda en search_queries. */
+async function recommend(query: string, lang: "es" | "en", matches: MatchRow[], userId: string | null) {
+  const admin = createAdminClient();
+  const candidatesText = matches
+    .map((c, i) => {
+      const titleField = lang === "es" ? c.title_es : c.title_en;
+      return `${i + 1}. [${c.id}] ${titleField} — category=${c.category}/${c.subcategory}, difficulty=${c.difficulty}, tier=${c.tier}. Use case: ${c.use_case ?? "n/a"}`;
+    })
+    .join("\n");
+
+  const systemPrompt = lang === "es"
+    ? `Eres un coach creativo del catálogo ARTO Studio AI Prompt Library. Hablas español de México (tú/tienes/quieres, NUNCA vos/tenés/acá). Tu trabajo: cuando alguien describe su proyecto, le entregas no solo prompts sino una mini-estrategia de cómo usarlos. Tono directo, accionable, sin relleno corporativo. Evita las palabras prohibidas de ARTO: leverage, empower, robust, holistic, ecosystem, scalable, optimize, elevate, foster.`
+    : `You are a creative coach for the ARTO Studio AI Prompt Library catalog. When someone describes their project, you deliver not only prompts but a mini-strategy on how to use them. Direct tone, actionable, no corporate filler. Avoid: leverage, empower, robust, holistic, ecosystem, scalable, optimize, elevate, foster.`;
+
+  const userPrompt = lang === "es"
+    ? `Un usuario describe lo que necesita:\n"${query}"\n\nTienes 20 prompts del catálogo más cercanos por similitud semántica:\n\n${candidatesText}\n\nElige los 4 a 6 más útiles para su caso y respóndele como un coach. Estructura la respuesta así (todo dentro de "explanation", separa cada bloque con un salto de línea doble):\n\n1. **Lectura del proyecto** (1 frase) — qué entendiste de su necesidad.\n2. **Por qué estos prompts** (2-3 frases) — qué problema resuelven juntos. Menciona los IDs específicos en negritas (**BR-0023**) cuando hables de un prompt concreto.\n3. **Orden sugerido** (3-4 frases o lista numerada) — qué hacer primero, segundo, tercero, con qué prompts. Sé específico.\n4. **Tip clave** (1-2 frases) — un consejo accionable para que aprovechen mejor el set.\n\nRESPONDE SOLO con un objeto JSON:\n{\n  "explanation": "El texto completo siguiendo la estructura. Usa **negritas** con asteriscos donde tenga sentido (IDs, etapas, conceptos clave). Mantén el tono coach: directo, específico, en español de México.",\n  "recommended_ids": ["BR-0023", "..."]\n}`
+    : `A user describes what they need:\n"${query}"\n\nYou have 20 catalog prompts closest by semantic similarity:\n\n${candidatesText}\n\nPick the 4 to 6 most useful for their case and respond as a coach. Structure the answer like this (all inside "explanation", separate each block with a blank line):\n\n1. **Project read** (1 sentence) — what you understood from their need.\n2. **Why these prompts** (2-3 sentences) — what problem they solve together. Mention specific IDs in bold (**BR-0023**) when referencing a particular prompt.\n3. **Suggested order** (3-4 sentences or numbered list) — what to do first, second, third, with which prompts. Be specific.\n4. **Key tip** (1-2 sentences) — one actionable insight to get the most from the set.\n\nReply with ONLY a JSON object:\n{\n  "explanation": "Full text following the structure above. Use **bold** with asterisks where it makes sense (IDs, phases, key concepts). Keep coach tone: direct, specific.",\n  "recommended_ids": ["BR-0023", "..."]\n}`;
+
+  const claudeResp = await getAnthropic().messages.create({
+    model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
+    max_tokens: 2048,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }],
+  });
+
+  const text = claudeResp.content[0]?.type === "text" ? claudeResp.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  let parsed: ClaudeOutput = { explanation: "", recommended_ids: [] };
+  if (jsonMatch) {
+    try {
+      parsed = JSON.parse(jsonMatch[0]) as ClaudeOutput;
+    } catch (e) {
+      console.error("Claude JSON parse failed:", text);
+    }
+  }
+
+  const validIds = new Set(matches.map((m) => m.id));
+  let recIds = (parsed.recommended_ids || []).filter((id) => validIds.has(id));
+  if (recIds.length === 0) recIds = matches.slice(0, 6).map((m) => m.id);
+
+  const sorted = await promptCards(recIds);
+
+  try {
+    let userTier: string | null = null;
+    if (userId) {
+      const { data: prof } = await admin.from("profiles").select("tier").eq("id", userId).maybeSingle();
+      userTier = prof?.tier ?? null;
+    }
+    await admin.from("search_queries").insert({
+      user_id: userId,
+      query,
+      query_lang: lang,
+      results_count: sorted.length,
+      top_result_id: matches[0].id,
+      top_similarity: matches[0].similarity,
+      llm_recommended_ids: recIds,
+      llm_explanation: parsed.explanation,
+      user_tier: userTier,
+    });
+  } catch (logErr) {
+    console.error("search log error:", logErr);
+  }
+
+  return { explanation: parsed.explanation, prompts: sorted };
 }
