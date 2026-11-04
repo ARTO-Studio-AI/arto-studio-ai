@@ -80,6 +80,9 @@ export interface AnalyticsEvents {
   };
   /* Servidor (GET /api/skill-downloads/[slug]): descarga entregada de un skill del ARTO Edit Bundle #1. */
   skill_downloaded: { skill: string; tier: AnalyticsTier; promo: boolean; locale: string };
+  /* Tutoriales (2026-11-05, D28): apertura de un tutorial y clic a uno de sus prompts. */
+  tutorial_opened: { tutorial: string; locale: string };
+  tutorial_prompt_clicked: { tutorial: string; prompt_id: string; locale: string };
 }
 
 export type AnalyticsEvent = keyof AnalyticsEvents;

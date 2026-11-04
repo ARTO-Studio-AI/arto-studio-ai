@@ -144,6 +144,7 @@ export type SeoPageKey =
   | "prompts"
   | "pricing"
   | "learn"
+  | "tutorials"
   | "skills"
   | "agents"
   | "mods"
@@ -229,6 +230,22 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
         title: "Aprende: guías de prompts de IA por vertical · ARTO Studio AI",
         description:
           "Guías para usar prompts de IA en branding, diseño gráfico, copywriting, fotografía, video, UX y otras verticales creativas, más artículos del journal de ARTO.",
+      },
+    },
+  },
+  /* Tutoriales (2026-11-05, D28): misma ruta /tutoriales en los dos idiomas. */
+  tutorials: {
+    path: "/tutoriales",
+    copy: {
+      en: {
+        title: "AI tutorials step by step · ARTO Studio AI",
+        description:
+          "Step-by-step AI tutorials with the exact prompts from the ARTO library: open a neighborhood business, quote and close agency projects, build your personal brand.",
+      },
+      es: {
+        title: "Tutoriales de IA paso a paso · ARTO Studio AI",
+        description:
+          "Tutoriales de IA paso a paso con los prompts exactos de la biblioteca de ARTO: abre un negocio de barrio, cotiza y cierra proyectos de agencia, arma tu marca personal.",
       },
     },
   },

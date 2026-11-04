@@ -124,6 +124,8 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `checkout_started` | clic en el CTA de Pro, antes de crear la sesión de Stripe | `plan` (`pro`), `price_usd`, `locale`, `signed_in` | `src/app/[locale]/(marketing)/pricing/ProCheckoutButton.tsx` |
 | `pro_unlock_clicked` | clic en la franja «Desbloquea N prompts con Pro» o en los botones del bloqueo de una ficha Pro (D28, 2026-11-05). Solo la ven visitantes y Free | `placement` (`catalog` \| `prompt_detail` \| `prompt_locked`), `cta` (`pricing` \| `signup`), `locale` | `src/components/ProUnlockBanner.tsx` y `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` |
 | `skill_downloaded` | descarga entregada de un skill del ARTO Edit Bundle #1 (Victor, 27 oct 2026). Solo con consentimiento de analítica; aparte, cada descarga deja siempre una línea `skill_download` (user_id, slug, tier, promo, hora) en los logs de Vercel | `skill` (slug), `tier`, `promo`, `locale` | `src/app/api/skill-downloads/[slug]/route.ts` (servidor) |
+| `tutorial_opened` | al montar `/[locale]/tutoriales/[slug]` (2026-11-05, D28) | `tutorial` (slug), `locale` | `src/app/[locale]/(marketing)/tutoriales/[slug]/page.tsx` |
+| `tutorial_prompt_clicked` | clic en un prompt desde un tutorial (lista de prompts o tarjeta del paso) | `tutorial` (slug), `prompt_id`, `locale` | misma página, `TrackedLink` |
 
 Lo que **no** se manda a PostHog: email, nombre, empresa, rol, el texto de las búsquedas, el cuerpo de los
 prompts, el referrer completo (solo lo que PostHog captura por su cuenta como `$referrer`).
