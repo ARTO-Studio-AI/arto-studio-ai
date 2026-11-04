@@ -67,6 +67,8 @@ export interface AnalyticsEvents {
   // first_results_ms: hasta que se ven las tarjetas; total_ms: hasta la explicacion (D28).
   search_performed: { lang: string; query_length: number; results_count: number; ok: boolean; first_results_ms?: number; total_ms?: number };
   catalog_search: { lang: string; query_length: number; results_count: number };
+  /* Envio del buscador abierto de la home (2026-11-05). El texto de la busqueda no se manda. */
+  home_search_submitted: { locale: string; query_length: number };
   favorite_added: { prompt_id: string };
   pricing_viewed: { locale: string; signed_in: boolean };
   checkout_started: { plan: "pro"; price_usd: number; locale: string; signed_in: boolean };
