@@ -128,8 +128,9 @@ export default async function LoginPage({ params, searchParams }: Props) {
               t.h1_plain
             )}
           </h1>
-          <p className="mt-4 max-w-[52ch] text-base leading-relaxed text-zinc-600">{t.lead}</p>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+          {/* En celular el lead se oculta para que Google quede arriba del pliegue (375x812). */}
+          <p className="mt-4 hidden max-w-[52ch] text-base leading-relaxed text-zinc-600 sm:block">{t.lead}</p>
+          <ul className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2">
             {benefits.map((b) => (
               <li key={b.title} className="flex gap-2.5">
                 <Check />
@@ -162,7 +163,8 @@ export default async function LoginPage({ params, searchParams }: Props) {
 
         {examples.length > 0 && (
           <section className="lg:col-start-1 lg:row-start-2">
-            <h2 className="text-eyebrow text-zinc-500">{t.examples_title}</h2>
+            {/* p y no h2: el estilo global de h2 le gana a text-eyebrow. */}
+            <p className="text-eyebrow text-zinc-500">{t.examples_title}</p>
             <ul className="mt-3 grid gap-3">
               {examples.map((p) => {
                 const v = VERTICALS[p.category];
