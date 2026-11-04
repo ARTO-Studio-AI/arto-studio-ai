@@ -114,6 +114,12 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `free_limit_reached` | al renderizar la pantalla de tope | `prompt_id`, `tier`, `signed_in`, `locale` | misma página, rama `limitHit` |
 | `signup_wall_viewed` | al renderizar un prompt free sin sesion (registro free, 2026-10-06) | `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/page.tsx` |
 | `signup_wall_clicked` | clic en "Crear cuenta gratis" del muro | `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/SignupWall.tsx` |
+| `login_viewed` | al renderizar `/[locale]/login` sin sesión (2026-11-05) | `locale`, `has_next`, `next_section` (sección de la ruta de vuelta, sin ids) | `src/app/[locale]/(marketing)/login/page.tsx` |
+| `signup_google_clicked` | clic en «Continuar con Google», antes de redirigir | `locale`, `has_next`, `marketing_opt_in` | `src/app/[locale]/(marketing)/login/LoginForm.tsx` |
+| `signup_email_submitted` | envío del enlace por correo (también el reenvío) | `locale`, `has_next`, `marketing_opt_in`, `has_company`, `has_role`, `resend` | `src/app/[locale]/(marketing)/login/LoginForm.tsx` |
+| `signup_bar_shown` | la barra de registro de visitantes aparece (una vez por carga) | `locale`, `path_section`, `trigger` (`scroll` \| `pages`) | `src/components/SignupBarClient.tsx` |
+| `signup_bar_clicked` | clic en «Crear cuenta gratis» de la barra | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
+| `signup_bar_dismissed` | la persona cierra la barra (no vuelve en 30 días) | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
 | `limit_cta_clicked` | clic en un CTA de la pantalla de tope | `cta` (`pricing` \| `library` \| `signup`), `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/PromptLimitReached.tsx` |
 | `prompt_copied` | clic en Copiar | `prompt_id`, `prompt_tier`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/CopyButton.tsx` |
 | `search_performed` | respuesta de `/api/search` (ok o error) | `lang`, `query_length`, `results_count`, `ok` | `src/app/[locale]/(marketing)/prompts/SmartSearch.tsx` |
