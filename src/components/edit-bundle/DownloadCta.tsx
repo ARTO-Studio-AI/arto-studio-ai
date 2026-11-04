@@ -2,8 +2,10 @@ import { buttonClass } from "@/components/ui";
 import Button from "@/components/ui/Button";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { downloadAccess, isProTier, type Viewer } from "@/lib/edit-bundle/access";
-import { EDIT_BUNDLE_SLUG, getDownloadItem, packageAvailable, type DownloadSlug } from "@/lib/edit-bundle/catalog";
+import { accessFor } from "@/lib/catalogo/access";
+import { getDownloadItem, packageAvailable } from "@/lib/catalogo/skills";
+import { isProTier, type Viewer } from "@/lib/edit-bundle/access";
+import { EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 
 /* Boton de descarga del ARTO Edit Bundle #1 con la regla de Victor del 27 oct 2026:
  *   sin sesion             -> crear cuenta o entrar, y regresa a esta misma pagina
@@ -11,11 +13,13 @@ import { EDIT_BUNDLE_SLUG, getDownloadItem, packageAvailable, type DownloadSlug 
  *   gratis despues del 3 nov -> a Pro (pricing)
  *   Pro                    -> descarga siempre
  * La pagina solo decide que boton pintar; quien da o niega el archivo es la ruta
- * /api/skill-downloads/[slug], que vuelve a revisar todo en el servidor. */
+ * /api/skill-downloads/[slug], que vuelve a revisar todo en el servidor.
+ * Desde el 2026-11-05 la regla sale de la categoria del skill (src/lib/catalogo/access.ts), y
+ * lo que no esta publicado (coming_soon) pinta «Disponible muy pronto» sin enlace. */
 
 interface Props {
   locale: Locale;
-  slug: DownloadSlug;
+  slug: string;
   viewer: Viewer;
   t: Dictionary["edit_bundle"];
   size?: "md" | "lg";
@@ -24,9 +28,17 @@ interface Props {
 
 export default function DownloadCta({ locale, slug, viewer, t, size = "lg", now = new Date() }: Props) {
   const item = getDownloadItem(slug);
-  if (!item) return null;
+  if (!item) {
+    return (
+      <div>
+        <button type="button" disabled className={buttonClass("primary", size)}>
+          {t.cta_soon}
+        </button>
+      </div>
+    );
+  }
   const isBundle = slug === EDIT_BUNDLE_SLUG;
-  const access = downloadAccess(viewer, now);
+  const access = accessFor(item.access, viewer, now);
   const back = `/${locale}${item.pagePath}`;
 
   if (access === "signin") {
@@ -46,7 +58,7 @@ export default function DownloadCta({ locale, slug, viewer, t, size = "lg", now 
         <Button href={`/${locale}/pricing`} size={size}>
           {t.cta_upgrade}
         </Button>
-        <p className="mt-2 text-xs text-zinc-500">{t.note_upgrade}</p>
+        <p className="mt-2 text-xs text-zinc-500">{item.access === "edit-bundle-1" ? t.note_upgrade : t.note_upgrade_pro}</p>
       </div>
     );
   }

@@ -7,8 +7,9 @@ import InstallSteps from "@/components/edit-bundle/InstallSteps";
 import { Badge } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import { priceLabel } from "@/lib/edit-bundle/access";
-import { EDIT_BUNDLE_PAGE, demoOf, getDownloadItem, getEditSkill } from "@/lib/edit-bundle/catalog";
+import { priceLabelFor } from "@/lib/catalogo/access";
+import { demoOf, getCategory, getDownloadItem, getSkill, type CatalogSkill, type SkillCategory } from "@/lib/catalogo/skills";
+import { EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
 
@@ -16,37 +17,56 @@ interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+/* Lo que cambia entre el bundle y una categoria nueva (2026-11-05): el bundle conserva su
+ * nombre en el titulo y su aviso de ChatGPT; un skill de otra categoria usa el de su ficha. */
+function contextOf(skill: CatalogSkill, locale: Locale) {
+  const category = getCategory(skill.category) as SkillCategory;
+  const t = getDictionary(locale).edit_bundle;
+  const inBundle = category.bundle === EDIT_BUNDLE_SLUG;
+  return {
+    category,
+    inBundle,
+    titleSuffix: inBundle ? t.bundle_name : category.name[locale],
+    chatgptNote: skill.chatgptNote?.[locale] ?? (inBundle ? t.chatgpt_note : null),
+  };
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: raw, slug } = await params;
   const locale = localeOf(raw);
-  const skill = getEditSkill(slug);
+  const skill = getSkill(slug);
   if (!skill) return {};
-  const t = getDictionary(locale).edit_bundle;
+  const ctx = contextOf(skill, locale);
   const demo = demoOf(skill.slug);
   return buildMetadata({
     locale,
     path: `/skills/${skill.slug}`,
-    title: withBrand(`${skill.name[locale]}: ${skill.tagline[locale].replace(/\.$/, "")} · ${t.bundle_name}`),
-    description: clampDescription(`${skill.what[locale]} ${t.chatgpt_note}`),
+    title: withBrand(`${skill.name[locale]}: ${skill.tagline[locale].replace(/\.$/, "")} · ${ctx.titleSuffix}`),
+    description: clampDescription(ctx.chatgptNote ? `${skill.what[locale]} ${ctx.chatgptNote}` : skill.what[locale]),
     ogImage: demo.poster ?? undefined,
   });
 }
 
 /* Pagina de cada skill del ARTO Edit Bundle #1 (Victor, 27 oct 2026): demo grande, que hace, que le dices
- * a Claude, que necesitas, cuanto tarda, como instalarlo y el boton de descarga. */
+ * a Claude, que necesitas, cuanto tarda, como instalarlo y el boton de descarga.
+ * Desde el 2026-11-05 sirve a todo el catalogo: un skill oculto es 404 y uno en coming_soon
+ * tiene pagina con el boton de «Disponible muy pronto». */
 export default async function EditSkillPage({ params }: Props) {
   const { locale: localeParam, slug } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
-  const skill = getEditSkill(slug);
+  const skill = getSkill(slug);
+  if (!skill) notFound();
   const item = getDownloadItem(slug);
-  if (!skill || !item) notFound();
 
   const t = getDictionary(locale).edit_bundle;
+  const soonLabel = getDictionary(locale).skills.badge;
+  const ctx = contextOf(skill, locale);
   const viewer = await getViewer();
   const now = new Date();
   const demo = demoOf(skill.slug);
-  const label = priceLabel(now) === "free" ? t.label_free : t.label_pro;
+  const soon = skill.status === "coming_soon";
+  const label = soon ? soonLabel : priceLabelFor(ctx.category.access, now) === "free" ? t.label_free : t.label_pro;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
@@ -59,16 +79,18 @@ export default async function EditSkillPage({ params }: Props) {
 
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge tone={label === t.label_pro ? "inverse" : "live"}>{label}</Badge>
-            <Badge tone="neutral">{t.category}</Badge>
+            <Badge tone={soon ? "soon" : label === t.label_pro ? "inverse" : "live"}>{label}</Badge>
+            <Badge tone="neutral">{ctx.category.name[locale]}</Badge>
             <Badge tone="neutral">v{skill.version}</Badge>
             {skill.placeholder && <Badge tone="soon">{t.draft_badge}</Badge>}
           </div>
           <h1 className="text-h1 mt-4">{skill.name[locale]}</h1>
           <p className="mt-3 text-lg text-zinc-600">{skill.tagline[locale]}</p>
-          <Link href={`/${locale}${EDIT_BUNDLE_PAGE}`} className="mt-2 inline-block text-sm text-zinc-500 underline-offset-2 hover:underline">
-            {t.part_of_bundle}
-          </Link>
+          {ctx.inBundle && (
+            <Link href={`/${locale}${EDIT_BUNDLE_PAGE}`} className="mt-2 inline-block text-sm text-zinc-500 underline-offset-2 hover:underline">
+              {t.part_of_bundle}
+            </Link>
+          )}
 
           <div className="mt-8">
             <DownloadCta locale={locale} slug={skill.slug} viewer={viewer} t={t} now={now} />
@@ -108,7 +130,7 @@ export default async function EditSkillPage({ params }: Props) {
       </div>
 
       <div className="mt-16">
-        <InstallSteps t={t} fileName={item.downloadName} />
+        <InstallSteps t={t} fileName={item?.downloadName ?? `${skill.slug}.skill`} chatgptNote={ctx.chatgptNote} />
       </div>
     </div>
   );

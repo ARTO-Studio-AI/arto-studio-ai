@@ -9,9 +9,11 @@ interface Props {
   fileName: string;
   /** El bundle es un zip con los 9 .skill adentro: el comando los descomprime uno por uno. */
   bundle?: boolean;
+  /** Aviso de ChatGPT. Por defecto el del bundle; null lo quita (2026-11-05, skills de otras categorias). */
+  chatgptNote?: string | null;
 }
 
-export default function InstallSteps({ t, fileName, bundle = false }: Props) {
+export default function InstallSteps({ t, fileName, bundle = false, chatgptNote = t.chatgpt_note }: Props) {
   const cmd = bundle
     ? `mkdir -p ~/.claude/skills\nunzip "${fileName}" -d arto-edit-bundle-1\nfind arto-edit-bundle-1 -name "*.skill" -exec unzip -o {} -d ~/.claude/skills/ \\;`
     : `mkdir -p ~/.claude/skills\nunzip "${fileName}" -d ~/.claude/skills/`;
@@ -40,9 +42,11 @@ export default function InstallSteps({ t, fileName, bundle = false }: Props) {
         </div>
       </div>
       {bundle && <p className="mt-4 text-sm text-zinc-600">{t.install_bundle_note}</p>}
-      <p className="mt-4 rounded-[var(--radius-sm)] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
-        {t.chatgpt_note}
-      </p>
+      {chatgptNote && (
+        <p className="mt-4 rounded-[var(--radius-sm)] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+          {chatgptNote}
+        </p>
+      )}
     </section>
   );
 }
