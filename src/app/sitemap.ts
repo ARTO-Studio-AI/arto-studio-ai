@@ -4,6 +4,7 @@ import { getAllLearnSlugs } from "@/lib/learn-pages";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config";
 import { localizedPath, siteUrl } from "@/lib/seo";
 import { EDIT_BUNDLE_PAGE, EDIT_SKILL_SLUGS } from "@/lib/edit-bundle/catalog";
+import { getAllTutorials } from "@/lib/tutorials";
 
 const SITE_URL = siteUrl();
 
@@ -41,6 +42,9 @@ const STATIC_MARKETING_PATHS = [
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/prompts", changeFrequency: "daily" as ChangeFreq, priority: 0.9 },
   { path: "/learn", changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
+  // Tutoriales (2026-11-05, D28): indice y cada tutorial.
+  { path: "/tutoriales", changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
+  ...getAllTutorials().map((t) => ({ path: `/tutoriales/${t.slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
   { path: "/tools", changeFrequency: "monthly" as ChangeFreq, priority: 0.5 },
   { path: "/privacy", changeFrequency: "yearly" as ChangeFreq, priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly" as ChangeFreq, priority: 0.3 },
