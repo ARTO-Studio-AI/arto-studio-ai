@@ -63,6 +63,21 @@ export interface AnalyticsEvents {
   limit_cta_clicked: { cta: "pricing" | "library" | "signup"; prompt_id: string; locale: string };
   signup_wall_viewed: { prompt_id: string; locale: string };
   signup_wall_clicked: { prompt_id: string; locale: string };
+  /* Embudo de registro (2026-11-05, 0 registros en 7 dias): /login visto, clic en Google,
+   * envio del enlace por correo y la barra de registro de visitantes (SignupBarClient). */
+  login_viewed: { locale: string; has_next: boolean; next_section: string };
+  signup_google_clicked: { locale: string; has_next: boolean; marketing_opt_in: boolean };
+  signup_email_submitted: {
+    locale: string;
+    has_next: boolean;
+    marketing_opt_in: boolean;
+    has_company: boolean;
+    has_role: boolean;
+    resend: boolean;
+  };
+  signup_bar_shown: { locale: string; path_section: string; trigger: "scroll" | "pages" };
+  signup_bar_clicked: { locale: string; path_section: string };
+  signup_bar_dismissed: { locale: string; path_section: string };
   prompt_copied: { prompt_id: string; prompt_tier: string; locale: string };
   // first_results_ms: hasta que se ven las tarjetas; total_ms: hasta la explicacion (D28).
   search_performed: { lang: string; query_length: number; results_count: number; ok: boolean; first_results_ms?: number; total_ms?: number };

@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Badge } from "@/components/ui";
 import { CookieSettingsButton } from "@/components/CookieBanner";
+import SignupBar from "@/components/SignupBar";
 
 interface Props {
   locale: Locale;
@@ -65,6 +66,7 @@ export default function Footer({ locale, footer }: Props) {
           </div>
         </div>
       </div>
+      <SignupBar locale={locale} />
     </footer>
   );
 }
