@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import AppShell from "@/components/navigation/AppShell";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmailAsync } from "@/lib/auth";
 import { isLocale, DEFAULT_LOCALE, type Locale } from "@/i18n/config";
@@ -57,8 +58,17 @@ export default async function MarketingLayout({
           isAdmin={isAdmin}
         />
       </header>
-      <main className="flex-1">{children}</main>
-      <Footer locale={locale} footer={dict.footer} />
+      {userEmail ? (
+        /* Con sesion: barra lateral y barra inferior por tipo de recurso (D28), salvo en la home. */
+        <AppShell locale={locale} labels={dict.app_nav} footer={<Footer locale={locale} footer={dict.footer} />}>
+          {children}
+        </AppShell>
+      ) : (
+        <>
+          <main className="flex-1">{children}</main>
+          <Footer locale={locale} footer={dict.footer} />
+        </>
+      )}
     </div>
   );
 }
