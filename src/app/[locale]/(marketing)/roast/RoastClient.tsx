@@ -607,7 +607,7 @@ function SocialSharePanel({ brand, result, share, lang, t }: { brand: string; re
   return (
     <div className="mt-6 grid gap-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 sm:grid-cols-[1fr_auto] sm:items-center">
       <div className="grid gap-4">
-      <p className="text-eyebrow text-[var(--accent)]">{t.share_label}</p>
+      <p className="text-eyebrow text-[var(--accent-ink)]">{t.share_label}</p>
       <div className="flex flex-wrap gap-2">
         {socials.map((s) => (
           <a
@@ -831,7 +831,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
           <section className="border-b border-zinc-200">
             <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_1fr]">
               <div className="grid min-w-0 gap-5">
-                <p className="text-eyebrow text-[var(--accent)]">{t.eyebrow}</p>
+                <p className="text-eyebrow text-[var(--accent-ink)]">{t.eyebrow}</p>
                 <h1 className="text-display">
                   Brand <span className="serif-accent">Roast.</span>
                 </h1>
