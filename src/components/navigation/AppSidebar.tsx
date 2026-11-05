@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { ACCOUNT_ITEM, APP_NAV_GROUPS, localeHref, type AppNavId, type AppNavItem } from "@/lib/app-nav";
 import AppNavIcon from "@/components/navigation/AppNavIcon";
 import VerticalLinks from "@/components/navigation/VerticalLinks";
+import { createStoredFlag } from "@/components/navigation/stored-flag";
 
 /* Barra lateral de escritorio (>= 1024 px) para usuarios con sesion (D28). Se queda fija bajo el
  * header (sticky) y se puede contraer a una columna de iconos; la preferencia vive en
@@ -14,37 +14,8 @@ import VerticalLinks from "@/components/navigation/VerticalLinks";
 
 type Labels = Dictionary["app_nav"];
 
-const STORAGE_KEY = "asai_sidebar_collapsed";
-const listeners = new Set<() => void>();
-let memoryCollapsed = false;
-
-function readCollapsed(): boolean {
-  try {
-    const v = window.localStorage.getItem(STORAGE_KEY);
-    return v === null ? memoryCollapsed : v === "1";
-  } catch {
-    return memoryCollapsed;
-  }
-}
-
-function writeCollapsed(value: boolean) {
-  memoryCollapsed = value;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, value ? "1" : "0");
-  } catch {
-    /* modo privado o almacenamiento bloqueado: queda en memoria */
-  }
-  listeners.forEach((l) => l());
-}
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  window.addEventListener("storage", cb);
-  return () => {
-    listeners.delete(cb);
-    window.removeEventListener("storage", cb);
-  };
-}
+const collapsedPref = createStoredFlag("asai_sidebar_collapsed");
+const writeCollapsed = collapsedPref.write;
 
 const GROUP_LABEL: Record<(typeof APP_NAV_GROUPS)[number]["id"], keyof Labels> = {
   home: "group_home",
@@ -61,7 +32,7 @@ interface Props {
 }
 
 export default function AppSidebar({ locale, labels, active }: Props) {
-  const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
+  const collapsed = collapsedPref.useFlag();
 
   const link = (item: AppNavItem) => {
     const isActive = active === item.id;

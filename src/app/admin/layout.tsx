@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { requireAdminSession } from "@/lib/auth";
-import AdminSidebar from "./AdminSidebar";
+import AdminNav from "./AdminNav";
 
-/* /admin layout — server-gated, renders the persistent left sidebar.
+/* /admin layout, server-gated; renders the admin navigation (AdminNav: barra lateral desde md,
+ * barra inferior con cajon en celular; 5 nov 2026).
  * Every page under /admin inherits this; cada pagina servidor ademas llama guardAdmin(). */
 
 export const dynamic = "force-dynamic";
@@ -17,10 +18,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
-      <AdminSidebar email={auth.email} />
-      <main className="flex-1 overflow-x-auto">
-        <div className="mx-auto w-full max-w-6xl px-6 py-6">{children}</div>
+    <div className="flex min-h-screen flex-col bg-zinc-50 md:flex-row">
+      <AdminNav email={auth.email} />
+      <main className="min-w-0 flex-1 overflow-x-auto">
+        {/* Abajo deja libre el alto de la barra inferior en celular. */}
+        <div className="mx-auto w-full max-w-6xl px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 md:pb-8">{children}</div>
       </main>
     </div>
   );
