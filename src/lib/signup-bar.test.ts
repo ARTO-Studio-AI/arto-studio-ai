@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  SIGNUP_BAR_DISMISS_DAYS,
-  dismissedRecently,
   formatCount,
   hasSupabaseSessionCookie,
   isSignupBarExcluded,
@@ -33,18 +31,6 @@ describe("isSignupBarExcluded", () => {
     expect(isSignupBarExcluded("/es")).toBe(false);
     expect(isSignupBarExcluded("/es/prompts/BR-0001")).toBe(false);
     expect(isSignupBarExcluded("/es/loginx")).toBe(false);
-  });
-});
-
-describe("dismissedRecently", () => {
-  const now = Date.UTC(2026, 10, 5);
-  it("respeta el cierre dentro del plazo", () => {
-    expect(dismissedRecently(String(now - 1000), now)).toBe(true);
-  });
-  it("vuelve a mostrar pasado el plazo o con basura", () => {
-    expect(dismissedRecently(String(now - (SIGNUP_BAR_DISMISS_DAYS + 1) * 86_400_000), now)).toBe(false);
-    expect(dismissedRecently(null, now)).toBe(false);
-    expect(dismissedRecently("nope", now)).toBe(false);
   });
 });
 

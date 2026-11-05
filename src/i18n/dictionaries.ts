@@ -226,6 +226,25 @@ export const DICTIONARIES = {
         creative_productivity: "Creative Productivity",
       },
     },
+    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Solo se pinta con
+     * STRIPE_PROMO_COUPON_24H configurado; ver src/lib/promo.ts. */
+    promo: {
+      title: "Your first month of Pro at 50% off",
+      ends_in: "Ends in",
+      time_left: "Time left",
+      cta: "Create account and claim it",
+      cta_short: "Claim it",
+      region: "Pro offer",
+      close_bar: "Close offer notice",
+      modal_eyebrow: "24 hours only",
+      modal_sub: "The whole prompt library with no daily limit, at half price for your first month.",
+      first_month: "first month",
+      then: "Then $9 USD a month. Cancel anytime.",
+      keep_browsing: "Keep browsing",
+      close_modal: "Close offer",
+      pricing_badge: "50% off your first month",
+      unavailable: "The offer is not available right now. We've logged it; please try again later.",
+    },
     pricing: {
       h1: "Pricing",
       sub: "Start free. Unlock the full catalog for $9 USD a month. Studio and Agents are coming soon.",
@@ -778,6 +797,25 @@ export const DICTIONARIES = {
         fashion: "Moda",
         creative_productivity: "Productividad Creativa",
       },
+    },
+    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Solo se pinta con
+     * STRIPE_PROMO_COUPON_24H configurado; ver src/lib/promo.ts. */
+    promo: {
+      title: "Tu primer mes de Pro al 50%",
+      ends_in: "Termina en",
+      time_left: "Te quedan",
+      cta: "Crear cuenta y aprovechar",
+      cta_short: "Aprovechar",
+      region: "Oferta de Pro",
+      close_bar: "Cerrar aviso de la oferta",
+      modal_eyebrow: "Solo 24 horas",
+      modal_sub: "Toda la biblioteca de prompts sin límite diario, a mitad de precio el primer mes.",
+      first_month: "el primer mes",
+      then: "Después, $9 USD al mes. Cancela cuando quieras.",
+      keep_browsing: "Seguir viendo",
+      close_modal: "Cerrar oferta",
+      pricing_badge: "50% el primer mes",
+      unavailable: "La oferta no está disponible en este momento. Ya quedó registrado; vuelve a intentarlo más tarde.",
     },
     pricing: {
       h1: "Precios",

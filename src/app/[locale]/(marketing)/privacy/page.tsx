@@ -6,7 +6,7 @@ import { CookieSettingsButton } from "@/components/CookieBanner";
 /* Aviso de privacidad (reescrito el 9 oct 2026, punto 13 de Victor). Describe lo que
  * el codigo hace hoy, nada mas: si cambia un proveedor, una cookie o una retencion,
  * se cambia aqui en el mismo PR. Fuentes: src/lib/consent.ts (cookies y aviso),
- * src/lib/analytics.ts (PostHog), src/lib/ga.ts (Google Analytics), src/lib/meta-pixel.ts (pixel de Meta), src/lib/attribution.ts (asai_utm), src/proxy.ts
+ * src/lib/analytics.ts (PostHog), src/lib/ga.ts (Google Analytics), src/lib/meta-pixel.ts (pixel de Meta), src/lib/attribution.ts (asai_utm), src/lib/promo.ts (asai_promo_24h), src/proxy.ts
  * (asai_vid), src/lib/marketing-list.ts (lista y doble opt-in), docs/DECISIONES.md D9. */
 
 export async function generateMetadata({
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }
 
 const CONTACT = "contact@artogroup.com";
-const UPDATED = { es: "22 de octubre de 2026", en: "October 22, 2026" };
+const UPDATED = { es: "5 de noviembre de 2026", en: "November 5, 2026" };
 
 type Cookie = { name: string; purpose: string; duration: string; kind: string };
 
@@ -30,6 +30,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "NEXT_LOCALE", purpose: "Recuerda el idioma que elegiste.", duration: "1 año", kind: "Esencial" },
     { name: "asai_next, asai_signup", purpose: "Te regresan a la página donde estabas y guardan empresa y rol mientras creas tu cuenta.", duration: "15 a 60 minutos", kind: "Esencial" },
     { name: "asai_consent", purpose: "Guarda lo que elegiste en el aviso de cookies.", duration: "6 meses", kind: "Esencial" },
+    { name: "asai_promo_24h", purpose: "Guarda cuándo empezaron tus 24 horas de la oferta de Pro, para que el reloj no se reinicie. Solo guarda esa hora, firmada.", duration: "400 días", kind: "Esencial" },
     { name: "asai_utm", purpose: "De qué campaña o sitio llegaste la primera vez (parámetros utm y sitio de origen, sin datos personales).", duration: "30 días", kind: "Analítica, solo con tu permiso" },
     { name: "ph_…_posthog", purpose: "Analítica de producto de PostHog: qué páginas y funciones se usan. PostHog guarda también un registro en el almacenamiento local del navegador.", duration: "1 año", kind: "Analítica, solo con tu permiso" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: cuántas personas visitan el sitio, qué páginas ven y de dónde llegan. Sin funciones de publicidad.", duration: "2 años", kind: "Analítica, solo con tu permiso" },
@@ -41,6 +42,7 @@ const COOKIES: Record<"es" | "en", Cookie[]> = {
     { name: "NEXT_LOCALE", purpose: "Remembers the language you chose.", duration: "1 year", kind: "Essential" },
     { name: "asai_next, asai_signup", purpose: "Bring you back to the page you were on and keep company and role while you create your account.", duration: "15 to 60 minutes", kind: "Essential" },
     { name: "asai_consent", purpose: "Stores your choice in the cookie notice.", duration: "6 months", kind: "Essential" },
+    { name: "asai_promo_24h", purpose: "Stores when your 24 hours of the Pro offer started, so the clock does not restart. It only holds that time, signed.", duration: "400 days", kind: "Essential" },
     { name: "asai_utm", purpose: "Which campaign or site brought you here the first time (utm parameters and referring site, no personal data).", duration: "30 days", kind: "Analytics, only with your permission" },
     { name: "ph_…_posthog", purpose: "PostHog product analytics: which pages and features get used. PostHog also keeps a record in the browser's local storage.", duration: "1 year", kind: "Analytics, only with your permission" },
     { name: "_ga, _ga_…", purpose: "Google Analytics: how many people visit the site, which pages they see and where they come from. No advertising features.", duration: "2 years", kind: "Analytics, only with your permission" },

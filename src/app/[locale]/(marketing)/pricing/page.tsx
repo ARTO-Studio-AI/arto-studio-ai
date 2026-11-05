@@ -6,7 +6,9 @@ import { localeOf, pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Button, Card } from "@/components/ui";
 import TrackOnMount from "@/components/analytics/TrackOnMount";
+import { promoConfigured } from "@/lib/promo-server";
 import ProCheckoutButton from "./ProCheckoutButton";
+import PromoPrice from "./PromoPrice";
 
 /* Precios segun la decision D7 de Victor (11 sep 2026): Free $0 con 3 prompts al
  * dia, Pro $9 USD, Studio $29 USD marcado como proximamente (no existe checkout:
@@ -23,6 +25,7 @@ const USD_MXN = 16.89; // aproximado, solo referencia
 
 interface Props {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ error?: string | string[] }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -34,8 +37,10 @@ function mxn(usd: number): string {
   return Math.round(usd * USD_MXN).toLocaleString("en-US");
 }
 
-export default async function PricingPage({ params }: Props) {
+export default async function PricingPage({ params, searchParams }: Props) {
   const { locale: localeParam } = await params;
+  const sp = (await searchParams) ?? {};
+  const promoUnavailable = sp.error === "promo_unavailable";
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const t = getDictionary(locale).pricing;
@@ -43,6 +48,9 @@ export default async function PricingPage({ params }: Props) {
   const faqDict = getDictionary(locale).home;
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const showMxn = locale === "es" && t.mxn_note.length > 0;
+  // Promo de 24 h (5 nov 2026): sin STRIPE_PROMO_COUPON_24H la tarjeta de Pro no cambia.
+  // Apagada, ni los textos de la promo viajan a la pagina.
+  const promoCopy = promoConfigured() ? getDictionary(locale).promo : null;
 
   /* Solo para las propiedades de pricing_viewed y checkout_started; la pagina
    * se ve igual con o sin sesion. Sin env de Supabase (build) cuenta como anonimo. */
@@ -142,6 +150,12 @@ export default async function PricingPage({ params }: Props) {
         <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-zinc-500">{t.launch_note}</p>
       </div>
 
+      {promoUnavailable && (
+        <p role="alert" className="mx-auto mb-8 max-w-xl rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-4 py-3 text-center text-sm text-zinc-700">
+          {getDictionary(locale).promo.unavailable}
+        </p>
+      )}
+
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((tier) => (
           <Card key={tier.key} highlight={tier.highlight} className={`relative flex flex-col ${tier.soon ? "bg-zinc-50" : ""}`}>
@@ -161,7 +175,7 @@ export default async function PricingPage({ params }: Props) {
               {tier.usd === null ? (
                 <span className="font-mono text-sm text-zinc-500">{t.no_price_yet}</span>
               ) : (
-                <>
+                <PromoPrice copy={tier.key === "pro" ? promoCopy : null}>
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
                   <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (
@@ -169,7 +183,7 @@ export default async function PricingPage({ params }: Props) {
                       {t.mxn_note.replace("{mxn}", mxn(tier.usd))}
                     </p>
                   )}
-                </>
+                </PromoPrice>
               )}
             </div>
             <ul className="mt-6 flex-1 space-y-2">
