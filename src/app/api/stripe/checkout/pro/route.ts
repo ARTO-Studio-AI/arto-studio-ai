@@ -38,8 +38,8 @@ export const maxDuration = 30;
  * por Victor en Stripe) y metadata[promo_coupon]. Stripe no acepta discounts junto con
  * allow_promotion_codes, asi que con el cupon ese campo se omite, y la sesion vence
  * cuando vencen las 24 h (expires_at, minimo 30 min de Stripe). Mismo precio, mismo
- * webhook, mismos metadatos de siempre. Si Stripe rechaza el cupon se reintenta una vez
- * sin el y se deja registro, para que un cupon mal configurado no tumbe la venta.
+ * webhook, mismos metadatos de siempre. Si Stripe rechaza el cupon no se reintenta a
+ * precio normal: se regresa a /pricing?error=promo_unavailable y se deja registro.
  */
 
 export async function GET(request: NextRequest) {
