@@ -85,7 +85,7 @@ Luego `npx vitest run && npm run build`, commit y PR. Al mergear, el skill queda
 
 Desactivar es inmediato para la descarga: la ruta revisa el estado efectivo, así que un skill oculto o en «muy pronto» responde 404 aunque el repo diga `published`.
 
-Si la base no responde, el sitio sigue con el último estado que leyó y, si nunca leyó, con el del repo. Lo que se desactivó en el admin podría volver a verse mientras la base esté caída; queda en los logs como `[catalogo]`.
+Si la base no responde, el sitio sigue con el último estado que leyó y, si nunca leyó, con el del repo. Lo que se desactivó en el admin podría volver a verse mientras la base esté caída; queda en los logs como `[catalogo]`. Decisión de Victor (5 nov 2026, por ficha, auditoría de Fable del PR 124): se acepta así, porque la regla de acceso de la categoría no cambia y nunca se entrega un paquete de pago a quien no paga.
 
 Por el script (cambia el repo, con PR):
 
