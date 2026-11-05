@@ -30,7 +30,14 @@ export default function SkillCard({ skill, locale, t, now = new Date(), soonLabe
       href={`/${locale}/skills/${skill.slug}`}
       className="group block rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
     >
-      <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} />
+      {demo.video ? (
+        <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} />
+      ) : (
+        /* Skill de texto sin video (2026-11-05): en lugar del 9:16 vacio, una frase con la que se usa. */
+        <div className="flex aspect-[4/3] items-end rounded-[var(--radius-md)] bg-zinc-900 p-4">
+          <p className="text-sm leading-snug text-white">«{skill.youSay[locale][0]}»</p>
+        </div>
+      )}
       <div className="mt-3 flex items-start justify-between gap-2 px-1">
         <h3 className="font-bold leading-tight">{skill.name[locale]}</h3>
         <Badge tone={soon ? "soon" : label === t.label_pro ? "inverse" : "live"}>{label}</Badge>

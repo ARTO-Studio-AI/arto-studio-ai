@@ -66,6 +66,9 @@ export default async function EditSkillPage({ params }: Props) {
   const now = new Date();
   const demo = demoOf(skill.slug);
   const soon = skill.status === "coming_soon";
+  /* Sin video y fuera del bundle de video, el bloque 9:16 de «Demo en camino» ocupaba toda la
+   * primera pantalla del celular; esos skills abren directo con su contenido (2026-11-05). */
+  const showDemo = Boolean(demo.video) || ctx.inBundle;
   const label = soon ? soonLabel : priceLabelFor(ctx.category.access, now) === "free" ? t.label_free : t.label_pro;
 
   return (
@@ -74,8 +77,10 @@ export default async function EditSkillPage({ params }: Props) {
         {t.back_to_skills}
       </Link>
 
-      <div className="mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_1fr] md:items-start">
-        <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} className="mx-auto max-w-[360px]" />
+      <div className={showDemo ? "mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_1fr] md:items-start" : "mt-6 max-w-3xl"}>
+        {showDemo && (
+          <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} className="mx-auto max-w-[360px]" />
+        )}
 
         <div>
           <div className="flex flex-wrap items-center gap-2">
