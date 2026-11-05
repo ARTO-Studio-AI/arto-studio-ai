@@ -133,6 +133,8 @@ describe("paquete .skill", () => {
     expect(packageProblems(makeZip({ "SKILL.md": "x" }), "arto-x").join()).toMatch(/no trae arto-x\/SKILL.md/);
     expect(packageProblems(makeZip({ "arto-x/SKILL.md": "x", "arto-x/demo/demo.mp4": "v" }), "arto-x").join()).toMatch(/no van/);
     expect(packageProblems(makeZip({ "arto-x/SKILL.md": "x", "arto-x/.DS_Store": "" }), "arto-x").join()).toMatch(/no van/);
+    expect(packageProblems(makeZip({ "arto-x/SKILL.md": "x", "arto-x/../x.sh": "y" }), "arto-x").join()).toMatch(/rutas no permitidas/);
+    expect(packageProblems(makeZip({ "arto-x/SKILL.md": "x", "arto-x/a\\b.txt": "y" }), "arto-x").join()).toMatch(/rutas no permitidas/);
   });
 });
 

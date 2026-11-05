@@ -197,6 +197,8 @@ export function packageProblems(buf, slug) {
   const extra = names.filter((n) => /(^|\/)\.DS_Store$|(^|\/)demo\/|(^|\/)ficha\.json$|^__MACOSX\//.test(n));
   if (extra.length) out.push(`el paquete trae archivos que no van (demo/, ficha.json, .DS_Store o __MACOSX): ${extra.slice(0, 5).join(", ")}`);
   const outside = names.filter((n) => !n.startsWith(`${slug}/`));
+  const unsafe = names.filter((n) => n.split("/").includes("..") || n.startsWith("/") || n.includes("\\"));
+  if (unsafe.length) out.push(`el paquete trae rutas no permitidas (.., absolutas o con \\): ${unsafe.slice(0, 5).join(", ")}`);
   if (outside.length) out.push(`el paquete trae archivos fuera de ${slug}/: ${outside.slice(0, 5).join(", ")}`);
   return out;
 }

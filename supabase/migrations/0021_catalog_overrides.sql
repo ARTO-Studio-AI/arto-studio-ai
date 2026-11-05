@@ -88,6 +88,9 @@ revoke all on table public.catalog_overrides from anon, authenticated;
 revoke all on table public.catalog_items from anon, authenticated;
 revoke all on table public.catalog_status_log from anon, authenticated;
 revoke all on sequence public.catalog_status_log_id_seq from anon, authenticated;
+-- Grant explicito a service_role (D16), igual que en la 0020.
+grant select, insert, update, delete on table public.catalog_overrides, public.catalog_items, public.catalog_status_log to service_role;
+grant usage, select on sequence public.catalog_status_log_id_seq to service_role;
 
 -- Bucket privado para los paquetes. Sin politicas en storage.objects: anon y authenticated
 -- no pueden listar, leer ni escribir; service role si. Limite de 4.4 MB y solo zip.
