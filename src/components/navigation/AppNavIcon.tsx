@@ -5,7 +5,8 @@ import type { AppNavId } from "@/lib/app-nav";
 
 type IconName = AppNavId | "more" | "close" | "collapse" | "expand" | "chevron";
 
-const PATHS: Record<IconName, string> = {
+/* Exportados para que la navegacion del admin (src/app/admin/AdminNav.tsx) use el mismo trazo. */
+export const NAV_ICON_PATHS: Record<IconName, string> = {
   new: "M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z",
   favorites:
     "M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z",
@@ -32,7 +33,7 @@ const PATHS: Record<IconName, string> = {
   chevron: "m8.25 4.5 7.5 7.5-7.5 7.5",
 };
 
-export default function AppNavIcon({ name, className = "h-5 w-5" }: { name: IconName; className?: string }) {
+export function NavSvg({ d, className = "h-5 w-5" }: { d: string; className?: string }) {
   return (
     <svg
       className={`shrink-0 ${className}`}
@@ -43,7 +44,11 @@ export default function AppNavIcon({ name, className = "h-5 w-5" }: { name: Icon
       aria-hidden="true"
       focusable="false"
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d={PATHS[name]} />
+      <path strokeLinecap="round" strokeLinejoin="round" d={d} />
     </svg>
   );
+}
+
+export default function AppNavIcon({ name, className = "h-5 w-5" }: { name: IconName; className?: string }) {
+  return <NavSvg d={NAV_ICON_PATHS[name]} className={className} />;
 }
