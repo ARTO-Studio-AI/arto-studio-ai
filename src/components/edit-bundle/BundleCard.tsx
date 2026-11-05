@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { isPromoActive } from "@/lib/edit-bundle/access";
+import type { CatalogSkill } from "@/lib/catalogo/skills";
 import { EDIT_BUNDLE_PAGE, EDIT_SKILLS } from "@/lib/edit-bundle/catalog";
 
 /* Tarjeta del ARTO Edit Bundle #1 en /skills: lleva a la landing de la promocion. */
@@ -11,9 +12,11 @@ interface Props {
   locale: Locale;
   t: Dictionary["edit_bundle"];
   now?: Date;
+  /** Skills visibles del bundle (estado efectivo). Sin esto, los del manifiesto. */
+  skills?: readonly CatalogSkill[];
 }
 
-export default function BundleCard({ locale, t, now = new Date() }: Props) {
+export default function BundleCard({ locale, t, now = new Date(), skills = EDIT_SKILLS }: Props) {
   const promo = isPromoActive(now);
   return (
     <Link
@@ -27,7 +30,7 @@ export default function BundleCard({ locale, t, now = new Date() }: Props) {
       <h3 className="mt-4 text-2xl font-extrabold tracking-tight">{t.bundle_name}</h3>
       <p className="mt-1 text-zinc-300">{t.bundle_tagline}</p>
       <p className="mt-3 text-sm text-zinc-400">{t.bundle_card_body}</p>
-      <p className="mt-4 text-sm text-zinc-300">{EDIT_SKILLS.map((s) => s.name[locale]).join(" · ")}</p>
+      <p className="mt-4 text-sm text-zinc-300">{skills.map((s) => s.name[locale]).join(" · ")}</p>
       <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)] group-hover:underline">
         {t.see_bundle} →
       </span>

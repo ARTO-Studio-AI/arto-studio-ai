@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config";
 import { captureServer } from "@/lib/analytics-server";
 import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
 import { accessFor, promoFor } from "@/lib/catalogo/access";
-import { getDownloadItem } from "@/lib/catalogo/skills";
+import { getCatalog, signedPackageUrl } from "@/lib/catalogo/efectivo";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 
 /* GET /api/skill-downloads/[slug] · descarga de los skills del ARTO Edit Bundle #1 (Victor, 27 oct 2026).
@@ -24,6 +24,12 @@ import { getViewer } from "@/lib/edit-bundle/viewer";
  *     Vercel siempre, y skill_downloaded en PostHog solo con consentimiento de analitica
  *     (D10). No hay tabla de eventos que lo acepte sin DDL: attribution_events tiene un
  *     CHECK con tipos cerrados.
+ *
+ * Desde el 2026-11-05 (gestion desde /admin/skills) el estado es el efectivo: el del
+ * manifiesto con lo que se activo o desactivo en /admin encima (src/lib/catalogo/efectivo.ts).
+ * Un skill oculto o en coming_soon no se descarga aunque el repo diga published. Los skills
+ * subidos desde /admin viven en el bucket privado catalogo-paquetes: despues de pasar la misma
+ * regla de su categoria, la ruta responde 302 a una URL firmada de 60 s (nunca se cachea).
  *
  * Todo sale con Cache-Control: private, no-store para que ninguna CDN guarde un archivo
  * de pago ni una redireccion que depende de la sesion. */
@@ -58,7 +64,7 @@ function asciiName(name: string): string {
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const item = getDownloadItem(slug);
+  const item = (await getCatalog()).getDownloadItem(slug);
   if (!item) return NextResponse.json({ error: "not_found" }, { status: 404, headers: NO_STORE });
 
   const locale = requestLocale(request);
@@ -74,6 +80,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return redirectTo(request, `/${locale}/pricing?from=${encodeURIComponent(item.slug)}`);
   }
 
+  const promo = promoFor(item.access, now);
+  const record = {
+    event: "skill_download",
+    slug: item.slug,
+    user_id: viewer.userId,
+    tier: viewer.tier,
+    promo,
+    at: now.toISOString(),
+  };
+  const consent = request.cookies.get(CONSENT_COOKIE)?.value;
+  const logDownload = () =>
+    after(async () => {
+      console.log(JSON.stringify(record));
+      if (analyticsAllowed(consent)) {
+        await captureServer(viewer.userId, "skill_downloaded", { skill: item.slug, tier: viewer.tier, promo, locale });
+      }
+    });
+
+  if (item.storagePath) {
+    const url = await signedPackageUrl(item.storagePath, item.downloadName);
+    if (!url) return NextResponse.json({ error: "not_available" }, { status: 404, headers: NO_STORE });
+    logDownload();
+    const res = NextResponse.redirect(url, 302);
+    for (const [k, v] of Object.entries(NO_STORE)) res.headers.set(k, v);
+    res.headers.set("X-Robots-Tag", "noindex");
+    return res;
+  }
+
   let body: Buffer;
   try {
     body = await readFile(path.join(PRIVATE_DIR, item.file));
@@ -85,22 +119,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "too_large" }, { status: 503, headers: NO_STORE });
   }
 
-  const promo = promoFor(item.access, now);
-  const record = {
-    event: "skill_download",
-    slug: item.slug,
-    user_id: viewer.userId,
-    tier: viewer.tier,
-    promo,
-    at: now.toISOString(),
-  };
-  const consent = request.cookies.get(CONSENT_COOKIE)?.value;
-  after(async () => {
-    console.log(JSON.stringify(record));
-    if (analyticsAllowed(consent)) {
-      await captureServer(viewer.userId, "skill_downloaded", { skill: item.slug, tier: viewer.tier, promo, locale });
-    }
-  });
+  logDownload();
 
   return new NextResponse(new Uint8Array(body), {
     status: 200,

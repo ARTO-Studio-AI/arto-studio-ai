@@ -18,45 +18,12 @@ import {
 } from "../scripts/lib/catalogo.mjs";
 import realCatalog from "../src/lib/catalogo/skills.json";
 import realMods from "../src/lib/catalogo/mods.json";
+import * as shared from "../src/lib/catalogo/validacion.mjs";
+import * as lib from "../scripts/lib/catalogo.mjs";
+import { makeZip, skillPackage } from "./helpers/zip";
 
 /* Validador de scripts/add-skill.mjs y scripts/add-mod.mjs (2026-11-05). Arma carpetas de
  * skill falsas en un directorio temporal; no toca el repo ni la red. */
-
-/** Zip minimo (sin comprimir) para probar lo que trae un .skill. El lector no revisa CRC. */
-function makeZip(files: Record<string, string>): Buffer {
-  const locals: Buffer[] = [];
-  const centrals: Buffer[] = [];
-  let offset = 0;
-  for (const [name, content] of Object.entries(files)) {
-    const n = Buffer.from(name, "utf8");
-    const data = Buffer.from(content, "utf8");
-    const local = Buffer.alloc(30);
-    local.writeUInt32LE(0x04034b50, 0);
-    local.writeUInt16LE(20, 4);
-    local.writeUInt32LE(data.length, 18);
-    local.writeUInt32LE(data.length, 22);
-    local.writeUInt16LE(n.length, 26);
-    locals.push(local, n, data);
-    const central = Buffer.alloc(46);
-    central.writeUInt32LE(0x02014b50, 0);
-    central.writeUInt16LE(20, 4);
-    central.writeUInt16LE(20, 6);
-    central.writeUInt32LE(data.length, 20);
-    central.writeUInt32LE(data.length, 24);
-    central.writeUInt16LE(n.length, 28);
-    central.writeUInt32LE(offset, 42);
-    centrals.push(central, n);
-    offset += 30 + n.length + data.length;
-  }
-  const cd = Buffer.concat(centrals);
-  const eocd = Buffer.alloc(22);
-  eocd.writeUInt32LE(0x06054b50, 0);
-  eocd.writeUInt16LE(Object.keys(files).length, 8);
-  eocd.writeUInt16LE(Object.keys(files).length, 10);
-  eocd.writeUInt32LE(cd.length, 12);
-  eocd.writeUInt32LE(offset, 16);
-  return Buffer.concat([...locals, cd, eocd]);
-}
 
 const bi = <T,>(es: T, en: T) => ({ es, en });
 
@@ -298,5 +265,63 @@ describe("mods", () => {
     expect(r.status).toBe("hidden");
     expect(r.manifest.mods).toHaveLength(2);
     expect(() => upsertMod(realMods, { ...nuevo, code: "MOD01" })).toThrow(/ya es de «auto-handoff»/);
+  });
+});
+
+/* Subida desde /admin/skills (2026-11-05): misma validacion que el script, desde el modulo
+ * compartido src/lib/catalogo/validacion.mjs. */
+describe("validacion compartida con /admin", () => {
+  const CATS = realCatalog.categories.map((c) => c.slug);
+
+  it("el script y el admin usan las mismas funciones (no hay reglas duplicadas)", () => {
+    for (const fn of ["validateFicha", "validateMod", "packageProblems", "copyProblems", "parseFrontmatter", "zipEntries", "skillMdProblems"] as const) {
+      expect(lib[fn], fn).toBe(shared[fn]);
+    }
+    expect(lib.LIMITS).toBe(shared.LIMITS);
+  });
+
+  it("un skill bien armado pasa, sin comprimir y con deflate", () => {
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba"), categories: CATS })).toEqual([]);
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba", { deflate: true }), categories: CATS })).toEqual([]);
+  });
+
+  it("aplica las mismas reglas de la ficha que add-skill.mjs", () => {
+    const bad = ficha({ what: bi("Rapido \u2014 y bien", "A seamless tool") });
+    const errors = shared.validateSkillUpload({ ficha: bad, pkg: skillPackage("arto-prueba"), categories: CATS });
+    expect(errors).toEqual(validateFicha(bad).map((e) => `ficha.json ${e}`));
+    expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it("lee el SKILL.md de adentro del paquete: name tiene que ser el slug", () => {
+    const errors = shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba", { name: "otro" }), categories: CATS });
+    expect(errors).toContain("SKILL.md: name «otro» no coincide con el slug de la ficha «arto-prueba»");
+    const noFm = makeZip({ "arto-prueba/SKILL.md": "# sin frontmatter" });
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: noFm, categories: CATS })).toContain("SKILL.md sin frontmatter (--- name / description ---)");
+  });
+
+  it("paquete sucio, ajeno, roto, ausente o pesado: no pasa", () => {
+    const dirty = makeZip({ "arto-prueba/SKILL.md": "x", "arto-prueba/.DS_Store": "", "otro/SKILL.md": "x" });
+    const e1 = shared.validateSkillUpload({ ficha: ficha(), pkg: dirty, categories: CATS });
+    expect(e1.join(" ")).toMatch(/no van/);
+    expect(e1.join(" ")).toMatch(/fuera de arto-prueba/);
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: Buffer.from("no es zip"), categories: CATS })[0]).toMatch(/no es un zip/);
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: null, categories: CATS })[0]).toMatch(/falta el paquete/);
+    const big = Buffer.alloc(Math.floor(shared.LIMITS.pkg) + 1);
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: big, categories: CATS })[0]).toMatch(/maximo 4613734/);
+  });
+
+  it("no crea categorias ni acepta una que no existe (la regla de descarga es de Victor)", () => {
+    const withCopy = ficha({ category: "nueva", category_copy: { name: bi("N", "N"), body: bi("B", "B"), kicker: bi("K", "K") } });
+    const errors = shared.validateSkillUpload({ ficha: withCopy, pkg: skillPackage("arto-prueba"), categories: CATS });
+    expect(errors.join(" ")).toMatch(/category_copy no va aqui/);
+    expect(errors.join(" ")).toMatch(/la categoria «nueva» no existe/);
+  });
+
+  it("mods: la ficha con validateMod y el archivo opcional tiene que ser zip", () => {
+    const mod = structuredClone(realMods.mods[0]);
+    expect(shared.validateModUpload({ mod, file: null })).toEqual([]);
+    expect(shared.validateModUpload({ mod, file: makeZip({ "a/b.txt": "x" }) })).toEqual([]);
+    expect(shared.validateModUpload({ mod, file: Buffer.from("hola") })[0]).toMatch(/no es un zip/);
+    expect(shared.validateModUpload({ mod: { ...mod, code: "X" }, file: null })).toEqual(validateMod({ ...mod, code: "X" }).map((e) => `mod.json ${e}`));
   });
 });

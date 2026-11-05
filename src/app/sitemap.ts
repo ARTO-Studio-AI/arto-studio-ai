@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getAllLearnSlugs } from "@/lib/learn-pages";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config";
 import { localizedPath, siteUrl } from "@/lib/seo";
-import { PUBLIC_SKILLS } from "@/lib/catalogo/skills";
+import { getCatalog } from "@/lib/catalogo/efectivo";
 import { EDIT_BUNDLE_PAGE } from "@/lib/edit-bundle/catalog";
 import { getAllTutorials } from "@/lib/tutorials";
 
@@ -31,14 +31,15 @@ function localizedEntry(locale: Locale, path: string) {
   return { url: `${SITE_URL}${localizedPath(locale, path)}`, alternates: { languages } };
 }
 
-const STATIC_MARKETING_PATHS = [
+const marketingPaths = (publishedSkills: readonly string[]) => [
   { path: "/", changeFrequency: "weekly" as ChangeFreq, priority: 1.0 },
   { path: "/pricing", changeFrequency: "monthly" as ChangeFreq, priority: 0.9 },
   { path: "/roast", changeFrequency: "monthly" as ChangeFreq, priority: 0.8 },
   { path: "/skills", changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
   { path: EDIT_BUNDLE_PAGE, changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
   // Solo los skills publicados (catalogo, 2026-11-05): coming_soon y hidden no se indexan.
-  ...PUBLIC_SKILLS.filter((s) => s.status === "published").map((s) => ({ path: `/skills/${s.slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
+  // Estado efectivo: manifiesto + /admin/skills, incluidos los subidos por admin.
+  ...publishedSkills.map((slug) => ({ path: `/skills/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
   { path: "/mods", changeFrequency: "weekly" as ChangeFreq, priority: 0.7 },
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
@@ -54,10 +55,12 @@ const STATIC_MARKETING_PATHS = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const published = (await getCatalog()).skills.filter((s) => s.status === "published").map((s) => s.slug);
+  const paths = marketingPaths(published);
 
   // Marketing pages: cross-product of LOCALES × paths.
   const localized: SitemapEntry[] = LOCALES.flatMap((loc) =>
-    STATIC_MARKETING_PATHS.map((entry) => ({
+    paths.map((entry) => ({
       ...localizedEntry(loc, entry.path),
       lastModified: now,
       changeFrequency: entry.changeFrequency,
