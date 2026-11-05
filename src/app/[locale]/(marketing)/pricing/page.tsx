@@ -46,8 +46,8 @@ export default async function PricingPage({ params }: Props) {
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const showMxn = locale === "es" && t.mxn_note.length > 0;
   // Promo de 24 h (5 nov 2026): sin STRIPE_PROMO_COUPON_24H la tarjeta de Pro no cambia.
-  const promoEnabled = promoConfigured();
-  const promoCopy = getDictionary(locale).promo;
+  // Apagada, ni los textos de la promo viajan a la pagina.
+  const promoCopy = promoConfigured() ? getDictionary(locale).promo : null;
 
   /* Solo para las propiedades de pricing_viewed y checkout_started; la pagina
    * se ve igual con o sin sesion. Sin env de Supabase (build) cuenta como anonimo. */
@@ -166,7 +166,7 @@ export default async function PricingPage({ params }: Props) {
               {tier.usd === null ? (
                 <span className="font-mono text-sm text-zinc-500">{t.no_price_yet}</span>
               ) : (
-                <PromoPrice enabled={promoEnabled && tier.key === "pro"} copy={promoCopy}>
+                <PromoPrice copy={tier.key === "pro" ? promoCopy : null}>
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
                   <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (

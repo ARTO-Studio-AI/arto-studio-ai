@@ -114,17 +114,14 @@ function subscribe(onChange: () => void): () => void {
 export default function SignupBarClient({
   locale,
   free,
-  promoEnabled,
-  promoCopy,
-  proFeatures,
+  promo: promoConfig,
 }: {
   locale: Locale;
   free: string | null;
-  /** STRIPE_PROMO_COUPON_24H y secreto de firma presentes (lo decide el servidor). */
-  promoEnabled: boolean;
-  promoCopy: Dictionary["promo"];
-  proFeatures: readonly string[];
+  /** Textos de la promo. null si falta STRIPE_PROMO_COUPON_24H o el secreto (lo decide el servidor). */
+  promo: { copy: Dictionary["promo"]; features: readonly string[] } | null;
 }) {
+  const promoEnabled = promoConfig !== null;
   const pathname = usePathname() ?? `/${locale}`;
   const state = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const t = COPY[locale] ?? COPY.en;
@@ -164,13 +161,13 @@ export default function SignupBarClient({
   }, [eligible, promo?.expired, locale, section]);
 
   const modal =
-    mode === "promo" && eligible && !isPromoModalExcluded(pathname) ? (
+    mode === "promo" && promoConfig && eligible && !isPromoModalExcluded(pathname) ? (
       <PromoModal
         locale={locale}
         endsAt={promo?.endsAt ?? null}
         pathSection={section}
-        copy={promoCopy}
-        features={proFeatures}
+        copy={promoConfig.copy}
+        features={promoConfig.features}
       />
     ) : null;
 
@@ -182,7 +179,8 @@ export default function SignupBarClient({
   }
 
   const search = typeof window === "undefined" ? "" : window.location.search;
-  const isPromo = mode === "promo";
+  const promoCopy = promoConfig?.copy ?? null;
+  const isPromo = mode === "promo" && promoCopy !== null;
   const href = isPromo ? promoHref(locale) : signupHref(locale, pathname, search);
 
   return (

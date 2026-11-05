@@ -14,13 +14,7 @@ import SignupBarClient from "./SignupBarClient";
 export default async function SignupBar({ locale }: { locale: Locale }) {
   const stats = await getSignupStats();
   const dict = getDictionary(locale);
-  return (
-    <SignupBarClient
-      locale={locale}
-      free={stats ? formatCount(stats.free, locale) : null}
-      promoEnabled={promoConfigured()}
-      promoCopy={dict.promo}
-      proFeatures={dict.pricing.tier_pro_features}
-    />
-  );
+  // Apagada, ni los textos de la promo viajan a la pagina.
+  const promo = promoConfigured() ? { copy: dict.promo, features: dict.pricing.tier_pro_features } : null;
+  return <SignupBarClient locale={locale} free={stats ? formatCount(stats.free, locale) : null} promo={promo} />;
 }

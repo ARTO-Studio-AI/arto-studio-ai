@@ -19,7 +19,6 @@ import {
   signPromoStart,
   verifyPromoCookie,
 } from "./promo-server";
-import { getDictionary } from "@/i18n/dictionaries";
 import PromoPrice from "@/app/[locale]/(marketing)/pricing/PromoPrice";
 import { POST } from "@/app/api/promo/route";
 
@@ -169,7 +168,7 @@ describe("sin STRIPE_PROMO_COUPON_24H la promo no existe", () => {
 
   it("/pricing pinta el precio normal, sin reloj ni descuento", () => {
     const html = renderToStaticMarkup(
-      createElement(PromoPrice, { enabled: false, copy: getDictionary("es").promo }, createElement("span", null, "$9")),
+      createElement(PromoPrice, { copy: null }, createElement("span", null, "$9")),
     );
     expect(html).toBe("<span>$9</span>");
     expect(html).not.toContain("4.50");
