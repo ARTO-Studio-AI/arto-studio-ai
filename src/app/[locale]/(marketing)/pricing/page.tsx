@@ -6,7 +6,9 @@ import { localeOf, pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Button, Card } from "@/components/ui";
 import TrackOnMount from "@/components/analytics/TrackOnMount";
+import { promoConfigured } from "@/lib/promo-server";
 import ProCheckoutButton from "./ProCheckoutButton";
+import PromoPrice from "./PromoPrice";
 
 /* Precios segun la decision D7 de Victor (11 sep 2026): Free $0 con 3 prompts al
  * dia, Pro $9 USD, Studio $29 USD marcado como proximamente (no existe checkout:
@@ -43,6 +45,9 @@ export default async function PricingPage({ params }: Props) {
   const faqDict = getDictionary(locale).home;
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const showMxn = locale === "es" && t.mxn_note.length > 0;
+  // Promo de 24 h (5 nov 2026): sin STRIPE_PROMO_COUPON_24H la tarjeta de Pro no cambia.
+  const promoEnabled = promoConfigured();
+  const promoCopy = getDictionary(locale).promo;
 
   /* Solo para las propiedades de pricing_viewed y checkout_started; la pagina
    * se ve igual con o sin sesion. Sin env de Supabase (build) cuenta como anonimo. */
@@ -161,7 +166,7 @@ export default async function PricingPage({ params }: Props) {
               {tier.usd === null ? (
                 <span className="font-mono text-sm text-zinc-500">{t.no_price_yet}</span>
               ) : (
-                <>
+                <PromoPrice enabled={promoEnabled && tier.key === "pro"} copy={promoCopy}>
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
                   <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (
@@ -169,7 +174,7 @@ export default async function PricingPage({ params }: Props) {
                       {t.mxn_note.replace("{mxn}", mxn(tier.usd))}
                     </p>
                   )}
-                </>
+                </PromoPrice>
               )}
             </div>
             <ul className="mt-6 flex-1 space-y-2">

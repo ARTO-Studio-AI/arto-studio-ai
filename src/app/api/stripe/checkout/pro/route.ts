@@ -3,6 +3,8 @@ import { config } from "dotenv";
 import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { PROMO_COOKIE } from "@/lib/promo";
+import { couponForCheckout, promoCheckoutExpiresAt, promoCouponId, verifyPromoCookie } from "@/lib/promo-server";
 
 /* Load .env.local explicitly. Workaround for Next.js 16 Turbopack env loading. */
 config({
@@ -29,6 +31,15 @@ export const maxDuration = 30;
  * receives the checkout.session.completed event and updates
  * profiles.tier = 'pro'. No webhook changes needed here because both
  * domains write to the same Supabase profiles table.
+ *
+ * Promo de 24 h (5 nov 2026, decision de Victor): si existe STRIPE_PROMO_COUPON_24H, la
+ * cookie firmada asai_promo_24h sigue dentro de sus 24 h y la persona nunca tuvo
+ * suscripcion, la sesion lleva discounts[0][coupon] (50% el primer pago, cupon creado
+ * por Victor en Stripe) y metadata[promo_coupon]. Stripe no acepta discounts junto con
+ * allow_promotion_codes, asi que con el cupon ese campo se omite, y la sesion vence
+ * cuando vencen las 24 h (expires_at, minimo 30 min de Stripe). Mismo precio, mismo
+ * webhook, mismos metadatos de siempre. Si Stripe rechaza el cupon se reintenta una vez
+ * sin el y se deja registro, para que un cupon mal configurado no tumbe la venta.
  */
 
 export async function GET(request: NextRequest) {
@@ -59,7 +70,7 @@ export async function GET(request: NextRequest) {
     const admin = createAdminClient();
     const { data: profile } = await admin
       .from("profiles")
-      .select("email, stripe_customer_id, tier")
+      .select("email, stripe_customer_id, tier, stripe_subscription_id, subscription_status")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -95,34 +106,82 @@ export async function GET(request: NextRequest) {
       await admin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
     }
 
-    // Create Stripe Checkout session
-    const params = new URLSearchParams();
-    params.set("mode", "subscription");
-    params.set("customer", customerId);
-    params.set("line_items[0][price]", proPriceId);
-    params.set("line_items[0][quantity]", "1");
-    params.set("client_reference_id", user.id);
-    params.set("metadata[user_id]", user.id);
-    params.set("metadata[tier]", "pro");
-    params.set("subscription_data[metadata][user_id]", user.id);
-    params.set("subscription_data[metadata][tier]", "pro");
-    params.set("success_url", `${siteUrl}/account?upgraded=pro`);
-    params.set("cancel_url", `${siteUrl}/pricing?canceled=true`);
-    params.set("allow_promotion_codes", "true");
-
-    const sessionResp = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
+    // Cupon de la promo de 24 h: solo lo decide el servidor, con la cookie firmada.
+    const now = Date.now();
+    const promoStart = verifyPromoCookie(request.cookies.get(PROMO_COOKIE)?.value, now);
+    const coupon = couponForCheckout({
+      couponId: promoCouponId(),
+      start: promoStart,
+      now,
+      priceId: proPriceId,
+      proMonthlyPriceId: process.env.STRIPE_PRICE_ID_PRO,
+      profile: profile
+        ? {
+            tier: profile.tier as string | null,
+            stripe_subscription_id: profile.stripe_subscription_id as string | null,
+            subscription_status: profile.subscription_status as string | null,
+          }
+        : null,
     });
-    const sessionData = (await sessionResp.json()) as {
-      id?: string;
-      url?: string;
-      error?: { message?: string };
+
+    // Create Stripe Checkout session
+    const buildParams = (withCoupon: string | null) => {
+      const params = new URLSearchParams();
+      params.set("mode", "subscription");
+      params.set("customer", customerId as string);
+      params.set("line_items[0][price]", proPriceId);
+      params.set("line_items[0][quantity]", "1");
+      params.set("client_reference_id", user.id);
+      params.set("metadata[user_id]", user.id);
+      params.set("metadata[tier]", "pro");
+      params.set("subscription_data[metadata][user_id]", user.id);
+      params.set("subscription_data[metadata][tier]", "pro");
+      params.set("success_url", `${siteUrl}/account?upgraded=pro`);
+      params.set("cancel_url", `${siteUrl}/pricing?canceled=true`);
+      if (withCoupon) {
+        params.set("discounts[0][coupon]", withCoupon);
+        params.set("metadata[promo_coupon]", withCoupon);
+        // La sesion con descuento no sobrevive a las 24 h (Stripe pide al menos 30 min).
+        const expiresAt = promoCheckoutExpiresAt(promoStart, now);
+        if (expiresAt) params.set("expires_at", String(expiresAt));
+      } else {
+        params.set("allow_promotion_codes", "true");
+      }
+      return params;
     };
+
+    const createSession = async (withCoupon: string | null) => {
+      const resp = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: buildParams(withCoupon).toString(),
+      });
+      const data = (await resp.json()) as {
+        id?: string;
+        url?: string;
+        error?: { message?: string; code?: string; param?: string };
+      };
+      return { resp, data };
+    };
+
+    let appliedCoupon = coupon;
+    let { resp: sessionResp, data: sessionData } = await createSession(coupon);
+    if (coupon && sessionResp.status >= 400 && sessionResp.status < 500) {
+      console.error(
+        JSON.stringify({
+          event: "stripe_pro_promo_coupon_rejected",
+          user_id: user.id,
+          code: sessionData.error?.code ?? null,
+          param: sessionData.error?.param ?? null,
+          message: sessionData.error?.message ?? null,
+        })
+      );
+      appliedCoupon = null;
+      ({ resp: sessionResp, data: sessionData } = await createSession(null));
+    }
 
     if (!sessionResp.ok || !sessionData.url) {
       const msg = sessionData.error?.message || `Stripe session create failed (${sessionResp.status})`;
@@ -135,6 +194,7 @@ export async function GET(request: NextRequest) {
         event: "stripe_pro_session_created",
         session_id: sessionData.id,
         user_id: user.id,
+        promo_coupon: appliedCoupon ? true : false,
       })
     );
 

@@ -8,16 +8,15 @@ import type { Locale } from "@/i18n/config";
  *     (sb-<ref>-auth-token, a veces partida en .0, .1), sin tocar el layout.
  *   - Aparece despues de bajar SIGNUP_BAR_SCROLL_PX o de abrir SIGNUP_BAR_MIN_PAGES paginas.
  *   - No sale en /login ni en /account.
- *   - Si se cierra, no vuelve en SIGNUP_BAR_DISMISS_DAYS dias (localStorage). */
+ *   - Si se cierra, vuelve en la siguiente pagina o visita (Victor, 5 nov 2026: «si
+ *     desaparece a los 30 dias, estamos perdiendo una oportunidad»). Antes se ocultaba
+ *     30 dias con localStorage (asai_signup_bar_closed); esa llave ya no se lee.
+ *   - Con la promo de 24 h vigente sale de inmediato, sin esperar scroll (src/lib/promo.ts). */
 
-export const SIGNUP_BAR_DISMISS_KEY = "asai_signup_bar_closed";
 export const SIGNUP_BAR_PAGES_KEY = "asai_signup_bar_pages";
 export const SIGNUP_BAR_SCROLLED_KEY = "asai_signup_bar_scrolled";
-export const SIGNUP_BAR_DISMISS_DAYS = 30;
 export const SIGNUP_BAR_SCROLL_PX = 480;
 export const SIGNUP_BAR_MIN_PAGES = 2;
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** true si el navegador trae la cookie de sesion de Supabase. */
 export function hasSupabaseSessionCookie(cookie: string | null | undefined): boolean {
@@ -29,14 +28,6 @@ export function hasSupabaseSessionCookie(cookie: string | null | undefined): boo
 export function isSignupBarExcluded(pathname: string): boolean {
   const rest = pathname.replace(/^\/(?:es|en)(?=\/|$)/, "");
   return /^\/(?:login|account)(?:\/|$)/.test(rest);
-}
-
-/** true si la barra se cerro hace menos de SIGNUP_BAR_DISMISS_DAYS dias. */
-export function dismissedRecently(raw: string | null | undefined, now: number): boolean {
-  if (!raw) return false;
-  const at = Number(raw);
-  if (!Number.isFinite(at) || at <= 0) return false;
-  return now - at < SIGNUP_BAR_DISMISS_DAYS * DAY_MS;
 }
 
 /** Enlace al registro que vuelve a la pagina actual despues de crear la cuenta. */

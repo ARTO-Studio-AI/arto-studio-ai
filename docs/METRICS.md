@@ -119,7 +119,11 @@ Todos los eventos llevan además lo que PostHog añade solo (`$current_url`, `$r
 | `signup_email_submitted` | envío del enlace por correo (también el reenvío) | `locale`, `has_next`, `marketing_opt_in`, `has_company`, `has_role`, `resend` | `src/app/[locale]/(marketing)/login/LoginForm.tsx` |
 | `signup_bar_shown` | la barra de registro de visitantes aparece (una vez por carga) | `locale`, `path_section`, `trigger` (`scroll` \| `pages`) | `src/components/SignupBarClient.tsx` |
 | `signup_bar_clicked` | clic en «Crear cuenta gratis» de la barra | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
-| `signup_bar_dismissed` | la persona cierra la barra (no vuelve en 30 días) | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
+| `signup_bar_dismissed` | la persona cierra la barra (vuelve en la siguiente página o visita, decisión de Victor del 2026-11-05) | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
+| `promo_bar_shown` | la barra sale con la promo de 24 h y su reloj (una vez por carga; solo con `STRIPE_PROMO_COUPON_24H`) | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
+| `promo_modal_shown` | la ventana de la promo se abre (una vez por sesión del navegador) | `locale`, `path_section`, `trigger` (`timer` \| `scroll`) | `src/components/promo/PromoModal.tsx` |
+| `promo_cta_clicked` | clic en «Crear cuenta y aprovechar» o en Suscribirme con la promo vigente | `placement` (`bar` \| `modal` \| `pricing`), `locale`, `path_section` | barra, ventana y `src/app/[locale]/(marketing)/pricing/ProCheckoutButton.tsx` |
+| `promo_expired_seen` | visitante sin sesión cuyas 24 h ya vencieron (una vez por sesión del navegador) | `locale`, `path_section` | `src/components/SignupBarClient.tsx` |
 | `limit_cta_clicked` | clic en un CTA de la pantalla de tope | `cta` (`pricing` \| `library` \| `signup`), `prompt_id`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/PromptLimitReached.tsx` |
 | `prompt_copied` | clic en Copiar | `prompt_id`, `prompt_tier`, `locale` | `src/app/[locale]/(marketing)/prompts/[id]/CopyButton.tsx` |
 | `search_performed` | respuesta de `/api/search` (ok o error) | `lang`, `query_length`, `results_count`, `ok` | `src/app/[locale]/(marketing)/prompts/SmartSearch.tsx` |
