@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import realCatalog from "@/lib/catalogo/skills.json";
+import { fakeSupabase, type FakeSupabase } from "../../../../../tests/helpers/fake-supabase";
 
 /* GET /api/skill-downloads/[slug] (Victor, 27 oct 2026): sesion, regla de fecha o Pro, y el archivo.
  * La sesion, el plan, el disco y PostHog se mockean; la regla de fecha es la real. */
@@ -19,7 +21,13 @@ vi.mock("next/server", async (orig) => {
   return { ...real, after: (fn: () => unknown) => afterTasks.push(fn) };
 });
 
+/* Estado de /admin/skills (catalog_overrides y catalog_items) en un Supabase falso: las
+ * pruebas nunca leen la base real aunque .env.local traiga las llaves. */
+let fake: FakeSupabase;
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => fake.client }));
+
 const { GET } = await import("./route");
+const { __resetCatalogCache } = await import("@/lib/catalogo/efectivo");
 
 const BEFORE = new Date("2026-11-08T05:59:59Z");
 const AFTER = new Date("2026-11-08T06:00:00Z");
@@ -42,6 +50,8 @@ beforeEach(() => {
   captureServer.mockClear();
   afterTasks.length = 0;
   readFile.mockResolvedValue(ZIP);
+  __resetCatalogCache();
+  fake = fakeSupabase({ catalog_overrides: [], catalog_items: [] });
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -150,5 +160,74 @@ describe("registro y archivo", () => {
     const res = await req("arto-edit-sonido");
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: "not_available" });
+  });
+});
+
+/* Gestion desde /admin/skills (2026-11-05): el estado efectivo manda sobre el del repo. */
+describe("estado de /admin", () => {
+  const H = "b".repeat(64);
+  const ov = (kind: string, slug: string, status: string) => ({ kind, slug, status, updated_by: "v", updated_at: "2026-11-05T12:00:00Z" });
+  const pro = { signedIn: true, userId: "u2", tier: "pro" };
+
+  it("oculto o muy pronto desde /admin: 404 sin mirar la sesion ni leer el archivo", async () => {
+    fake.db.catalog_overrides = [ov("skill", "arto-edit-color", "hidden"), ov("skill", "arto-edit-zooms", "coming_soon"), ov("bundle", "arto-edit-bundle-1", "hidden")];
+    for (const slug of ["arto-edit-color", "arto-edit-zooms", "arto-edit-bundle-1"]) {
+      const res = await req(slug);
+      expect(res.status, slug).toBe(404);
+    }
+    expect(getViewer).not.toHaveBeenCalled();
+    expect(readFile).not.toHaveBeenCalled();
+  });
+
+  const uploaded = () => ({
+    kind: "skill",
+    slug: "arto-subido",
+    ficha: { ...structuredClone(realCatalog.skills[0].ficha), slug: "arto-subido", category: "estrategia-y-negocio" },
+    storage_path: `skills/arto-subido/${H}.skill`,
+    bytes: 100,
+    sha256: H,
+    uploaded_by: "v",
+    updated_at: "2026-11-05T12:00:00Z",
+  });
+
+  it("subido por admin y oculto (como entra): 404", async () => {
+    fake.db.catalog_items = [uploaded()];
+    expect((await req("arto-subido")).status).toBe(404);
+    expect(fake.calls.signed).toEqual([]);
+  });
+
+  it("subido y publicado: regla pro de su categoria, y solo despues la URL firmada de corta vida", async () => {
+    vi.setSystemTime(BEFORE);
+    fake.db.catalog_items = [uploaded()];
+    fake.db.catalog_overrides = [ov("skill", "arto-subido", "published")];
+
+    getViewer.mockResolvedValue({ signedIn: false });
+    let res = await req("arto-subido", { NEXT_LOCALE: "es" });
+    expect(res.headers.get("location")).toBe("https://preview.example.com/es/login?next=%2Fes%2Fskills%2Farto-subido");
+
+    getViewer.mockResolvedValue({ signedIn: true, userId: "u1", tier: "free" });
+    res = await req("arto-subido", { NEXT_LOCALE: "es" });
+    expect(res.headers.get("location")).toBe("https://preview.example.com/es/pricing?from=arto-subido");
+    expect(fake.calls.signed).toEqual([]);
+
+    getViewer.mockResolvedValue(pro);
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    res = await req("arto-subido");
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`https://storage.example.com/sign/skills/arto-subido/${H}.skill?token=t`);
+    expect(res.headers.get("cache-control")).toContain("no-store");
+    expect(fake.calls.signed).toEqual([{ path: `skills/arto-subido/${H}.skill`, seconds: 60, download: "arto-subido - SKILL - V1.0.skill" }]);
+    expect(readFile).not.toHaveBeenCalled();
+    await flushAfter();
+  });
+
+  it("si la base no responde, sirve lo del repo (falla al manifiesto)", async () => {
+    vi.setSystemTime(BEFORE);
+    fake.failReads = true;
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    getViewer.mockResolvedValue(pro);
+    expect((await req("arto-edit-color")).status).toBe(200);
+    expect((await req("arto-subido")).status).toBe(404);
   });
 });

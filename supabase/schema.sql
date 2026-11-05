@@ -9,7 +9,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict AdALaV689OFQLh0syICLFAbzq74DCsuvozzhum8ogs2Mmq1uCUdQfcOAZLwTiU6
+\restrict RynuAOTuHs6v5MXRiVAOVxRor6yUPXXjGWrZdB4aZfJ4h9sF7gpudu5pqIhAhft
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -366,6 +366,100 @@ CREATE TABLE public.catalog_changes (
 
 ALTER TABLE public.catalog_changes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.catalog_changes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: catalog_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.catalog_items (
+    kind text NOT NULL,
+    slug text NOT NULL,
+    ficha jsonb NOT NULL,
+    storage_path text,
+    bytes integer,
+    sha256 text,
+    uploaded_by text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT catalog_items_ficha_check CHECK (((jsonb_typeof(ficha) = 'object'::text) AND ((ficha ->> 'slug'::text) = slug))),
+    CONSTRAINT catalog_items_kind_check CHECK ((kind = ANY (ARRAY['skill'::text, 'mod'::text]))),
+    CONSTRAINT catalog_items_pkg_check CHECK ((((storage_path IS NULL) AND (bytes IS NULL) AND (sha256 IS NULL)) OR ((storage_path ~ '^(skills|mods)/[a-z0-9-]+/[0-9a-f]{64}\.(skill|zip)$'::text) AND ((bytes >= 1) AND (bytes <= 4613734)) AND (sha256 ~ '^[0-9a-f]{64}$'::text)))),
+    CONSTRAINT catalog_items_skill_pkg_check CHECK (((kind <> 'skill'::text) OR (storage_path IS NOT NULL))),
+    CONSTRAINT catalog_items_slug_check CHECK (((slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text) AND (char_length(slug) <= 100)))
+);
+
+
+--
+-- Name: TABLE catalog_items; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.catalog_items IS 'Skills y mods subidos desde /admin/skills. Se suman a los del repo; si un slug existe en los dos, gana el del repo. Entran ocultos (sin override = hidden).';
+
+
+--
+-- Name: catalog_overrides; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.catalog_overrides (
+    kind text NOT NULL,
+    slug text NOT NULL,
+    status text NOT NULL,
+    updated_by text NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT catalog_overrides_kind_check CHECK ((kind = ANY (ARRAY['skill'::text, 'mod'::text, 'bundle'::text]))),
+    CONSTRAINT catalog_overrides_slug_check CHECK (((slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text) AND (char_length(slug) <= 100))),
+    CONSTRAINT catalog_overrides_status_check CHECK ((status = ANY (ARRAY['published'::text, 'coming_soon'::text, 'hidden'::text])))
+);
+
+
+--
+-- Name: TABLE catalog_overrides; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.catalog_overrides IS 'Estado de skills, bundles y mods elegido en /admin/skills. Manda sobre el del manifiesto del repo (src/lib/catalogo/*.json). Lo lee el sitio con cache de 60 s.';
+
+
+--
+-- Name: catalog_status_log; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.catalog_status_log (
+    id bigint NOT NULL,
+    kind text NOT NULL,
+    slug text NOT NULL,
+    action text NOT NULL,
+    from_status text,
+    to_status text NOT NULL,
+    detail jsonb,
+    changed_by text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT catalog_status_log_action_check CHECK ((action = ANY (ARRAY['status'::text, 'upload'::text]))),
+    CONSTRAINT catalog_status_log_from_status_check CHECK ((from_status = ANY (ARRAY['published'::text, 'coming_soon'::text, 'hidden'::text]))),
+    CONSTRAINT catalog_status_log_kind_check CHECK ((kind = ANY (ARRAY['skill'::text, 'mod'::text, 'bundle'::text]))),
+    CONSTRAINT catalog_status_log_to_status_check CHECK ((to_status = ANY (ARRAY['published'::text, 'coming_soon'::text, 'hidden'::text])))
+);
+
+
+--
+-- Name: TABLE catalog_status_log; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.catalog_status_log IS 'Cada cambio de estado o subida hecha en /admin/skills: quien, cuando y de que estado a cual.';
+
+
+--
+-- Name: catalog_status_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_status_log ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.catalog_status_log_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1157,6 +1251,30 @@ ALTER TABLE ONLY public.catalog_changes
 
 
 --
+-- Name: catalog_items catalog_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_items
+    ADD CONSTRAINT catalog_items_pkey PRIMARY KEY (kind, slug);
+
+
+--
+-- Name: catalog_overrides catalog_overrides_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_overrides
+    ADD CONSTRAINT catalog_overrides_pkey PRIMARY KEY (kind, slug);
+
+
+--
+-- Name: catalog_status_log catalog_status_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_status_log
+    ADD CONSTRAINT catalog_status_log_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: clients clients_api_key_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1471,6 +1589,20 @@ CREATE INDEX catalog_changes_created_idx ON public.catalog_changes USING btree (
 --
 
 CREATE INDEX catalog_changes_entity_idx ON public.catalog_changes USING btree (entity, entity_id, created_at DESC);
+
+
+--
+-- Name: catalog_status_log_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX catalog_status_log_created_idx ON public.catalog_status_log USING btree (created_at DESC);
+
+
+--
+-- Name: catalog_status_log_item_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX catalog_status_log_item_idx ON public.catalog_status_log USING btree (kind, slug, created_at DESC);
 
 
 --
@@ -2161,6 +2293,24 @@ ALTER TABLE public.attribution_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.catalog_changes ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: catalog_items; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_items ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: catalog_overrides; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_overrides ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: catalog_status_log; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_status_log ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: clients; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -2338,5 +2488,5 @@ ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict AdALaV689OFQLh0syICLFAbzq74DCsuvozzhum8ogs2Mmq1uCUdQfcOAZLwTiU6
+\unrestrict RynuAOTuHs6v5MXRiVAOVxRor6yUPXXjGWrZdB4aZfJ4h9sF7gpudu5pqIhAhft
 

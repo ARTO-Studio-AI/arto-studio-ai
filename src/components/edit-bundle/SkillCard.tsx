@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { priceLabelFor } from "@/lib/catalogo/access";
-import { accessOf, demoOf, type CatalogSkill } from "@/lib/catalogo/skills";
+import { demoOf, getCategory, type CatalogSkill } from "@/lib/catalogo/skills";
 import DemoVideo from "./DemoVideo";
 
 /* Tarjeta de un skill del ARTO Edit Bundle #1: demo en loop, nombre, una linea y la
@@ -23,7 +23,7 @@ interface Props {
 export default function SkillCard({ skill, locale, t, now = new Date(), soonLabel = t.cta_soon }: Props) {
   const demo = demoOf(skill.slug);
   const soon = skill.status === "coming_soon";
-  const price = priceLabelFor(accessOf(skill.slug) ?? "pro", now) === "free" ? t.label_free : t.label_pro;
+  const price = priceLabelFor(getCategory(skill.category)?.access ?? "pro", now) === "free" ? t.label_free : t.label_pro;
   const label = soon ? soonLabel : price;
   return (
     <Link
