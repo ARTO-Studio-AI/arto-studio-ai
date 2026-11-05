@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localeHref, mobileDrawerGroups, mobilePrimaryItems, type AppNavId } from "@/lib/app-nav";
 import AppNavIcon from "@/components/navigation/AppNavIcon";
 import VerticalLinks from "@/components/navigation/VerticalLinks";
+import { useDrawerFocus } from "@/components/navigation/use-drawer-focus";
 
 /* Barra inferior en celular (< 768 px) para usuarios con sesion (D28): cuatro destinos fijos y
  * «Mas», que abre un cajon con el resto. El cajon es un dialogo modal: atrapa el foco, se cierra
@@ -39,47 +40,7 @@ export default function AppBottomNav({ locale, labels, active }: Props) {
     moreRef.current?.focus();
   }
 
-  useEffect(() => {
-    if (!open) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setOpen(false);
-        moreRef.current?.focus();
-        return;
-      }
-      if (e.key !== "Tab" || !panelRef.current) return;
-      /* Solo lo visible: los enlaces dentro de un <details> cerrado no reciben foco. */
-      const focusables = Array.from(
-        panelRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((el) => {
-        const details = el.closest("details");
-        if (details && !details.open && el.tagName !== "SUMMARY") return false;
-        return el.getClientRects().length > 0;
-      });
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open]);
+  useDrawerFocus(open, setOpen, { panel: panelRef, close: closeRef, trigger: moreRef });
 
   const itemClass = (isActive: boolean) =>
     `relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[11px] leading-tight transition ${FOCUS} ${
