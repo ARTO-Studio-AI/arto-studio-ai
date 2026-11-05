@@ -7,7 +7,8 @@ import SkillCard from "@/components/edit-bundle/SkillCard";
 import { Badge, Card } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import { EDIT_SKILLS } from "@/lib/edit-bundle/catalog";
+import { getBundle, publicCategories } from "@/lib/catalogo/skills";
+import { EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
@@ -25,7 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /* /skills (2026-10-27): arriba la categoria «Edicion de video» con los 9 skills del
  * ARTO Edit Bundle #1 (Victor, 27 oct 2026) y la tarjeta del bundle; abajo, la lista que estaba en
- * desarrollo, ahora como «Proximamente». La etiqueta Gratis/Pro sale de la fecha. */
+ * desarrollo, ahora como «Proximamente». La etiqueta Gratis/Pro sale de la fecha.
+ * Desde el 2026-11-05 las categorias y tarjetas salen del catalogo (src/lib/catalogo/skills.json):
+ * una seccion por categoria con skills visibles; los ocultos no salen. */
 export default async function SkillsPage({ params }: Props) {
   const { locale: localeParam } = await params;
   if (!isLocale(localeParam)) notFound();
@@ -44,23 +47,30 @@ export default async function SkillsPage({ params }: Props) {
         <p className="mt-4 max-w-xl text-lg text-zinc-600">{t.hero_body}</p>
       </div>
 
-      <section id="edicion-de-video" aria-labelledby="cat-video">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl">
-            <p className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500">{eb.hero_kicker}</p>
-            <h2 id="cat-video" className="mt-2 text-3xl font-extrabold tracking-tight">{eb.category}</h2>
-            <p className="mt-2 text-zinc-600">{eb.category_body}</p>
-          </div>
-        </div>
-        <div className="mt-8">
-          <BundleCard locale={locale} t={eb} now={now} />
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {EDIT_SKILLS.map((skill) => (
-            <SkillCard key={skill.slug} skill={skill} locale={locale} t={eb} now={now} />
-          ))}
-        </div>
-      </section>
+      {publicCategories().map(({ category, skills }, i) => {
+        const bundle = category.bundle ? getBundle(category.bundle) : null;
+        return (
+          <section key={category.slug} id={category.slug} aria-labelledby={`cat-${category.slug}`} className={i > 0 ? "mt-20" : undefined}>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <p className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500">{category.kicker[locale]}</p>
+                <h2 id={`cat-${category.slug}`} className="mt-2 text-3xl font-extrabold tracking-tight">{category.name[locale]}</h2>
+                <p className="mt-2 text-zinc-600">{category.body[locale]}</p>
+              </div>
+            </div>
+            {bundle?.slug === EDIT_BUNDLE_SLUG && (
+              <div className="mt-8">
+                <BundleCard locale={locale} t={eb} now={now} />
+              </div>
+            )}
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {skills.map((skill) => (
+                <SkillCard key={skill.slug} skill={skill} locale={locale} t={eb} now={now} soonLabel={t.badge} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       <section className="mt-20" aria-labelledby="coming-soon">
         <div className="mb-6">

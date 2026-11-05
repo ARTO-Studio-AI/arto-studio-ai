@@ -1,0 +1,515 @@
+{
+  "categories": [
+    {
+      "slug": "edicion-de-video",
+      "order": 1,
+      "access": "edit-bundle-1",
+      "bundle": "arto-edit-bundle-1",
+      "kicker": {
+        "es": "Edición de video con Claude",
+        "en": "Video editing with Claude"
+      },
+      "name": {
+        "es": "Edición de video",
+        "en": "Video editing"
+      },
+      "body": {
+        "es": "9 skills para que Claude Code edite tus videos verticales. Cada uno hace una cosa y se puede usar solo; el Director los combina.",
+        "en": "9 skills so Claude Code edits your vertical videos. Each one does one thing and works on its own; the Director chains them together."
+      }
+    }
+  ],
+  "bundles": [
+    {
+      "slug": "arto-edit-bundle-1",
+      "category": "edicion-de-video",
+      "version": "1.0",
+      "page": "/edit-bundle-1",
+      "status": "published"
+    }
+  ],
+  "skills": [
+    {
+      "slug": "arto-edit-cortes",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-cortes",
+        "order": 1,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Cortes",
+          "en": "Cuts"
+        },
+        "tagline": {
+          "es": "Quita silencios, muletillas y tomas repetidas sin perder la sincronía.",
+          "en": "Removes silences, filler words and repeated takes without breaking sync."
+        },
+        "what": {
+          "es": "Transcribe tu video palabra por palabra, mide los silencios y te enseña la lista de cortes en una tabla. Cuando dices que sí, corta dejando 0.08 s de aire y comprueba que audio y video siguen juntos. La lista queda en JSON para poner whooshes después.",
+          "en": "Transcribes your video word by word, measures the silences and shows you the list of cuts in a table. Once you say yes, it cuts with 0.08 s of breathing room and checks that audio and video still line up. The list is saved as JSON so you can add whooshes later."
+        },
+        "you_say": {
+          "es": [
+            "Quita los silencios de mi video",
+            "Quita las muletillas y la toma repetida",
+            "Hazlo más dinámico"
+          ],
+          "en": [
+            "Remove the silences from my video",
+            "Cut the filler words and the repeated take",
+            "Make it snappier"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo",
+            "Whisper (mlx-whisper en Mac con chip M u openai-whisper)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 or newer",
+            "Whisper (mlx-whisper on Apple Silicon or openai-whisper)"
+          ]
+        },
+        "time": {
+          "es": "unos 30 s por minuto de video en Mac con chip M",
+          "en": "about 30 s per minute of video on Apple Silicon"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-subtitulos",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-subtitulos",
+        "order": 2,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Subtítulos",
+          "en": "Captions"
+        },
+        "tagline": {
+          "es": "Subtítulos palabra por palabra, limpios y en el tercio inferior.",
+          "en": "Clean word-by-word captions in the lower third."
+        },
+        "what": {
+          "es": "Pone subtítulos de 2 a 3 palabras en blanco con sombra suave, sin caja, que nunca juntan dos frases ni se salen del margen. Si quieres, la palabra que se está diciendo va en naranja. También te da el .srt.",
+          "en": "Adds 2 to 3 word captions in white with a soft shadow and no box, never mixing two sentences or leaving the safe margin. Optionally, the word being spoken turns orange. You also get the .srt file."
+        },
+        "you_say": {
+          "es": [
+            "Ponle subtítulos a mi video",
+            "Subtítulos con la palabra resaltada",
+            "Sácame el srt"
+          ],
+          "en": [
+            "Add captions to my video",
+            "Captions with the active word highlighted",
+            "Make me an srt"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg (no necesita libass)",
+            "Python 3.9 o más nuevo con Pillow",
+            "Whisper (mlx-whisper en Mac con chip M u openai-whisper)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg (no libass needed)",
+            "Python 3.9 or newer with Pillow",
+            "Whisper (mlx-whisper on Apple Silicon or openai-whisper)"
+          ]
+        },
+        "time": {
+          "es": "unos 35 s por minuto de video en Mac con chip M",
+          "en": "about 35 s per minute of video on Apple Silicon"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-letras-detras",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-letras-detras",
+        "order": 3,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Letras detrás",
+          "en": "Text behind you"
+        },
+        "tagline": {
+          "es": "Tu titular, detrás de tu cabeza.",
+          "en": "Your headline, behind your head."
+        },
+        "what": {
+          "es": "Recorta a la persona cuadro por cuadro y pone un titular grande de una o dos palabras detrás de ella, con una entrada animada. La cabeza tapa parte de las letras y el resto del video queda igual.",
+          "en": "It cuts out the person frame by frame and places a big one or two word headline behind them, with an animated entrance. Your head covers part of the letters and the rest of the video stays the same."
+        },
+        "you_say": {
+          "es": [
+            "Pon «EL PLAN» detrás de mí en el segundo 3",
+            "Pon letras detrás de mi cabeza cuando digo «criterio»",
+            "Hazlo en blanco y con Manrope"
+          ],
+          "en": [
+            "Put \"THE PLAN\" behind me at second 3",
+            "Put the text behind my head when I say \"criteria\"",
+            "Make it white, in Manrope"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo",
+            "rembg (se instala solo)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 or newer",
+            "rembg (installs itself)"
+          ]
+        },
+        "time": {
+          "es": "unos 16 segundos por un tramo de 3 s en una Mac con chip M",
+          "en": "about 16 seconds for a 3 s segment on an Apple silicon Mac"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-recuadros",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-recuadros",
+        "order": 4,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Recuadros",
+          "en": "Pop-up cards"
+        },
+        "tagline": {
+          "es": "Tarjetas que aparecen justo cuando las nombras.",
+          "en": "Cards that pop up right when you say it."
+        },
+        "what": {
+          "es": "Pone tarjetas flotantes con una captura, otro clip, un prompt que se escribe solo o un ícono, con esquinas redondeadas, sombra suave y un pequeño rebote. Entran con la palabra que las menciona y nunca te tapan la cara.",
+          "en": "It adds floating cards with a screenshot, another clip, a prompt that types itself or an icon, with rounded corners, a soft shadow and a little bounce. They come in on the word that mentions them and never cover your face."
+        },
+        "you_say": {
+          "es": [
+            "Muestra el prompt cuando digo «prompts»",
+            "Pon la captura del sitio cuando digo «PRO»",
+            "Pon un check con «Sin tarjeta» en el segundo 1.3"
+          ],
+          "en": [
+            "Show the prompt when I say \"prompts\"",
+            "Show the site screenshot when I say \"PRO\"",
+            "Add a check icon saying \"No card\" at second 1.3"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo",
+            "rembg (se instala solo)",
+            "Whisper, opcional"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 or newer",
+            "rembg (installs itself)",
+            "Whisper, optional"
+          ]
+        },
+        "time": {
+          "es": "unos 15 segundos por un clip de 8 s con dos tarjetas",
+          "en": "about 15 seconds for an 8 s clip with two cards"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-titulares",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-titulares",
+        "order": 5,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Titulares",
+          "en": "Headlines"
+        },
+        "tagline": {
+          "es": "Tu video, con portada de revista.",
+          "en": "Your video, with a magazine cover."
+        },
+        "what": {
+          "es": "Pone un masthead grande en serif de revista con una línea fina y una línea de apoyo, con entrada animada. El color se elige solo según el fondo y, si quieres, el masthead queda detrás de ti.",
+          "en": "It adds a big magazine serif masthead with a thin rule and a support line, with an animated entrance. The color adapts to the background and, if you want, the masthead goes behind you."
+        },
+        "you_say": {
+          "es": [
+            "Ponle un titular de revista que diga «Norte»",
+            "Pon «Norte» detrás de mí como portada",
+            "Agrega abajo «Edición 01 · Prompts que sí sirven»"
+          ],
+          "en": [
+            "Add a magazine headline that says \"Norte\"",
+            "Put \"Norte\" behind me like a magazine cover",
+            "Add \"Issue 01 · Prompts that work\" below"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo",
+            "rembg para ponerlo detrás (se instala solo)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 or newer",
+            "rembg to put it behind you (installs itself)"
+          ]
+        },
+        "time": {
+          "es": "de 10 a 20 segundos por titular",
+          "en": "10 to 20 seconds per headline"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-color",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-color",
+        "order": 6,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Color",
+          "en": "Color"
+        },
+        "tagline": {
+          "es": "Cuatro looks de color y un antes y después con barra, sin quemar la piel.",
+          "en": "Four color looks and a before and after slider that keep skin natural."
+        },
+        "what": {
+          "es": "Le pone a tu video un look cálido, oscuro, limpio o en blanco y negro, con la intensidad que quieras, o lo ajusta con palabras como «un poco más cálido». Puede entregar un antes y después con barra deslizante y revisa en una hoja de cuadros que la piel no se queme.",
+          "en": "Gives your video a warm, dark, clean or black and white look at the strength you want, or adjusts it from plain words like \"a bit warmer\". It can deliver a before and after slider and checks a frame sheet so skin never gets blown out."
+        },
+        "you_say": {
+          "es": [
+            "Dale un look cálido a mi video",
+            "Hazlo más oscuro, tipo cine",
+            "Pásalo a blanco y negro",
+            "Un poco más cálido y menos contraste",
+            "Enséñame el antes y después con barra"
+          ],
+          "en": [
+            "Give my video a warm look",
+            "Make it darker and moodier",
+            "Turn it black and white",
+            "A bit warmer and less contrast",
+            "Show me a before and after slider"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo con Pillow y numpy",
+            "rembg (opcional)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9+ with Pillow and numpy",
+            "rembg (optional)"
+          ]
+        },
+        "time": {
+          "es": "unos 2 a 4 segundos por cada 10 segundos de video",
+          "en": "about 2 to 4 seconds per 10 seconds of video"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-zooms",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-zooms",
+        "order": 7,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Zooms",
+          "en": "Zooms"
+        },
+        "tagline": {
+          "es": "Zooms suaves hacia la cara en las frases que importan, sin temblor.",
+          "en": "Smooth push-in zooms on the lines that matter, with no jitter."
+        },
+        "what": {
+          "es": "Hace zooms de empuje de 1.0 a 1.12 en 0.4 s con curva suave, anclados en tu cara para que nunca corten la cabeza y como máximo uno cada 6 segundos. Tú dices los segundos o las frases, o el skill las elige con Whisper.",
+          "en": "Adds push-in zooms from 1.0 to 1.12 in 0.4 s with an ease curve, anchored on your face so your head is never cut, and never more than one every 6 seconds. You pick the seconds or the lines, or the skill picks them with Whisper."
+        },
+        "you_say": {
+          "es": [
+            "Ponle zooms a mi video",
+            "Haz zoom cuando digo «el problema»",
+            "Elige tú dónde van los zooms",
+            "Zoom en el segundo 4 y que regrese de golpe"
+          ],
+          "en": [
+            "Add zooms to my video",
+            "Zoom in when I say \"the problem\"",
+            "You choose where the zooms go",
+            "Zoom at second 4 and snap back"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo con Pillow y numpy",
+            "rembg (recomendado)",
+            "Whisper (para frases o modo automático)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9+ with Pillow and numpy",
+            "rembg (recommended)",
+            "Whisper (for lines or auto mode)"
+          ]
+        },
+        "time": {
+          "es": "unos 15 a 25 segundos por cada 10 segundos de video",
+          "en": "about 15 to 25 seconds per 10 seconds of video"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-sonido",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-sonido",
+        "order": 8,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Sonido",
+          "en": "Sound"
+        },
+        "tagline": {
+          "es": "Música que baja cuando hablas, whooshes en los cortes y volumen listo para redes.",
+          "en": "Music that ducks under your voice, whooshes on every cut and loudness ready for social."
+        },
+        "what": {
+          "es": "Mezcla tu música con ducking bajo la voz, pone un whoosh antes de cada corte y un pop en cada aparición, y deja el master a -14 LUFS con pico de -2 dB en doble pasada. Al final mide el archivo y te dice el resultado. Trae sus propios efectos, libres para usar.",
+          "en": "Mixes your music with ducking under the voice, adds a whoosh before every cut and a pop on every pop-up, and masters to -14 LUFS with a -2 dB peak in two passes. It measures the final file and tells you the numbers. Ships with its own royalty-free effects."
+        },
+        "you_say": {
+          "es": [
+            "Ponle música y baja la música cuando hablo",
+            "Ponle whooshes en los cortes",
+            "Déjalo a -14 LUFS"
+          ],
+          "en": [
+            "Add music and duck it under my voice",
+            "Add whooshes on the cuts",
+            "Master it to -14 LUFS"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo con numpy",
+            "Tu música (o la cama de prueba incluida)"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 or newer with numpy",
+            "Your own music (or the included test bed)"
+          ]
+        },
+        "time": {
+          "es": "unos 5 s por minuto de video",
+          "en": "about 5 s per minute of video"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-edit-director",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-edit-director",
+        "order": 9,
+        "category": "edicion-de-video",
+        "name": {
+          "es": "Director",
+          "en": "Director"
+        },
+        "tagline": {
+          "es": "Primero el storyboard, después la edición completa con los otros 8 skills.",
+          "en": "Storyboard first, then the full edit with the other 8 skills."
+        },
+        "what": {
+          "es": "Lee tu video, te propone un storyboard escena por escena con lo que se dice, el efecto y el recurso, y no edita nada hasta que lo apruebas. Luego llama a los otros skills del bundle en orden, ajusta los tiempos después de cortar y al final verifica con hoja de cuadros y Whisper contra el guion.",
+          "en": "Reads your video, proposes a scene by scene storyboard with what is said, the effect and the asset, and edits nothing until you approve it. Then it runs the other bundle skills in order, updates the timing after cuts and checks the result with a frame sheet and Whisper against the script."
+        },
+        "you_say": {
+          "es": [
+            "Edita mi video completo",
+            "Arma primero el storyboard",
+            "¿Qué le pondrías a este video?",
+            "Aprobado, edítalo"
+          ],
+          "en": [
+            "Edit my whole video",
+            "Make a storyboard first",
+            "What would you add to this video?",
+            "Approved, go ahead and edit"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9 o más nuevo con Pillow y numpy",
+            "Whisper",
+            "Los skills del ARTO Edit Bundle #1 que use el storyboard"
+          ],
+          "en": [
+            "Claude Code",
+            "ffmpeg",
+            "Python 3.9+ with Pillow and numpy",
+            "Whisper",
+            "The ARTO Edit Bundle #1 skills the storyboard uses"
+          ]
+        },
+        "time": {
+          "es": "el storyboard en menos de un minuto; la edición, la suma de los skills que use",
+          "en": "the storyboard in under a minute; the edit takes the sum of the skills it uses"
+        },
+        "version": "1.0"
+      }
+    }
+  ]
+}

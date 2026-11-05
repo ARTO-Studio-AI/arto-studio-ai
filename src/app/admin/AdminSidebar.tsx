@@ -42,6 +42,8 @@ const SECTIONS: Section[] = [
       { href: "/admin/catalogo", label: "Prompts" },
       { href: "/admin/catalogo/importar", label: "Importar CSV" },
       { href: "/admin/catalogo/historial", label: "Historial" },
+      /* Skills y mods del catalogo, solo lectura (2026-11-05). */
+      { href: "/admin/skills", label: "Skills y mods" },
     ],
   },
   {

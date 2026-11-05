@@ -4,11 +4,13 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config";
 import { captureServer } from "@/lib/analytics-server";
 import { CONSENT_COOKIE, analyticsAllowed } from "@/lib/consent";
-import { downloadAccess, isPromoActive } from "@/lib/edit-bundle/access";
-import { getDownloadItem } from "@/lib/edit-bundle/catalog";
+import { accessFor, promoFor } from "@/lib/catalogo/access";
+import { getDownloadItem } from "@/lib/catalogo/skills";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 
 /* GET /api/skill-downloads/[slug] · descarga de los skills del ARTO Edit Bundle #1 (Victor, 27 oct 2026).
+ * Desde el 2026-11-05 sirve a todo el catalogo (src/lib/catalogo): solo lo publicado, con la
+ * regla de su categoria. El bundle sigue con la suya, sin cambios (src/lib/catalogo/access.ts).
  *
  *  1. El slug se busca en el catalogo. Lo que no esta ahi es 404; el nombre del archivo
  *     sale del catalogo, nunca de la peticion (sin path traversal).
@@ -31,7 +33,7 @@ export const dynamic = "force-dynamic";
 
 const NO_STORE = { "Cache-Control": "private, no-store, max-age=0" };
 
-/* Vercel no responde mas de 4.5 MB desde una funcion; scripts/edit-bundle-manifest.mjs ya rechaza
+/* Vercel no responde mas de 4.5 MB desde una funcion; scripts/catalogo-assets.mjs ya rechaza
  * paquetes de mas de 4.4 MB, y aqui se repite por si alguien copio uno sin correrlo. */
 const MAX_BYTES = Math.floor(4.4 * 1024 * 1024);
 
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const locale = requestLocale(request);
   const viewer = await getViewer();
   const now = new Date();
-  const access = downloadAccess(viewer, now);
+  const access = accessFor(item.access, viewer, now);
 
   if (access === "signin" || !viewer.signedIn) {
     const back = `/${locale}${item.pagePath}`;
@@ -83,7 +85,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "too_large" }, { status: 503, headers: NO_STORE });
   }
 
-  const promo = isPromoActive(now);
+  const promo = promoFor(item.access, now);
   const record = {
     event: "skill_download",
     slug: item.slug,

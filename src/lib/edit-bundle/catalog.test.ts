@@ -39,6 +39,7 @@ describe("getDownloadItem", () => {
       file: "arto-edit-subtitulos.skill",
       downloadName: "arto-edit-subtitulos - SKILL - V1.0.skill",
       pagePath: "/skills/arto-edit-subtitulos",
+      access: "edit-bundle-1",
     });
     expect(getDownloadItem(EDIT_BUNDLE_SLUG)?.file).toBe("arto-edit-bundle-1.zip");
     expect(getDownloadItem(EDIT_BUNDLE_SLUG)?.pagePath).toBe("/edit-bundle-1");

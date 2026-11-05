@@ -1,191 +1,106 @@
-# Adding a new skill to ARTO Studio AI
+# Cómo se sube todo al sitio
 
-Target: from "I have an idea for a skill" → "it's live in production" in ~15 minutes.
+Actualizado el 2026-11-05. Prompts, skills y mods de `creative.artostudio.ai`. Ninguno pide tocar código a mano.
 
-Every skill is a self-contained `SkillDefinition<TInput, TOutput>` registered in `src/lib/skills/index.ts`. The generic engine (`src/lib/skills/engine.ts`) handles: input validation → knowledge loading → Claude call (optionally with `web_fetch`) → tool extraction → derived fields → fallback → trace persistence. You do not touch it.
+| Qué | Cómo | Dónde queda |
+|---|---|---|
+| Prompts | Desde el panel, sin PR | Base de datos (`prompts`) |
+| Skills | `node scripts/add-skill.mjs <carpeta>` en una rama, con PR | `src/lib/catalogo/skills.json` y `private/skills/` |
+| Mods | `node scripts/add-mod.mjs <mod.json>` en una rama, con PR | `src/lib/catalogo/mods.json` |
 
-Unless you set `public: true`, the new skill is gated behind a client API key automatically. Only `brand-roast` is public.
+Para ver qué hay y en qué estado: **`/admin/skills`** (solo lectura).
 
-## The 4 steps
+## 1. Prompts
 
-### 1. Define the input and output types
+Todo por el panel, en producción y sin despliegue:
 
-Either add them to an existing `*-types.ts` file or create `src/lib/skills/<slug>-types.ts`.
+- **Uno nuevo**: `/admin/catalogo/nuevo`.
+- **Muchos**: `/admin/catalogo/importar` con un CSV. Lo fácil es exportar desde `/admin/catalogo`, editar en Sheets y volver a subir. Sin `id` es alta y entra **no disponible**; con `id` edita solo las celdas con valor.
+- **Publicar**: en `/admin/catalogo`, columna «disponible».
+- **Deshacer**: `/admin/catalogo/historial`. Cada cambio o importación es un lote que se revierte entero.
 
-```ts
-export interface BrandPositioningRequest {
-  brandName: string;
-  industry: string;
-  audience: string;
-  competitors?: string[];
-  websiteUrl?: string;
-}
+## 2. Skills
 
-export interface BrandPositioningResult {
-  positioningStatement: string;
-  pillars: Array<{ name: string; description: string }>;
-  differentiators: string[];
-  risks: string[];
-}
+### La carpeta (la de Drive)
+
+```
+skills/<slug>/
+  SKILL.md                         frontmatter con name (= slug) y description
+  ficha.json                       textos de la página, en es y en
+  <slug> - SKILL - V<version>.skill   zip con la carpeta <slug>/ adentro
+  demo/demo.mp4                    opcional, hasta 1.5 MB
+  demo/poster.jpg                  opcional, hasta 150 KB
 ```
 
-### 2. Write the system prompt and the Claude tool schema
+`ficha.json` tiene la forma de las del Edit Bundle: `slug`, `order`, `category`, `name`, `tagline`, `what`, `you_say`, `needs`, `time` (todos con `es` y `en`), `version` y, si aplica, `placeholder: true` y `chatgpt_note`. Si el skill estrena categoría, la ficha trae también `category_copy` con `name`, `body` y `kicker` en `es` y `en`.
 
-The system prompt receives the concatenated ARTO knowledge slices you declare + the validated input. The tool schema is what Claude must fill in.
+### El comando
 
-```ts
-import type { Tool } from "@anthropic-ai/sdk/resources/messages";
-
-export function buildBrandPositioningPrompt(knowledge: string): string {
-  return `You are ARTO Studio AI's Brand Positioning engine.
-Use the methodology below to produce a sharp, differentiated positioning.
-
-${knowledge}
-
-Return exactly one call to the deliver_positioning tool.`;
-}
-
-export const brandPositioningTool: Tool = {
-  name: "deliver_positioning",
-  description: "Deliver a brand positioning statement + pillars.",
-  input_schema: {
-    type: "object",
-    properties: {
-      positioningStatement: { type: "string" },
-      pillars: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: { type: "string" },
-            description: { type: "string" },
-          },
-          required: ["name", "description"],
-        },
-      },
-      differentiators: { type: "array", items: { type: "string" } },
-      risks: { type: "array", items: { type: "string" } },
-    },
-    required: ["positioningStatement", "pillars", "differentiators", "risks"],
-  },
-};
-```
-
-### 3. (Optional) Write a deterministic fallback
-
-If Claude is down or there's no API key, the engine calls `fallbackFn(input)`. Skip this if the skill should just 503 on failure — but for anything customer-facing, write one.
-
-```ts
-export function fallbackPositioning(input: BrandPositioningRequest): BrandPositioningResult {
-  return {
-    positioningStatement: `${input.brandName} — the [category] brand for [audience] who want [outcome].`,
-    pillars: [
-      { name: "Clarity", description: "State what you do in one sentence." },
-      { name: "Tension", description: "Define who you are NOT for." },
-      { name: "Proof", description: "Show the receipts, not the promise." },
-    ],
-    differentiators: ["Define 3-5 truths only you can claim."],
-    risks: ["Generic category language erodes differentiation."],
-  };
-}
-```
-
-### 4. Register the skill
-
-Create `src/lib/skills/brand-positioning.ts`:
-
-```ts
-import { registerSkill } from "./registry";
-import type { SkillDefinition, InputValidationResult } from "./types";
-import type { BrandPositioningRequest, BrandPositioningResult } from "./brand-positioning-types";
-import { buildBrandPositioningPrompt, brandPositioningTool } from "./brand-positioning-prompt";
-import { fallbackPositioning } from "./brand-positioning-fallback";
-
-function validate(body: unknown): InputValidationResult<BrandPositioningRequest> {
-  if (!body || typeof body !== "object") {
-    return { valid: false, error: "Request body is required", field: "body" };
-  }
-  const b = body as Record<string, unknown>;
-  const brandName = typeof b.brandName === "string" ? b.brandName.trim() : "";
-  const industry = typeof b.industry === "string" ? b.industry.trim() : "";
-  const audience = typeof b.audience === "string" ? b.audience.trim() : "";
-  if (!brandName) return { valid: false, error: "brandName required", field: "brandName" };
-  if (!industry) return { valid: false, error: "industry required", field: "industry" };
-  if (!audience) return { valid: false, error: "audience required", field: "audience" };
-  return {
-    valid: true,
-    data: {
-      brandName,
-      industry,
-      audience,
-      competitors: Array.isArray(b.competitors)
-        ? (b.competitors as unknown[]).filter((c): c is string => typeof c === "string")
-        : undefined,
-      websiteUrl: typeof b.websiteUrl === "string" ? b.websiteUrl : undefined,
-    },
-  };
-}
-
-export const brandPositioningSkill: SkillDefinition<BrandPositioningRequest, BrandPositioningResult> = {
-  slug: "brand-positioning",
-  name: "Brand Positioning",
-  description: "Generate a sharp, differentiated brand positioning statement with pillars.",
-  public: false, // gated — requires client API key
-  knowledgeKeys: ["strategy", "narrative"],
-  requiresWebFetch: true,
-  urlField: "websiteUrl",
-  inputValidator: validate,
-  systemPromptBuilder: (knowledge) => buildBrandPositioningPrompt(knowledge),
-  outputToolSchema: brandPositioningTool,
-  fallbackFn: fallbackPositioning,
-  maxTokens: 3000,
-};
-
-registerSkill(brandPositioningSkill);
-```
-
-Then add one import line to `src/lib/skills/index.ts`:
-
-```ts
-import "./brand-positioning";
-```
-
-That's it. The skill is now callable at `POST /api/skills/brand-positioning` with header `x-arto-api-key: arto_live_...`. It shows up in `GET /api/skills` for clients whose `allowed_skills` includes its slug (or `"*"`).
-
-## Knowledge slices
-
-`knowledgeKeys` references keys in `src/lib/knowledge.ts → KNOWLEDGE_MAP`. To add a new slice:
-
-1. Drop a `.md` file somewhere under `/knowledge/` (e.g. `/knowledge/methodology/positioning.md`).
-2. Register it in `KNOWLEDGE_MAP` under a short key (`positioning: "knowledge/methodology/positioning.md"`).
-3. Reference the key from your skill's `knowledgeKeys`.
-
-The loader caches per key, so slices you don't use aren't loaded.
-
-## Permissioning a client
+En la Mac Mini, que tiene el repo y Drive:
 
 ```bash
-curl -X POST https://arto-studio-ai.vercel.app/api/admin/clients \
-  -H "Authorization: Bearer $ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Acme Co",
-    "email": "ops@acme.com",
-    "tier": "agency",
-    "allowed_skills": ["brand-roast", "brand-positioning"],
-    "rate_limit_per_hour": 100
-  }'
+cd ~/Projects/arto-studio-ai && git switch -c feat/skill-<slug> origin/main
+DRIVE="$HOME/Library/CloudStorage/GoogleDrive-vhcelaya@artogroup.com/Shared drives/CLAUDE DRIVE/CC CW Project Folders/ASAI ARTO Studio AI Project/skills"
+
+node scripts/add-skill.mjs "$DRIVE/<slug>" --dry-run   # solo revisa
+node scripts/add-skill.mjs "$DRIVE/<slug>"             # lo sube oculto
 ```
 
-The response contains `api_key` **once**. Send it to the client over a secure channel — it's never retrievable again.
+El script valida la carpeta (frontmatter, ficha en los dos idiomas, sin em dashes ni palabras prohibidas, paquete limpio y dentro del peso), copia el paquete a `private/skills/` y la demo a `public/skills/demos/`, registra el skill en `skills.json` y regenera `assets.json`. Si algo falla, no escribe nada y dice qué arreglar.
 
-## Checklist before shipping a skill
+Luego `npx vitest run && npm run build`, commit y PR. Al mergear, el skill queda en el sitio con el estado que tenga.
 
-- [ ] Input validator rejects missing/oversized fields with a clear `field` name.
-- [ ] Tool schema lists every required output field.
-- [ ] System prompt references ARTO methodology, not generic advice.
-- [ ] Fallback produces something usable (not "TODO").
-- [ ] `knowledgeKeys` loads only what the skill actually needs.
-- [ ] Decided `public` flag deliberately (default: `false`).
-- [ ] `npm run build` passes locally.
-- [ ] Smoke test via curl against localhost before deploying.
+### Estados
+
+| Estado | En /skills | Página | Descarga |
+|---|---|---|---|
+| `hidden` (lo nuevo entra así) | no | 404 | no |
+| `coming_soon` | sí, con «Muy pronto» | sí | no |
+| `published` | sí | sí | según la regla de su categoría |
+
+```bash
+node scripts/add-skill.mjs "$DRIVE/<slug>" --publish       # sube y publica
+node scripts/add-skill.mjs "$DRIVE/<slug>" --coming-soon
+node scripts/add-skill.mjs --estado <slug> published       # cambia el estado sin volver a copiar
+```
+
+Volver a correr el comando sobre un skill que ya existe lo actualiza (ficha, paquete y demo) y **conserva su estado** si no pides otro. Así se sube una versión nueva.
+
+### Quién descarga
+
+Lo decide la categoría (`access` en `skills.json`), no el script:
+
+- `edit-bundle-1`: la regla del ARTO Edit Bundle #1 (`src/lib/edit-bundle/access.ts`). Gratis con cuenta hasta el 7 nov de 2026, después solo Pro.
+- `pro`: solo Pro y Enterprise. Es la que recibe una categoría nueva.
+
+Abrir una categoría gratis o cambiar una regla es decisión de Victor y va en `docs/DECISIONES.md`.
+
+### El Edit Bundle
+
+`bash scripts/sync-edit-bundle.sh` (desde la MacBook) pasa los 9 skills por el mismo `add-skill.mjs` y copia el `.zip` del bundle. En la Mac Mini también se puede correr `add-skill.mjs` sobre cada carpeta.
+
+## 3. Mods
+
+Solo entra un mod con su **FICHA DE VERIFICACION** en `mods/` de Drive (skill `asai-auditoria-de-mods`).
+
+1. Escribe `mod.json` en la carpeta del mod, con la forma de una entrada de `src/lib/catalogo/mods.json`: `code` (MOD02, MOD03…), `slug`, `name`, `releaseDate` (AAAA-MM-DD), `version`, `author`, `license` y `copy.es` / `copy.en` con `tagline`, `what` y `checked` (lo que revisamos).
+2. En una rama:
+
+```bash
+node scripts/add-mod.mjs "<carpeta del mod>/mod.json"                 # oculto
+node scripts/add-mod.mjs "<carpeta del mod>/mod.json" --coming-soon   # sale con su fecha
+node scripts/add-mod.mjs --estado <slug> published
+```
+
+3. Pruebas, build, commit y PR. `/mods` lee el manifiesto. La descarga de mods todavía no existe.
+
+## 4. Qué revisa Fable antes de publicar
+
+Un skill o mod pasa a `published` o `coming_soon` solo con la revisión de Fable en el PR:
+
+- **Textos**: español de México, sin em dashes ni palabras prohibidas (el script ya lo revisa), ARTO como «agencia creativa», sin precios de N7 ni promesas que el skill no cumple.
+- **Paquete**: que el `.skill` sea el que se probó (huella SHA-256 en `/admin/skills` igual a la de Drive), que traiga solo la carpeta del skill y que el `SKILL.md` no pida nada peligroso (llaves, red, borrar archivos).
+- **Acceso**: que la categoría tenga la regla que decidió Victor. Un cambio de regla o de precio no se publica sin su decisión escrita.
+- **Página**: el preview del PR responde 200 en `/es/skills/<slug>` y `/en/skills/<slug>`, y la descarga hace lo que dice la regla (sin sesión, cuenta gratis y Pro).
+
+Los skills que esperan el cierre de Victor se suben ocultos o no se suben.

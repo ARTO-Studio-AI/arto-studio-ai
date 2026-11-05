@@ -3,7 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { getAllLearnSlugs } from "@/lib/learn-pages";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/config";
 import { localizedPath, siteUrl } from "@/lib/seo";
-import { EDIT_BUNDLE_PAGE, EDIT_SKILL_SLUGS } from "@/lib/edit-bundle/catalog";
+import { PUBLIC_SKILLS } from "@/lib/catalogo/skills";
+import { EDIT_BUNDLE_PAGE } from "@/lib/edit-bundle/catalog";
 import { getAllTutorials } from "@/lib/tutorials";
 
 const SITE_URL = siteUrl();
@@ -36,7 +37,8 @@ const STATIC_MARKETING_PATHS = [
   { path: "/roast", changeFrequency: "monthly" as ChangeFreq, priority: 0.8 },
   { path: "/skills", changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
   { path: EDIT_BUNDLE_PAGE, changeFrequency: "weekly" as ChangeFreq, priority: 0.8 },
-  ...EDIT_SKILL_SLUGS.map((slug) => ({ path: `/skills/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
+  // Solo los skills publicados (catalogo, 2026-11-05): coming_soon y hidden no se indexan.
+  ...PUBLIC_SKILLS.filter((s) => s.status === "published").map((s) => ({ path: `/skills/${s.slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
   { path: "/mods", changeFrequency: "weekly" as ChangeFreq, priority: 0.7 },
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },

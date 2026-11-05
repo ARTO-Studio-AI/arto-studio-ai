@@ -1,0 +1,36 @@
+{
+  "mods": [
+    {
+      "code": "MOD01",
+      "slug": "auto-handoff",
+      "name": "auto-handoff",
+      "status": "coming_soon",
+      "releaseDate": "2026-11-09",
+      "version": "0.8.6-asai",
+      "author": "Alex Hillman",
+      "license": "MIT",
+      "copy": {
+        "es": {
+          "tagline": "Cuando a tu sesión de Claude Code se le acaba el contexto, deja un parte para la siguiente.",
+          "what": "Escribe un resumen de lo que estabas haciendo, lo que falta y las decisiones tomadas, y la sesión nueva arranca leyéndolo. Instalas la copia que revisamos, con nuestras plantillas.",
+          "checked": [
+            "Código leído completo en una versión fija, con huellas SHA-256",
+            "Qué sale de tu equipo y a dónde",
+            "Prueba en vivo con trabajo real",
+            "Guía de instalación en español"
+          ]
+        },
+        "en": {
+          "tagline": "When your Claude Code session runs out of context, it leaves a brief for the next one.",
+          "what": "It writes a summary of what you were doing, what's left and the decisions made, and the new session starts by reading it. You install the copy we reviewed, with our templates.",
+          "checked": [
+            "Full code read at a pinned version, with SHA-256 checksums",
+            "What leaves your machine and where it goes",
+            "Live test with real work",
+            "Installation guide in Spanish and English"
+          ]
+        }
+      }
+    }
+  ]
+}
