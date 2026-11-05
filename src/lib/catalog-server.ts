@@ -142,14 +142,15 @@ export function isPerRow(patch: BulkPatch): boolean {
   return Boolean(patch.add_tags || patch.remove_tags || patch.is_featured !== undefined);
 }
 
-/** Aplica un cambio por lote. Primero guarda el historial; si eso falla, no toca nada. */
-export async function applyBulk(ids: string[], patch: BulkPatch, by: string): Promise<BulkResult> {
+/** Aplica un cambio por lote. Primero guarda el historial; si eso falla, no toca nada.
+ * `origin` antepone de donde viene el cambio al resumen del historial («revisión: …»). */
+export async function applyBulk(ids: string[], patch: BulkPatch, by: string, origin?: string): Promise<BulkResult> {
   const perRow = isPerRow(patch);
   if (perRow && ids.length > PER_ROW_MAX) throw new Error(`Etiquetas y destacados van de ${PER_ROW_MAX} en ${PER_ROW_MAX}. Acota el filtro o la selección.`);
   const sb = createAdminClient();
   const cols = patchColumns(patch);
   const now = new Date().toISOString();
-  const summary = describePatch(patch);
+  const summary = origin ? `${origin}: ${describePatch(patch)}` : describePatch(patch);
   const batchId = randomUUID();
 
   const befores: Row[] = [];

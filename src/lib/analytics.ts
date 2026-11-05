@@ -78,6 +78,11 @@ export interface AnalyticsEvents {
   signup_bar_shown: { locale: string; path_section: string; trigger: "scroll" | "pages" };
   signup_bar_clicked: { locale: string; path_section: string };
   signup_bar_dismissed: { locale: string; path_section: string };
+  /* Promo de 24 h «primer mes de Pro al 50%» (2026-11-05). Solo con STRIPE_PROMO_COUPON_24H. */
+  promo_bar_shown: { locale: string; path_section: string };
+  promo_modal_shown: { locale: string; path_section: string; trigger: "timer" | "scroll" };
+  promo_cta_clicked: { placement: "bar" | "modal" | "pricing"; locale: string; path_section: string };
+  promo_expired_seen: { locale: string; path_section: string };
   prompt_copied: { prompt_id: string; prompt_tier: string; locale: string };
   // first_results_ms: hasta que se ven las tarjetas; total_ms: hasta la explicacion (D28).
   search_performed: { lang: string; query_length: number; results_count: number; ok: boolean; first_results_ms?: number; total_ms?: number };

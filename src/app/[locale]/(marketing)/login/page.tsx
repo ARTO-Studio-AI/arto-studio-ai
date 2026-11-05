@@ -118,7 +118,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
       />
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-x-14 lg:gap-y-10">
         <section className="lg:col-start-1 lg:row-start-1">
-          <p className="text-eyebrow text-[var(--accent)]">{t.eyebrow}</p>
+          <p className="text-eyebrow text-[var(--accent-ink)]">{t.eyebrow}</p>
           <h1 className="text-h1 mt-3 text-zinc-900">
             {nums ? (
               <>

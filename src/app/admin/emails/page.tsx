@@ -67,7 +67,7 @@ export default function EmailsAdminPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <p className="text-eyebrow text-[var(--accent)]">Marketing</p>
+        <p className="text-eyebrow text-[var(--accent-ink)]">Marketing</p>
         <h1 className="text-h1 mt-1">Correos</h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-600">
           Todos los correos del sitio, con su diseño real. Elige uno, revisa la vista previa en español o inglés y mándate una prueba: sale por el mismo camino que el envío real.
