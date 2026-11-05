@@ -9,7 +9,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict RynuAOTuHs6v5MXRiVAOVxRor6yUPXXjGWrZdB4aZfJ4h9sF7gpudu5pqIhAhft
+\restrict DqKf5Rp7UYQxHAE8OPxZ5hrrTmQg1kZp2N4GETiCDsdY823wWpAKnybDWkZANP7
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -868,6 +868,93 @@ COMMENT ON COLUMN public.profiles.signup_locale IS 'Locale de la pagina de login
 
 
 --
+-- Name: promotion_changes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.promotion_changes (
+    id bigint NOT NULL,
+    promotion_id text NOT NULL,
+    action text NOT NULL,
+    before jsonb,
+    after jsonb,
+    changed_by text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT promotion_changes_action_check CHECK ((action = ANY (ARRAY['create'::text, 'update'::text, 'enable'::text, 'disable'::text])))
+);
+
+
+--
+-- Name: TABLE promotion_changes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.promotion_changes IS 'Cada cambio hecho en /admin/promociones: quien, cuando y de que a que (before y after).';
+
+
+--
+-- Name: promotion_changes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.promotion_changes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.promotion_changes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: promotions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.promotions (
+    id text NOT NULL,
+    name text NOT NULL,
+    kind text NOT NULL,
+    percent_off numeric(5,2),
+    amount_off_cents integer,
+    currency text,
+    duration_months integer,
+    trial_days integer,
+    stripe_coupon_id text,
+    clock_hours integer NOT NULL,
+    audience text NOT NULL,
+    utm_campaign text,
+    starts_at timestamp with time zone NOT NULL,
+    ends_at timestamp with time zone NOT NULL,
+    enabled boolean DEFAULT false NOT NULL,
+    copy jsonb NOT NULL,
+    coupon_verified_at timestamp with time zone,
+    coupon_snapshot jsonb,
+    created_by text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_by text NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT promotions_amount_check CHECK (((kind <> 'amount'::text) OR ((amount_off_cents IS NOT NULL) AND (amount_off_cents > 0) AND (currency IS NOT NULL) AND (currency ~ '^[a-z]{3}$'::text) AND (percent_off IS NULL) AND (trial_days IS NULL) AND (stripe_coupon_id IS NOT NULL) AND (duration_months IS NOT NULL) AND ((duration_months >= 1) AND (duration_months <= 36))))),
+    CONSTRAINT promotions_audience_check CHECK ((audience = ANY (ARRAY['anon'::text, 'free_never_pro'::text, 'utm'::text]))),
+    CONSTRAINT promotions_clock_check CHECK (((clock_hours >= 1) AND (clock_hours <= 720))),
+    CONSTRAINT promotions_copy_check CHECK (((jsonb_typeof(copy) = 'object'::text) AND (jsonb_typeof((copy -> 'es'::text)) = 'object'::text) AND (jsonb_typeof((copy -> 'en'::text)) = 'object'::text))),
+    CONSTRAINT promotions_coupon_check CHECK (((stripe_coupon_id IS NULL) OR (stripe_coupon_id ~ '^[A-Za-z0-9_-]{1,200}$'::text))),
+    CONSTRAINT promotions_dates_check CHECK ((ends_at > starts_at)),
+    CONSTRAINT promotions_id_check CHECK (((id ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text) AND ((char_length(id) >= 3) AND (char_length(id) <= 60)))),
+    CONSTRAINT promotions_kind_check CHECK ((kind = ANY (ARRAY['percent'::text, 'amount'::text, 'trial'::text]))),
+    CONSTRAINT promotions_name_check CHECK (((char_length(name) >= 1) AND (char_length(name) <= 120))),
+    CONSTRAINT promotions_percent_check CHECK (((kind <> 'percent'::text) OR ((percent_off IS NOT NULL) AND (percent_off > (0)::numeric) AND (percent_off <= (100)::numeric) AND (amount_off_cents IS NULL) AND (currency IS NULL) AND (trial_days IS NULL) AND (stripe_coupon_id IS NOT NULL) AND (duration_months IS NOT NULL) AND ((duration_months >= 1) AND (duration_months <= 36))))),
+    CONSTRAINT promotions_trial_check CHECK (((kind <> 'trial'::text) OR ((trial_days IS NOT NULL) AND ((trial_days >= 1) AND (trial_days <= 730)) AND (percent_off IS NULL) AND (amount_off_cents IS NULL) AND (currency IS NULL) AND (stripe_coupon_id IS NULL) AND (duration_months IS NULL)))),
+    CONSTRAINT promotions_utm_check CHECK ((((audience = 'utm'::text) AND (utm_campaign IS NOT NULL) AND ((char_length(utm_campaign) >= 1) AND (char_length(utm_campaign) <= 200))) OR ((audience <> 'utm'::text) AND (utm_campaign IS NULL)))),
+    CONSTRAINT promotions_verified_check CHECK (((NOT enabled) OR (kind = 'trial'::text) OR (coupon_verified_at IS NOT NULL)))
+);
+
+
+--
+-- Name: TABLE promotions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.promotions IS 'Promociones de Pro administradas en /admin/promociones (2026-11-05). El sitio las lee con cache de 60 s. Si la tabla esta vacia o no existe, sale la promo de STRIPE_PROMO_COUPON_24H.';
+
+
+--
 -- Name: prompt_opens; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1459,6 +1546,22 @@ ALTER TABLE ONLY public.profiles
 
 
 --
+-- Name: promotion_changes promotion_changes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.promotion_changes
+    ADD CONSTRAINT promotion_changes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: promotions promotions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.promotions
+    ADD CONSTRAINT promotions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: prompt_opens prompt_opens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1998,6 +2101,27 @@ CREATE INDEX newsletter_subscribed_at_idx ON public.newsletter_subscribers USING
 
 
 --
+-- Name: promotion_changes_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX promotion_changes_created_idx ON public.promotion_changes USING btree (created_at DESC);
+
+
+--
+-- Name: promotion_changes_promo_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX promotion_changes_promo_idx ON public.promotion_changes USING btree (promotion_id, created_at DESC);
+
+
+--
+-- Name: promotions_live_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX promotions_live_idx ON public.promotions USING btree (audience, starts_at DESC) WHERE enabled;
+
+
+--
 -- Name: prompt_opens_subject_day_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2407,6 +2531,18 @@ ALTER TABLE public.outreach_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: promotion_changes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.promotion_changes ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: promotions; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: prompt_opens; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -2488,5 +2624,5 @@ ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict RynuAOTuHs6v5MXRiVAOVxRor6yUPXXjGWrZdB4aZfJ4h9sF7gpudu5pqIhAhft
+\unrestrict DqKf5Rp7UYQxHAE8OPxZ5hrrTmQg1kZp2N4GETiCDsdY823wWpAKnybDWkZANP7
 

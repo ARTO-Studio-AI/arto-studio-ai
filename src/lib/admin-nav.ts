@@ -19,13 +19,14 @@ export type AdminNavId =
   | "grants"
   | "waitlist"
   | "api_clients"
+  | "promos"
   | "emails"
   | "channels"
   | "searches"
   | "roasts"
   | "skill_traces";
 
-export type AdminNavGroupId = "home" | "catalog" | "people" | "comms" | "metrics";
+export type AdminNavGroupId = "home" | "catalog" | "people" | "sales" | "comms" | "metrics";
 
 export interface AdminNavItem {
   id: AdminNavId;
@@ -72,6 +73,12 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { id: "waitlist", href: "/admin/lista", label: "Lista de promociones" },
       { id: "api_clients", href: "/admin/clients", label: "Clientes API" },
     ],
+  },
+  {
+    /* 5 nov 2026: las promos de Pro se levantan y se quitan aqui (src/lib/promos/). */
+    id: "sales",
+    label: "Ventas",
+    items: [{ id: "promos", href: "/admin/promociones", label: "Promociones" }],
   },
   {
     id: "comms",

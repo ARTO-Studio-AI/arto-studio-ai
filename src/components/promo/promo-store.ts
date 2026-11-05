@@ -3,9 +3,9 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { toPromoState, type PromoApiResponse, type PromoState } from "@/lib/promo";
 
-/* Estado de la promo de 24 h en el navegador (5 nov 2026). Un solo POST /api/promo por
- * carga de pagina, compartido por la barra, la ventana y /pricing. El servidor decide;
- * aqui solo se guarda su respuesta y se cuenta hacia atras para pintar el reloj. */
+/* Estado de la promo en el navegador (5 nov 2026). Un solo POST /api/promo por carga de
+ * pagina, compartido por la barra, la ventana y /pricing. El servidor decide que promo
+ * toca, sus textos y su reloj; aqui solo se guarda su respuesta y se cuenta hacia atras. */
 
 let state: PromoState | null = null;
 let requested = false;
@@ -28,10 +28,16 @@ function getServerSnapshot(): PromoState | null {
   return null;
 }
 
-function loadPromo(): void {
+function loadPromo(locale: string): void {
   if (requested) return;
   requested = true;
-  fetch("/api/promo", { method: "POST", credentials: "same-origin", cache: "no-store" })
+  fetch("/api/promo", {
+    method: "POST",
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ locale }),
+  })
     .then((r) => (r.ok ? (r.json() as Promise<PromoApiResponse>) : null))
     .then((data) => {
       state = toPromoState(data, Date.now());
@@ -50,16 +56,16 @@ export function currentPromo(): PromoState | null {
 /** Marca la promo como vencida cuando el reloj llega a cero en esta carga. */
 export function markPromoExpired(): void {
   if (!state?.active) return;
-  state = { active: false, expired: true, endsAt: null };
+  state = { active: false, expired: true, endsAt: null, promoId: state.promoId, offer: null };
   emit();
 }
 
 /** Promo del visitante. Con enabled=false no se pregunta al servidor y devuelve null. */
-export function usePromo(enabled: boolean): PromoState | null {
+export function usePromo(enabled: boolean, locale: string): PromoState | null {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   useEffect(() => {
-    if (enabled) loadPromo();
-  }, [enabled]);
+    if (enabled) loadPromo(locale);
+  }, [enabled, locale]);
   return enabled ? s : null;
 }
 
