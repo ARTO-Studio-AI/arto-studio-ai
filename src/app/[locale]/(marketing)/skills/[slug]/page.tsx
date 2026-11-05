@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { priceLabelFor } from "@/lib/catalogo/access";
-import { demoOf, getCategory, getDownloadItem, getSkill, type CatalogSkill, type SkillCategory } from "@/lib/catalogo/skills";
+import { getCatalog } from "@/lib/catalogo/efectivo";
+import { demoOf, getCategory, type CatalogSkill, type SkillCategory } from "@/lib/catalogo/skills";
 import { EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
@@ -34,7 +35,7 @@ function contextOf(skill: CatalogSkill, locale: Locale) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: raw, slug } = await params;
   const locale = localeOf(raw);
-  const skill = getSkill(slug);
+  const skill = (await getCatalog()).getSkill(slug);
   if (!skill) return {};
   const ctx = contextOf(skill, locale);
   const demo = demoOf(skill.slug);
@@ -50,14 +51,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /* Pagina de cada skill del ARTO Edit Bundle #1 (Victor, 27 oct 2026): demo grande, que hace, que le dices
  * a Claude, que necesitas, cuanto tarda, como instalarlo y el boton de descarga.
  * Desde el 2026-11-05 sirve a todo el catalogo: un skill oculto es 404 y uno en coming_soon
- * tiene pagina con el boton de «Disponible muy pronto». */
+ * tiene pagina con el boton de «Disponible muy pronto». El estado es el efectivo (manifiesto +
+ * /admin/skills) y tambien salen los skills subidos desde /admin. */
 export default async function EditSkillPage({ params }: Props) {
   const { locale: localeParam, slug } = await params;
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
-  const skill = getSkill(slug);
+  const catalog = await getCatalog();
+  const skill = catalog.getSkill(slug);
   if (!skill) notFound();
-  const item = getDownloadItem(slug);
+  const item = catalog.getDownloadItem(slug);
 
   const t = getDictionary(locale).edit_bundle;
   const soonLabel = getDictionary(locale).skills.badge;

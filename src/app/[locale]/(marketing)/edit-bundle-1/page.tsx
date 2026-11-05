@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isPromoActive } from "@/lib/edit-bundle/access";
-import { EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG, EDIT_SKILLS, getDownloadItem } from "@/lib/edit-bundle/catalog";
+import { getCatalog } from "@/lib/catalogo/efectivo";
+import { EDIT_BUNDLE_CATEGORY, EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 import { buildMetadata, localeOf } from "@/lib/seo";
 
@@ -34,7 +35,10 @@ export default async function EditBundleLanding({ params }: Props) {
   const viewer = await getViewer();
   const now = new Date();
   const promo = isPromoActive(now);
-  const bundle = getDownloadItem(EDIT_BUNDLE_SLUG);
+  /* Estado efectivo (2026-11-05): un skill desactivado en /admin/skills deja de salir aqui. */
+  const catalog = await getCatalog();
+  const bundle = catalog.getDownloadItem(EDIT_BUNDLE_SLUG);
+  const editSkills = catalog.publicSkills().filter((s) => s.category === EDIT_BUNDLE_CATEGORY);
 
   return (
     <div>
@@ -56,7 +60,7 @@ export default async function EditBundleLanding({ params }: Props) {
         <h2 className="text-h2">{t.cards_h2}</h2>
         <p className="mt-3 max-w-2xl text-zinc-600">{t.cards_body}</p>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {EDIT_SKILLS.map((skill) => (
+          {editSkills.map((skill) => (
             <SkillCard key={skill.slug} skill={skill} locale={locale} t={t} now={now} />
           ))}
         </div>

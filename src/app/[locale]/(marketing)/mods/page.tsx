@@ -5,12 +5,17 @@ import NewsletterForm from "@/components/NewsletterForm";
 import { Badge, Card } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import { formatModDate, MODS } from "@/lib/mods";
+import { getCatalog } from "@/lib/catalogo/efectivo";
+import { formatModDate } from "@/lib/mods";
 import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ locale: string }>;
 }
+
+/* Desde el 2026-11-05 los mods se activan y desactivan desde /admin/skills sin redeploy, y
+ * ahi se suben los nuevos: la pagina lee el estado efectivo en cada visita (cache de 60 s). */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -22,6 +27,7 @@ export default async function ModsPage({ params }: Props) {
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const t = getDictionary(locale).mods;
+  const mods = (await getCatalog()).publicMods();
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
 
   return (
@@ -35,7 +41,7 @@ export default async function ModsPage({ params }: Props) {
       </div>
 
       <div className="grid gap-4">
-        {MODS.map((mod) => {
+        {mods.map((mod) => {
           const c = mod.copy[locale];
           return (
             <Card key={mod.slug} padding="sm" className="p-5 sm:p-6">

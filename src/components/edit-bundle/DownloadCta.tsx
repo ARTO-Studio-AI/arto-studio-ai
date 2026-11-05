@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { accessFor } from "@/lib/catalogo/access";
-import { getDownloadItem, packageAvailable } from "@/lib/catalogo/skills";
+import { getCatalog } from "@/lib/catalogo/efectivo";
 import { isProTier, type Viewer } from "@/lib/edit-bundle/access";
 import { EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 
@@ -15,7 +15,8 @@ import { EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
  * La pagina solo decide que boton pintar; quien da o niega el archivo es la ruta
  * /api/skill-downloads/[slug], que vuelve a revisar todo en el servidor.
  * Desde el 2026-11-05 la regla sale de la categoria del skill (src/lib/catalogo/access.ts), y
- * lo que no esta publicado (coming_soon) pinta «Disponible muy pronto» sin enlace. */
+ * lo que no esta publicado (coming_soon) pinta «Disponible muy pronto» sin enlace. El estado es
+ * el efectivo (manifiesto + /admin/skills), el mismo que revisa la ruta de descarga. */
 
 interface Props {
   locale: Locale;
@@ -26,8 +27,9 @@ interface Props {
   now?: Date;
 }
 
-export default function DownloadCta({ locale, slug, viewer, t, size = "lg", now = new Date() }: Props) {
-  const item = getDownloadItem(slug);
+export default async function DownloadCta({ locale, slug, viewer, t, size = "lg", now = new Date() }: Props) {
+  const catalog = await getCatalog();
+  const item = catalog.getDownloadItem(slug);
   if (!item) {
     return (
       <div>
@@ -64,7 +66,7 @@ export default function DownloadCta({ locale, slug, viewer, t, size = "lg", now 
   }
 
   const note = viewer.signedIn && isProTier(viewer.tier) ? t.note_pro : t.note_free_promo;
-  if (!packageAvailable(slug)) {
+  if (!catalog.packageAvailable(slug)) {
     return (
       <div>
         <button type="button" disabled className={buttonClass("primary", size)}>
