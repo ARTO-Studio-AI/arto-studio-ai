@@ -6,7 +6,8 @@ import { localeOf, pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { Badge, Button, Card } from "@/components/ui";
 import TrackOnMount from "@/components/analytics/TrackOnMount";
-import { promoConfigured } from "@/lib/promo-server";
+import { promoSigningReady } from "@/lib/promo-server";
+import { anyLivePromo } from "@/lib/promos/estado";
 import ProCheckoutButton from "./ProCheckoutButton";
 import PromoPrice from "./PromoPrice";
 
@@ -48,9 +49,10 @@ export default async function PricingPage({ params, searchParams }: Props) {
   const faqDict = getDictionary(locale).home;
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
   const showMxn = locale === "es" && t.mxn_note.length > 0;
-  // Promo de 24 h (5 nov 2026): sin STRIPE_PROMO_COUPON_24H la tarjeta de Pro no cambia.
-  // Apagada, ni los textos de la promo viajan a la pagina.
-  const promoCopy = promoConfigured() ? getDictionary(locale).promo : null;
+  // Promos (5 nov 2026): sin ninguna promo viva (de /admin/promociones o la de
+  // STRIPE_PROMO_COUPON_24H) la tarjeta de Pro no cambia y ni se pregunta a /api/promo.
+  // Esta pagina es dinamica, asi que el dato es de este momento (cache de 60 s).
+  const promoCopy = promoSigningReady() && (await anyLivePromo()) ? getDictionary(locale).promo : null;
 
   /* Solo para las propiedades de pricing_viewed y checkout_started; la pagina
    * se ve igual con o sin sesion. Sin env de Supabase (build) cuenta como anonimo. */
@@ -175,7 +177,7 @@ export default async function PricingPage({ params, searchParams }: Props) {
               {tier.usd === null ? (
                 <span className="font-mono text-sm text-zinc-500">{t.no_price_yet}</span>
               ) : (
-                <PromoPrice copy={tier.key === "pro" ? promoCopy : null}>
+                <PromoPrice copy={tier.key === "pro" ? promoCopy : null} locale={locale}>
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
                   <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (

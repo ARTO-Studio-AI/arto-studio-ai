@@ -11,7 +11,7 @@ import {
 
 describe("ADMIN_NAV_GROUPS", () => {
   it("tiene los grupos en orden", () => {
-    expect(ADMIN_NAV_GROUPS.map((g) => g.label)).toEqual(["Inicio", "Catálogo", "Usuarios", "Comunicación", "Medición"]);
+    expect(ADMIN_NAV_GROUPS.map((g) => g.label)).toEqual(["Inicio", "Catálogo", "Usuarios", "Ventas", "Comunicación", "Medición"]);
   });
 
   it("ids y rutas unicos, todas bajo /admin", () => {
@@ -57,6 +57,7 @@ describe("activeAdminNavId", () => {
   it("marca cada pagina existente", () => {
     expect(activeAdminNavId("/admin/revision")).toBe("review");
     expect(activeAdminNavId("/admin/skills")).toBe("skills");
+    expect(activeAdminNavId("/admin/promociones")).toBe("promos");
     expect(activeAdminNavId("/admin/usuarios?p=2")).toBe("users");
     expect(activeAdminNavId("/admin/pro")).toBe("pro");
     expect(activeAdminNavId("/admin/concesiones")).toBe("grants");

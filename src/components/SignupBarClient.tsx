@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n/config";
@@ -18,8 +17,8 @@ import {
   pathSection,
   signupHref,
 } from "@/lib/signup-bar";
-import PromoClock from "./promo/PromoClock";
 import PromoModal from "./promo/PromoModal";
+import { BarCard, PromoBarText } from "./promo/PromoViews";
 import { usePromo } from "./promo/promo-store";
 
 /* Barra de registro para visitantes (2026-11-05, 0 registros en 7 dias). Fija abajo.
@@ -32,7 +31,13 @@ import { usePromo } from "./promo/promo-store";
  * monta la ventana grande (PromoModal, una vez por sesion). Cerrar la barra la oculta
  * solo en esta pagina: vuelve en la siguiente o en la siguiente visita. Sin la variable,
  * la barra es la de siempre (aparece al bajar o en la segunda pagina) y tampoco recuerda
- * el cierre mas alla de la pagina. */
+ * el cierre mas alla de la pagina.
+ *
+ * Promos de /admin/promociones (5 nov 2026): la barra pregunta a /api/promo que promo toca
+ * y pinta sus textos (PromoViews, las mismas piezas de la vista previa del admin). Con
+ * sesion tambien pregunta: si la promo es para cuentas (cuenta gratis que nunca tuvo Pro o
+ * de campana), sale la barra con el boton directo a /pricing; las de «sin cuenta» siguen sin
+ * salir con sesion, como en el PR 123. Todos los eventos llevan promo_id. */
 
 const COPY = {
   es: {
@@ -118,7 +123,7 @@ export default function SignupBarClient({
 }: {
   locale: Locale;
   free: string | null;
-  /** Textos de la promo. null si falta STRIPE_PROMO_COUPON_24H o el secreto (lo decide el servidor). */
+  /** Textos comunes de la promo. null si no hay secreto de firma (sin el no hay promos). */
   promo: { copy: Dictionary["promo"]; features: readonly string[] } | null;
 }) {
   const promoEnabled = promoConfig !== null;
@@ -129,11 +134,16 @@ export default function SignupBarClient({
   const [dismissedOn, setDismissedOn] = useState<string | null>(null);
   const shown = useRef<"" | "promo" | "signup">("");
 
-  // Solo visitantes sin sesion y con el aviso de cookies contestado.
-  const eligible = (state === "waiting" || state === "scroll" || state === "pages") && !isSignupBarExcluded(pathname);
-  const promo = usePromo(promoEnabled && eligible);
-  const mode = barMode({ promoEnabled, promo, signupTriggered: state === "scroll" || state === "pages" });
-  const visible = eligible && mode !== "off" && dismissedOn !== pathname;
+  // La barra de registro: solo visitantes sin sesion y con el aviso de cookies contestado.
+  const excluded = isSignupBarExcluded(pathname);
+  const eligible = (state === "waiting" || state === "scroll" || state === "pages") && !excluded;
+  // La de promo ademas pregunta con sesion (el servidor decide si hay una para esa cuenta).
+  const signedIn = state === "session";
+  const promoEligible = eligible || (signedIn && !excluded);
+  const promo = usePromo(promoEnabled && promoEligible, locale);
+  const mode = barMode({ promoEnabled, promo, signupTriggered: state === "scroll" || state === "pages", signedIn });
+  const visible = promoEligible && mode !== "off" && dismissedOn !== pathname;
+  const promoId = promo?.promoId ?? "";
 
   // Cuenta paginas distintas abiertas en esta pestana (sin doble conteo en modo estricto).
   useEffect(() => {
@@ -147,9 +157,9 @@ export default function SignupBarClient({
   useEffect(() => {
     if (!visible || shown.current === mode) return;
     shown.current = mode;
-    if (mode === "promo") track("promo_bar_shown", { locale, path_section: section });
+    if (mode === "promo") track("promo_bar_shown", { locale, path_section: section, promo_id: promoId });
     else if (mode === "signup") track("signup_bar_shown", { locale, path_section: section, trigger: state === "scroll" ? "scroll" : "pages" });
-  }, [visible, mode, locale, section, state]);
+  }, [visible, mode, locale, section, state, promoId]);
 
   // Quien ya gasto sus 24 h: una vez por sesion del navegador.
   useEffect(() => {
@@ -157,17 +167,19 @@ export default function SignupBarClient({
     mem.expiredSeen = true;
     if (readSession(PROMO_EXPIRED_SEEN_KEY) === "1") return;
     writeSession(PROMO_EXPIRED_SEEN_KEY, "1");
-    track("promo_expired_seen", { locale, path_section: section });
-  }, [eligible, promo?.expired, locale, section]);
+    track("promo_expired_seen", { locale, path_section: section, promo_id: promoId });
+  }, [eligible, promo?.expired, locale, section, promoId]);
 
   const modal =
-    mode === "promo" && promoConfig && eligible && !isPromoModalExcluded(pathname) ? (
+    mode === "promo" && promoConfig && promo?.offer && promoEligible && !isPromoModalExcluded(pathname) ? (
       <PromoModal
         locale={locale}
-        endsAt={promo?.endsAt ?? null}
+        endsAt={promo.endsAt}
         pathSection={section}
         copy={promoConfig.copy}
         features={promoConfig.features}
+        offer={promo.offer}
+        signedIn={signedIn}
       />
     ) : null;
 
@@ -180,8 +192,7 @@ export default function SignupBarClient({
 
   const search = typeof window === "undefined" ? "" : window.location.search;
   const promoCopy = promoConfig?.copy ?? null;
-  const isPromo = mode === "promo" && promoCopy !== null;
-  const href = isPromo ? promoHref(locale) : signupHref(locale, pathname, search);
+  const offer = mode === "promo" ? (promo?.offer ?? null) : null;
 
   return (
     <>
@@ -190,50 +201,32 @@ export default function SignupBarClient({
       <div aria-hidden="true" className="h-24 sm:h-20" />
       <div
         role="region"
-        aria-label={isPromo ? promoCopy.region : t.region}
+        aria-label={offer && promoCopy ? promoCopy.region : t.region}
         className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-5"
       >
-        <div className="animate-fade-in pointer-events-auto mx-auto flex max-w-3xl items-center gap-2.5 rounded-[var(--radius-md)] bg-zinc-900 py-2.5 pl-4 pr-2 text-white shadow-[0_10px_30px_rgba(24,24,27,0.28)] sm:gap-4 sm:py-3 sm:pl-5">
-          <span aria-hidden="true" className="hidden h-2 w-2 shrink-0 rounded-full bg-[var(--accent)] sm:inline-block" />
-          <div className="min-w-0 flex-1">
-            {isPromo ? (
-              <>
-                <p className="text-sm font-semibold leading-snug">{promoCopy.title}</p>
-                <p className="text-xs text-zinc-300">
-                  {promoCopy.ends_in}{" "}
-                  <PromoClock endsAt={promo?.endsAt ?? null} className="font-semibold text-[var(--accent)]" />
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-semibold leading-snug">{t.title(free)}</p>
-                <p className="hidden text-xs text-zinc-400 sm:block">{t.sub}</p>
-              </>
-            )}
-          </div>
-          <Link
-            href={href}
-            onClick={() =>
-              isPromo
-                ? track("promo_cta_clicked", { placement: "bar", locale, path_section: section })
-                : track("signup_bar_clicked", { locale, path_section: section })
-            }
-            className="shrink-0 rounded-[var(--radius-sm)] bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-zinc-950 transition hover:brightness-110 focus-visible:outline-white sm:px-4"
-          >
-            <span className="sm:hidden">{isPromo ? promoCopy.cta_short : t.cta_short}</span>
-            <span className="hidden sm:inline">{isPromo ? promoCopy.cta : t.cta}</span>
-          </Link>
-          <button
-            type="button"
-            onClick={dismiss}
-            aria-label={isPromo ? promoCopy.close_bar : t.close}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-zinc-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-white"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
+        {offer && promoCopy ? (
+          <BarCard
+            title={<PromoBarText offer={offer} dict={promoCopy} endsAt={promo?.endsAt ?? null} />}
+            sub={null}
+            href={promoHref(locale, signedIn)}
+            cta={offer.copy.cta}
+            ctaShort={promoCopy.cta_short}
+            closeLabel={promoCopy.close_bar}
+            onCta={() => track("promo_cta_clicked", { placement: "bar", locale, path_section: section, promo_id: offer.id })}
+            onClose={dismiss}
+          />
+        ) : (
+          <BarCard
+            title={<p className="text-sm font-semibold leading-snug">{t.title(free)}</p>}
+            sub={<p className="hidden text-xs text-zinc-400 sm:block">{t.sub}</p>}
+            href={signupHref(locale, pathname, search)}
+            cta={t.cta}
+            ctaShort={t.cta_short}
+            closeLabel={t.close}
+            onCta={() => track("signup_bar_clicked", { locale, path_section: section })}
+            onClose={dismiss}
+          />
+        )}
       </div>
     </>
   );

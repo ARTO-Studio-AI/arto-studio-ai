@@ -226,8 +226,10 @@ export const DICTIONARIES = {
         creative_productivity: "Creative Productivity",
       },
     },
-    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Solo se pinta con
-     * STRIPE_PROMO_COUPON_24H configurado; ver src/lib/promo.ts. */
+    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Desde el mismo dia las
+     * promos salen de /admin/promociones con sus propios textos (titulo, subtitulo, boton e
+     * insignia); estos quedan para la promo de respaldo (STRIPE_PROMO_COUPON_24H) y para lo
+     * comun a todas. {h} = horas del reloj, {n} = meses o dias. Ver src/lib/promos/. */
     promo: {
       title: "Your first month of Pro at 50% off",
       ends_in: "Ends in",
@@ -236,10 +238,15 @@ export const DICTIONARIES = {
       cta_short: "Claim it",
       region: "Pro offer",
       close_bar: "Close offer notice",
-      modal_eyebrow: "24 hours only",
+      modal_eyebrow: "{h} hours only",
+      modal_eyebrow_one: "1 hour only",
       modal_sub: "The whole prompt library with no daily limit, at half price for your first month.",
       first_month: "first month",
+      first_months: "for your first {n} months",
+      trial_days: "for {n} days",
+      free_label: "Free",
       then: "Then $9 USD a month. Cancel anytime.",
+      then_trial: "Then $9 USD a month. Cancel before the trial ends and you pay nothing.",
       keep_browsing: "Keep browsing",
       close_modal: "Close offer",
       pricing_badge: "50% off your first month",
@@ -798,8 +805,9 @@ export const DICTIONARIES = {
         creative_productivity: "Productividad Creativa",
       },
     },
-    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Solo se pinta con
-     * STRIPE_PROMO_COUPON_24H configurado; ver src/lib/promo.ts. */
+    /* Promo «primer mes de Pro al 50%» por 24 horas (5 nov 2026). Desde el mismo dia las
+     * promos salen de /admin/promociones con sus propios textos; estos quedan para la promo
+     * de respaldo y para lo comun a todas. {h} = horas, {n} = meses o dias. */
     promo: {
       title: "Tu primer mes de Pro al 50%",
       ends_in: "Termina en",
@@ -808,10 +816,15 @@ export const DICTIONARIES = {
       cta_short: "Aprovechar",
       region: "Oferta de Pro",
       close_bar: "Cerrar aviso de la oferta",
-      modal_eyebrow: "Solo 24 horas",
+      modal_eyebrow: "Solo {h} horas",
+      modal_eyebrow_one: "Solo 1 hora",
       modal_sub: "Toda la biblioteca de prompts sin límite diario, a mitad de precio el primer mes.",
       first_month: "el primer mes",
+      first_months: "los primeros {n} meses",
+      trial_days: "por {n} días",
+      free_label: "Gratis",
       then: "Después, $9 USD al mes. Cancela cuando quieras.",
+      then_trial: "Después, $9 USD al mes. Si cancelas antes de que termine la prueba, no pagas nada.",
       keep_browsing: "Seguir viendo",
       close_modal: "Cerrar oferta",
       pricing_badge: "50% el primer mes",
