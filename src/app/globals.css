@@ -14,6 +14,13 @@
   --ink-3: #a1a1aa;      /* zinc-400 */
   --line: #e4e4e7;       /* zinc-200 */
   --accent: #ff4d00;
+  /* Acento para texto y para fondos naranjas con letra blanca (decision de Victor,
+   * 5 nov 2026): #ff4d00 sobre blanco da 3.33:1 y no pasa AA. #c93800 da 5.19:1 sobre
+   * blanco, 4.97 sobre --bg y 4.64 sobre --paper. --accent se queda en decoraciones
+   * (puntos, reglas, bordes, foco), en texto grande (.serif-accent, >= 24 px, 3.33:1) y
+   * sobre zinc-900, donde da 5.33:1 y --accent-ink solo 3.42. Lo vigila
+   * src/lib/contraste-tokens.test.ts. */
+  --accent-ink: #c93800;
   --accent-soft: #fff1ea;
   /* Superficies calidas del design system de ARTO, solo para graficos (hero y portadas). */
   --paper: #f4f2ee;
@@ -41,6 +48,7 @@
   --color-muted: var(--ink-2);
   --color-border: var(--line);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);

@@ -79,7 +79,7 @@ function ProductCard({
       {character && (
         <Image src={character.src} alt="" width={character.w} height={character.h} className="absolute right-4 top-4 h-auto w-16" />
       )}
-      <p className="text-eyebrow text-[var(--accent)]">{eyebrow}</p>
+      <p className={`text-eyebrow ${dark ? "text-[var(--accent)]" : "text-[var(--accent-ink)]"}`}>{eyebrow}</p>
       <h3 className="pr-16 text-2xl font-extrabold leading-tight">{title}</h3>
       <p className={`text-[15px] ${dark ? "text-zinc-300" : "text-zinc-600"}`}>{body}</p>
       <ul className={`flex-1 space-y-1.5 text-sm ${dark ? "text-zinc-300" : "text-zinc-600"}`}>
@@ -158,7 +158,7 @@ export default async function HomePage({ params }: Props) {
         * tres pasos baja a su propia seccion justo debajo. */}
       <section className="grid items-center gap-10 py-14 sm:py-20 lg:grid-cols-[1.02fr_1fr] lg:gap-12">
         <div className="grid min-w-0 gap-5">
-          <p className="text-eyebrow text-[var(--accent)]">{v2.eyebrow}</p>
+          <p className="text-eyebrow text-[var(--accent-ink)]">{v2.eyebrow}</p>
           <h1 className="text-display">
             {v2.h1_before} <span className="serif-accent">{v2.h1_accent}</span>
           </h1>
