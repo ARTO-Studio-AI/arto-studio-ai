@@ -250,6 +250,7 @@ describe("addSkill", () => {
 
   it("categoria nueva: sin category_copy es error; con category_copy se crea con la regla pro", () => {
     const root = fakeRepo();
+    const nextOrder = Math.max(...readCatalog(root).categories.map((c: { order: number }) => c.order)) + 1;
     const sinCopy = addSkill({ root, dir: skillFolder({ ficha: ficha({ category: "estrategia" }) }) });
     expect(sinCopy.ok).toBe(false);
     expect(sinCopy.errors.join()).toMatch(/categoria «estrategia» no existe/);
@@ -259,7 +260,7 @@ describe("addSkill", () => {
     expect(conCopy.ok).toBe(true);
     expect(conCopy.createdCategory).toBe(true);
     const cat = readCatalog(root);
-    expect(cat.categories.find((c: { slug: string }) => c.slug === "estrategia")).toMatchObject({ access: "pro", bundle: null, order: 2 });
+    expect(cat.categories.find((c: { slug: string }) => c.slug === "estrategia")).toMatchObject({ access: "pro", bundle: null, order: nextOrder });
     expect(cat.skills[0].ficha.category_copy).toBeUndefined();
   });
 });

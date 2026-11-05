@@ -24,10 +24,10 @@ const EB_SLUGS = [
 ];
 
 describe("catalogo real", () => {
-  it("el bundle sigue igual: 9 skills publicados en su orden, una categoria, el bundle publicado", () => {
-    expect(real.PUBLIC_SKILLS.map((s) => s.slug)).toEqual(EB_SLUGS);
-    expect(real.ALL_SKILLS.every((s) => s.status === "published" && s.category === "edicion-de-video")).toBe(true);
-    expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video"]);
+  it("el bundle sigue igual: 9 skills publicados en su orden, su categoria primero, el bundle publicado", () => {
+    expect(real.PUBLIC_SKILLS.filter((s) => s.category === "edicion-de-video").map((s) => s.slug)).toEqual(EB_SLUGS);
+    expect(real.ALL_SKILLS.every((s) => s.status === "published")).toBe(true);
+    expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia-y-negocio"]);
     expect(real.getCategory("edicion-de-video")?.access).toBe("edit-bundle-1");
     expect(real.getDownloadItem("arto-edit-bundle-1")).toEqual({
       slug: "arto-edit-bundle-1",
@@ -43,9 +43,14 @@ describe("catalogo real", () => {
     for (const slug of EB_SLUGS) expect(real.demoOf(slug).video).toBe(`/skills/demos/${slug}.mp4`);
   });
 
-  it("los dos skills nuevos no estan en este catalogo (esperan el cierre de Victor)", () => {
-    expect(real.ALL_SKILLS.find((s) => s.slug === "arto-arranque-negocio-local")).toBeUndefined();
-    expect(real.ALL_SKILLS.find((s) => s.slug === "arto-cotizacion-creativa")).toBeUndefined();
+  // Victor dio el cierre el 2026-11-05 («Publicar los dos») y eligio la regla «Solo Pro».
+  it("los dos skills de Estrategia y negocio estan publicados con la regla pro", () => {
+    expect(real.getCategory("estrategia-y-negocio")?.access).toBe("pro");
+    for (const slug of ["arto-arranque-negocio-local", "arto-cotizacion-creativa"]) {
+      expect(real.getSkill(slug)?.status, slug).toBe("published");
+      expect(real.packageAvailable(slug), slug).toBe(true);
+      expect(real.getDownloadItem(slug)?.access, slug).toBe("pro");
+    }
   });
 });
 
@@ -75,10 +80,10 @@ describe("estados", () => {
   });
 
   async function withCatalog() {
-    const cat = structuredClone(realCatalog) as typeof realCatalog & { categories: Record<string, unknown>[] };
+    const cat = structuredClone(realCatalog) as unknown as { categories: Record<string, unknown>[]; skills: Record<string, unknown>[] };
     cat.categories.push({
       slug: "estrategia",
-      order: 2,
+      order: 99,
       access: "pro",
       bundle: null,
       kicker: { es: "Marca", en: "Brand" },
@@ -114,8 +119,8 @@ describe("estados", () => {
     const m = await withCatalog();
     expect(m.getDownloadItem("arto-pro")).toMatchObject({ file: "arto-pro.skill", access: "pro", pagePath: "/skills/arto-pro" });
     const cats = m.publicCategories();
-    expect(cats.map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia"]);
-    expect(cats[1].skills.map((s) => s.slug)).toEqual(["arto-pronto", "arto-pro"]);
+    expect(cats.map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia-y-negocio", "estrategia"]);
+    expect(cats[2].skills.map((s) => s.slug)).toEqual(["arto-pronto", "arto-pro"]);
   });
 });
 

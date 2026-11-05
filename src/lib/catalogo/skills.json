@@ -17,6 +17,24 @@
         "es": "9 skills para que Claude Code edite tus videos verticales. Cada uno hace una cosa y se puede usar solo; el Director los combina.",
         "en": "9 skills so Claude Code edits your vertical videos. Each one does one thing and works on its own; the Director chains them together."
       }
+    },
+    {
+      "slug": "estrategia-y-negocio",
+      "order": 2,
+      "access": "pro",
+      "bundle": null,
+      "kicker": {
+        "es": "Estrategia con el método de ARTO",
+        "en": "Strategy with ARTO's method"
+      },
+      "name": {
+        "es": "Estrategia y negocio",
+        "en": "Strategy and business"
+      },
+      "body": {
+        "es": "Skills para arrancar, vender y cotizar con el método de una agencia creativa con más de 15 años. Funcionan en Claude y en ChatGPT.",
+        "en": "Skills to launch, sell and quote with the method of a creative agency with more than 15 years in the craft. They work in Claude and ChatGPT."
+      }
     }
   ],
   "bundles": [
@@ -507,6 +525,102 @@
         "time": {
           "es": "el storyboard en menos de un minuto; la edición, la suma de los skills que use",
           "en": "the storyboard in under a minute; the edit takes the sum of the skills it uses"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-arranque-negocio-local",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-arranque-negocio-local",
+        "order": 1,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "Arranque de Negocio Local",
+          "en": "Local Business Launch"
+        },
+        "tagline": {
+          "es": "Nombre, posicionamiento, voz y plan de apertura para tu negocio de barrio, en una conversación.",
+          "en": "Name, positioning, voice and opening plan for your neighborhood business, in one conversation."
+        },
+        "what": {
+          "es": "Primero decide dónde se para tu negocio frente a los tres competidores de tu zona: una frase de menos de 30 palabras que no le sirve a nadie más, la metáfora que puedes repetir y la tabla de lo que tu negocio no va a ser. De ahí salen tres nombres con su frase y su riesgo, la voz con ejemplos de así sí y así no, la lista para revisar si el nombre está libre y un plan de 4 semanas alrededor de la apertura, con tu presupuesto repartido y 3 números para revisar cada domingo.",
+          "en": "First it decides where your business stands against the three competitors in your area: a sentence under 30 words that fits no one else, a metaphor you can repeat and a table of what your business will not be. From there come three names with their tagline and risk, a voice with do and don't examples, a checklist to see if the name is free, and a 4-week plan around opening day, with your budget split and 3 numbers to check every Sunday."
+        },
+        "you_say": {
+          "es": [
+            "Voy a abrir una cafetería y necesito nombre e identidad",
+            "Estoy por abrir un estudio de pilates, ayúdame a lanzarlo",
+            "Necesito nombre y plan de apertura para mi panadería"
+          ],
+          "en": [
+            "I'm opening a coffee shop and need a name and a launch plan",
+            "Help me launch my local business",
+            "Name and brand for my bakery"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT"
+          ],
+          "en": [
+            "Claude or ChatGPT"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
+        },
+        "version": "1.0",
+        "chatgpt_note": {
+          "es": "En ChatGPT funciona con el mismo método, pero la prueba contra tus competidores sale menos exigente que en Claude: revisa que tu frase no le sirva a ninguno de ellos.",
+          "en": "In ChatGPT it follows the same method, but the test against your competitors comes out less strict than in Claude: check that your sentence doesn't fit any of them."
+        }
+      }
+    },
+    {
+      "slug": "arto-cotizacion-creativa",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-cotizacion-creativa",
+        "order": 2,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "Cotización Creativa",
+          "en": "Creative Quote"
+        },
+        "tagline": {
+          "es": "Cotiza en tres opciones, cuida tu margen y deja de regalar cambios.",
+          "en": "Quote in three options, protect your margin and stop giving away revisions."
+        },
+        "what": {
+          "es": "Separa lo que tu cliente pide de lo que de verdad necesita y lo convierte en tres opciones con alcance cerrado: qué incluye, qué no, cuántas rondas, plazo y precio con su lógica. Calcula cada precio con tus horas, tu costo y tu margen mínimo, y si el presupuesto del cliente no alcanza, ajusta el alcance antes que tu tarifa. Te entrega la tabla comparativa, las condiciones de pago con tus propias reglas, una orden de cambio lista para firmar y el correo para mandarla en menos de 150 palabras.",
+          "en": "It separates what your client asks for from what they really need and turns it into three options with a closed scope: what's included, what's not, how many revision rounds, timeline and a price with its reasoning. Each price comes from your hours, your cost and your minimum margin, and if the client's budget falls short, it cuts scope before your rate. You get the comparison table, payment terms with your own rules, a change order ready to sign and the email to send it in under 150 words."
+        },
+        "you_say": {
+          "es": [
+            "Ayúdame a cotizar este proyecto de branding",
+            "El cliente tiene 30 mil, ¿qué le ofrezco?",
+            "Me piden cambios que no estaban en la cotización"
+          ],
+          "en": [
+            "Help me quote this branding project",
+            "How much should I charge this client?",
+            "Build a change order for this extra request"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT"
+          ],
+          "en": [
+            "Claude or ChatGPT"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
         },
         "version": "1.0"
       }

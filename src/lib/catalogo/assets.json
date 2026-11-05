@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T12:58:06.394Z",
+  "generatedAt": "2026-11-05T11:55:52.663Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -74,6 +74,14 @@
     "arto-edit-director": {
       "bytes": 388995,
       "sha256": "5a5b99c5e90de820ecb4bfe05b5e04bd285cef98f2bf63b75a655cf128c75c11"
+    },
+    "arto-arranque-negocio-local": {
+      "bytes": 9895,
+      "sha256": "2a160721ba3765901a86bef5387a0dd8f433019b3cf737a5f2b071bf76635ade"
+    },
+    "arto-cotizacion-creativa": {
+      "bytes": 9139,
+      "sha256": "bc4c292d0829200f8a54ec5348c8bd93b8a872a89dfee5316bc08c757111a8e9"
     },
     "arto-edit-bundle-1": {
       "bytes": 2566629,
