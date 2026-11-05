@@ -81,6 +81,7 @@ export default async function AdminHoy() {
           Las secciones viejas siguen en el menú, bajo «Anterior», hasta que se decida qué se retira.{" "}
           <Link href="/admin/emails" className="text-zinc-900 underline-offset-2 hover:underline">Editar la bienvenida</Link>
         </p>
+        <p className="mt-1"><Link href="/admin/revision" className="text-zinc-900 underline-offset-2 hover:underline">Revisar los prompts nuevos de las rondas</Link></p>
       </div>
     </div>
   );
