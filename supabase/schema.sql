@@ -1,15 +1,15 @@
 -- supabase/schema.sql
 -- Esquema de producción de ARTO Studio AI (Supabase, schema public), solo estructura, sin datos.
--- Generado el 2026-09-11 desde el Mac Mini con:
+-- Generado el 2026-11-05 desde el Mac Mini con:
 --   pg_dump --schema-only --no-owner --no-privileges --schema=public "$DATABASE_URL"
---   (pg_dump 18.6 de brew libpq; DATABASE_URL de producción vía vercel env pull, nunca impresa)
+--   (pg_dump de brew libpq; DATABASE_URL de producción vía vercel env pull, nunca impresa)
 -- Se regenera con el mismo comando después de cada migración aplicada. No editar a mano.
 
 --
 -- PostgreSQL database dump
 --
 
-\restrict jhBUj0N4iGmHh3O99MkU9SeeBgLbLvughO4R8jm0oGjrKjLL7RS4K7f8FVLlgCQ
+\restrict AdALaV689OFQLh0syICLFAbzq74DCsuvozzhum8ogs2Mmq1uCUdQfcOAZLwTiU6
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -83,12 +83,10 @@ $$;
 -- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
--- Definicion vigente: la de la migracion 0012 (copia el perfil completo desde
--- raw_user_meta_data, con topes de longitud). Actualizado el 2026-10-10.
-CREATE FUNCTION public.handle_new_user() returns trigger
-    language plpgsql security definer
-    set search_path = public, pg_temp
-    as $$
+CREATE FUNCTION public.handle_new_user() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
+    AS $$
 declare
   granted_tier text;
   granted_admin boolean;
@@ -334,6 +332,49 @@ CREATE TABLE public.attribution_events (
 
 
 --
+-- Name: COLUMN attribution_events.user_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.attribution_events.user_id IS 'Usuario de auth.users (signup y demas eventos de producto). target_id es de outreach_targets (H-61).';
+
+
+--
+-- Name: catalog_changes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.catalog_changes (
+    id bigint NOT NULL,
+    batch_id uuid NOT NULL,
+    entity text NOT NULL,
+    entity_id text NOT NULL,
+    action text NOT NULL,
+    summary text NOT NULL,
+    before jsonb,
+    after jsonb NOT NULL,
+    changed_by text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    reverted_at timestamp with time zone,
+    reverted_by text,
+    CONSTRAINT catalog_changes_action_check CHECK ((action = ANY (ARRAY['create'::text, 'update'::text]))),
+    CONSTRAINT catalog_changes_entity_check CHECK ((entity = ANY (ARRAY['prompt'::text, 'skill'::text])))
+);
+
+
+--
+-- Name: catalog_changes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_changes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.catalog_changes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: clients; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -438,6 +479,41 @@ CREATE TABLE public.courses (
     updated_at timestamp with time zone DEFAULT now(),
     CONSTRAINT courses_difficulty_check CHECK ((difficulty = ANY (ARRAY['beginner'::text, 'intermediate'::text, 'advanced'::text]))),
     CONSTRAINT courses_tier_check CHECK ((tier = ANY (ARRAY['free'::text, 'pro'::text])))
+);
+
+
+--
+-- Name: digest_sends; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.digest_sends (
+    id bigint NOT NULL,
+    sent_on date NOT NULL,
+    prompt_ids text[] NOT NULL,
+    strategy text DEFAULT 'new_then_random'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT digest_sends_prompt_ids_check CHECK (((cardinality(prompt_ids) >= 1) AND (cardinality(prompt_ids) <= 20)))
+);
+
+
+--
+-- Name: TABLE digest_sends; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.digest_sends IS 'Prompts enviados en cada resumen semanal. La seleccion excluye todos los ids de esta tabla (regla de Victor del 16 oct: nunca repetir).';
+
+
+--
+-- Name: digest_sends_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.digest_sends ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.digest_sends_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -646,9 +722,66 @@ CREATE TABLE public.profiles (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     is_admin boolean DEFAULT false NOT NULL,
+    company text,
+    role text,
+    signup_source text,
+    utm_source text,
+    utm_medium text,
+    utm_campaign text,
+    utm_content text,
+    utm_term text,
+    referrer text,
+    signup_locale text,
     CONSTRAINT profiles_preferred_language_check CHECK ((preferred_language = ANY (ARRAY['en'::text, 'es'::text]))),
     CONSTRAINT profiles_subscription_status_check CHECK ((subscription_status = ANY (ARRAY['active'::text, 'inactive'::text, 'canceled'::text, 'past_due'::text]))),
     CONSTRAINT profiles_tier_check CHECK ((tier = ANY (ARRAY['free'::text, 'pro'::text, 'enterprise'::text])))
+);
+
+
+--
+-- Name: COLUMN profiles.company; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.profiles.company IS 'Empresa que escribio el usuario al registrarse (opcional).';
+
+
+--
+-- Name: COLUMN profiles.role; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.profiles.role IS 'Rol que escribio el usuario al registrarse (opcional).';
+
+
+--
+-- Name: COLUMN profiles.signup_source; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.profiles.signup_source IS 'utm_source de la primera visita, si no el host del referrer, si no direct.';
+
+
+--
+-- Name: COLUMN profiles.referrer; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.profiles.referrer IS 'Origen + path del referrer externo de la primera visita, sin query.';
+
+
+--
+-- Name: COLUMN profiles.signup_locale; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.profiles.signup_locale IS 'Locale de la pagina de login donde se registro (en | es).';
+
+
+--
+-- Name: prompt_opens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.prompt_opens (
+    subject text NOT NULL,
+    prompt_id text NOT NULL,
+    day date DEFAULT CURRENT_DATE NOT NULL,
+    first_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -673,6 +806,30 @@ CREATE TABLE public.prompt_queue (
     CONSTRAINT prompt_queue_quantity_check CHECK (((quantity >= 1) AND (quantity <= 20))),
     CONSTRAINT prompt_queue_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'generating'::text, 'done'::text, 'failed'::text, 'cancelled'::text])))
 );
+
+
+--
+-- Name: prompt_reviews; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.prompt_reviews (
+    prompt_id text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    reviewed_by text,
+    reviewed_at timestamp with time zone,
+    note text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT prompt_reviews_decision_check CHECK (((status = 'pending'::text) OR ((reviewed_by IS NOT NULL) AND (reviewed_at IS NOT NULL)))),
+    CONSTRAINT prompt_reviews_note_check CHECK (((note IS NULL) OR (char_length(note) <= 2000))),
+    CONSTRAINT prompt_reviews_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'unpublished'::text])))
+);
+
+
+--
+-- Name: TABLE prompt_reviews; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.prompt_reviews IS 'Revision de Victor a las altas del catalogo (2026-11-05). Pendiente = alta en catalog_changes sin fila approved o unpublished aqui.';
 
 
 --
@@ -830,6 +987,17 @@ ALTER SEQUENCE public.skill_traces_id_seq OWNED BY public.skill_traces.id;
 
 
 --
+-- Name: stripe_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.stripe_events (
+    id text NOT NULL,
+    type text,
+    received_at timestamp with time zone DEFAULT now()
+);
+
+
+--
 -- Name: user_sessions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -855,8 +1023,56 @@ CREATE TABLE public.waitlist (
     id integer NOT NULL,
     email text NOT NULL,
     source text DEFAULT 'landing'::text NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    sources text[],
+    locale text,
+    marketing_opt_in boolean DEFAULT false NOT NULL,
+    consent_version text,
+    consent_at timestamp with time zone,
+    utm_source text,
+    utm_medium text,
+    utm_campaign text,
+    utm_content text,
+    utm_term text,
+    referrer text,
+    landing_path text,
+    first_touch_at timestamp with time zone
 );
+
+
+--
+-- Name: COLUMN waitlist.sources; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.waitlist.sources IS 'Todas las listas en las que se anoto este correo (skills, agents...). source guarda la primera. Null en filas anteriores a 0018.';
+
+
+--
+-- Name: COLUMN waitlist.marketing_opt_in; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.waitlist.marketing_opt_in IS 'Marco la casilla de promociones en NewsletterForm. Es la peticion; el alta real en la lista es newsletter_subscribers tras el doble opt-in.';
+
+
+--
+-- Name: COLUMN waitlist.consent_version; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.waitlist.consent_version IS 'WAITLIST_CONSENT_VERSION (src/lib/waitlist.ts) del texto que vio, solo si marco la casilla.';
+
+
+--
+-- Name: COLUMN waitlist.consent_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.waitlist.consent_at IS 'Hora del servidor en que marco la casilla por primera vez (no se pisa).';
+
+
+--
+-- Name: COLUMN waitlist.first_touch_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.waitlist.first_touch_at IS 'ts de la cookie asai_utm (primer toque). Null si no acepto la analitica o entro directo sin cookie.';
 
 
 --
@@ -933,6 +1149,14 @@ ALTER TABLE ONLY public.attribution_events
 
 
 --
+-- Name: catalog_changes catalog_changes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_changes
+    ADD CONSTRAINT catalog_changes_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: clients clients_api_key_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -986,6 +1210,22 @@ ALTER TABLE ONLY public.courses
 
 ALTER TABLE ONLY public.courses
     ADD CONSTRAINT courses_slug_key UNIQUE (slug);
+
+
+--
+-- Name: digest_sends digest_sends_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.digest_sends
+    ADD CONSTRAINT digest_sends_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: digest_sends digest_sends_sent_on_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.digest_sends
+    ADD CONSTRAINT digest_sends_sent_on_key UNIQUE (sent_on);
 
 
 --
@@ -1101,11 +1341,27 @@ ALTER TABLE ONLY public.profiles
 
 
 --
+-- Name: prompt_opens prompt_opens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prompt_opens
+    ADD CONSTRAINT prompt_opens_pkey PRIMARY KEY (subject, prompt_id, day);
+
+
+--
 -- Name: prompt_queue prompt_queue_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.prompt_queue
     ADD CONSTRAINT prompt_queue_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: prompt_reviews prompt_reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prompt_reviews
+    ADD CONSTRAINT prompt_reviews_pkey PRIMARY KEY (prompt_id);
 
 
 --
@@ -1165,6 +1421,14 @@ ALTER TABLE ONLY public.skill_traces
 
 
 --
+-- Name: stripe_events stripe_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stripe_events
+    ADD CONSTRAINT stripe_events_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_sessions user_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1186,6 +1450,27 @@ ALTER TABLE ONLY public.waitlist
 
 ALTER TABLE ONLY public.waitlist
     ADD CONSTRAINT waitlist_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: catalog_changes_batch_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX catalog_changes_batch_idx ON public.catalog_changes USING btree (batch_id);
+
+
+--
+-- Name: catalog_changes_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX catalog_changes_created_idx ON public.catalog_changes USING btree (created_at DESC);
+
+
+--
+-- Name: catalog_changes_entity_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX catalog_changes_entity_idx ON public.catalog_changes USING btree (entity, entity_id, created_at DESC);
 
 
 --
@@ -1238,17 +1523,17 @@ CREATE INDEX idx_attribution_events_type ON public.attribution_events USING btre
 
 
 --
--- Name: idx_attribution_events_utm; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_attribution_events_utm ON public.attribution_events USING btree (utm_source, utm_campaign);
-
-
---
 -- Name: idx_attribution_events_user; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_attribution_events_user ON public.attribution_events USING btree (event_type, user_id);
+
+
+--
+-- Name: idx_attribution_events_utm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_attribution_events_utm ON public.attribution_events USING btree (utm_source, utm_campaign);
 
 
 --
@@ -1581,6 +1866,20 @@ CREATE INDEX newsletter_subscribed_at_idx ON public.newsletter_subscribers USING
 
 
 --
+-- Name: prompt_opens_subject_day_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX prompt_opens_subject_day_idx ON public.prompt_opens USING btree (subject, day);
+
+
+--
+-- Name: prompt_reviews_status_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX prompt_reviews_status_idx ON public.prompt_reviews USING btree (status);
+
+
+--
 -- Name: prompts_embedding_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1718,6 +2017,14 @@ ALTER TABLE ONLY public.profiles
 
 
 --
+-- Name: prompt_reviews prompt_reviews_prompt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prompt_reviews
+    ADD CONSTRAINT prompt_reviews_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES public.prompts(id) ON DELETE CASCADE;
+
+
+--
 -- Name: purchases purchases_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1785,13 +2092,6 @@ CREATE POLICY "Users can manage own favorites" ON public.favorites USING ((auth.
 
 
 --
--- Name: profiles Users can update own profile; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((auth.uid() = id));
-
-
---
 -- Name: profiles Users can view own profile; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -1849,24 +2149,16 @@ CREATE POLICY "admins read grants" ON public.email_tier_grants FOR SELECT USING 
 ALTER TABLE public.agent_social_log ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: newsletter_subscribers anyone can subscribe themselves; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "anyone can subscribe themselves" ON public.newsletter_subscribers FOR INSERT WITH CHECK (true);
-
-
---
--- Name: newsletter_subscribers anyone can unsubscribe with valid token; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "anyone can unsubscribe with valid token" ON public.newsletter_subscribers FOR UPDATE USING (true) WITH CHECK (true);
-
-
---
 -- Name: attribution_events; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
 ALTER TABLE public.attribution_events ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: catalog_changes; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.catalog_changes ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: clients; Type: ROW SECURITY; Schema: public; Owner: -
@@ -1897,6 +2189,12 @@ ALTER TABLE public.content_items ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: digest_sends; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.digest_sends ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: email_tier_grants; Type: ROW SECURITY; Schema: public; Owner: -
@@ -1959,10 +2257,22 @@ ALTER TABLE public.outreach_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: prompt_opens; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.prompt_opens ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: prompt_queue; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
 ALTER TABLE public.prompt_queue ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: prompt_reviews; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.prompt_reviews ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: prompts; Type: ROW SECURITY; Schema: public; Owner: -
@@ -2007,6 +2317,12 @@ ALTER TABLE public.search_queries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.skill_traces ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: stripe_events; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.stripe_events ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: user_sessions; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -2022,5 +2338,5 @@ ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict jhBUj0N4iGmHh3O99MkU9SeeBgLbLvughO4R8jm0oGjrKjLL7RS4K7f8FVLlgCQ
+\unrestrict AdALaV689OFQLh0syICLFAbzq74DCsuvozzhum8ogs2Mmq1uCUdQfcOAZLwTiU6
 
