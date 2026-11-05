@@ -167,20 +167,23 @@ export async function GET(request: NextRequest) {
       return { resp, data };
     };
 
-    let appliedCoupon = coupon;
-    let { resp: sessionResp, data: sessionData } = await createSession(coupon);
-    if (coupon && sessionResp.status >= 400 && sessionResp.status < 500) {
+    const { resp: sessionResp, data: sessionData } = await createSession(coupon);
+    if (coupon && !sessionResp.ok) {
+      /* Decision de Victor (5 nov 2026, auditoria de Fable del PR 123): si Stripe rechaza
+       * el cupon no se reintenta a precio normal. La persona vio $4.50; mandarla a pagar $9
+       * en silencio rompe la confianza y esconde el error de configuracion. Se regresa a
+       * /pricing con un aviso y queda el registro para arreglar el cupon. */
       console.error(
         JSON.stringify({
           event: "stripe_pro_promo_coupon_rejected",
           user_id: user.id,
+          status: sessionResp.status,
           code: sessionData.error?.code ?? null,
           param: sessionData.error?.param ?? null,
           message: sessionData.error?.message ?? null,
         })
       );
-      appliedCoupon = null;
-      ({ resp: sessionResp, data: sessionData } = await createSession(null));
+      return NextResponse.redirect(`${siteUrl}/pricing?error=promo_unavailable`);
     }
 
     if (!sessionResp.ok || !sessionData.url) {
@@ -194,7 +197,7 @@ export async function GET(request: NextRequest) {
         event: "stripe_pro_session_created",
         session_id: sessionData.id,
         user_id: user.id,
-        promo_coupon: appliedCoupon ? true : false,
+        promo_coupon: coupon ? true : false,
       })
     );
 

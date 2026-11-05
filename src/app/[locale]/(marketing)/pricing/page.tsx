@@ -25,6 +25,7 @@ const USD_MXN = 16.89; // aproximado, solo referencia
 
 interface Props {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ error?: string | string[] }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -36,8 +37,10 @@ function mxn(usd: number): string {
   return Math.round(usd * USD_MXN).toLocaleString("en-US");
 }
 
-export default async function PricingPage({ params }: Props) {
+export default async function PricingPage({ params, searchParams }: Props) {
   const { locale: localeParam } = await params;
+  const sp = (await searchParams) ?? {};
+  const promoUnavailable = sp.error === "promo_unavailable";
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const t = getDictionary(locale).pricing;
@@ -146,6 +149,12 @@ export default async function PricingPage({ params }: Props) {
         <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-500">{t.value_note}</p>
         <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-zinc-500">{t.launch_note}</p>
       </div>
+
+      {promoUnavailable && (
+        <p role="alert" className="mx-auto mb-8 max-w-xl rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-4 py-3 text-center text-sm text-zinc-700">
+          {getDictionary(locale).promo.unavailable}
+        </p>
+      )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((tier) => (

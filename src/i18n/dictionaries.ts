@@ -243,6 +243,7 @@ export const DICTIONARIES = {
       keep_browsing: "Keep browsing",
       close_modal: "Close offer",
       pricing_badge: "50% off your first month",
+      unavailable: "The offer is not available right now. We already got the alert; please try again in a few minutes.",
     },
     pricing: {
       h1: "Pricing",
@@ -814,6 +815,7 @@ export const DICTIONARIES = {
       keep_browsing: "Seguir viendo",
       close_modal: "Cerrar oferta",
       pricing_badge: "50% el primer mes",
+      unavailable: "La oferta no está disponible en este momento. Ya nos llegó el aviso; inténtalo de nuevo en unos minutos.",
     },
     pricing: {
       h1: "Precios",
