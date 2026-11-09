@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { downloadAccess } from "@/lib/edit-bundle/access";
+import { EDIT_BUNDLE_FREE_UNTIL, downloadAccess } from "@/lib/edit-bundle/access";
 import { accessFor, priceLabelFor, promoFor } from "./access";
 import realCatalog from "./skills.json";
 import * as real from "./skills";
@@ -8,8 +8,9 @@ import { ALL_MODS, MODS, parseMods } from "@/lib/mods";
 /* Manifiesto del catalogo (2026-11-05): lo que el sitio lee de skills.json y mods.json.
  * Los estados se prueban con un manifiesto falso (vi.doMock del JSON). */
 
-const BEFORE = new Date("2026-11-08T05:59:59Z");
-const AFTER = new Date("2026-11-08T06:00:00Z");
+/* Los dos lados del corte salen de la constante: si se amplia otra vez la promo, estas pruebas no se rompen. */
+const AFTER = new Date(EDIT_BUNDLE_FREE_UNTIL);
+const BEFORE = new Date(AFTER.getTime() - 1000);
 
 const EB_SLUGS = [
   "arto-edit-cortes",

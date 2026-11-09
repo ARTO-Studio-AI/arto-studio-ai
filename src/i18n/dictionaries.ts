@@ -404,7 +404,7 @@ export const DICTIONARIES = {
       category_body:
         "9 skills so Claude Code edits your vertical videos. Each one does one thing and works on its own; the Director chains them together.",
       coming_soon_h2: "Coming soon",
-      label_free: "Free until Nov 7",
+      label_free: "Free until Nov 30",
       label_pro: "Pro",
       label_account: "Free with an account",
       draft_badge: "Draft copy",
@@ -412,7 +412,7 @@ export const DICTIONARIES = {
       bundle_name: "ARTO Edit Bundle #1",
       bundle_tagline: "9 skills so Claude edits your videos",
       bundle_card_body: "All 9 skills in one file, with the install guide.",
-      bundle_included_promo: "Included in Pro · Free until Nov 7 with a free account",
+      bundle_included_promo: "Included in Pro · Free until Nov 30 with a free account",
       bundle_included: "Included in Pro",
       see_skill: "See skill",
       see_bundle: "See the bundle",
@@ -424,9 +424,9 @@ export const DICTIONARIES = {
       cta_download_bundle: "Download the full bundle",
       cta_upgrade: "Go Pro to download",
       cta_soon: "Available very soon",
-      note_free_promo: "Free with your account until Nov 7. From Nov 8 it is part of Pro.",
+      note_free_promo: "Free with your account until Nov 30. From Dec 1 it is part of Pro.",
       note_pro: "You are on Pro: you can always download, including new versions.",
-      note_upgrade: "The promo ended on Nov 7. With Pro (9 USD a month) you download it and get every new version.",
+      note_upgrade: "The promo ended on Nov 30. With Pro (9 USD a month) you download it and get every new version.",
       note_upgrade_pro: "This skill is part of Pro. With Pro you download it and get every new version.",
       note_free_account: "Free with your account, with no end date.",
       note_signin: "No card. It takes a minute with your email or Google.",
@@ -464,8 +464,8 @@ export const DICTIONARIES = {
           a: "In ChatGPT it helps you plan; it does not edit. To edit the video you need Claude Code, which runs ffmpeg on your computer.",
         },
         {
-          q: "What happens on November 3?",
-          a: "Whatever you already downloaded is yours and keeps working. From Nov 8, downloads and new versions are for Pro (9 USD a month).",
+          q: "What happens on December 1?",
+          a: "Whatever you already downloaded is yours and keeps working. From Dec 1, downloads and new versions are for Pro (9 USD a month).",
         },
         {
           q: "Vertical video only?",
@@ -474,7 +474,7 @@ export const DICTIONARIES = {
       ],
       meta_title: "ARTO Edit Bundle #1: 9 skills so Claude edits your videos",
       meta_description:
-        "9 Claude Code skills for vertical video: cuts, captions, text behind you, pop-up cards, headlines, color, zooms, sound and a Director. Free until Nov 7 with a free account.",
+        "9 Claude Code skills for vertical video: cuts, captions, text behind you, pop-up cards, headlines, color, zooms, sound and a Director. Free until Nov 30 with a free account.",
     },
     mods: {
       badge: "New",
@@ -984,7 +984,7 @@ export const DICTIONARIES = {
       category_body:
         "9 skills para que Claude Code edite tus videos verticales. Cada uno hace una cosa y se puede usar solo; el Director los combina.",
       coming_soon_h2: "Próximamente",
-      label_free: "Gratis hasta el 7 nov",
+      label_free: "Gratis hasta el 30 nov",
       label_pro: "Pro",
       label_account: "Gratis con cuenta",
       draft_badge: "Texto provisional",
@@ -992,7 +992,7 @@ export const DICTIONARIES = {
       bundle_name: "ARTO Edit Bundle #1",
       bundle_tagline: "9 skills para que Claude edite tus videos",
       bundle_card_body: "Los 9 skills en un solo archivo, con la guía de instalación.",
-      bundle_included_promo: "Incluido en Pro · Gratis hasta el 7 nov con cuenta gratis",
+      bundle_included_promo: "Incluido en Pro · Gratis hasta el 30 nov con cuenta gratis",
       bundle_included: "Incluido en Pro",
       see_skill: "Ver skill",
       see_bundle: "Ver el bundle",
@@ -1004,9 +1004,9 @@ export const DICTIONARIES = {
       cta_download_bundle: "Descargar el bundle completo",
       cta_upgrade: "Hazte Pro para descargar",
       cta_soon: "Disponible muy pronto",
-      note_free_promo: "Gratis con tu cuenta hasta el 7 nov. Desde el 8 nov es parte de Pro.",
+      note_free_promo: "Gratis con tu cuenta hasta el 30 nov. Desde el 1 dic es parte de Pro.",
       note_pro: "Eres Pro: descargas siempre, con las versiones nuevas.",
-      note_upgrade: "La promoción terminó el 7 nov. Con Pro (9 USD al mes) lo descargas y te llegan las versiones nuevas.",
+      note_upgrade: "La promoción terminó el 30 nov. Con Pro (9 USD al mes) lo descargas y te llegan las versiones nuevas.",
       note_upgrade_pro: "Este skill es parte de Pro. Con Pro lo descargas y te llegan las versiones nuevas.",
       note_free_account: "Gratis con tu cuenta, sin fecha de corte.",
       note_signin: "Sin tarjeta. Toma un minuto con tu correo o con Google.",
@@ -1044,8 +1044,8 @@ export const DICTIONARIES = {
           a: "En ChatGPT sirve para planear, no edita. Para editar el video necesitas Claude Code, que corre ffmpeg en tu computadora.",
         },
         {
-          q: "¿Qué pasa el 3 de noviembre?",
-          a: "Lo que ya bajaste es tuyo y sigue funcionando. Desde el 8 nov la descarga y las versiones nuevas son para Pro (9 USD al mes).",
+          q: "¿Qué pasa el 1 de diciembre?",
+          a: "Lo que ya bajaste es tuyo y sigue funcionando. Desde el 1 dic la descarga y las versiones nuevas son para Pro (9 USD al mes).",
         },
         {
           q: "¿Solo sirve para video vertical?",
@@ -1054,7 +1054,7 @@ export const DICTIONARIES = {
       ],
       meta_title: "ARTO Edit Bundle #1: 9 skills para que Claude edite tus videos",
       meta_description:
-        "9 skills de Claude Code para video vertical: cortes, subtítulos, letras detrás, recuadros, titulares, color, zooms, sonido y un Director. Gratis hasta el 7 nov con cuenta gratis.",
+        "9 skills de Claude Code para video vertical: cortes, subtítulos, letras detrás, recuadros, titulares, color, zooms, sonido y un Director. Gratis hasta el 30 nov con cuenta gratis.",
     },
     mods: {
       badge: "Nuevo",
