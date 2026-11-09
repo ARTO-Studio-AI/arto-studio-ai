@@ -103,7 +103,7 @@ Volver a correr el comando sobre un skill que ya existe lo actualiza (ficha, paq
 
 Lo decide la categoría (`access` en `skills.json`), no el script ni el admin:
 
-- `edit-bundle-1`: la regla del ARTO Edit Bundle #1 (`src/lib/edit-bundle/access.ts`). Gratis con cuenta hasta el 7 nov de 2026, después solo Pro.
+- `edit-bundle-1`: la regla del ARTO Edit Bundle #1 (`src/lib/edit-bundle/access.ts`). Gratis con cuenta hasta el 30 nov de 2026, después solo Pro.
 - `pro`: solo Pro y Enterprise. Es la que recibe una categoría nueva.
 
 Abrir una categoría gratis o cambiar una regla es decisión de Victor y va en `docs/DECISIONES.md`.

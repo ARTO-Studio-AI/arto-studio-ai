@@ -16,7 +16,7 @@ interface Props {
 }
 
 /* La etiqueta Gratis/Pro depende de la hora: sin esto la pagina se prerenderiza en el build y
- * seguiria diciendo «Gratis hasta el 7 nov» despues del corte (auditoria de Fable). */
+ * seguiria diciendo «Gratis hasta el 30 nov» despues del corte (auditoria de Fable). */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

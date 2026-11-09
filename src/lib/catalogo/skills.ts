@@ -15,7 +15,7 @@ import manifest from "./skills.json";
  *
  * Reglas de descarga (access de la categoria):
  *   edit-bundle-1  la del bundle (src/lib/edit-bundle/access.ts): gratis con cuenta hasta el
- *                  7 nov 2026, despues solo Pro. Es la que ya existia, sin cambios.
+ *                  30 nov 2026, despues solo Pro. Es la que ya existia, sin cambios.
  *   pro            solo Pro y Enterprise. Es la que recibe una categoria nueva por defecto;
  *                  cualquier otra regla es decision de Victor.
  *
