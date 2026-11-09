@@ -148,7 +148,12 @@ async function saveUpload(opts: {
 export async function uploadSkill(input: { ficha: unknown; pkg: Buffer | null; actor: string }) {
   const catalog = await getCatalog({ fresh: true });
   if (!catalog.dbOk) throw new AdminCatalogError("No pude leer la base; no se subio nada. Intenta de nuevo en un momento.", 503);
-  const errors = validateSkillUpload({ ficha: input.ficha, pkg: input.pkg, categories: catalog.categories.map((c) => c.slug) });
+  const errors = validateSkillUpload({
+    ficha: input.ficha,
+    pkg: input.pkg,
+    categories: catalog.categories.map((c) => c.slug),
+    freeCategories: catalog.categories.filter((c) => c.access === "cuenta").map((c) => c.slug),
+  });
   if (errors.length) throw new AdminCatalogError("No se subio nada", 400, errors);
 
   const ficha = input.ficha as Record<string, unknown> & { slug: string; version: string };

@@ -20,7 +20,7 @@
     },
     {
       "slug": "estrategia-y-negocio",
-      "order": 2,
+      "order": 3,
       "access": "pro",
       "bundle": null,
       "kicker": {
@@ -34,6 +34,24 @@
       "body": {
         "es": "Skills para arrancar, vender y cotizar con el método de una agencia creativa con más de 15 años. Funcionan en Claude y en ChatGPT.",
         "en": "Skills to launch, sell and quote with the method of a creative agency with more than 15 years in the craft. They work in Claude and ChatGPT."
+      }
+    },
+    {
+      "slug": "graficos-animados",
+      "order": 2,
+      "access": "cuenta",
+      "bundle": null,
+      "kicker": {
+        "es": "Gráficos animados con Claude",
+        "en": "Animated graphics with Claude"
+      },
+      "name": {
+        "es": "Gráficos animados",
+        "en": "Animated graphics"
+      },
+      "body": {
+        "es": "Skills que convierten tu guion en gráficos animados para reels, hechos en tu compu y sin créditos. Gratis con tu cuenta.",
+        "en": "Skills that turn your script into animated graphics for reels, rendered on your computer with no credits. Free with your account."
       }
     }
   ],
@@ -621,6 +639,64 @@
         "time": {
           "es": "unos 5 minutos de conversación",
           "en": "about 5 minutes of conversation"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-anima",
+      "status": "hidden",
+      "ficha": {
+        "slug": "arto-anima",
+        "order": 1,
+        "category": "graficos-animados",
+        "name": {
+          "es": "ARTO Anima",
+          "en": "ARTO Anima"
+        },
+        "tagline": {
+          "es": "Los gráficos animados de tu reel, diseñados para cada frase y montados encima de tu clip.",
+          "en": "Your reel's animated graphics, designed for each line and laid over your clip."
+        },
+        "what": {
+          "es": "Lee tu guion con tiempos y arma un storyboard de 6 tramos. Con tu OK escribe cada gráfico como una página animada (titular que se escribe, pasos numerados, cifras, capturas del producto, tarjeta final con tu CTA) y te enseña una hoja de fotogramas. Con tu segundo OK hace el MP4 vertical en tu compu, sin créditos ni cuenta, deja el sonido a -14 LUFS y te da el proyecto para cambiarlo después.",
+          "en": "Reads your timed script and builds a 6-part storyboard. Once you say yes, it writes each graphic as an animated web page (a headline that types itself, numbered steps, figures, product screenshots, an end card with your CTA) and shows you a sheet of key frames. With your second yes it renders the vertical MP4 on your computer, with no credits or account, sets the sound to -14 LUFS and hands you the project so you can change it later."
+        },
+        "you_say": {
+          "es": [
+            "Anima los gráficos de mi reel",
+            "Hazme un reel solo de gráficos con este guion",
+            "Ponle titular animado y tarjeta final con mi CTA"
+          ],
+          "en": [
+            "Animate the graphics for my reel",
+            "Make a graphics-only reel from this script",
+            "Add an animated headline and an end card with my CTA"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude Code",
+            "Mac o Linux (en Windows no; probado en Linux, en Mac todavía no)",
+            "Node 22 o más nuevo",
+            "ffmpeg",
+            "Unos 400 MB libres para el motor de render y su Chrome"
+          ],
+          "en": [
+            "Claude Code",
+            "Mac or Linux (not Windows; tested on Linux, not yet on Mac)",
+            "Node 22 or newer",
+            "ffmpeg",
+            "About 400 MB free for the render engine and its Chrome"
+          ]
+        },
+        "time": {
+          "es": "de 4 a 5 s por segundo de reel, medido en Linux con 4 núcleos, más unos minutos la primera vez",
+          "en": "4 to 5 s per second of reel, measured on Linux with 4 cores, plus a few minutes the first time"
+        },
+        "chatgpt_note": {
+          "es": "En ChatGPT entrega el storyboard y el proyecto de animación; el video se hace en Claude Code.",
+          "en": "In ChatGPT it delivers the storyboard and the animation project; the video is rendered in Claude Code."
         },
         "version": "1.0"
       }

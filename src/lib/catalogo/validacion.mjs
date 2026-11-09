@@ -8,7 +8,7 @@
 import { inflateRawSync } from "node:zlib";
 
 export const STATUSES = ["published", "coming_soon", "hidden"];
-export const ACCESS_POLICIES = ["edit-bundle-1", "pro"];
+export const ACCESS_POLICIES = ["edit-bundle-1", "pro", "cuenta"];
 
 /* Limites del contrato del bundle: demo 1.5 MB, poster 150 KB, paquete 4.4 MB (la respuesta de
  * una funcion de Vercel no pasa de 4.5 MB). */
@@ -210,16 +210,21 @@ export function packageProblems(buf, slug) {
  * aplica a una carpeta de Drive, pero sobre la ficha y el .skill que llegan en el formulario.
  * El SKILL.md se lee de adentro del paquete (<slug>/SKILL.md).
  *   - ficha valida (validateFicha), sin category_copy: las categorias nuevas solo entran por PR
- *   - categoria que ya existe (la regla de descarga es la de su categoria)
+ *   - categoria que ya existe (la regla de descarga es la de su categoria) y que no sea gratis con cuenta
  *   - paquete dentro del peso, limpio (packageProblems) y con SKILL.md valido (skillMdProblems)
- * @param {{ ficha: any, pkg: Buffer | null, categories: string[] }} input
+ * @param {{ ficha: any, pkg: Buffer | null, categories: string[], freeCategories?: string[] }} input
  * @returns {string[]}
  */
-export function validateSkillUpload({ ficha, pkg, categories }) {
+export function validateSkillUpload({ ficha, pkg, categories, freeCategories = [] }) {
   const errors = validateFicha(ficha).map((e) => `ficha.json ${e}`);
   if (errors.length) return errors;
   if (ficha.category_copy !== undefined) {
     errors.push("ficha.json: category_copy no va aqui. Una categoria nueva se crea con scripts/add-skill.mjs en un PR (su regla de descarga la decide Victor)");
+  }
+  /* Las categorias con la regla «cuenta» dan el skill gratis con cuenta: un skill ahi solo
+   * entra por PR, con Fable (hallazgo 1 de Fable en el PR #127, 9 nov 2026). */
+  if (freeCategories.includes(ficha.category)) {
+    errors.push(`ficha.json: la categoria «${ficha.category}» es gratis con cuenta; un skill ahi solo entra con scripts/add-skill.mjs en un PR`);
   }
   if (!categories.includes(ficha.category)) {
     errors.push(`ficha.json: la categoria «${ficha.category}» no existe. Usa una de: ${categories.join(", ")}`);

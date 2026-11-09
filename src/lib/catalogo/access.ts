@@ -6,16 +6,20 @@ import type { AccessPolicy } from "./skills";
  *  edit-bundle-1  delega TAL CUAL en src/lib/edit-bundle/access.ts (decision de Victor del
  *                 27 oct 2026). Este archivo no la cambia ni la duplica.
  *  pro            solo Pro y Enterprise, sin promocion. Es la regla que recibe una categoria
- *                 nueva: abrir descargas gratis es decision de Victor, no del script. */
+ *                 nueva: abrir descargas gratis es decision de Victor, no del script.
+ *  cuenta         cualquier cuenta con sesion, siempre (ARTO Anima, 6 nov 2026). Sin sesion
+ *                 pide entrar; nunca entrega a un visitante sin cuenta. */
 
 export function accessFor(policy: AccessPolicy, viewer: Viewer, now: Date = new Date()): DownloadAccess {
   if (policy === "edit-bundle-1") return downloadAccess(viewer, now);
   if (!viewer.signedIn) return "signin";
+  if (policy === "cuenta") return "download";
   return isProTier(viewer.tier) ? "download" : "upgrade";
 }
 
-/** Etiqueta de la tarjeta: "free" solo para el bundle en promocion; lo demas es "pro". */
-export function priceLabelFor(policy: AccessPolicy, now: Date = new Date()): "free" | "pro" {
+/** Etiqueta de la tarjeta: "free" para el bundle en promocion, "account" para la regla cuenta; lo demas es "pro". */
+export function priceLabelFor(policy: AccessPolicy, now: Date = new Date()): "free" | "pro" | "account" {
+  if (policy === "cuenta") return "account";
   return policy === "edit-bundle-1" ? priceLabel(now) : "pro";
 }
 

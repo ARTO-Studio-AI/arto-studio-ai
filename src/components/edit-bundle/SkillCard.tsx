@@ -23,7 +23,8 @@ interface Props {
 export default function SkillCard({ skill, locale, t, now = new Date(), soonLabel = t.cta_soon }: Props) {
   const demo = demoOf(skill.slug);
   const soon = skill.status === "coming_soon";
-  const price = priceLabelFor(getCategory(skill.category)?.access ?? "pro", now) === "free" ? t.label_free : t.label_pro;
+  const kind = priceLabelFor(getCategory(skill.category)?.access ?? "pro", now);
+  const price = kind === "free" ? t.label_free : kind === "account" ? t.label_account : t.label_pro;
   const label = soon ? soonLabel : price;
   return (
     <Link

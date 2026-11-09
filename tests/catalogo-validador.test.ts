@@ -287,6 +287,14 @@ describe("validacion compartida con /admin", () => {
     expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba", { deflate: true }), categories: CATS })).toEqual([]);
   });
 
+  it("no deja subir por el admin a una categoria gratis con cuenta (hallazgo 1 de Fable, PR #127)", () => {
+    const free = realCatalog.categories.filter((c) => c.access === "cuenta").map((c) => c.slug);
+    expect(free).toContain("graficos-animados");
+    const errors = shared.validateSkillUpload({ ficha: ficha({ category: "graficos-animados" }), pkg: skillPackage("arto-prueba"), categories: CATS, freeCategories: free });
+    expect(errors.some((e: string) => e.includes("gratis con cuenta"))).toBe(true);
+    expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba"), categories: CATS, freeCategories: free })).toEqual([]);
+  });
+
   it("aplica las mismas reglas de la ficha que add-skill.mjs", () => {
     const bad = ficha({ what: bi("Rapido \u2014 y bien", "A seamless tool") });
     const errors = shared.validateSkillUpload({ ficha: bad, pkg: skillPackage("arto-prueba"), categories: CATS });
