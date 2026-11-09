@@ -18,6 +18,9 @@ import manifest from "./skills.json";
  *                  7 nov 2026, despues solo Pro. Es la que ya existia, sin cambios.
  *   pro            solo Pro y Enterprise. Es la que recibe una categoria nueva por defecto;
  *                  cualquier otra regla es decision de Victor.
+ *   cuenta         cualquier cuenta con sesion descarga, sin fecha de corte (Victor delego la
+ *                  regla de ARTO Anima el 6 nov 2026: «Este tipo de cosas, decídelas tú»).
+ *                  Sin sesion manda a crear cuenta. No hay promocion ni fecha.
  *
  * assets.json lo genera scripts/catalogo-assets.mjs: que demos (public/skills/demos) y que
  * paquetes (private/skills) hay en disco. Los paquetes solo salen por /api/skill-downloads. */
@@ -27,7 +30,7 @@ type Bi<T> = Record<Locale, T>;
 export const CATALOG_STATUSES = ["published", "coming_soon", "hidden"] as const;
 export type CatalogStatus = (typeof CATALOG_STATUSES)[number];
 
-export const ACCESS_POLICIES = ["edit-bundle-1", "pro"] as const;
+export const ACCESS_POLICIES = ["edit-bundle-1", "pro", "cuenta"] as const;
 export type AccessPolicy = (typeof ACCESS_POLICIES)[number];
 
 export interface SkillCategory {

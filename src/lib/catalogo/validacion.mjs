@@ -8,7 +8,7 @@
 import { inflateRawSync } from "node:zlib";
 
 export const STATUSES = ["published", "coming_soon", "hidden"];
-export const ACCESS_POLICIES = ["edit-bundle-1", "pro"];
+export const ACCESS_POLICIES = ["edit-bundle-1", "pro", "cuenta"];
 
 /* Limites del contrato del bundle: demo 1.5 MB, poster 150 KB, paquete 4.4 MB (la respuesta de
  * una funcion de Vercel no pasa de 4.5 MB). */

@@ -26,7 +26,7 @@ const EB_SLUGS = [
 describe("catalogo real", () => {
   it("el bundle sigue igual: 9 skills publicados en su orden, su categoria primero, el bundle publicado", () => {
     expect(real.PUBLIC_SKILLS.filter((s) => s.category === "edicion-de-video").map((s) => s.slug)).toEqual(EB_SLUGS);
-    expect(real.ALL_SKILLS.every((s) => s.status === "published")).toBe(true);
+    expect(real.ALL_SKILLS.filter((s) => s.slug !== "arto-anima").every((s) => s.status === "published")).toBe(true);
     expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia-y-negocio"]);
     expect(real.getCategory("edicion-de-video")?.access).toBe("edit-bundle-1");
     expect(real.getDownloadItem("arto-edit-bundle-1")).toEqual({
@@ -51,6 +51,18 @@ describe("catalogo real", () => {
       expect(real.packageAvailable(slug), slug).toBe(true);
       expect(real.getDownloadItem(slug)?.access, slug).toBe("pro");
     }
+  });
+
+  // Pedido de la Bitacora del 6 nov: ARTO Anima sube oculto, en su categoria con la regla cuenta.
+  it("ARTO Anima entra oculto, con paquete y demo, en Graficos animados con la regla cuenta", () => {
+    const anima = real.ALL_SKILLS.find((s) => s.slug === "arto-anima");
+    expect(anima?.status).toBe("hidden");
+    expect(anima?.category).toBe("graficos-animados");
+    expect(real.getCategory("graficos-animados")?.access).toBe("cuenta");
+    expect(real.getSkill("arto-anima")).toBeNull();
+    expect(real.getDownloadItem("arto-anima")).toBeNull();
+    expect(real.packageAvailable("arto-anima")).toBe(true);
+    expect(real.demoOf("arto-anima").video).toBe("/skills/demos/arto-anima.mp4");
   });
 });
 
@@ -146,6 +158,17 @@ describe("reglas de descarga", () => {
     expect(accessFor("pro", ent, AFTER)).toBe("download");
     expect(priceLabelFor("pro", BEFORE)).toBe("pro");
     expect(promoFor("pro", BEFORE)).toBe(false);
+  });
+
+  it("cuenta: cualquier cuenta con sesion descarga siempre; sin sesion pide entrar", () => {
+    const far = new Date("2030-01-01T00:00:00Z");
+    for (const now of [BEFORE, AFTER, far]) {
+      expect(accessFor("cuenta", anon, now)).toBe("signin");
+      for (const v of [free, pro, ent]) expect(accessFor("cuenta", v, now)).toBe("download");
+      expect(accessFor("cuenta", { signedIn: true, userId: "u", tier: "" }, now)).toBe("download");
+      expect(priceLabelFor("cuenta", now)).toBe("account");
+      expect(promoFor("cuenta", now)).toBe(false);
+    }
   });
 });
 

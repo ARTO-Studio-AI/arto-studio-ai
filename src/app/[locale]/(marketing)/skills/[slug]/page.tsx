@@ -72,7 +72,8 @@ export default async function EditSkillPage({ params }: Props) {
   /* Sin video y fuera del bundle de video, el bloque 9:16 de «Demo en camino» ocupaba toda la
    * primera pantalla del celular; esos skills abren directo con su contenido (2026-11-05). */
   const showDemo = Boolean(demo.video) || ctx.inBundle;
-  const label = soon ? soonLabel : priceLabelFor(ctx.category.access, now) === "free" ? t.label_free : t.label_pro;
+  const kind = priceLabelFor(ctx.category.access, now);
+  const label = soon ? soonLabel : kind === "free" ? t.label_free : kind === "account" ? t.label_account : t.label_pro;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">

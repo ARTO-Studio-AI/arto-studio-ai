@@ -65,7 +65,7 @@ export default async function DownloadCta({ locale, slug, viewer, t, size = "lg"
     );
   }
 
-  const note = viewer.signedIn && isProTier(viewer.tier) ? t.note_pro : t.note_free_promo;
+  const note = viewer.signedIn && isProTier(viewer.tier) ? t.note_pro : item.access === "cuenta" ? t.note_free_account : t.note_free_promo;
   if (!catalog.packageAvailable(slug)) {
     return (
       <div>
