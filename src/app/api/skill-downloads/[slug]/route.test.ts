@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import realCatalog from "@/lib/catalogo/skills.json";
+import { EDIT_BUNDLE_FREE_UNTIL } from "@/lib/edit-bundle/access";
 import { fakeSupabase, type FakeSupabase } from "../../../../../tests/helpers/fake-supabase";
 
 /* GET /api/skill-downloads/[slug] (Victor, 27 oct 2026): sesion, regla de fecha o Pro, y el archivo.
@@ -29,8 +30,9 @@ vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => fake.client })
 const { GET } = await import("./route");
 const { __resetCatalogCache } = await import("@/lib/catalogo/efectivo");
 
-const BEFORE = new Date("2026-11-08T05:59:59Z");
-const AFTER = new Date("2026-11-08T06:00:00Z");
+/* Los dos lados del corte salen de la constante: si se amplia otra vez la promo, estas pruebas no se rompen. */
+const AFTER = new Date(EDIT_BUNDLE_FREE_UNTIL);
+const BEFORE = new Date(AFTER.getTime() - 1000);
 const ZIP = Buffer.from("PK\u0003\u0004fake");
 
 function req(slug: string, cookies: Record<string, string> = {}) {
