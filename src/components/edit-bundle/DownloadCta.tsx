@@ -10,7 +10,7 @@ import { EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 /* Boton de descarga del ARTO Edit Bundle #1 con la regla de Victor del 27 oct 2026:
  *   sin sesion             -> crear cuenta o entrar, y regresa a esta misma pagina
  *   gratis en promocion    -> descarga
- *   gratis despues del 3 nov -> a Pro (pricing)
+ *   gratis desde el 1 dic -> a Pro (pricing)
  *   Pro                    -> descarga siempre
  * La pagina solo decide que boton pintar; quien da o niega el archivo es la ruta
  * /api/skill-downloads/[slug], que vuelve a revisar todo en el servidor.

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { EDIT_BUNDLE_FREE_UNTIL, downloadAccess, isPromoActive, isProTier, priceLabel, type Viewer } from "./access";
 
-/* Corte de la promocion del ARTO Edit Bundle #1 (Victor, 27 oct 2026): gratis con cuenta hasta el 7 nov de
- * 2026 inclusive en hora de Ciudad de Mexico; desde el 8 nov 00:00 CDMX (06:00 UTC), solo Pro. */
+/* Corte de la promocion del ARTO Edit Bundle #1 (Victor, 27 oct 2026): gratis con cuenta hasta el 30 nov de
+ * 2026 inclusive en hora de Ciudad de Mexico (extendida el 6 nov); desde el 1 dic 00:00 CDMX (06:00 UTC), solo Pro. */
 
-const BEFORE = new Date("2026-11-08T05:59:59.999Z"); // 7 nov 23:59:59.999 en CDMX
-const CUTOFF = new Date("2026-11-08T06:00:00.000Z"); // 8 nov 00:00 en CDMX
-const AFTER = new Date("2026-11-12T12:00:00Z");
+const BEFORE = new Date("2026-12-01T05:59:59.999Z"); // 30 nov 23:59:59.999 en CDMX
+const CUTOFF = new Date("2026-12-01T06:00:00.000Z"); // 1 dic 00:00 en CDMX
+const AFTER = new Date("2026-12-05T12:00:00Z");
 const LAUNCH = new Date("2026-10-27T15:00:00Z");
 
 const anon: Viewer = { signedIn: false };
@@ -16,8 +16,8 @@ const enterprise: Viewer = { signedIn: true, userId: "u-ent", tier: "enterprise"
 const weird: Viewer = { signedIn: true, userId: "u-x", tier: "Pro " };
 
 describe("EDIT_BUNDLE_FREE_UNTIL", () => {
-  it("es el 8 nov de 2026 a las 00:00 de Ciudad de Mexico (06:00 UTC)", () => {
-    expect(EDIT_BUNDLE_FREE_UNTIL).toBe("2026-11-08T06:00:00Z");
+  it("es el 1 dic de 2026 a las 00:00 de Ciudad de Mexico (06:00 UTC)", () => {
+    expect(EDIT_BUNDLE_FREE_UNTIL).toBe("2026-12-01T06:00:00Z");
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Mexico_City",
       year: "numeric",
@@ -28,12 +28,12 @@ describe("EDIT_BUNDLE_FREE_UNTIL", () => {
       hourCycle: "h23",
     }).formatToParts(new Date(EDIT_BUNDLE_FREE_UNTIL));
     const get = (type: string) => parts.find((p) => p.type === type)?.value;
-    expect(`${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`).toBe("2026-11-08 00:00");
+    expect(`${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`).toBe("2026-12-01 00:00");
   });
 });
 
 describe("isPromoActive", () => {
-  it("activa el dia del lanzamiento y hasta el ultimo milisegundo del 7 nov en CDMX", () => {
+  it("activa el dia del lanzamiento y hasta el ultimo milisegundo del 30 nov en CDMX", () => {
     expect(isPromoActive(LAUNCH)).toBe(true);
     expect(isPromoActive(BEFORE)).toBe(true);
   });
