@@ -22,6 +22,18 @@
    * src/lib/contraste-tokens.test.ts. */
   --accent-ink: #c93800;
   --accent-soft: #fff1ea;
+  /* Paleta índigo (decisión de Victor, 10 nov 2026, D20). Nace en los videos de Victor
+   * (complementaria dividida del naranja: 18°, 168° y 228°) y se suma al sitio. En el sitio
+   * el fondo sigue blanco: el índigo va en secciones o tarjetas oscuras, nunca como fondo
+   * de página. --aqua da 1.8:1 sobre blanco: solo va sobre índigo o como decoración; para
+   * texto verde agua sobre blanco se usa --aqua-ink (5.31:1). Lo vigila
+   * src/lib/contraste-tokens.test.ts. */
+  --indigo: #121936;
+  --indigo-2: #222b4f;
+  --indigo-ink-2: #b3b7c7;
+  --aqua: #42d7b9;
+  --aqua-ink: #157965;
+  --aqua-soft: #e3f8f3;
   /* Superficies calidas del design system de ARTO, solo para graficos (hero y portadas). */
   --paper: #f4f2ee;
   --sand: #e9e3d8;
@@ -49,6 +61,11 @@
   --color-border: var(--line);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-indigo: var(--indigo);
+  --color-indigo-2: var(--indigo-2);
+  --color-aqua: var(--aqua);
+  --color-aqua-ink: var(--aqua-ink);
+  --color-aqua-soft: var(--aqua-soft);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
