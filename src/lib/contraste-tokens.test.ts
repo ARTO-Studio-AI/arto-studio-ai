@@ -72,6 +72,33 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+describe("contraste de la paleta indigo (D20)", () => {
+  const white = "#ffffff";
+  const indigo = token("indigo");
+
+  it("texto blanco, gris claro, naranja y verde agua pasan AA sobre --indigo", () => {
+    for (const fg of [white, token("indigo-ink-2"), token("accent"), token("aqua")]) {
+      expect(contrast(fg, indigo), `${fg} sobre ${indigo}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("texto blanco pasa AA sobre la tarjeta --indigo-2", () => {
+    expect(contrast(white, token("indigo-2"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("--aqua-ink pasa AA sobre blanco, --surface y --bg", () => {
+    for (const bg of [white, token("surface"), token("bg")]) {
+      expect(contrast(token("aqua-ink"), bg), `aqua-ink sobre ${bg}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("--indigo como texto pasa AA sobre blanco y sobre --aqua-soft", () => {
+    for (const bg of [white, token("aqua-soft")]) {
+      expect(contrast(indigo, bg)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});
+
 describe("uso del acento en texto chico", () => {
   it('ningun "text-eyebrow text-[var(--accent)]" literal en src', () => {
     const offenders = walk(join(__dirname, ".."))

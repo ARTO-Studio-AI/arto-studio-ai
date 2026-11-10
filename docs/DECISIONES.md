@@ -279,6 +279,16 @@ siguiente sesión.
 | **Qué NO hacer (fase 2)** | No mandar el correo en claro ni el nombre de la marca. No mandar eventos del servidor sin la cookie de publicidad (la API pública del roast, sin cookie, no cuenta). No esperar a Meta antes de responder el roast ni el login (`after()`). No mandar `RoastCompleted` ni `Lead` por el servidor sin el `event_id` del navegador (se contarían dos veces). La industria solo va si es de la lista del roast. No poner `META_CAPI_TEST_EVENT_CODE` en producción. Graph API en v26.0: revisar la versión en cada auditoría |
 | **Dónde** | `src/lib/meta-pixel.ts`, `src/lib/meta-capi.ts`, `src/lib/consent.ts`, `src/lib/analytics.ts`, `src/components/CookieBanner.tsx`, `src/components/analytics/GaPageViews.tsx`, aviso de privacidad, `docs/METRICS.md` |
 
+### D20 · Paleta índigo: sección de videos y colores nuevos en el sitio
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-11-10, en el hilo «261110 ASAI Ficha de voz para videos de Victor». Eligió la paleta «Índigo profundo» y el corredor como símbolo de videos; luego: «Va a haber una sección nueva que va a ser para videos… En la paleta de colores general, vamos a agregar estos nuevos colores para que también se puedan utilizar en el sitio. Solamente que en el sitio el fondo sí va en blanco» |
+| **Qué se decidió** | **Videos:** fondo índigo `#121936` (no negro), texto `#fafafa`, secundario `#b3b7c7`, acento naranja `#ff4d00` (5.2:1), tarjetas `#222b4f`, etiquetas y avisos verde agua `#42d7b9`; llamado en píldora naranja con texto índigo; símbolo: personaje corredor en blanco, desde 24 px. Regla de color: complementaria dividida del naranja (18°, 168° y 228°). **Sitio:** se suman los tokens `--indigo`, `--indigo-2`, `--indigo-ink-2`, `--aqua`, `--aqua-ink` y `--aqua-soft`; el fondo de página sigue blanco |
+| **Por qué** | A Victor no le gusta el fondo negro en los videos y sí el naranja. El índigo es oscuro con color y deja el naranja en 5.2:1, así que también sirve en letra chica. Se probó y descartó: naranja más brillante `#ff6a00` (en claro baja a 2.75) y paletas sin naranja |
+| **Qué NO hacer** | No usar fondo negro en videos. No cambiar el naranja `#ff4d00`. No poner `--aqua` como texto sobre blanco (1.8:1): usar `--aqua-ink`. No usar `--indigo` como fondo de página del sitio ni agregar dark mode por esto. No usar el corredor por debajo de 24 px (para favicon sigue el logo) |
+| **Dónde** | `src/app/globals.css`, `src/lib/contraste-tokens.test.ts`; guía de video en Drive «261110 ASAI guia de estilo de edicion de video v1.1»; página de pruebas https://claude.ai/artifact/Y2T68L8dwphEXScWkoH5x7 |
+
 ### ARTO Edit Bundle #1: gratis con cuenta hasta el 30 nov, después solo Pro
 
 | | |
