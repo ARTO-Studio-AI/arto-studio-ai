@@ -1,41 +1,50 @@
 {
-  "generatedAt": "2026-11-11T08:08:08.848Z",
+  "generatedAt": "2026-11-11T09:30:24.439Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-subtitulos": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-letras-detras": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-recuadros": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-titulares": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-color": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-zooms": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-sonido": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-edit-director": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 1
     },
     "arto-anima": {
       "mp4": true,
