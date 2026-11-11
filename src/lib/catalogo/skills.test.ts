@@ -69,7 +69,8 @@ describe("catalogo real", () => {
       "/skills/demos/arto-anima-ejemplo-1.jpg",
       "/skills/demos/arto-anima-ejemplo-2.jpg",
     ]);
-    expect(real.ejemplosOf("arto-edit-cortes")).toEqual([]);
+    // Los 9 del Edit Bundle llevan su lámina del carrusel ASAI06 como segunda imagen (11 nov 2026).
+    for (const slug of EB_SLUGS) expect(real.ejemplosOf(slug)).toEqual([`/skills/demos/${slug}-ejemplo-1.jpg`]);
   });
 });
 

@@ -87,7 +87,7 @@ export default async function EditSkillPage({ params }: Props) {
           <div className="mx-auto w-full max-w-[360px]">
             <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} />
             {ejemplos.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className={ejemplos.length > 1 ? "mt-3 grid grid-cols-2 gap-3" : "mt-3 grid gap-3"}>
                 {ejemplos.map((src, i) => (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -95,7 +95,7 @@ export default async function EditSkillPage({ params }: Props) {
                     src={src}
                     alt={`${skill.name[locale]} · ${t.examples_label} ${i + 1}`}
                     loading="lazy"
-                    className="aspect-[9/16] w-full rounded-[var(--radius-md)] border border-zinc-200 object-cover"
+                    className="h-auto w-full rounded-[var(--radius-md)] border border-zinc-200"
                   />
                 ))}
               </div>
