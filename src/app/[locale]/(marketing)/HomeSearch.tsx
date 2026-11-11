@@ -35,7 +35,7 @@ export default function HomeSearch({ locale, label, placeholder, button }: Props
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
-          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400"
+          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -53,10 +53,11 @@ export default function HomeSearch({ locale, label, placeholder, button }: Props
           required
           maxLength={MAX_QUERY_LENGTH}
           placeholder={placeholder}
-          className="block h-12 w-full rounded-[var(--radius-lg)] border border-zinc-300 bg-white pl-12 pr-4 text-base text-zinc-900 placeholder:text-zinc-400 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)]"
+          className="block h-12 w-full rounded-[var(--radius-md)] border border-white bg-white pl-12 pr-4 text-base text-black placeholder:text-[var(--ink-2)] focus:border-[var(--lime)] focus:outline-none focus:ring-2 focus:ring-[var(--lime)]"
         />
       </div>
-      <Button type="submit" size="lg" className="h-12">
+      {/* Va dentro del panel negro de la home: boton lima con letra negra (nunca azul sobre negro). */}
+      <Button type="submit" size="lg" variant="lime" className="h-12">
         {button}
       </Button>
     </form>

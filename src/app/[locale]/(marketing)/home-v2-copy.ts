@@ -6,7 +6,14 @@ export const HOME_V2: Record<Locale, {
   eyebrow: string;
   h1_before: string;
   h1_accent: string;
+  h1_after: string;
   lead: string;
+  potd_badge: string;
+  potd_eyebrow: string;
+  potd_copy: string;
+  potd_view: string;
+  potd_fallback_title: string;
+  potd_fallback_body: string;
   cta_prompts: string;
   cta_roast: string;
   fine: string;
@@ -54,9 +61,17 @@ export const HOME_V2: Record<Locale, {
 }> = {
   es: {
     eyebrow: "Por ARTO Group · Agencia creativa desde 2009",
-    h1_before: "El estudio creativo que nunca",
-    h1_accent: "duerme.",
-    lead: "Elige un prompt hecho por estrategas de ARTO, pégalo en Claude o ChatGPT y entrega trabajo de marca el mismo día. En español y en inglés.",
+    // Titular decidido por Victor el 11 nov 2026 (marca v2.0).
+    h1_before: "Lo que usamos en ARTO,",
+    h1_accent: "listo",
+    h1_after: "para copiar.",
+    lead: "Te damos los prompts, skills y sistemas de IA que usamos en ARTO, probados y listos para copiar. Para emprendedores y equipos chicos que quieren trabajar más rápido.",
+    potd_badge: "Prompt del día",
+    potd_eyebrow: "Lo usas hoy",
+    potd_copy: "Copiar prompt",
+    potd_view: "Ver la ficha",
+    potd_fallback_title: "Tu propuesta hoy, con un solo prompt",
+    potd_fallback_body: "Pega tus notas de la llamada tal cual. Pide tres secciones: lo que entendiste, lo que propones y lo que cuesta.",
     cta_prompts: "Explorar prompts gratis",
     cta_roast: "Roastea tu marca",
     hero_alt: "Ilustración: un personaje con un ojo por cabeza trabaja en su laptop, sentado sobre una luna naranja.",
@@ -115,9 +130,17 @@ export const HOME_V2: Record<Locale, {
   },
   en: {
     eyebrow: "By ARTO Group · Creative agency since 2009",
-    h1_before: "The creative studio that never",
-    h1_accent: "sleeps.",
-    lead: "Pick a prompt written by ARTO strategists, paste it into Claude or ChatGPT, and ship brand work the same day. In English and Spanish.",
+    // Headline decided by Victor on 11 Nov 2026 (brand v2.0).
+    h1_before: "What we use at ARTO,",
+    h1_accent: "ready",
+    h1_after: "to copy.",
+    lead: "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
+    potd_badge: "Prompt of the day",
+    potd_eyebrow: "Use it today",
+    potd_copy: "Copy prompt",
+    potd_view: "See the prompt",
+    potd_fallback_title: "Your proposal today, with one prompt",
+    potd_fallback_body: "Paste your call notes as they are. Ask for three sections: what you understood, what you propose and what it costs.",
     cta_prompts: "Browse free prompts",
     cta_roast: "Roast your brand",
     hero_alt: "Illustration: a character with an eye for a head works on a laptop, sitting on an orange moon.",

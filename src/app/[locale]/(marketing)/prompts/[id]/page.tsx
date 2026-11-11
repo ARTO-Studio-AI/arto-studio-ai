@@ -191,7 +191,7 @@ export default async function PromptDetail({ params }: Props) {
           props={{ prompt_id: prompt.id, tier: analyticsTier, signed_in: !!user, locale }}
         />
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
+          <Link href={`/${locale}/prompts`} className="text-sm text-[var(--ink-2)] hover:text-[var(--accent)]">
             {dict.back_to_catalog}
           </Link>
           {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
@@ -226,17 +226,17 @@ export default async function PromptDetail({ params }: Props) {
         />
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href={`/${locale}/prompts`} className="text-sm text-zinc-500 hover:text-zinc-900">
+        <Link href={`/${locale}/prompts`} className="text-sm text-[var(--ink-2)] hover:text-[var(--accent)]">
           {dict.back_to_catalog}
         </Link>
         {quotaUsed !== null && <PromptQuota locale={locale} used={quotaUsed} />}
       </div>
 
-      <header className="relative mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6 shadow-[var(--shadow-sm)]">
+      <header className="relative mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-6 shadow-[var(--shadow-sm)]">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 text-[11px]">
-              <span className="font-mono text-zinc-500">{prompt.id}</span>
+              <span className="font-mono text-[var(--ink-2)]">{prompt.id}</span>
               <Badge tone={prompt.tier === "free" ? "tier" : "inverse"} dot={isLocked ? false : undefined}>
                 {isLocked && <LockIcon className="h-2.5 w-2.5" />}
                 {tier.label}
@@ -251,7 +251,7 @@ export default async function PromptDetail({ params }: Props) {
                 {aiGroupLabel} · {aiModelLabel(prompt.ai_model)}
               </span>
             </div>
-            <p className="mt-3 text-xs text-zinc-500">{subcategoryLabel(prompt.subcategory, lang)}</p>
+            <p className="mt-3 text-xs text-[var(--ink-2)]">{subcategoryLabel(prompt.subcategory, lang)}</p>
             {/* Inline EN/ES switcher removed — the global LangSwitcher in the
               * Nav handles locale toggling for the whole site. */}
           </div>
@@ -266,9 +266,15 @@ export default async function PromptDetail({ params }: Props) {
         </div>
       </header>
 
-      <section className="mt-6 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-6">
+      {/* Marca v2.0: con el prompt abierto, el recuadro va en azul con letra blanca y boton blanco
+        * «Copiar prompt». Bloqueado o con muro de registro se queda blanco. */}
+      <section
+        className={`mt-6 rounded-[var(--radius-lg)] p-6 ${
+          !isLocked && !needsSignup ? "asai-blue bg-[var(--accent)] text-white" : "border border-[var(--line)] bg-white"
+        }`}
+      >
         <div className="flex items-start justify-between">
-          <h2 className="text-eyebrow text-zinc-500">{dict.prompt_label}</h2>
+          <h2 className={`text-eyebrow ${!isLocked && !needsSignup ? "text-white" : "text-[var(--ink-2)]"}`}>{dict.prompt_label}</h2>
           {!isLocked && !needsSignup && (
             <div className="flex items-center gap-2">
               <AddToCollectionButton promptId={prompt.id} lang={lang} signedIn={!!user} />
@@ -292,17 +298,17 @@ export default async function PromptDetail({ params }: Props) {
                 * un blur de CSS, y cualquiera los leia en el HTML (H-65, 2026-10-12). */}
               <div aria-hidden="true" className="pointer-events-none absolute inset-0 select-none space-y-2 py-1 blur-[2px]">
                 {[96, 88, 92, 70, 94, 82, 60, 90, 76, 84, 66, 92].map((w, i) => (
-                  <div key={i} className="h-3 rounded bg-zinc-200" style={{ width: `${w}%` }} />
+                  <div key={i} className="h-3 rounded bg-black/10" style={{ width: `${w}%` }} />
                 ))}
               </div>
               <div className="relative flex flex-col items-center bg-white/80 px-4 py-8 text-center backdrop-blur-sm">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-[var(--accent)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black text-[var(--lime)]">
                   <LockIcon className="h-5 w-5" />
                 </span>
-                <p className="mt-3 font-semibold text-zinc-900">
+                <p className="mt-3 font-semibold text-black">
                   {prompt.tier === "pro" ? proDict.locked_title : dict.enterprise_prompt}
                 </p>
-                <p className="mt-1 max-w-md text-sm text-zinc-600">
+                <p className="mt-1 max-w-md text-sm text-[var(--ink-2)]">
                   {prompt.tier === "pro"
                     ? user ? proDict.locked_body_free : proDict.locked_body_anon
                     : user ? dict.upgrade_to_unlock : dict.sign_in_to_unlock}
@@ -330,28 +336,28 @@ export default async function PromptDetail({ params }: Props) {
               </div>
             </div>
           ) : (
-            <pre className="whitespace-pre-wrap break-words font-sans text-zinc-700" data-testid="prompt-body">{body}</pre>
+            <pre className="whitespace-pre-wrap break-words font-sans text-white" data-testid="prompt-body">{body}</pre>
           )}
         </div>
       </section>
 
       {isLocked && prompt.tier === "pro" && (
-        <p className="mt-3 text-xs text-zinc-500">{proDict.preview_note}</p>
+        <p className="mt-3 text-xs text-[var(--ink-2)]">{proDict.preview_note}</p>
       )}
 
       {/* Bloqueado se ve igual: para que sirve y que entrega ayuda a decidir si vale Pro (D28). */}
       {(useCase || expectedOutput) && !needsSignup && (
         <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {useCase && (
-            <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5">
-              <h3 className="text-eyebrow text-zinc-500">{dict.when_to_use}</h3>
-              <p className="mt-2 text-sm text-zinc-700">{useCase}</p>
+            <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-5">
+              <h3 className="text-eyebrow text-[var(--ink-2)]">{dict.when_to_use}</h3>
+              <p className="mt-2 text-sm text-black">{useCase}</p>
             </div>
           )}
           {expectedOutput && (
-            <div className="rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-5">
-              <h3 className="text-eyebrow text-zinc-500">{dict.expected_output}</h3>
-              <p className="mt-2 text-sm text-zinc-700">{expectedOutput}</p>
+            <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-5">
+              <h3 className="text-eyebrow text-[var(--ink-2)]">{dict.expected_output}</h3>
+              <p className="mt-2 text-sm text-black">{expectedOutput}</p>
             </div>
           )}
         </section>
@@ -363,10 +369,10 @@ export default async function PromptDetail({ params }: Props) {
 
       {prompt.tags?.length > 0 && (
         <section className="mt-8">
-          <h3 className="text-eyebrow text-zinc-500">{dict.tags}</h3>
+          <h3 className="text-eyebrow text-[var(--ink-2)]">{dict.tags}</h3>
           <div className="mt-2 flex flex-wrap gap-2 text-xs">
             {prompt.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-zinc-100 px-2 py-1 text-zinc-600">{tag}</span>
+              <span key={tag} className="rounded-full bg-[var(--lime-hover)] px-2 py-1 text-[var(--ink-2)]">{tag}</span>
             ))}
           </div>
         </section>

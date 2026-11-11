@@ -60,7 +60,7 @@ export const VERTICALS: Record<Category, { code: string; label_en: string; label
 /* Chips monocromos (Fase 2, 11 sep 2026): solo zinc + un punto de acento.
  * El significado lo lleva el texto, no el color. Los semanticos (ok/warn/bad)
  * quedan reservados a los scores del Brand Roast. */
-const NEUTRAL_CAT = { chip: "bg-zinc-100 text-zinc-700", ring: "ring-zinc-400", dot: "bg-zinc-300" };
+const NEUTRAL_CAT = { chip: "bg-[var(--lime-hover)] text-black", ring: "ring-black/40", dot: "bg-black/30" };
 export const CATEGORY_STYLES: Record<Category, { chip: string; ring: string; dot: string }> = {
   branding: NEUTRAL_CAT, graphic_design: NEUTRAL_CAT, copywriting: NEUTRAL_CAT,
   photography: NEUTRAL_CAT, video: NEUTRAL_CAT, ux_ui: NEUTRAL_CAT,
@@ -90,14 +90,14 @@ export const TIER_STYLES: Record<Tier, { chip: string; label: string }> = {
 export type AiGroup = "text" | "image" | "video" | "music" | "voice" | "any";
 
 /* Grupos de herramienta: monocromo con punto de acento; el texto distingue. */
-const GROUP_CHIP = "bg-white text-zinc-700 ring-1 ring-inset ring-zinc-200";
+const GROUP_CHIP = "bg-white text-black ring-1 ring-inset ring-black/15";
 export const AI_GROUPS: Record<AiGroup, { label: string; label_es: string; chip: string }> = {
   text: { label: "Text", label_es: "Texto", chip: GROUP_CHIP },
   image: { label: "Image", label_es: "Imagen", chip: GROUP_CHIP },
   video: { label: "Video", label_es: "Video", chip: GROUP_CHIP },
   music: { label: "Music", label_es: "Música", chip: GROUP_CHIP },
   voice: { label: "Voice", label_es: "Voz", chip: GROUP_CHIP },
-  any: { label: "Any", label_es: "Cualquiera", chip: "bg-zinc-100 text-zinc-700" },
+  any: { label: "Any", label_es: "Cualquiera", chip: "bg-[var(--lime-hover)] text-black" },
 };
 
 /* Fecha del ultimo cambio a este catalogo. Se actualiza a mano al tocar AI_TOOLS

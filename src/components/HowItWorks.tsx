@@ -42,11 +42,11 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
   return (
     <div
       aria-label={c.aria}
-      className="relative mt-10 grid gap-3.5 rounded-[var(--radius-lg)] bg-[var(--paper)] p-5 pt-8 sm:p-6 sm:pt-9 lg:mt-0"
+      className="relative mt-10 grid gap-3.5 rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-5 pt-8 sm:p-6 sm:pt-9 lg:mt-0"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] [background-image:radial-gradient(rgba(24,24,27,0.10)_1px,transparent_1px)] [background-size:16px_16px]"
+        className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] [background-image:radial-gradient(rgba(0,0,0,0.10)_1px,transparent_1px)] [background-size:16px_16px]"
       />
       <Image
         src="/brand/characters/character-03.png"
@@ -57,39 +57,39 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
       />
 
       <Step n={1}>
-        <div className="text-eyebrow flex justify-between gap-2 text-zinc-400">
+        <div className="text-eyebrow flex justify-between gap-2 text-[var(--ink-3)]">
           <span>{c.s1k}</span>
-          <span className="rounded-full border border-[#ffd2bf] bg-[var(--accent-soft)] px-2 text-[10px] text-[#b33600]">{c.s3free}</span>
+          <span className="rounded-full border border-black/25 bg-[var(--lime)] px-2 text-[10px] text-black">{c.s3free}</span>
         </div>
-        <p className="mt-1.5 text-[15px] font-semibold leading-snug text-zinc-900">{c.s1t}</p>
-        <p className="mt-1.5 text-[13px] leading-snug text-zinc-600">{c.s1p}</p>
+        <p className="mt-1.5 text-[15px] font-semibold leading-snug text-black">{c.s1t}</p>
+        <p className="mt-1.5 text-[13px] leading-snug text-[var(--ink-2)]">{c.s1p}</p>
       </Step>
 
       <Step n={2}>
-        <div className="text-eyebrow flex justify-between gap-2 text-zinc-400">
+        <div className="text-eyebrow flex justify-between gap-2 text-[var(--ink-3)]">
           <span>{c.s2k}</span>
           <span className="hidden sm:inline">Claude · ChatGPT</span>
         </div>
         <div className="mt-2 grid gap-2">
-          <span className="justify-self-end rounded-xl rounded-br-sm bg-zinc-900 px-3 py-2 font-mono text-xs text-white">{c.s2me}</span>
-          <span className="max-w-[92%] rounded-xl rounded-bl-sm bg-zinc-100 px-3 py-2 text-[13px] leading-snug text-zinc-900">{c.s2ai}</span>
+          <span className="justify-self-end rounded-xl rounded-br-sm bg-[var(--accent)] px-3 py-2 font-mono text-xs text-white">{c.s2me}</span>
+          <span className="max-w-[92%] rounded-xl rounded-bl-sm bg-[var(--lime)] px-3 py-2 text-[13px] leading-snug text-black">{c.s2ai}</span>
         </div>
       </Step>
 
       <Step n={3}>
-        <div className="text-eyebrow flex justify-between gap-2 text-zinc-400">
+        <div className="text-eyebrow flex justify-between gap-2 text-[var(--ink-3)]">
           <span>{c.s3k}</span>
           <span className="hidden sm:inline">{c.s3free}</span>
         </div>
         <div className="mt-2 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
-          <span className="font-display text-[46px] font-extrabold leading-[0.9] tracking-[-0.04em] text-[var(--warn)] tabular-nums">4.8</span>
-          <span className="font-serif text-lg italic leading-tight text-zinc-900">{c.s3q}</span>
+          <span className="font-display text-[46px] font-extrabold leading-[0.9] tracking-[-0.04em] text-[var(--accent)] tabular-nums">4.8</span>
+          <span className="font-serif text-lg italic leading-tight text-black">{c.s3q}</span>
           <div className="col-span-2 grid grid-cols-4 gap-2">
             {c.bars.map((label, i) => (
               <div key={label} className="grid gap-1">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-400">{label}</span>
-                <span className="block h-[5px] overflow-hidden rounded-full bg-zinc-100">
-                  <span className="block h-full bg-[var(--warn)]" style={{ width: `${BAR_WIDTHS[i]}%` }} />
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--ink-3)]">{label}</span>
+                <span className="block h-[5px] overflow-hidden rounded-full bg-black/10">
+                  <span className="block h-full bg-[var(--accent)]" style={{ width: `${BAR_WIDTHS[i]}%` }} />
                 </span>
               </div>
             ))}
@@ -103,8 +103,8 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
 function Step({ n, children }: { n: number; children: React.ReactNode }) {
   return (
     <div className="relative grid grid-cols-[28px_1fr] items-start gap-3">
-      <span className="mt-2.5 grid h-7 w-7 place-items-center rounded-full bg-zinc-900 font-mono text-xs text-white">{n}</span>
-      <div className="min-w-0 rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-3.5 shadow-[var(--shadow-sm)]">
+      <span className="mt-2.5 grid h-7 w-7 place-items-center rounded-full bg-[var(--accent)] font-mono text-xs text-white">{n}</span>
+      <div className="min-w-0 rounded-[var(--radius-md)] border border-[var(--line)] bg-white px-4 py-3.5 shadow-[var(--shadow-sm)]">
         {children}
       </div>
     </div>

@@ -93,7 +93,7 @@ export async function getFeaturedPrompts(limit = 12) {
   const sb = await createClient();
   const { data, error } = await sb
     .from("prompts")
-    .select("id, title_en, title_es, category, subcategory, ai_model, difficulty, tier, tags, is_featured")
+    .select("id, title_en, title_es, category, subcategory, ai_model, difficulty, tier, tags, is_featured, use_case")
     .eq("is_published", true)
     .eq("is_featured", true)
     .order("featured_at", { ascending: false })
