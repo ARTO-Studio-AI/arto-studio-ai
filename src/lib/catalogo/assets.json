@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T09:30:24.439Z",
+  "generatedAt": "2026-11-11T10:50:18.238Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -43,6 +43,16 @@
     },
     "arto-edit-director": {
       "mp4": true,
+      "jpg": true,
+      "ejemplos": 1
+    },
+    "arto-arranque-negocio-local": {
+      "mp4": false,
+      "jpg": true,
+      "ejemplos": 1
+    },
+    "arto-cotizacion-creativa": {
+      "mp4": false,
       "jpg": true,
       "ejemplos": 1
     },

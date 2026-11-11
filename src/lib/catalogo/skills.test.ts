@@ -71,6 +71,11 @@ describe("catalogo real", () => {
     ]);
     // Los 9 del Edit Bundle llevan su lámina del carrusel ASAI06 como segunda imagen (11 nov 2026).
     for (const slug of EB_SLUGS) expect(real.ejemplosOf(slug)).toEqual([`/skills/demos/${slug}-ejemplo-1.jpg`]);
+    // Sin video: poster y una imagen de ejemplo cada uno (Victor, 11 nov 2026).
+    for (const slug of ["arto-arranque-negocio-local", "arto-cotizacion-creativa"]) {
+      expect(real.demoOf(slug)).toEqual({ video: null, poster: `/skills/demos/${slug}.jpg` });
+      expect(real.ejemplosOf(slug)).toEqual([`/skills/demos/${slug}-ejemplo-1.jpg`]);
+    }
   });
 });
 

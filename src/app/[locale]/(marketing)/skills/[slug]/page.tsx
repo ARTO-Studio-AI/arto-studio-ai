@@ -73,6 +73,10 @@ export default async function EditSkillPage({ params }: Props) {
   /* Sin video y fuera del bundle de video, el bloque 9:16 de «Demo en camino» ocupaba toda la
    * primera pantalla del celular; esos skills abren directo con su contenido (2026-11-05). */
   const showDemo = Boolean(demo.video) || ctx.inBundle;
+  /* Sin video pero con imagenes de ejemplo (regla 16, Victor 11 nov 2026: «generar imagen para los
+   * que no tienen nada»): van en su proporcion 4:5, sin el marco 9:16 del video. */
+  const showImages = !showDemo && (Boolean(demo.poster) || ejemplos.length > 0);
+  const imagenes = showImages ? [...(demo.poster ? [demo.poster] : []), ...ejemplos] : [];
   const kind = priceLabelFor(ctx.category.access, now);
   const label = soon ? soonLabel : kind === "free" ? t.label_free : kind === "account" ? t.label_account : t.label_pro;
 
@@ -82,7 +86,21 @@ export default async function EditSkillPage({ params }: Props) {
         {t.back_to_skills}
       </Link>
 
-      <div className={showDemo ? "mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_1fr] md:items-start" : "mt-6 max-w-3xl"}>
+      <div className={showDemo || showImages ? "mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_1fr] md:items-start" : "mt-6 max-w-3xl"}>
+        {showImages && (
+          <div className="mx-auto grid w-full max-w-[360px] gap-3">
+            {imagenes.map((src, i) => (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                key={src}
+                src={src}
+                alt={`${skill.name[locale]} · ${t.examples_label} ${i + 1}`}
+                loading={i === 0 ? "eager" : "lazy"}
+                className="h-auto w-full rounded-[var(--radius-md)] border border-zinc-200"
+              />
+            ))}
+          </div>
+        )}
         {showDemo && (
           <div className="mx-auto w-full max-w-[360px]">
             <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} />
