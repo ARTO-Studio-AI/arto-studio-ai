@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T08:08:30.026Z",
+  "generatedAt": "2026-11-11T08:08:08.848Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -39,7 +39,8 @@
     },
     "arto-anima": {
       "mp4": true,
-      "jpg": true
+      "jpg": true,
+      "ejemplos": 2
     }
   },
   "packages": {

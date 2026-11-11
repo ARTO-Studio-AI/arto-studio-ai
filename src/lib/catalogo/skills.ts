@@ -267,7 +267,7 @@ export function getDownloadItem(slug: string): DownloadItem | null {
 
 interface AssetManifest {
   generatedAt: string | null;
-  demos: Record<string, { mp4: boolean; jpg: boolean }>;
+  demos: Record<string, { mp4: boolean; jpg: boolean; ejemplos?: number }>;
   packages: Record<string, { bytes: number; sha256: string }>;
 }
 
@@ -279,6 +279,12 @@ export function demoOf(slug: string): { video: string | null; poster: string | n
     video: d?.mp4 ? `/skills/demos/${slug}.mp4` : null,
     poster: d?.jpg ? `/skills/demos/${slug}.jpg` : null,
   };
+}
+
+/** Imagenes de ejemplo ademas del poster (regla 16): /skills/demos/<slug>-ejemplo-N.jpg. */
+export function ejemplosOf(slug: string): string[] {
+  const n = ASSETS.demos?.[slug]?.ejemplos ?? 0;
+  return Array.from({ length: n }, (_, i) => `/skills/demos/${slug}-ejemplo-${i + 1}.jpg`);
 }
 
 /** true si el paquete ya se sincronizo al repo (si no, el boton dice «muy pronto»). */
