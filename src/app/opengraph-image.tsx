@@ -24,7 +24,7 @@ export default async function Image() {
           flexDirection: "column",
           justifyContent: "space-between",
           background: OG.paper,
-          backgroundImage: "radial-gradient(rgba(24,24,27,0.09) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "28px 28px",
           padding: 64,
         }}
@@ -41,7 +41,7 @@ export default async function Image() {
           <div style={{ display: "flex", flexDirection: "column", gap: 22, width: 760 }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", fontFamily: "Manrope", fontSize: 72, lineHeight: 1.08, letterSpacing: -3, color: OG.ink }}>
               <span>El estudio creativo que nunca&nbsp;</span>
-              <span style={{ fontFamily: "Cormorant", fontStyle: "italic", fontSize: 88, letterSpacing: -1, color: OG.accent }}>duerme.</span>
+              <span style={{ fontFamily: "Cormorant", fontStyle: "italic", fontSize: 88, letterSpacing: -1, color: OG.ink, background: OG.pink, padding: "0 12px", borderRadius: 6 }}>duerme.</span>
             </div>
             <div style={{ display: "flex", gap: 22 }}>
               {steps.map((s, i) => (

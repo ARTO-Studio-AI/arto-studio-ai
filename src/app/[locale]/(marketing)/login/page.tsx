@@ -174,7 +174,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
                       <span className="text-eyebrow block text-zinc-500">{v ? (locale === "es" ? v.label_es : v.label_en) : p.category}</span>
                       <span className="mt-1 block font-semibold leading-snug text-zinc-900">{locale === "es" ? p.title_es : p.title_en}</span>
                     </span>
-                    <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-semibold text-zinc-900">{t.free_chip}</span>
+                    <span className="shrink-0 rounded-full bg-[var(--lime-soft)] px-2.5 py-1 text-xs font-semibold text-zinc-900">{t.free_chip}</span>
                   </li>
                 );
               })}

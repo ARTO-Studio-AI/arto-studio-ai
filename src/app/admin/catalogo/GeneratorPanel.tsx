@@ -49,7 +49,7 @@ export default function GeneratorPanel({ onUse, initialIdea = "" }: { onUse: (d:
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-dashed border-zinc-300 bg-[var(--paper)] p-5">
+    <div className="rounded-[var(--radius-lg)] border border-dashed border-zinc-300 bg-white p-5">
       <p className="text-eyebrow text-zinc-500">Generar borrador con IA</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-4">
         <label className="text-sm font-medium text-zinc-700">Vertical
