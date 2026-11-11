@@ -159,8 +159,10 @@ export default async function HomePage({ params }: Props) {
         code: CATEGORY_LABELS[potd.category]?.code ?? potd.id.slice(0, 2),
         category: (locale === "es" ? CATEGORY_LABELS[potd.category]?.label_es : CATEGORY_LABELS[potd.category]?.label_en) ?? potd.category,
         title: locale === "es" ? potd.title_es : potd.title_en,
-        body: potd.use_case?.trim() || (locale === "es" ? potd.title_en : potd.title_es),
+        // use_case solo existe en ingles: en ES va el texto fijo de la tarjeta.
+        body: (locale === "en" && potd.use_case?.trim()) || v2.potd_body,
         href: lp(`/prompts/${potd.id}`),
+        catalogHref: lp("/prompts"),
       }
     : {
         id: "",
@@ -169,6 +171,7 @@ export default async function HomePage({ params }: Props) {
         title: v2.potd_fallback_title,
         body: v2.potd_fallback_body,
         href: lp("/prompts"),
+        catalogHref: lp("/prompts"),
       };
 
   // Pick the title in the active locale (Prompt type has both title_en and title_es).

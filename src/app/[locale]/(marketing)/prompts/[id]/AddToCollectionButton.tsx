@@ -93,7 +93,7 @@ export default function AddToCollectionButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-2 w-72 rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-3 shadow-lg">
+        <div className="absolute right-0 z-10 mt-2 w-72 rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-3 text-black shadow-lg">
           {loading ? (
             <p className="text-xs text-[var(--ink-2)]">…</p>
           ) : (

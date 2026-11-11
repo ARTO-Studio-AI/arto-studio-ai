@@ -205,6 +205,9 @@ h1 { letter-spacing: -0.035em; }
   background-color: var(--lime);
   color: #000000;
 }
+.asai-blue .bg-\[var\(--accent\)\]:hover:not(:disabled) {
+  background-color: var(--lime-hover);
+}
 /* Sobre negro el acento de texto es lima, nunca azul (2.5:1). */
 .asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-\[var\(--dark\)\], .asai-dark) :is(.text-\[var\(--accent\)\], .text-\[var\(--accent-ink\)\], .text-accent, .text-accent-ink) {
   color: var(--lime);
