@@ -218,7 +218,7 @@ export default function SignupBarClient({
         ) : (
           <BarCard
             title={<p className="text-sm font-semibold leading-snug">{t.title(free)}</p>}
-            sub={<p className="hidden text-xs text-zinc-400 sm:block">{t.sub}</p>}
+            sub={<p className="hidden text-xs text-white sm:block">{t.sub}</p>}
             href={signupHref(locale, pathname, search)}
             cta={t.cta}
             ctaShort={t.cta_short}

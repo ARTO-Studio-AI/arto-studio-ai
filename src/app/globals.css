@@ -1,50 +1,50 @@
 @import "tailwindcss";
 
-/* Tokens del sistema (Fase 2, 11 sep 2026). Superficies claras, tintas zinc,
- * un solo acento y tres semanticos reservados a los scores del Brand Roast.
- * No hay dark mode; no lo agregues aqui sin decision de Victor.
- * Acento: no hay un color oficial de ARTO en public/brand ni en src (el logo es
- * negro y el personaje va en negro y blanco), asi que aplica el default de la
- * decision D4: #ff4d00. Si aparece el oficial en Brand Assets, se cambia solo aqui. */
+/* Tokens del sistema: marca ASAI v2.0 (decision de Victor, 11 nov 2026). Salen de tokens.json
+ * del design system de ARTO (grupo ASAI), no de tokens.css, que aun trae los --asai-* viejos.
+ * Fondo de pagina lima; letra negra sobre lima siempre, tambien en botones. Azul ultramar para
+ * el boton principal, recuadros y letra de color sobre lima o blanco. Rosa fosforo solo como
+ * marcatexto detras de la palabra clave, con letra negra encima.
+ * Reglas que no se negocian (las vigila scripts/contraste.mjs y src/lib/contraste-tokens.test.ts):
+ *   sobre lima: letra negra (17.3). Nunca blanca (1.2) ni rosa (2.7).
+ *   sobre negro: letra blanca; acentos en lima (17.3). Nunca azul (2.5) ni negra.
+ *   sobre azul: letra blanca (8.4). Nunca lima ni negra.
+ *   sobre blanco: letra negra; links y letra de color en azul (8.4).
+ * No hay dark mode; no lo agregues aqui sin decision de Victor. */
 :root {
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --ink: #18181b;        /* zinc-900 */
-  --ink-2: #52525b;      /* zinc-600 */
-  --ink-3: #a1a1aa;      /* zinc-400 */
-  --line: #e4e4e7;       /* zinc-200 */
-  --accent: #ff4d00;
-  /* Acento para texto y para fondos naranjas con letra blanca (decision de Victor,
-   * 5 nov 2026): #ff4d00 sobre blanco da 3.33:1 y no pasa AA. #c93800 da 5.19:1 sobre
-   * blanco, 4.97 sobre --bg y 4.64 sobre --paper. --accent se queda en decoraciones
-   * (puntos, reglas, bordes, foco), en texto grande (.serif-accent, >= 24 px, 3.33:1) y
-   * sobre zinc-900, donde da 5.33:1 y --accent-ink solo 3.42. Lo vigila
-   * src/lib/contraste-tokens.test.ts. */
-  --accent-ink: #c93800;
-  --accent-soft: #fff1ea;
-  /* Paleta índigo (decisión de Victor, 10 nov 2026, D20). Nace en los videos de Victor
-   * (complementaria dividida del naranja: 18°, 168° y 228°) y se suma al sitio. En el sitio
-   * el fondo sigue blanco: el índigo va en secciones o tarjetas oscuras, nunca como fondo
-   * de página. --aqua da 1.8:1 sobre blanco: solo va sobre índigo o como decoración; para
-   * texto verde agua sobre blanco se usa --aqua-ink (5.31:1). Lo vigila
-   * src/lib/contraste-tokens.test.ts. */
-  --indigo: #121936;
-  --indigo-2: #222b4f;
-  --indigo-ink-2: #b3b7c7;
-  --aqua: #42d7b9;
-  --aqua-ink: #157965;
-  --aqua-soft: #e3f8f3;
-  /* Superficies calidas del design system de ARTO, solo para graficos (hero y portadas). */
-  --paper: #f4f2ee;
-  --sand: #e9e3d8;
+  --bg: #daf700;          /* lima: fondo de pagina */
+  --surface: #ffffff;     /* tarjetas */
+  --ink: #000000;
+  --ink-2: #3d4500;       /* oliva: texto secundario (8.4 sobre lima, 10.3 sobre blanco) */
+  --ink-3: #5a6600;       /* oliva 2: claves y metadatos (5.2 sobre lima, 6.3 sobre blanco) */
+  --line: rgba(0, 0, 0, 0.14);
+  --accent: #1e00ff;      /* azul ultramar: boton principal, recuadros, letra de color */
+  --accent-ink: #1e00ff;  /* links sobre lima (6.9) o blanco (8.4) */
+  --accent-hover: #1800cc;
+  --pink: #ff3fa4;        /* rosa fosforo: solo marcatexto, con letra negra (6.5) */
+  --dark: #000000;        /* paneles negros y pie */
+  --lime: #daf700;
+  --lime-hover: #c6e000;
   --ok: #16a34a;
   --warn: #d97706;
   --bad: #dc2626;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
-  --shadow-md: 0 4px 16px rgba(24, 24, 27, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 18px 50px rgba(0, 0, 0, 0.14);
+
+  /* Puente mientras migran las paginas (fases 2 y 3): los tokens viejos apuntan a los nuevos.
+   * Al cerrar la fase 3 se borran y no queda ningun naranja, indigo ni verde agua en src/. */
+  --accent-soft: #eef6b8;
+  --indigo: var(--dark);
+  --indigo-2: #161616;
+  --indigo-ink-2: #e4e4e7;
+  --aqua: var(--lime);
+  --aqua-ink: var(--ink-2);
+  --aqua-soft: #eef6b8;
+  --paper: var(--surface);
+  --sand: #eef6b8;
 
   /* Compatibilidad con clases viejas (bg-background, text-muted, border-border). */
   --background: var(--bg);
@@ -61,6 +61,13 @@
   --color-border: var(--line);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-hover: var(--accent-hover);
+  --color-pink: var(--pink);
+  --color-dark: var(--dark);
+  --color-lime: var(--lime);
+  --color-lime-hover: var(--lime-hover);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
   --color-indigo: var(--indigo);
   --color-indigo-2: var(--indigo-2);
   --color-aqua: var(--aqua);
@@ -87,14 +94,28 @@ body {
   font-family: var(--font-brand-text), system-ui, sans-serif;
 }
 
-/* Palabra clave del titular: serif italica, un poco mas grande, en acento. */
+/* Palabra clave del titular: Cormorant italica 600 con marcatexto rosa y letra negra (6.5:1).
+ * Nunca letra rosa. */
 .serif-accent {
   font-family: var(--font-brand-serif), Georgia, serif;
   font-style: italic;
   font-weight: 600;
   font-size: 1.12em;
   letter-spacing: -0.01em;
-  color: var(--accent);
+  color: var(--ink);
+  background: linear-gradient(transparent 20%, var(--pink) 20%, var(--pink) 96%, transparent 96%);
+  padding: 0 0.08em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Marcatexto rosa para la palabra clave fuera del titular. Letra negra encima. */
+.asai-mark {
+  background: var(--pink);
+  color: var(--ink);
+  padding: 0 0.2em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .font-mono {
@@ -107,6 +128,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-brand-display), system-ui, sans-serif;
   letter-spacing: -0.03em;
 }
+h1 { letter-spacing: -0.035em; }
 
 @utility text-display { font-size: clamp(2.5rem, 6.4vw, 4.75rem); line-height: 1; font-weight: 800; letter-spacing: -0.035em; }
 @utility text-h1 { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.04; font-weight: 800; letter-spacing: -0.03em; }
@@ -129,6 +151,56 @@ h1, h2, h3, h4, h5, h6 {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* Puente de color para las paginas de (marketing) mientras migran (fases 2 y 3).
+ * El sitio entero va sobre lima. Las paginas todavia usan la escala zinc de Tailwind; dentro de
+ * .asai-site esa escala se redefine para que el texto pase AA sobre lima y sobre blanco
+ * (zinc-400 a zinc-700 pasan a oliva y negro; 200 y 300 son lineas). En paneles negros la escala
+ * de texto vuelve a grises claros. /admin y /studio no usan .asai-site y no cambian. */
+.asai-site {
+  --color-zinc-50: #f7fbe0;
+  --color-zinc-100: #eef6b8;
+  --color-zinc-200: rgba(0, 0, 0, 0.14);
+  --color-zinc-300: rgba(0, 0, 0, 0.28);
+  --color-zinc-400: #5a6600;
+  --color-zinc-500: #4a5400;
+  --color-zinc-600: #3d4500;
+  --color-zinc-700: #262b00;
+  --color-zinc-800: #111111;
+  --color-zinc-900: #000000;
+  --color-zinc-950: #000000;
+}
+.asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) {
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-300: #e4e4e7;
+  --color-zinc-400: #d4d4d8;
+  --color-zinc-500: #bdbdbd;
+  --color-zinc-600: #a1a1aa;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+}
+/* zinc-300 es linea, pero hay textos de relleno («—») en zinc-300: sobre lima van en oliva 2. */
+.asai-site .text-zinc-300 {
+  color: var(--ink-3);
+}
+.asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) .text-zinc-300 {
+  color: #e4e4e7;
+}
+/* Sobre negro el acento de texto es lima, nunca azul (2.5:1). */
+.asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) :is(.text-\[var\(--accent\)\], .text-\[var\(--accent-ink\)\], .text-accent, .text-accent-ink) {
+  color: var(--lime);
+}
+/* Dentro de una tarjeta blanca o lima metida en un panel negro, la escala vuelve a la de lima. */
+.asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) :is(.bg-white, .bg-\[var\(--surface\)\], .bg-\[var\(--bg\)\], .bg-lime) {
+  --color-zinc-200: rgba(0, 0, 0, 0.14);
+  --color-zinc-300: rgba(0, 0, 0, 0.28);
+  --color-zinc-400: #5a6600;
+  --color-zinc-500: #4a5400;
+  --color-zinc-600: #3d4500;
+  --color-zinc-700: #262b00;
+  --color-zinc-800: #111111;
 }
 
 @keyframes fade-in {

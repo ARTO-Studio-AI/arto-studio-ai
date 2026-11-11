@@ -30,17 +30,17 @@ export default function ProUnlockBanner({ locale, count, placement, className = 
 
   return (
     <aside
-      className={`flex flex-col gap-3 rounded-[var(--radius-lg)] border border-zinc-900 bg-zinc-900 p-4 text-white sm:flex-row sm:items-center sm:justify-between ${className}`}
+      className={`asai-dark flex flex-col gap-3 rounded-[var(--radius-lg)] border border-black bg-black p-4 text-white sm:flex-row sm:items-center sm:justify-between ${className}`}
       data-testid="pro-unlock-banner"
       aria-label={title}
     >
       <div className="flex min-w-0 items-start gap-3">
-        <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[var(--accent)]">
+        <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[var(--lime)]">
           <LockIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
           <p className="font-semibold leading-snug">{title}</p>
-          <p className="mt-0.5 text-sm text-zinc-300">
+          <p className="mt-0.5 text-sm text-white">
             {pricing.tier_pro_tagline}{" "}
             <span className="font-mono text-white">
               {pricing.tier_pro_price} {pricing.tier_pro_period}
@@ -52,7 +52,7 @@ export default function ProUnlockBanner({ locale, count, placement, className = 
         event="pro_unlock_clicked"
         props={{ placement, cta: "pricing", locale }}
         href={`/${locale}/pricing`}
-        className={buttonClass("secondary", "md", "min-h-[44px] shrink-0 border-white sm:min-h-0")}
+        className={buttonClass("lime", "md", "min-h-[44px] shrink-0 sm:min-h-0")}
       >
         {t.strip_cta}
       </TrackedLink>

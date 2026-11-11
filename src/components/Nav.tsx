@@ -40,7 +40,8 @@ function initialsOf(email?: string | null): string {
   return local.slice(0, 2).toUpperCase();
 }
 
-const NAV_LINK = "text-zinc-700 transition hover:text-zinc-900";
+/* Sobre lima la letra es negra siempre; el hover subraya (marca ASAI v2.0). */
+const NAV_LINK = "font-medium text-black transition hover:underline hover:underline-offset-4";
 
 export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
   const [productsOpen, setProductsOpen] = useState(false);
@@ -85,10 +86,10 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
       <Link
         href={lp("/account")}
         onClick={() => setMobileOpen(false)}
-        className={`flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-700 transition hover:border-zinc-400 ${mobile ? "mt-1 justify-center" : ""}`}
+        className={`flex items-center gap-2 rounded-full border border-black bg-white px-2.5 py-1 text-black transition hover:bg-[var(--lime-hover)] ${mobile ? "mt-1 justify-center" : ""}`}
         title={user?.email || undefined}
       >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 font-mono text-[11px] font-medium text-white">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black font-mono text-[11px] font-medium text-white">
           {initialsOf(user?.email)}
         </span>
         <span className="text-xs">{nav.account}</span>
@@ -104,7 +105,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
       <Link
         href="/admin"
         onClick={() => setMobileOpen(false)}
-        className={`rounded-[var(--radius-sm)] border border-zinc-300 bg-zinc-50 px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-700 transition hover:border-zinc-900 ${mobile ? "mt-1 text-center" : ""}`}
+        className={`rounded-[var(--radius-sm)] border border-black bg-white px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-black transition hover:bg-[var(--lime-hover)] ${mobile ? "mt-1 text-center" : ""}`}
         title="Admin panel"
       >
         Admin
@@ -113,9 +114,10 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
 
   return (
     <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-      <Link href={lp("/")} className="flex items-baseline gap-2">
-        <Image src="/brand/arto-logo-black.svg" alt="ARTO Creative 24/7" width={69} height={24} className="h-6 w-auto" priority />
-        <span className="hidden font-mono text-[11px] font-medium tracking-[0.08em] text-zinc-500 sm:inline">
+      <Link href={lp("/")} className="flex items-center gap-3" aria-label="ARTO Studio AI">
+        {/* Logo negro sobre lima (marca ASAI v2.0). SVG limpio, sin bloque <metadata>. */}
+        <Image src="/brand/asai/logo-negro.svg" alt="ARTO Studio AI" width={156} height={30} className="h-7 w-auto" priority unoptimized />
+        <span className="hidden font-mono text-[11px] font-medium tracking-[0.08em] text-[var(--ink-2)] lg:inline">
           {nav.tagline}
         </span>
       </Link>
@@ -142,32 +144,32 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
           </button>
 
           {productsOpen && (
-            <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-2 shadow-[var(--shadow-md)]">
+            <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-2 shadow-[var(--shadow-md)]">
               {products.map((p) => (
                 <Link
                   key={p.href}
                   href={p.href}
-                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-zinc-50"
+                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-[var(--lime)]"
                   onClick={() => setProductsOpen(false)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-zinc-900">{p.title}</span>
+                    <span className="font-semibold text-black">{p.title}</span>
                     <Badge tone={p.tone}>{p.badge}</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-500">{p.blurb}</p>
+                  <p className="mt-0.5 text-xs text-[var(--ink-2)]">{p.blurb}</p>
                 </Link>
               ))}
-              <div className="mt-1 border-t border-zinc-100 pt-1">
+              <div className="mt-1 border-t border-[var(--line)] pt-1">
                 <Link
                   href={ROAST_HREF}
-                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-zinc-50"
+                  className="block rounded-[var(--radius-sm)] px-3 py-2.5 hover:bg-[var(--lime)]"
                   onClick={() => setProductsOpen(false)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-zinc-900">{nav.brand_roast}</span>
+                    <span className="font-semibold text-black">{nav.brand_roast}</span>
                     <Badge tone="live">{nav.badge_free}</Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-500">{nav.brand_roast_blurb}</p>
+                  <p className="mt-0.5 text-xs text-[var(--ink-2)]">{nav.brand_roast_blurb}</p>
                 </Link>
               </div>
             </div>
@@ -182,7 +184,7 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
         <AccountLink />
       </div>
 
-      <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label={nav.menu} aria-expanded={mobileOpen}>
+      <button className="text-black md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label={nav.menu} aria-expanded={mobileOpen}>
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           {mobileOpen ? (
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -193,24 +195,24 @@ export default function Nav({ user, locale, nav, isAdmin = false }: Props) {
       </button>
 
       {mobileOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-zinc-200 bg-white px-6 py-4 md:hidden">
+        <div className="absolute left-0 right-0 top-full z-50 border-b border-[var(--line)] bg-[var(--bg)] px-6 py-4 md:hidden">
           <div className="flex flex-col gap-3 text-sm">
-            <p className="text-eyebrow text-zinc-400">{nav.products}</p>
+            <p className="text-eyebrow text-[var(--ink-2)]">{nav.products}</p>
             {products.map((p) => (
-              <Link key={p.href} href={p.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-zinc-700">
+              <Link key={p.href} href={p.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 font-medium text-black">
                 {p.title}
                 <Badge tone={p.tone}>{p.badge}</Badge>
               </Link>
             ))}
-            <Link href={ROAST_HREF} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-zinc-700">
+            <Link href={ROAST_HREF} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 font-medium text-black">
               {nav.brand_roast}
               <Badge tone="live">{nav.badge_free}</Badge>
             </Link>
-            <div className="my-1 border-t border-zinc-100" />
-            <Link href={lp("/work")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.work}</Link>
-            <Link href={lp("/learn")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.learn}</Link>
-            <Link href={lp("/pricing")} onClick={() => setMobileOpen(false)} className="text-zinc-700">{nav.pricing}</Link>
-            <div className="my-1 border-t border-zinc-100" />
+            <div className="my-1 border-t border-[var(--line)]" />
+            <Link href={lp("/work")} onClick={() => setMobileOpen(false)} className="font-medium text-black">{nav.work}</Link>
+            <Link href={lp("/learn")} onClick={() => setMobileOpen(false)} className="font-medium text-black">{nav.learn}</Link>
+            <Link href={lp("/pricing")} onClick={() => setMobileOpen(false)} className="font-medium text-black">{nav.pricing}</Link>
+            <div className="my-1 border-t border-[var(--line)]" />
             <LangSwitcher current={locale} />
             <AdminLink mobile />
             <AccountLink mobile />
