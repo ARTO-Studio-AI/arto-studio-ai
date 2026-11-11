@@ -212,7 +212,16 @@ export function buildAssets(root, catalog) {
     const j = size(path.join(root, PATHS.demos, `${slug}.jpg`));
     if (m !== null && m > LIMITS.mp4) errors.push(`${slug}.mp4 pesa ${m} bytes (maximo ${LIMITS.mp4})`);
     if (j !== null && j > LIMITS.jpg) errors.push(`${slug}.jpg pesa ${j} bytes (maximo ${LIMITS.jpg})`);
-    if (m !== null || j !== null) demos[slug] = { mp4: m !== null, jpg: j !== null };
+    /* Regla 16 (Victor, 6 nov 2026): cada skill lleva video y 2 imagenes de ejemplo. El poster es
+     * la primera; las demas van en <slug>-ejemplo-1.jpg ... -4.jpg, con el mismo limite de peso. */
+    let ejemplos = 0;
+    for (let n = 1; n <= 4; n++) {
+      const e = size(path.join(root, PATHS.demos, `${slug}-ejemplo-${n}.jpg`));
+      if (e === null) break;
+      if (e > LIMITS.jpg) errors.push(`${slug}-ejemplo-${n}.jpg pesa ${e} bytes (maximo ${LIMITS.jpg})`);
+      ejemplos = n;
+    }
+    if (m !== null || j !== null || ejemplos) demos[slug] = { mp4: m !== null, jpg: j !== null, ...(ejemplos ? { ejemplos } : {}) };
   }
   const pkgs = [...catalog.skills.map((s) => [s.slug, `${s.slug}.skill`]), ...catalog.bundles.map((b) => [b.slug, `${b.slug}.zip`])];
   for (const [slug, file] of pkgs) {

@@ -64,6 +64,12 @@ describe("catalogo real", () => {
     expect(real.getDownloadItem("arto-anima")).toBeNull();
     expect(real.packageAvailable("arto-anima")).toBe(true);
     expect(real.demoOf("arto-anima").video).toBe("/skills/demos/arto-anima.mp4");
+    // Regla 16: video, poster y al menos una imagen de ejemplo mas (2 imagenes en total).
+    expect(real.ejemplosOf("arto-anima")).toEqual([
+      "/skills/demos/arto-anima-ejemplo-1.jpg",
+      "/skills/demos/arto-anima-ejemplo-2.jpg",
+    ]);
+    expect(real.ejemplosOf("arto-edit-cortes")).toEqual([]);
   });
 });
 

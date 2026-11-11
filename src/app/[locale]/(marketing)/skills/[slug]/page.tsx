@@ -9,7 +9,7 @@ import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { priceLabelFor } from "@/lib/catalogo/access";
 import { getCatalog } from "@/lib/catalogo/efectivo";
-import { demoOf, getCategory, type CatalogSkill, type SkillCategory } from "@/lib/catalogo/skills";
+import { demoOf, ejemplosOf, getCategory, type CatalogSkill, type SkillCategory } from "@/lib/catalogo/skills";
 import { EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { getViewer } from "@/lib/edit-bundle/viewer";
 import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
@@ -68,6 +68,7 @@ export default async function EditSkillPage({ params }: Props) {
   const viewer = await getViewer();
   const now = new Date();
   const demo = demoOf(skill.slug);
+  const ejemplos = ejemplosOf(skill.slug);
   const soon = skill.status === "coming_soon";
   /* Sin video y fuera del bundle de video, el bloque 9:16 de «Demo en camino» ocupaba toda la
    * primera pantalla del celular; esos skills abren directo con su contenido (2026-11-05). */
@@ -83,7 +84,23 @@ export default async function EditSkillPage({ params }: Props) {
 
       <div className={showDemo ? "mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_1fr] md:items-start" : "mt-6 max-w-3xl"}>
         {showDemo && (
-          <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} className="mx-auto max-w-[360px]" />
+          <div className="mx-auto w-full max-w-[360px]">
+            <DemoVideo video={demo.video} poster={demo.poster} label={skill.name[locale]} missingLabel={t.demo_missing} />
+            {ejemplos.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                {ejemplos.map((src, i) => (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`${skill.name[locale]} · ${t.examples_label} ${i + 1}`}
+                    loading="lazy"
+                    className="aspect-[9/16] w-full rounded-[var(--radius-md)] border border-zinc-200 object-cover"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         <div>
