@@ -14,16 +14,16 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "lime" | "white"
 export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-transparent font-semibold transition " +
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border font-semibold transition " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 " +
   "disabled:pointer-events-none disabled:opacity-50";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white",
+  primary: "border-transparent bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white",
   secondary: "border-black bg-white text-black hover:bg-[var(--lime-hover)] hover:text-black",
-  ghost: "text-black hover:bg-black/5 hover:text-black",
-  lime: "bg-[var(--lime)] text-black hover:bg-[var(--lime-hover)] hover:text-black",
-  white: "bg-white text-black hover:bg-[#f2f2f2] hover:text-black",
+  ghost: "border-transparent text-black hover:bg-black/5 hover:text-black",
+  lime: "border-transparent bg-[var(--lime)] text-black hover:bg-[var(--lime-hover)] hover:text-black",
+  white: "border-transparent bg-white text-black hover:bg-[#f2f2f2] hover:text-black",
 };
 
 const SIZES: Record<ButtonSize, string> = {

@@ -25,7 +25,7 @@ export default function Footer({ locale, footer }: Props) {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-8 sm:grid-cols-4">
           <div>
-            <Image src="/brand/asai/logo-lima.svg" alt="ARTO Studio AI" width={166} height={32} className="h-8 w-auto" unoptimized />
+            <Image src="/brand/asai/logo-lima.svg" alt="ARTO Studio AI" width={166} height={32} className="h-8 w-auto" loading="eager" unoptimized />
             <p className="mt-3 text-xs text-white">{footer.copyright}</p>
           </div>
 
