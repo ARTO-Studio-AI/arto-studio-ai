@@ -15,6 +15,8 @@ export interface HeroPrompt {
   title: string;
   body: string;
   href: string;
+  /** Segundo boton: el catalogo completo. */
+  catalogHref: string;
 }
 
 interface Props {
@@ -68,7 +70,7 @@ export default function HeroVisual({ prompt, labels }: Props) {
             {labels.copy}
           </Link>
           <Link
-            href={prompt.href}
+            href={prompt.catalogHref}
             className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-white/60 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
           >
             {labels.view}

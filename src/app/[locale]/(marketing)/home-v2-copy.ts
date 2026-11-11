@@ -12,6 +12,7 @@ export const HOME_V2: Record<Locale, {
   potd_eyebrow: string;
   potd_copy: string;
   potd_view: string;
+  potd_body: string;
   potd_fallback_title: string;
   potd_fallback_body: string;
   cta_prompts: string;
@@ -68,8 +69,9 @@ export const HOME_V2: Record<Locale, {
     lead: "Te damos los prompts, skills y sistemas de IA que usamos en ARTO, probados y listos para copiar. Para emprendedores y equipos chicos que quieren trabajar más rápido.",
     potd_badge: "Prompt del día",
     potd_eyebrow: "Lo usas hoy",
-    potd_copy: "Copiar prompt",
-    potd_view: "Ver la ficha",
+    potd_copy: "Abrir el prompt",
+    potd_view: "Ver el catálogo",
+    potd_body: "Ábrelo, cópialo y pégalo en Claude o ChatGPT con tus datos. Listo en minutos.",
     potd_fallback_title: "Tu propuesta hoy, con un solo prompt",
     potd_fallback_body: "Pega tus notas de la llamada tal cual. Pide tres secciones: lo que entendiste, lo que propones y lo que cuesta.",
     cta_prompts: "Explorar prompts gratis",
@@ -137,8 +139,9 @@ export const HOME_V2: Record<Locale, {
     lead: "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
     potd_badge: "Prompt of the day",
     potd_eyebrow: "Use it today",
-    potd_copy: "Copy prompt",
-    potd_view: "See the prompt",
+    potd_copy: "Open the prompt",
+    potd_view: "Browse the catalog",
+    potd_body: "Open it, copy it and paste it into Claude or ChatGPT with your details. Done in minutes.",
     potd_fallback_title: "Your proposal today, with one prompt",
     potd_fallback_body: "Paste your call notes as they are. Ask for three sections: what you understood, what you propose and what it costs.",
     cta_prompts: "Browse free prompts",
