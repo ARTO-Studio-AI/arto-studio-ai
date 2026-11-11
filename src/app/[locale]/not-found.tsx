@@ -20,16 +20,16 @@ export default async function LocaleNotFound() {
   const dict = getDictionary(locale);
   const es = locale === "es";
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg)]">
-      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
+    <div className="asai-site flex min-h-screen flex-col bg-[var(--bg)] text-black">
+      <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--bg)]">
         <Nav user={null} locale={locale} nav={dict.nav} />
       </header>
       <main className="mx-auto flex max-w-3xl flex-1 flex-col items-center px-6 py-24 text-center">
         <Image src="/brand/arto-character-01.png" alt="ARTO" width={160} height={151} className="h-auto w-36" priority />
-        <p className="text-eyebrow mt-8 text-zinc-400">404</p>
+        <p className="text-eyebrow mt-8 text-[var(--ink-3)]">404</p>
         <h1 className="text-h1 mt-2">{es ? "Esta página no existe." : "This page does not exist."}</h1>
         <span className="accent-rule mx-auto mt-4" />
-        <p className="mt-4 max-w-md text-zinc-600">
+        <p className="mt-4 max-w-md text-[var(--ink-2)]">
           {es
             ? "Puede que el enlace esté viejo o que el prompt haya cambiado de ID. La biblioteca sigue ahí."
             : "The link may be stale or the prompt may have a new ID. The library is still there."}
@@ -38,7 +38,7 @@ export default async function LocaleNotFound() {
           <Button href={`/${locale}/prompts`}>{es ? "Ir a la biblioteca" : "Go to the library"}</Button>
           <Button href={`/${locale}`} variant="secondary">{es ? "Inicio" : "Home"}</Button>
         </div>
-        <Link href={`/${locale}/roast`} className="mt-6 text-sm text-zinc-500 hover:text-zinc-900">
+        <Link href={`/${locale}/roast`} className="mt-6 text-sm text-[var(--ink-2)] hover:text-black">
           {es ? "O prueba el Brand Roast gratis →" : "Or try the free Brand Roast →"}
         </Link>
       </main>
