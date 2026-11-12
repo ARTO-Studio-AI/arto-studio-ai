@@ -59,15 +59,15 @@ const cormorant = localFont({
  * the canonical origin. */
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: `${SITE_NAME} · The creative studio that never sleeps`,
+  title: `${SITE_NAME} · What we use at ARTO, ready to copy`,
   description:
-    "3,000 prompts, AI creative skills and autonomous agents built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex, now self-serve.",
+    "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: `${SITE_NAME} · The creative studio that never sleeps`,
+    title: `${SITE_NAME} · What we use at ARTO, ready to copy`,
     description:
-      "3,000 prompts, AI creative skills and autonomous agents. The methodology behind ARTO's work for Grupo Modelo, Sigma and Kavak, now self-serve.",
+      "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
     images: [{ url: absoluteUrl(DEFAULT_OG_IMAGE_PATH), width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: { card: "summary_large_image" },

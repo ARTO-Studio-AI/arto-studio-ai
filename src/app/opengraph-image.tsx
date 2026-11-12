@@ -6,7 +6,7 @@ import { SITE_HOST } from "@/lib/site-url";
  * que no traen la suya. Mismo lenguaje que el hero del home: titular en Manrope con la
  * palabra en serif, los tres pasos y un personaje de ARTO. */
 
-export const alt = "ARTO Studio AI · El estudio creativo que nunca duerme";
+export const alt = "ARTO Studio AI · Lo que usamos en ARTO, listo para copiar.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,8 +40,9 @@ export default async function Image() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 22, width: 760 }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", fontFamily: "Manrope", fontSize: 72, lineHeight: 1.08, letterSpacing: -3, color: OG.ink }}>
-              <span>El estudio creativo que nunca&nbsp;</span>
-              <span style={{ fontFamily: "Cormorant", fontStyle: "italic", fontSize: 88, letterSpacing: -1, color: OG.ink, background: OG.pink, padding: "0 12px", borderRadius: 6 }}>duerme.</span>
+              <span>Lo que usamos en ARTO,&nbsp;</span>
+              <span style={{ fontFamily: "Cormorant", fontStyle: "italic", fontSize: 88, letterSpacing: -1, color: OG.ink, background: OG.pink, padding: "0 12px", borderRadius: 6 }}>listo</span>
+              <span>&nbsp;para copiar.</span>
             </div>
             <div style={{ display: "flex", gap: 22 }}>
               {steps.map((s, i) => (
