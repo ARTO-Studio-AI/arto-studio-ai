@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="asai-site flex min-h-screen flex-col bg-[var(--bg)] text-black md:flex-row">
+    <div className="asai-site asai-back flex min-h-screen flex-col bg-[var(--bg)] text-black md:flex-row">
       <AdminNav email={auth.email} />
       <main className="min-w-0 flex-1 overflow-x-auto">
         {/* Abajo deja libre el alto de la barra inferior en celular. */}

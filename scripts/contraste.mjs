@@ -166,10 +166,14 @@ function medir() {
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: ancho, height: 900 } });
-// Para revisar /admin en local: CONTRASTE_COOKIE="nombre=valor" agrega esa cookie de sesion.
+// Para revisar /admin en local: CONTRASTE_COOKIE="nombre=valor; otra=valor" agrega cookies de sesion.
 if (process.env.CONTRASTE_COOKIE) {
-  const [name, ...rest] = process.env.CONTRASTE_COOKIE.split("=");
-  await ctx.addCookies([{ name, value: rest.join("="), url: base }]);
+  // Varias cookies separadas por «; » (la sesion de Supabase puede venir partida en .0 y .1).
+  const cookies = process.env.CONTRASTE_COOKIE.split("; ").filter(Boolean).map((c) => {
+    const [name, ...rest] = c.split("=");
+    return { name, value: rest.join("="), url: base };
+  });
+  await ctx.addCookies(cookies);
 }
 // Sin aviso de cookies encima de la pagina: el visitante ya eligio "solo esenciales"
 // (formato de src/lib/consent.ts; si sube CONSENT_VERSION, se cambia aqui).

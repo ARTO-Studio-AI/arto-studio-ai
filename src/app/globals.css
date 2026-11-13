@@ -143,7 +143,7 @@ h1 { letter-spacing: -0.035em; }
  * El sitio entero va sobre lima. Las paginas todavia usan la escala zinc de Tailwind; dentro de
  * .asai-site esa escala se redefine para que el texto pase AA sobre lima y sobre blanco
  * (zinc-400 a zinc-700 pasan a oliva y negro; 200 y 300 son lineas). En paneles negros la escala
- * de texto vuelve a grises claros. /admin y /studio no usan .asai-site y no cambian. */
+ * de texto vuelve a grises claros. Desde el 13 nov /admin, /studio y /welcome tambien (.asai-back). */
 .asai-site {
   --color-zinc-50: #f7fbe0;
   --color-zinc-100: #eef6b8;
@@ -156,6 +156,19 @@ h1 { letter-spacing: -0.035em; }
   --color-zinc-800: #111111;
   --color-zinc-900: #000000;
   --color-zinc-950: #000000;
+}
+/* Backend sobre lima (admin, studio, welcome; auditoria de Fable 13 nov): los avisos de error y
+ * de advertencia van directo sobre lima, donde #dc2626 da 3.97:1. Rojo y ambar mas oscuros
+ * (#b91c1c 5.6:1, #92400e 7:1) y los campos sin fondo propio en blanco. */
+.asai-back {
+  --bad: #b91c1c;
+  --color-red-500: #b91c1c;
+  --color-red-600: #b91c1c;
+  --color-amber-600: #92400e;
+  --color-amber-700: #92400e;
+}
+.asai-back :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  background-color: #ffffff;
 }
 .asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-\[var\(--dark\)\], .asai-dark) {
   --color-zinc-100: #f4f4f5;

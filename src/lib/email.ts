@@ -65,7 +65,7 @@ async function send(params: {
  * llave), en ingles como siempre. Starter ya no se vende (D7): la bienvenida de prueba
  * manda a escribir a contact@artogroup.com en vez de ofrecer el plan. */
 
-const CODE_STYLE = `display:block;padding:14px 16px;background:${C.paper};border:1px solid ${C.line};border-radius:10px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:18px;color:${C.ink};word-break:break-all;white-space:pre-wrap;`;
+const CODE_STYLE = `display:block;padding:14px 16px;background:${C.limeSoft};border:1px solid ${C.line};border-radius:10px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:18px;color:${C.ink};word-break:break-all;white-space:pre-wrap;`;
 
 export async function sendTrialWelcomeEmail(params: {
   to: string;

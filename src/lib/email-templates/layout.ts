@@ -29,9 +29,6 @@ export const C = {
   ink3: "#5a6600",
   line: "#e4e4e7",
   accent: "#1e00ff",
-  accentSoft: "#eef6b8",
-  ok: "#16a34a",
-  warn: "#d97706",
   bad: "#dc2626",
 };
 
@@ -99,7 +96,7 @@ export function hero(opts: { eyebrow: string; title: string; accent: string; int
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td valign="top">
         ${eyebrow(opts.eyebrow, C.accent)}
-        <div class="h1" style="font-family:${F.display};font-size:44px;line-height:48px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${esc(opts.title)} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:52px;letter-spacing:-0.5px;color:${C.ink};background:${C.pink};padding:0 8px;">${esc(opts.accent)}</span></div>
+        <div class="h1" style="font-family:${F.display};font-size:44px;line-height:56px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${esc(opts.title)} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:52px;letter-spacing:-0.5px;color:${C.ink};background-color:${C.pink};padding:0 6px;">${esc(opts.accent)}</span></div>
       </td>${art}
     </tr></table>${intro}`;
 }
@@ -169,7 +166,7 @@ export function layout({ lang, preheader, body, reason, unsubscribeUrl }: Layout
 <style>
   @media (max-width:620px){
     .card{padding:28px 20px !important;}
-    .h1{font-size:34px !important;line-height:38px !important;}
+    .h1{font-size:34px !important;line-height:46px !important;}
     .h1 span{font-size:40px !important;}
     .score{font-size:84px !important;}
     .hero-art img{width:64px !important;height:auto !important;}
@@ -184,7 +181,7 @@ export function layout({ lang, preheader, body, reason, unsubscribeUrl }: Layout
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};">
   <tr><td align="center" style="padding:28px 12px 36px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
-      <tr><td style="background:${C.lime};border-radius:20px 20px 0 0;border:1px solid ${C.line};border-bottom:0;font-size:0;line-height:0;">
+      <tr><td style="background:${C.lime};border-radius:20px 20px 0 0;border:1px solid ${C.lime};border-bottom:0;font-size:0;line-height:0;">
         <a href="${SITE_URL}/${lang}"><img src="${SITE_URL}${HEADER[lang]}" width="${HEADER.w}" alt="ARTO Studio AI · ${esc(TAGLINE[lang])}" style="display:block;border:0;width:100%;max-width:${HEADER.w}px;height:auto;border-radius:20px 20px 0 0;"></a>
       </td></tr>
       <tr><td class="card" style="background:${C.white};border-radius:0 0 20px 20px;padding:36px 36px 40px 36px;border:1px solid ${C.line};border-top:1px solid ${C.line};">

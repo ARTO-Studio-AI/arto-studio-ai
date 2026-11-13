@@ -142,6 +142,14 @@ describe("no quedan colores de la marca vieja en src (fase 3)", () => {
       expect(src, name).not.toMatch(/background:\$\{C\.(lime|paper)\};color:\$\{C\.white\}/);
     }
   });
+
+  it("el boton lima de los correos lleva letra negra y el azul nunca va sobre negro", async () => {
+    const { button, C } = await import("./email-templates/layout");
+    const html = button("Ir", "https://x", "accent");
+    expect(html).toContain(`background:${C.lime}`);
+    expect(html).toContain(`color:${C.ink}`);
+    expect(button("Ir", "https://x", "dark")).toContain(`color:${C.white}`);
+  });
 });
 
 // Guarda: las etiquetas (text-eyebrow, 11.5 px) no pueden ir en --accent sobre
