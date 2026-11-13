@@ -1,11 +1,11 @@
-/* Portada de tutorial (2026-11-05). Mismo sistema que BlogCover (Bauhaus geometrico, tinta, arena
- * y un solo acento sobre papel), con una composicion propia: una escalera con un bloque por paso
+/* Portada de tutorial (2026-11-05). Mismo sistema que BlogCover (Bauhaus geometrico, negro, lima
+ * y un solo acento azul sobre blanco), con una composicion propia: una escalera con un bloque por paso
  * que termina en el punto de acento, el resultado. El codigo del tutorial va arriba y la palabra
  * en serif abajo. Sin imagenes generadas. */
 
-const INK = "#18181b";
-const SAND = "#e9e3d8";
-const ACCENT = "#ff4d00";
+const INK = "#000000";
+const SAND = "#daf700"; // lima (marca v2.0)
+const ACCENT = "#1e00ff"; // azul ultramar
 
 interface Props {
   code: string;
@@ -25,7 +25,7 @@ export default function TutorialCover({ code, word, steps, size = "card", classN
   const label = `Tutorial · ${code}`;
 
   return (
-    <div className={`relative w-full overflow-hidden bg-[var(--paper)] ${ratio} ${className}`} aria-hidden="true">
+    <div className={`relative w-full overflow-hidden bg-white ${ratio} ${className}`} aria-hidden="true">
       <svg viewBox="0 0 100 100" className="absolute right-[5%] top-[9%] h-[64%] w-auto">
         <circle cx={24} cy={32} r={20} fill={SAND} />
         {Array.from({ length: n }, (_, i) => (

@@ -42,7 +42,7 @@ export default async function EditBundleLanding({ params }: Props) {
 
   return (
     <div>
-      <section className="border-b border-zinc-200 bg-[var(--paper,#F6F5F2)]">
+      <section className="border-b border-zinc-200 bg-[var(--bg)]">
         <div className="mx-auto max-w-5xl px-6 py-16 text-center sm:py-24">
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-zinc-500">{t.hero_kicker}</p>
           <h1 className="text-h1 mt-4">{t.bundle_name}</h1>

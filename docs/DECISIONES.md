@@ -281,6 +281,8 @@ siguiente sesión.
 
 ### D20 · Paleta índigo: sección de videos y colores nuevos en el sitio
 
+> **Reemplazada por D21 (marca v2.0, 2026-11-11).** Los tokens índigo y verde agua ya no existen en el sitio.
+
 | | |
 |---|---|
 | **Quién** | Victor, 2026-11-10, en el hilo «261110 ASAI Ficha de voz para videos de Victor». Eligió la paleta «Índigo profundo» y el corredor como símbolo de videos; luego: «Va a haber una sección nueva que va a ser para videos… En la paleta de colores general, vamos a agregar estos nuevos colores para que también se puedan utilizar en el sitio. Solamente que en el sitio el fondo sí va en blanco» |
@@ -288,6 +290,17 @@ siguiente sesión.
 | **Por qué** | A Victor no le gusta el fondo negro en los videos y sí el naranja. El índigo es oscuro con color y deja el naranja en 5.2:1, así que también sirve en letra chica. Se probó y descartó: naranja más brillante `#ff6a00` (en claro baja a 2.75) y paletas sin naranja |
 | **Qué NO hacer** | No usar fondo negro en videos. No cambiar el naranja `#ff4d00`. No poner `--aqua` como texto sobre blanco (1.8:1): usar `--aqua-ink`. No usar `--indigo` como fondo de página del sitio ni agregar dark mode por esto. No usar el corredor por debajo de 24 px (para favicon sigue el logo) |
 | **Dónde** | `src/app/globals.css`, `src/lib/contraste-tokens.test.ts`; guía de video en Drive «261110 ASAI guia de estilo de edicion de video v1.1»; página de pruebas https://claude.ai/artifact/Y2T68L8dwphEXScWkoH5x7 |
+
+### D21 · Marca ASAI v2.0: todo el sitio sobre lima
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-11-10 y 11, en los hilos del manual de marca y de mockups del sitio v2.0 (decisiones por ficha). Implementó Code en tres PRs (`feat/marca-v2-fase-1`, `-2`, `-3`) |
+| **Qué se decidió** | Fondo de página lima `#daf700`, tarjetas blancas, letra negra, texto secundario oliva `#3d4500` y `#5a6600`. Azul ultramar `#1e00ff` para el botón principal, recuadros (letra blanca encima) y letra de color sobre lima o blanco. Rosa fósforo `#ff3fa4` solo como marcatexto detrás de la palabra clave, con letra negra. Negro para paneles y pie, con acentos en lima. Titular del inicio: «Lo que usamos en ARTO, listo para copiar.» / «What we use at ARTO, ready to copy.». El mismo titular va en el título del sitio, la descripción para buscadores y la imagen para redes del inicio (Victor, ficha del 12 nov 2026). El hero deja lugar para un video en loop (`src/lib/hero-video.ts`); mientras no haya, muestra el corredor con el prompt del día. Los tokens salen de `tokens.json` del design system, no de `tokens.css` |
+| **Reglas de contraste** | Sobre lima nunca letra blanca ni rosa. Sobre azul nunca lima ni negra. Sobre negro nunca azul ni negra. Todo texto ≥ 4.5:1 (3:1 desde 24 px). Las vigila `scripts/contraste.mjs` (obligatorio antes de cada PR de marca) y `src/lib/contraste-tokens.test.ts` |
+| **Puente zinc** | Dentro de `.asai-site` la escala `zinc` de Tailwind se redefine (oliva y negro sobre lima; grises claros dentro de paneles negros, `.asai-dark`; blanco dentro de `.asai-blue`). Es intencional: así cualquier página nueva que use zinc ya pasa contraste. /admin y /studio no llevan `.asai-site` |
+| **Qué NO hacer** | No poner letra blanca sobre lima, aunque sea un botón. No usar el rosa como letra. No volver a `#ff4d00`, `#121936` ni `#42d7b9`. No quitar `.asai-site` del layout de (marketing) ni el puente zinc sin revisar contraste en todas las páginas. Score del Brand Roast: 7 o más en azul, 5 a 6.9 en negro, abajo de 5 en rojo `--bad` (sin verde ni ámbar; el ámbar se leía como el naranja viejo). Victor lo confirmó por ficha el 12 nov 2026. No regresar al semáforo |
+| **Dónde** | `src/app/globals.css`, `src/app/[locale]/(marketing)/layout.tsx`, `src/components/ui/`, `src/components/HeroVisual.tsx`, `src/lib/og-kit.tsx`, `scripts/contraste.mjs`, `public/brand/asai/` |
 
 ### ARTO Edit Bundle #1: gratis con cuenta hasta el 30 nov, después solo Pro
 

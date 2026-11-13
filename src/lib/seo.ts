@@ -177,14 +177,14 @@ export const PAGE_SEO: Record<SeoPageKey, SeoPage> = {
     path: "/",
     copy: {
       en: {
-        title: "ARTO Studio AI · The creative studio that never sleeps",
+        title: "ARTO Studio AI · What we use at ARTO, ready to copy",
         description:
-          "3,000+ bilingual prompts built on ARTO's real methodology: strategy, creativity, narrative and production. 15+ years of work for Grupo Modelo, Sigma, Kavak and Cemex, now self-serve. Skills and agents coming soon.",
+          "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
       },
       es: {
-        title: "ARTO Studio AI · El estudio creativo que nunca duerme",
+        title: "ARTO Studio AI · Lo que usamos en ARTO, listo para copiar",
         description:
-          "3,000+ prompts bilingües con la metodología real de ARTO: estrategia, creatividad, narrativa y producción. 15+ años de trabajo para Grupo Modelo, Sigma, Kavak y Cemex, ahora en autoservicio. Skills y agentes, próximamente.",
+          "Te damos los prompts, skills y sistemas de IA que usamos en ARTO, probados y listos para copiar. Para emprendedores y equipos chicos que quieren trabajar más rápido.",
       },
     },
   },

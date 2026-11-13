@@ -356,8 +356,10 @@ function ScoreBar({ label, score, roast, delay = 0 }: { label: string; score: nu
  * score enorme, frase en serif y los cuatro pilares), para que lo que ves en pantalla
  * sea lo que compartes. */
 
+/* Colores de score con la marca v2.0 (D21): 7 o mas en azul, 5 a 6.9 en negro, abajo de 5 en rojo.
+ * Sin verde ni ambar: el ambar se leia como el naranja de la marca vieja. */
 function scoreVar(score: number): string {
-  return score >= 7 ? "var(--ok)" : score >= 5 ? "var(--warn)" : "var(--bad)";
+  return score >= 7 ? "var(--accent)" : score >= 5 ? "var(--ink)" : "var(--bad)";
 }
 
 function ScoreCard({ brand, industry, result, t }: { brand: string; industry?: string; result: RoastResult; t: Dict }) {
@@ -369,7 +371,7 @@ function ScoreCard({ brand, industry, result, t }: { brand: string; industry?: s
     [t.pillars.digital, result.digital.score],
   ];
   return (
-    <div className="relative overflow-hidden rounded-[var(--radius-lg)] bg-[var(--paper)] p-6 sm:p-10">
+    <div className="relative overflow-hidden rounded-[var(--radius-lg)] bg-white p-6 sm:p-10">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(24,24,27,0.09)_1px,transparent_1px)] [background-size:18px_18px]" />
       <Image
         src="/brand/characters/character-03.png"
@@ -402,7 +404,7 @@ function ScoreCard({ brand, industry, result, t }: { brand: string; industry?: s
               <div key={label} className="grid gap-1.5">
                 <span className="text-eyebrow text-zinc-500">{label}</span>
                 <div className="flex items-center gap-2.5">
-                  <span className="block h-2 flex-1 overflow-hidden rounded-full bg-[#e4e0d8]">
+                  <span className="block h-2 flex-1 overflow-hidden rounded-full bg-black/10">
                     <span className="block h-full rounded-full" style={{ width: `${Math.max(4, value * 10)}%`, background: scoreVar(value) }} />
                   </span>
                   <span className="font-display text-xl font-extrabold tabular-nums">{value}</span>
@@ -823,7 +825,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
   )}`;
 
   return (
-    <div className="flex flex-col flex-1 bg-white">
+    <div className="flex flex-col flex-1 bg-[var(--bg)]">
       <div className="flex flex-1 flex-col">
         {/* Hero (2026-10-07): estilo del sitio, con la vista previa del resultado. Se oculta
           * cuando ya hay resultado para que el score quede arriba. */}
@@ -975,7 +977,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                     <div className="mt-4 space-y-3">
                       {history.map((entry, i) => {
                         const scoreColor =
-                          entry.overall >= 7 ? "text-emerald-500" : entry.overall >= 5 ? "text-amber-500" : "text-red-500";
+                          entry.overall >= 7 ? "text-[var(--accent)]" : entry.overall >= 5 ? "text-black" : "text-[var(--bad)]";
                         return (
                           <button
                             key={`${entry.brandName}-${i}`}
@@ -1178,7 +1180,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                       <ScoreBar label={t.pillars.digital} score={result.digital.score} roast={result.digital.roast} delay={450} />
                     </div>
 
-                    <div className="mt-12 rounded-[var(--radius-lg)] bg-[var(--paper)] p-8 md:p-10">
+                    <div className="mt-12 rounded-[var(--radius-lg)] bg-white p-8 md:p-10">
                       <h3 className="text-eyebrow text-zinc-500">{t.verdict}</h3>
                       <p className="mt-4 text-lg font-medium leading-relaxed">{result.verdict}</p>
                     </div>
@@ -1214,7 +1216,7 @@ function BrandRoastInner({ lang, verifiedHeadline }: { lang: Lang; verifiedHeadl
                 )}
 
                 {/* CTA */}
-                <div className="mt-12 rounded-[var(--radius-lg)] bg-foreground p-8 text-center text-white md:p-12">
+                <div className="asai-dark mt-12 rounded-[var(--radius-lg)] bg-black p-8 text-center text-white md:p-12">
                   <h3 className="text-2xl font-bold tracking-tight md:text-3xl">{isSharedView ? t.cta_shared_h : t.cta_h}</h3>
                   <p className="mx-auto mt-4 max-w-lg text-zinc-400">{isSharedView ? t.cta_shared_body : t.cta_body}</p>
                   <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">

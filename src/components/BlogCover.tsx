@@ -4,7 +4,7 @@ import { VERTICALS, type Category } from "@/types/prompt";
 /* Portadas del blog. Sistema hecho con HTML/SVG, sin imagenes generadas (decision de
  * Victor del 2026-10-07): cada articulo nuevo tiene portada de marca desde el primer dia.
  * Estilo F «Bauhaus geometrico», aprobado el 2026-10-10: formas planas (circulos, medios
- * circulos, bloques y lineas) en tinta, arena y un solo acento, sobre papel. Seis
+ * circulos, bloques y lineas) en negro, lima y un solo acento azul, sobre blanco (marca v2.0). Seis
  * composiciones; cada vertical toma una, y la segunda vertical que repite composicion la
  * usa en espejo. El codigo de la vertical va arriba y la palabra en serif abajo. */
 
@@ -25,10 +25,10 @@ const MAP: Record<Category, { c: Comp; mirror?: boolean; es: string; en: string 
   creative_productivity: { c: 6, mirror: true, es: "Antes / después.", en: "Before / after." },
 };
 
-const INK = "#18181b";
-const SAND = "#e9e3d8";
-const ACCENT = "#ff4d00";
-const PAPER = "#f4f2ee";
+const INK = "#000000";
+const SAND = "#daf700"; // lima (marca v2.0)
+const ACCENT = "#1e00ff"; // azul ultramar
+const PAPER = "#ffffff";
 
 /* Composiciones en una caja de 100 x 100. */
 function Shapes({ c }: { c: Comp }) {
@@ -125,7 +125,7 @@ export default function BlogCover({ category, locale, size = "card", className =
   const ratio = size === "hero" ? "aspect-[21/9]" : "aspect-[16/10]";
 
   return (
-    <div className={`relative w-full overflow-hidden bg-[var(--paper)] ${ratio} ${className}`} aria-hidden="true">
+    <div className={`relative w-full overflow-hidden bg-white ${ratio} ${className}`} aria-hidden="true">
       <svg
         viewBox="0 0 100 100"
         className="absolute right-[5%] top-[9%] h-[64%] w-auto"

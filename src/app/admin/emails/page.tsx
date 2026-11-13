@@ -145,7 +145,7 @@ export default function EmailsAdminPage() {
           key={`${kind}-${lang}-${previewKey}`}
           title="Vista previa"
           src={`/api/admin/emails?preview=${kind}&lang=${lang}`}
-          className="h-[900px] w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-[var(--paper)]"
+          className="h-[900px] w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white"
         />
       </div>
     </div>

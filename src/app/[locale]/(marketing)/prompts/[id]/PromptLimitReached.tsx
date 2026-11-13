@@ -51,19 +51,19 @@ export default function PromptLimitReached({ locale, title, promptId, signedIn, 
 
   return (
     <section
-      className="mt-6 rounded-[16px] border border-zinc-200 bg-white p-6 sm:p-8"
+      className="mt-6 rounded-[16px] border border-[var(--line)] bg-white p-6 sm:p-8"
       data-testid="prompt-limit-reached"
     >
-      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{copy.eyebrow}</p>
-      <h2 className="mt-2 text-xl font-bold tracking-tight text-zinc-900">{title}</h2>
-      <p className="mt-1 font-mono text-[11px] text-zinc-500">{promptId}</p>
-      <p className="mt-4 max-w-xl text-sm text-zinc-700">{copy.body}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-2)]">{copy.eyebrow}</p>
+      <h2 className="mt-2 text-xl font-bold tracking-tight text-black">{title}</h2>
+      <p className="mt-1 font-mono text-[11px] text-[var(--ink-2)]">{promptId}</p>
+      <p className="mt-4 max-w-xl text-sm text-black">{copy.body}</p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <TrackedLink
           event="limit_cta_clicked"
           props={{ cta: "pricing", prompt_id: promptId, locale }}
           href={`/${locale}/pricing`}
-          className="inline-flex items-center rounded-[6px] bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+          className="inline-flex items-center rounded-[6px] bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
         >
           {copy.primary}
         </TrackedLink>
@@ -71,18 +71,18 @@ export default function PromptLimitReached({ locale, title, promptId, signedIn, 
           event="limit_cta_clicked"
           props={{ cta: "library", prompt_id: promptId, locale }}
           href={`/${locale}/prompts`}
-          className="inline-flex items-center rounded-[6px] border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+          className="inline-flex items-center rounded-[6px] border border-black/30 px-4 py-2.5 text-sm font-medium text-black transition hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
         >
           {copy.secondary}
         </TrackedLink>
       </div>
       {!signedIn && (
-        <p className="mt-5 text-xs text-zinc-500">
+        <p className="mt-5 text-xs text-[var(--ink-2)]">
           <TrackedLink
             event="limit_cta_clicked"
             props={{ cta: "signup", prompt_id: promptId, locale }}
             href={`/${locale}/login`}
-            className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+            className="font-medium text-black underline underline-offset-2 hover:text-[var(--accent)]"
           >
             {copy.signup}
           </TrackedLink>{" "}

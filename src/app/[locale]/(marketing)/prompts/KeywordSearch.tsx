@@ -95,7 +95,7 @@ export default function KeywordSearch({ lang, q, filters, resultsCount }: Props)
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
-          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400"
+          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--ink-3)]"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -114,14 +114,14 @@ export default function KeywordSearch({ lang, q, filters, resultsCount }: Props)
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={copy.placeholder}
-          className="block h-12 w-full rounded-[var(--radius-lg)] border border-zinc-300 bg-white pl-12 pr-12 text-base text-zinc-900 placeholder:text-zinc-400 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)] [&::-webkit-search-cancel-button]:hidden"
+          className="block h-12 w-full rounded-[var(--radius-lg)] border border-black/30 bg-white pl-12 pr-12 text-base text-black placeholder:text-[var(--ink-3)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25 [&::-webkit-search-cancel-button]:hidden"
         />
         {value && (
           <button
             type="button"
             onClick={() => onChange("")}
             aria-label={copy.clear}
-            className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-zinc-400 hover:text-zinc-900"
+            className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-[var(--ink-3)] hover:text-[var(--accent)]"
           >
             <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="m5 5 10 10M15 5 5 15" strokeLinecap="round" />
@@ -129,7 +129,7 @@ export default function KeywordSearch({ lang, q, filters, resultsCount }: Props)
           </button>
         )}
       </div>
-      <p className="mt-2 min-h-[1.25rem] font-mono text-xs text-zinc-500" aria-live="polite">
+      <p className="mt-2 min-h-[1.25rem] font-mono text-xs text-[var(--ink-2)]" aria-live="polite">
         {pending ? copy.searching : q ? copy.results(resultsCount) : ""}
       </p>
     </form>

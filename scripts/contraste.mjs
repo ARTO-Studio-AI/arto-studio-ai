@@ -8,6 +8,7 @@
  *   - hay letra blanca o rosa sobre lima;
  *   - hay letra lima o negra sobre azul;
  *   - hay letra azul o negra sobre negro.
+ * Los controles inactivos (disabled) no cuentan, como en WCAG 1.4.3.
  *
  * Uso:
  *   npm run build && npm start &         (o la URL de un preview de Vercel)
@@ -124,6 +125,8 @@ function medir() {
     if (r.width <= 1 || r.height <= 1) continue;
     const cs = getComputedStyle(el);
     if (cs.visibility === "hidden" || cs.display === "none") continue;
+    // Controles inactivos (disabled) quedan fuera, como en WCAG 1.4.3.
+    if (el.closest(":disabled, [aria-disabled='true']")) continue;
     let op = 1;
     for (let n = el; n && n.nodeType === 1; n = n.parentElement) op *= Number(getComputedStyle(n).opacity);
     if (op < 0.1) continue;

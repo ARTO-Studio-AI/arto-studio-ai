@@ -31,21 +31,21 @@ export default function SignupWall({ locale, promptId, teaser }: Props) {
 
   return (
     <div className="relative mt-3" data-testid="signup-wall">
-      <p className="whitespace-pre-wrap break-words text-zinc-700">{teaser}</p>
+      <p className="whitespace-pre-wrap break-words text-black">{teaser}</p>
       <div className="pointer-events-none -mt-10 h-10 bg-gradient-to-b from-transparent to-white" aria-hidden="true" />
-      <div className="mt-4 rounded-[var(--radius-md)] border border-zinc-200 bg-zinc-50 p-5">
-        <p className="font-semibold text-zinc-900">{copy.title}</p>
-        <p className="mt-1 text-sm text-zinc-600">{copy.body}</p>
+      <div className="mt-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--lime)] p-5">
+        <p className="font-semibold text-black">{copy.title}</p>
+        <p className="mt-1 text-sm text-[var(--ink-2)]">{copy.body}</p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <TrackedLink
             event="signup_wall_clicked"
             props={{ prompt_id: promptId, locale }}
             href={href}
-            className="inline-flex items-center rounded-[6px] bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+            className="inline-flex items-center rounded-[6px] bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
           >
             {copy.cta}
           </TrackedLink>
-          <a href={href} className="text-sm text-zinc-500 underline-offset-4 hover:text-zinc-900 hover:underline">
+          <a href={href} className="text-sm text-[var(--ink-2)] underline-offset-4 hover:text-[var(--accent)] hover:underline">
             {copy.login}
           </a>
         </div>

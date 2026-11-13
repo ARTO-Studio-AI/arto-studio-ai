@@ -113,6 +113,28 @@ describe("no quedan colores de la marca vieja en los componentes base (fase 1)",
   });
 });
 
+// Fase 3: en todo src/ ya no queda la marca vieja. Unica excepcion: la plantilla de correo
+// (src/lib/email-templates/), que es area de correo y cambia en su propio PR con revision de Fable.
+describe("no quedan colores de la marca vieja en src (fase 3)", () => {
+  it("sin #ff4d00, #c93800, #121936, #42d7b9 ni tokens viejos", () => {
+    const root = join(__dirname, "..");
+    const files: string[] = [];
+    const visit = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        const p = join(dir, name);
+        if (statSync(p).isDirectory()) {
+          if (!p.includes("email-templates")) visit(p);
+        } else if (/\.(tsx?|css)$/.test(p) && !p.endsWith("contraste-tokens.test.ts")) files.push(p);
+      }
+    };
+    visit(root);
+    const bad = files.filter((f) =>
+      /#ff4d00|#c93800|#121936|#42d7b9|var\(--(indigo|aqua|paper|sand|accent-soft)\b/i.test(readFileSync(f, "utf8")),
+    );
+    expect(bad).toEqual([]);
+  });
+});
+
 // Guarda: las etiquetas (text-eyebrow, 11.5 px) no pueden ir en --accent sobre
 // fondo claro. Si una etiqueta va sobre fondo oscuro, que use una condicion
 // explicita como en ProductCard de (marketing)/page.tsx.

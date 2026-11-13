@@ -83,10 +83,10 @@ export const DICTIONARIES = {
     },
     home: {
       eyebrow: "By ARTO Group — 15+ years with Grupo Modelo, Sigma, Kavak, Cemex",
-      hero_h1_line1: "The creative studio",
-      hero_h1_line2: "that never sleeps.",
+      hero_h1_line1: "What we use at ARTO,",
+      hero_h1_line2: "ready to copy.",
       hero_body:
-        "3,000+ bilingual prompts that encode ARTO's real methodology: strategy, creativity, narrative, and production. Built on 15+ years of work for brands like Grupo Modelo, Herdez and Sigma. Skills and agents are on the way.",
+        "We give you the prompts, skills and AI systems we use at ARTO, tested and ready to copy. For entrepreneurs and small teams who want to work faster.",
       hero_subbenefit:
         "Find the exact prompt for the job, in English or Spanish, and ship brand-ready work the same day.",
       hero_count_label: "bilingual prompts, ready to use.",
@@ -665,10 +665,10 @@ export const DICTIONARIES = {
     },
     home: {
       eyebrow: "Por ARTO Group — 15+ años con Grupo Modelo, Sigma, Kavak y Cemex",
-      hero_h1_line1: "El estudio creativo",
-      hero_h1_line2: "que nunca duerme.",
+      hero_h1_line1: "Lo que usamos en ARTO,",
+      hero_h1_line2: "listo para copiar.",
       hero_body:
-        "3,000+ prompts bilingües que encapsulan la metodología real de ARTO: estrategia, creatividad, narrativa y producción. Construidos sobre 15+ años de trabajo para marcas como Grupo Modelo, Herdez y Sigma. Los skills y los agentes vienen en camino.",
+        "Te damos los prompts, skills y sistemas de IA que usamos en ARTO, probados y listos para copiar. Para emprendedores y equipos chicos que quieren trabajar más rápido.",
       hero_subbenefit:
         "Encuentra el prompt exacto para cada tarea, en español o inglés, y entrega trabajo listo para tu marca el mismo día.",
       hero_count_label: "prompts bilingües listos para usar.",

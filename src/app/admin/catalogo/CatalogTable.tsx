@@ -217,7 +217,7 @@ export default function CatalogTable({ rows, filter, totalInFilter }: { rows: Ca
           </thead>
           <tbody className="divide-y divide-zinc-100">
             {rows.map((r) => (
-              <tr key={r.id} className={selected.has(r.id) || allInFilter ? "bg-[var(--accent-soft)]" : ""}>
+              <tr key={r.id} className={selected.has(r.id) || allInFilter ? "bg-[var(--lime-soft)]" : ""}>
                 <td className="px-3 py-2.5 align-top">
                   <input type="checkbox" aria-label={`Seleccionar ${r.id}`} checked={allInFilter || selected.has(r.id)} onChange={() => toggle(r.id)} />
                 </td>
