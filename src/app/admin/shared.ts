@@ -3,16 +3,15 @@
  * Every tab lives under `src/app/admin/` and reuses this module.
  */
 
+/* Escala de D21 (Victor, 12 nov 2026): azul 7 o mas, negro de 5 a 6.9, rojo abajo de 5. Sin semaforo. */
 export function scoreColor(score: number): string {
-  if (score >= 7) return "text-emerald-600";
-  if (score >= 5) return "text-amber-600";
-  return "text-red-600";
+  if (score >= 7) return "text-[var(--accent)]";
+  if (score >= 5) return "text-black";
+  return "text-[var(--bad)]";
 }
 
 export function scoreBg(score: number): string {
-  if (score >= 7) return "bg-emerald-50 border-emerald-200";
-  if (score >= 5) return "bg-amber-50 border-amber-200";
-  return "bg-red-50 border-red-200";
+  return score < 5 ? "bg-white border-[var(--bad)]" : "bg-white border-zinc-200";
 }
 
 export function formatDate(iso: string): string {

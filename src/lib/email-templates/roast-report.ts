@@ -106,7 +106,7 @@ export function roastReportEmail({ lang, brand, result, shareQuery }: RoastRepor
     <div class="score" style="font-family:${F.display};font-size:104px;line-height:100px;font-weight:800;letter-spacing:-4px;color:${scoreColor(result.overall)};margin:4px 0 0 0;">${result.overall}<span style="font-family:${F.meta};font-size:22px;letter-spacing:0;color:${C.ink3};font-weight:500;">/10</span></div>
     ${result.headline ? `<div style="font-family:${F.serif};font-style:italic;font-size:26px;line-height:32px;color:${C.ink};margin:14px 0 26px 0;">“${esc(result.headline)}”</div>` : ""}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${pillarRows}</table>
-    <div style="background:${C.paper};border-radius:12px;padding:22px 22px;margin:22px 0 0 0;">
+    <div style="background:${C.limeSoft};border-radius:12px;padding:22px 22px;margin:22px 0 0 0;">
       ${eyebrow(t.verdict)}
       <div style="font-family:${F.body};font-size:17px;line-height:26px;color:${C.ink};font-weight:500;margin-top:10px;">${esc(result.verdict)}</div>
     </div>

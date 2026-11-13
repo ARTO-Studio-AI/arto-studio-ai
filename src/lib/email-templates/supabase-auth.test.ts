@@ -12,8 +12,8 @@ describe("supabaseAuthTemplate", () => {
       expect(html.endsWith("{{ end }}")).toBe(true);
       expect(html.match(/\{\{ \.ConfirmationURL \}\}/g)?.length).toBe(6);
       expect(html.match(/\{\{ \.Email \}\}/g)?.length).toBe(2);
-      expect(html).toContain("/email/header-es.png");
-      expect(html).toContain("/email/header-en.png");
+      expect(html).toContain("/email/header-v2-es.png");
+      expect(html).toContain("/email/header-v2-en.png");
       expect(html).not.toContain("—");
     });
   }

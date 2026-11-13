@@ -106,7 +106,7 @@ export function welcomeEmail(content: WelcomeContent, lang: "es" | "en", unsubsc
 
   const promo = content.promo_enabled
     ? `<div style="background:${C.ink};border-radius:12px;padding:26px 24px;margin:26px 0 0 0;">
-        ${eyebrow(es ? "Para la lista" : "For the list", C.accent)}
+        ${eyebrow(es ? "Para la lista" : "For the list", C.lime)}
         <div style="font-family:${F.display};font-size:24px;line-height:29px;font-weight:800;color:${C.white};letter-spacing:-0.5px;margin-top:10px;">${esc(L(content.promo_title_es, content.promo_title_en))}</div>
         <div style="font-family:${F.body};font-size:15px;line-height:23px;color:#d4d4d8;margin:10px 0 18px 0;">${esc(L(content.promo_body_es, content.promo_body_en))}</div>
         ${button(L(content.promo_cta_es, content.promo_cta_en), abs(content.promo_url, lang), "accent")}

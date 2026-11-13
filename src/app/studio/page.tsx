@@ -100,10 +100,10 @@ export default function StudioDashboard() {
   /* ── Auth gate ── */
   if (!authed) {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="asai-site asai-back flex min-h-screen flex-col bg-[var(--bg)] text-black">
         <nav className="border-b border-zinc-200 px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={69} height={24} className="h-6 w-auto" />
+            <Image src="/brand/asai/logo-negro.svg" alt="ARTO Studio AI" width={146} height={28} className="h-6 w-auto" unoptimized />
             <span className="text-sm font-medium tracking-wide text-zinc-500">STUDIO</span>
           </Link>
         </nav>
@@ -148,11 +148,11 @@ export default function StudioDashboard() {
   const currentSkillTraces = traces.filter((t) => t.skill_slug === activeSlug).slice(0, 10);
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
+    <div className="asai-site asai-back flex min-h-screen flex-col bg-[var(--bg)] text-black">
       <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={69} height={24} className="h-6 w-auto" />
+            <Image src="/brand/asai/logo-negro.svg" alt="ARTO Studio AI" width={146} height={28} className="h-6 w-auto" unoptimized />
             <span className="text-sm font-medium tracking-wide text-zinc-500">STUDIO</span>
           </Link>
           <div className="flex items-center gap-4">

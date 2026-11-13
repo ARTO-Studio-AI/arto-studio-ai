@@ -14,8 +14,9 @@ const num = (v: unknown) => (typeof v === "number" ? v : null);
 
 function tone(score: number | null): string {
   if (score === null) return "text-zinc-400";
-  if (score >= 7) return "text-[var(--ok)]";
-  if (score >= 4.5) return "text-[var(--warn)]";
+  // Escala de D21: azul, negro y rojo (sin semaforo).
+  if (score >= 7) return "text-[var(--accent)]";
+  if (score >= 5) return "text-black";
   return "text-[var(--bad)]";
 }
 
