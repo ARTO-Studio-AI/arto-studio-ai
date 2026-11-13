@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
             {label}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ display: "flex", flex: 1, height: wide ? 8 : 12, borderRadius: 99, background: "#e4e0d8" }}>
+            <div style={{ display: "flex", flex: 1, height: wide ? 8 : 12, borderRadius: 99, background: "rgba(0,0,0,0.1)" }}>
               <div style={{ display: "flex", width: `${Math.max(4, pillars[i] * 10)}%`, height: "100%", borderRadius: 99, background: scoreColor(pillars[i]) }} />
             </div>
             <span style={{ fontFamily: "Manrope", fontSize: wide ? 24 : story ? 44 : 30, color: OG.ink, lineHeight: 1 }}>{pillars[i]}</span>
@@ -146,9 +146,9 @@ export async function GET(req: NextRequest) {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ fontFamily: "Manrope", fontSize: wide ? 30 : story ? 54 : 44, letterSpacing: -1 }}>{t.ctaTitle}</span>
-        <span style={{ fontFamily: "Inter Tight", fontSize: wide ? 18 : story ? 30 : 24, color: "#d4d4d8" }}>{t.ctaBody}</span>
+        <span style={{ fontFamily: "Inter Tight", fontSize: wide ? 18 : story ? 30 : 24, color: "#e4e4e7" }}>{t.ctaBody}</span>
       </div>
-      <span style={{ fontFamily: "Geist", fontSize: wide ? 18 : story ? 28 : 22, color: OG.accent, letterSpacing: 1 }}>{SITE_HOST}/roast →</span>
+      <span style={{ fontFamily: "Geist", fontSize: wide ? 18 : story ? 28 : 22, color: OG.lime, letterSpacing: 1 }}>{SITE_HOST}/roast →</span>
     </div>
   );
 
@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
           display: "flex",
           flexDirection: "column",
           background: OG.paper,
-          backgroundImage: "radial-gradient(rgba(24,24,27,0.09) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "28px 28px",
           padding: pad,
           gap: wide ? 18 : 30,

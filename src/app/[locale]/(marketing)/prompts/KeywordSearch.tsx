@@ -114,7 +114,7 @@ export default function KeywordSearch({ lang, q, filters, resultsCount }: Props)
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={copy.placeholder}
-          className="block h-12 w-full rounded-[var(--radius-lg)] border border-black/30 bg-white pl-12 pr-12 text-base text-black placeholder:text-[var(--ink-3)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-soft)] [&::-webkit-search-cancel-button]:hidden"
+          className="block h-12 w-full rounded-[var(--radius-lg)] border border-black/30 bg-white pl-12 pr-12 text-base text-black placeholder:text-[var(--ink-3)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25 [&::-webkit-search-cancel-button]:hidden"
         />
         {value && (
           <button

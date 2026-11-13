@@ -249,7 +249,7 @@ export default function LoginForm({ locale = "en", next }: { locale?: Locale; ne
     return (
       <div className="text-sm" role="status" aria-live="polite">
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+          <span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--lime-soft)] text-[var(--accent)]">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="2.5" y="4.5" width="15" height="11" rx="2" stroke="currentColor" strokeWidth="1.6" />
               <path d="M3 5.5l7 5.5 7-5.5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />

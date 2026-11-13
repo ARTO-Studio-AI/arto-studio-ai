@@ -51,7 +51,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           flexDirection: "column",
           justifyContent: "space-between",
           background: OG.paper,
-          backgroundImage: "radial-gradient(rgba(24,24,27,0.09) 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(rgba(0,0,0,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "28px 28px",
           padding: 64,
         }}
@@ -66,7 +66,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontFamily: "Geist", fontSize: 20, letterSpacing: 3, color: OG.ink2 }}>{prompt?.id ?? ""}</span>
             {tier && (
-              <span style={{ display: "flex", fontFamily: "Geist", fontSize: 16, letterSpacing: 2, textTransform: "uppercase", padding: "6px 14px", borderRadius: 99, background: tier === "Free" ? "#fff1ea" : OG.ink, color: tier === "Free" ? "#b33600" : OG.white }}>
+              <span style={{ display: "flex", fontFamily: "Geist", fontSize: 16, letterSpacing: 2, textTransform: "uppercase", padding: "6px 14px", borderRadius: 99, background: tier === "Free" ? OG.white : OG.ink, color: tier === "Free" ? OG.ink : OG.white }}>
                 {tier}
               </span>
             )}
@@ -87,7 +87,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           <span style={{ fontFamily: "Manrope", fontSize: 28, color: OG.white, letterSpacing: -0.5 }}>
             {es ? "Ábrelo gratis con tu cuenta" : "Open it free with your account"}
           </span>
-          <span style={{ fontFamily: "Geist", fontSize: 20, color: OG.accent }}>{SITE_HOST}/prompts →</span>
+          <span style={{ fontFamily: "Geist", fontSize: 20, color: OG.lime }}>{SITE_HOST}/prompts →</span>
         </div>
       </div>
     ),

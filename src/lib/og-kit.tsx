@@ -3,19 +3,22 @@ import { join } from "node:path";
 
 /* Kit de imagenes para redes (2026-10-07). Todas las imagenes que el sitio manda al
  * compartir (home, prompts, blog y Brand Roast) salen de aqui con la marca nueva:
- * papel calido, tinta, acento naranja, personajes de ARTO y las cuatro voces
+ * marca ASAI v2.0 (11 nov 2026): fondo lima, letra negra, azul ultramar como letra de color
+ * sobre lima o blanco, lima sobre negro y rosa solo como marcatexto. Personajes de ARTO y las cuatro voces
  * tipograficas. Satori necesita TTF/OTF, por eso las fuentes van como TTF estaticos
  * (Fontsource, OFL) en src/app/_og, leidas del repo para no depender de la red.
  * next.config incluye src/app/_og en el trazado de las funciones. */
 
 export const OG = {
-  paper: "#f4f2ee",
-  sand: "#e9e3d8",
-  ink: "#18181b",
-  ink2: "#52525b",
-  ink3: "#a1a1aa",
-  line: "#e4e4e7",
-  accent: "#ff4d00",
+  paper: "#daf700", // lima: fondo
+  sand: "#eef6b8", // lima palido: rieles de barras
+  ink: "#000000",
+  ink2: "#3d4500", // oliva
+  ink3: "#5a6600", // oliva 2
+  line: "rgba(0,0,0,0.14)",
+  accent: "#1e00ff", // azul ultramar: letra de color sobre lima o blanco, nunca sobre negro
+  lime: "#daf700", // acento sobre negro
+  pink: "#ff3fa4", // solo marcatexto, con letra negra
   white: "#ffffff",
   ok: "#16a34a",
   warn: "#d97706",
@@ -73,8 +76,9 @@ export const CHAR_SIZES: Record<string, [number, number]> = {
   "character-05.png": [267, 273],
 };
 
+/** Marca v2.0 (D21): 7 o mas en azul, 5 a 6.9 en negro, abajo de 5 en rojo. */
 export function scoreColor(score: number): string {
-  return score >= 7 ? OG.ok : score >= 5 ? OG.warn : OG.bad;
+  return score >= 7 ? OG.accent : score >= 5 ? OG.ink : OG.bad;
 }
 
 /** Recorta texto para que no reviente el layout de Satori. */
