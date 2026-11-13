@@ -40,8 +40,8 @@ export function BarCard({
   onClose?: () => void;
 }) {
   return (
-    <div className="animate-fade-in pointer-events-auto mx-auto flex max-w-3xl items-center gap-2.5 rounded-[var(--radius-md)] bg-zinc-900 py-2.5 pl-4 pr-2 text-white shadow-[0_10px_30px_rgba(24,24,27,0.28)] sm:gap-4 sm:py-3 sm:pl-5">
-      <span aria-hidden="true" className="hidden h-2 w-2 shrink-0 rounded-full bg-[var(--accent)] sm:inline-block" />
+    <div className="asai-dark animate-fade-in pointer-events-auto mx-auto flex max-w-3xl items-center gap-2.5 rounded-[var(--radius-md)] bg-black py-2.5 pl-4 pr-2 text-white shadow-[0_10px_30px_rgba(0,0,0,0.28)] sm:gap-4 sm:py-3 sm:pl-5">
+      <span aria-hidden="true" className="hidden h-2 w-2 shrink-0 rounded-full bg-[var(--lime)] sm:inline-block" />
       <div className="min-w-0 flex-1">
         {title}
         {sub}
@@ -49,7 +49,7 @@ export function BarCard({
       <Link
         href={href}
         onClick={onCta}
-        className="shrink-0 rounded-[var(--radius-sm)] bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-zinc-950 transition hover:brightness-110 focus-visible:outline-white sm:px-4"
+        className="shrink-0 rounded-[var(--radius-sm)] bg-[var(--lime)] px-3 py-2 text-sm font-semibold text-black transition hover:bg-[var(--lime-hover)] focus-visible:outline-white sm:px-4"
       >
         <span className="sm:hidden">{ctaShort}</span>
         <span className="hidden sm:inline">{cta}</span>
@@ -58,7 +58,7 @@ export function BarCard({
         type="button"
         onClick={onClose}
         aria-label={closeLabel}
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-zinc-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-white"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-white transition hover:bg-white/10 hover:text-[var(--lime)] focus-visible:outline-white"
       >
         <CloseIcon />
       </button>
@@ -71,8 +71,8 @@ export function PromoBarText({ offer, dict, endsAt }: { offer: PromoOffer; dict:
   return (
     <>
       <p className="text-sm font-semibold leading-snug">{offer.copy.title}</p>
-      <p className="text-xs text-zinc-300">
-        {dict.ends_in} <PromoClock endsAt={endsAt} className="font-semibold text-[var(--accent)]" />
+      <p className="text-xs text-white">
+        {dict.ends_in} <PromoClock endsAt={endsAt} className="font-semibold text-[var(--lime)]" />
       </p>
     </>
   );
@@ -152,14 +152,14 @@ export function PromoModalCard({
           href={href}
           data-autofocus
           onClick={onCta}
-          className="flex-1 rounded-[var(--radius-sm)] bg-zinc-900 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-zinc-700"
+          className="flex-1 rounded-[var(--radius-sm)] bg-[var(--accent)] px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)]"
         >
           {offer.copy.cta}
         </Link>
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 rounded-[var(--radius-sm)] border border-zinc-300 px-4 py-2.5 text-sm text-zinc-700 transition hover:border-zinc-500"
+          className="flex-1 rounded-[var(--radius-sm)] border border-black bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[var(--lime-hover)]"
         >
           {dict.keep_browsing}
         </button>
@@ -174,7 +174,7 @@ export function PromoPriceView({ offer, dict, endsAt }: { offer: PromoOffer; dic
   const price = priceView(offer, dict);
   return (
     <div>
-      <p className="mb-1 inline-block rounded-full bg-[var(--accent)] px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-950">
+      <p className="mb-1 inline-block rounded-full bg-[var(--accent)] px-2 py-0.5 font-mono text-[11px] font-semibold text-white">
         {offer.copy.badge}
       </p>
       <div className="flex flex-wrap items-baseline gap-x-2">

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-/* Tarjeta del sistema: superficie blanca, linea zinc-200, radio 16.
- * `interactive` agrega el hover de elevacion; con `href` se vuelve Link. */
+/* Tarjeta del sistema (marca ASAI v2.0): superficie blanca, linea --line, radio 16, letra negra.
+ * `interactive` agrega el hover: sube 2px y sombra. `highlight` pone borde negro de 2px.
+ * Con `href` se vuelve Link. */
 
 interface Props {
   children: ReactNode;
@@ -18,9 +19,9 @@ const PAD = { none: "", sm: "p-4", md: "p-6", lg: "p-8" };
 
 export function cardClass({ interactive = false, highlight = false, padding = "md", className = "" }: Omit<Props, "children" | "href" | "as">): string {
   return [
-    "rounded-[var(--radius-lg)] bg-white",
-    highlight ? "border-2 border-zinc-900" : "border border-zinc-200",
-    interactive ? "transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)]" : "",
+    "rounded-[var(--radius-lg)] bg-white text-black",
+    highlight ? "border-2 border-black" : "border border-[var(--line)]",
+    interactive ? "transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]" : "",
     PAD[padding],
     className,
   ]

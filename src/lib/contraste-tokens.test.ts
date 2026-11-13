@@ -2,11 +2,9 @@ import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 
-// Contraste del acento (decision de Victor, 5 nov 2026). Lee los tokens de
-// globals.css y mide con la formula de WCAG 2.x, para que un cambio de color no
-// rompa AA sin que nadie se entere.
-// - --accent-ink (texto naranja, botones naranjas con letra blanca): >= 4.5:1.
-// - --accent (decoraciones y texto grande >= 24 px): >= 3:1 sobre blanco y --bg.
+// Contraste de los tokens (marca ASAI v2.0, 11 nov 2026). Lee los tokens de globals.css y
+// mide con la formula de WCAG 2.x, para que un cambio de color no rompa AA sin que nadie se
+// entere. La revision por pagina (texto real contra fondo real) vive en scripts/contraste.mjs.
 
 const CSS = readFileSync(join(__dirname, "../app/globals.css"), "utf8");
 
@@ -29,34 +27,89 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-describe("contraste de los tokens de acento", () => {
+// Marca ASAI v2.0 (decision de Victor, 11 nov 2026). Reglas del manual que no se negocian.
+describe("contraste de la marca ASAI v2.0", () => {
   const white = "#ffffff";
-  const accent = token("accent");
-  const ink = token("accent-ink");
+  const black = "#000000";
+  const lime = token("bg");
+  const blue = token("accent");
+  const pink = token("pink");
 
   it("la formula coincide con valores conocidos", () => {
-    expect(contrast("#000000", white)).toBeCloseTo(21, 5);
-    expect(contrast("#ff4d00", white)).toBeCloseTo(3.33, 2);
+    expect(contrast(black, white)).toBeCloseTo(21, 5);
+    expect(contrast("#1e00ff", white)).toBeCloseTo(8.4, 1);
   });
 
-  it("--accent-ink pasa AA (4.5:1) sobre blanco, --surface, --bg y el crema --paper", () => {
-    for (const bg of [white, token("surface"), token("bg"), token("paper")]) {
-      expect(contrast(ink, bg), `${ink} sobre ${bg}`).toBeGreaterThanOrEqual(4.5);
+  it("los tokens son los de tokens.json (grupo ASAI)", () => {
+    expect(lime).toBe("#daf700");
+    expect(blue).toBe("#1e00ff");
+    expect(pink).toBe("#ff3fa4");
+    expect(token("ink")).toBe("#000000");
+    expect(token("ink-2")).toBe("#3d4500");
+    expect(token("ink-3")).toBe("#5a6600");
+  });
+
+  it("sobre lima: negro, oliva, oliva 2 y azul pasan AA", () => {
+    for (const fg of [black, token("ink-2"), token("ink-3"), token("accent-ink")]) {
+      expect(contrast(fg, lime), `${fg} sobre lima`).toBeGreaterThanOrEqual(4.5);
     }
   });
 
-  it("--accent-ink con letra blanca encima pasa AA", () => {
-    expect(contrast(white, ink)).toBeGreaterThanOrEqual(4.5);
+  it("sobre lima: la letra blanca y la rosa NO pasan (por eso estan prohibidas)", () => {
+    expect(contrast(white, lime)).toBeLessThan(3);
+    expect(contrast(pink, lime)).toBeLessThan(3);
   });
 
-  it("--accent pasa 3:1 (texto grande y graficos) sobre blanco y --bg", () => {
-    for (const bg of [white, token("surface"), token("bg")]) {
-      expect(contrast(accent, bg), `${accent} sobre ${bg}`).toBeGreaterThanOrEqual(3);
+  it("sobre blanco: negro, oliva y azul pasan AA", () => {
+    for (const fg of [black, token("ink-2"), token("ink-3"), token("accent-ink")]) {
+      expect(contrast(fg, white), `${fg} sobre blanco`).toBeGreaterThanOrEqual(4.5);
     }
   });
 
-  it("--accent sigue pasando AA sobre zinc-900 (tarjetas oscuras)", () => {
-    expect(contrast(accent, "#18181b")).toBeGreaterThanOrEqual(4.5);
+  it("sobre azul: solo letra blanca pasa AA; lima y negro no", () => {
+    expect(contrast(white, blue)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(white, token("accent-hover"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("sobre negro: blanco y lima pasan AA; azul no (2.5:1)", () => {
+    expect(contrast(white, token("dark"))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(lime, token("dark"))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(blue, token("dark"))).toBeLessThan(3);
+  });
+
+  it("marcatexto rosa: letra negra encima pasa AA", () => {
+    expect(contrast(black, pink)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("botones lima: letra negra pasa AA en reposo y en hover", () => {
+    expect(contrast(black, token("lime-hover"))).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("no quedan colores de la marca vieja en los componentes base (fase 1)", () => {
+  const base = [
+    "../components/ui/Button.tsx",
+    "../components/ui/Card.tsx",
+    "../components/ui/Badge.tsx",
+    "../components/Nav.tsx",
+    "../components/Footer.tsx",
+    "../components/SignupBarClient.tsx",
+    "../components/ProUnlockBanner.tsx",
+    "../components/PromptQuota.tsx",
+    "../components/DifficultyChip.tsx",
+    "../components/promo/PromoViews.tsx",
+  ];
+  it("sin naranja, indigo ni verde agua", () => {
+    for (const f of base) {
+      const src = readFileSync(join(__dirname, f), "utf8");
+      expect(src, f).not.toMatch(/#ff4d00|#c93800|#121936|#42d7b9|--indigo|--aqua|--paper|--sand/i);
+    }
+  });
+  it("sin letra blanca sobre lima en una misma clase", () => {
+    for (const f of base) {
+      const src = readFileSync(join(__dirname, f), "utf8");
+      expect(src, f).not.toMatch(/bg-\[var\(--(lime|bg)\)\][^"`]*text-white|text-white[^"`]*bg-\[var\(--(lime|bg)\)\]/);
+    }
   });
 });
 
@@ -71,33 +124,6 @@ function walk(dir: string, out: string[] = []): string[] {
   }
   return out;
 }
-
-describe("contraste de la paleta indigo (D20)", () => {
-  const white = "#ffffff";
-  const indigo = token("indigo");
-
-  it("texto blanco, gris claro, naranja y verde agua pasan AA sobre --indigo", () => {
-    for (const fg of [white, token("indigo-ink-2"), token("accent"), token("aqua")]) {
-      expect(contrast(fg, indigo), `${fg} sobre ${indigo}`).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it("texto blanco pasa AA sobre la tarjeta --indigo-2", () => {
-    expect(contrast(white, token("indigo-2"))).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it("--aqua-ink pasa AA sobre blanco, --surface y --bg", () => {
-    for (const bg of [white, token("surface"), token("bg")]) {
-      expect(contrast(token("aqua-ink"), bg), `aqua-ink sobre ${bg}`).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it("--indigo como texto pasa AA sobre blanco y sobre --aqua-soft", () => {
-    for (const bg of [white, token("aqua-soft")]) {
-      expect(contrast(indigo, bg)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-});
 
 describe("uso del acento en texto chico", () => {
   it('ningun "text-eyebrow text-[var(--accent)]" literal en src', () => {

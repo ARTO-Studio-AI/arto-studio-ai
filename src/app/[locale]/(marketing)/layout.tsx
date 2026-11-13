@@ -49,8 +49,10 @@ export default async function MarketingLayout({
   const isAdmin = await isAdminEmailAsync(userEmail);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur-sm">
+    /* Marca ASAI v2.0 (11 nov 2026): todo el sitio va sobre lima. .asai-site activa el puente de
+     * color de globals.css para las paginas que aun usan la escala zinc. */
+    <div className="asai-site flex min-h-screen flex-col bg-[var(--bg)] text-black">
+      <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--bg)]">
         <Nav
           user={userEmail ? { email: userEmail } : null}
           locale={locale}

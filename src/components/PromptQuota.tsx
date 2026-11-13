@@ -19,7 +19,7 @@ export default function PromptQuota({ locale, used, limit = FREE_DAILY_OPENS }: 
       : `${left} of ${limit} free prompts left today`;
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2.5 py-1 font-mono text-[11px] text-zinc-600"
+      className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 font-mono text-[11px] text-black"
       data-testid="prompt-quota"
     >
       <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />

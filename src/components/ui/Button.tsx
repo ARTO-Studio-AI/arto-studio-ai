@@ -1,21 +1,29 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-/* Boton del sistema. Tres variantes, un solo acento en el foco.
- * Se usa como <Button href> (Link o <a>) o como <Button type="submit">. */
+/* Boton del sistema, marca ASAI v2.0 (11 nov 2026).
+ *   primary   azul ultramar con letra blanca (8.4:1). El boton principal sobre lima o blanco.
+ *   secondary blanco con borde negro y letra negra.
+ *   ghost     sin fondo, letra negra.
+ *   lime      lima con letra negra (17.3:1). Solo sobre paneles negros.
+ *   white     blanco con letra negra. Sobre recuadros azules.
+ * Sobre lima la letra nunca es blanca. Se usa como <Button href> (Link o <a>) o como
+ * <Button type="submit">. */
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "lime" | "white";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] font-medium transition " +
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border font-semibold transition " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 " +
   "disabled:pointer-events-none disabled:opacity-50";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-zinc-900 text-white hover:bg-zinc-700",
-  secondary: "border border-zinc-300 bg-white text-zinc-800 hover:border-zinc-900",
-  ghost: "text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100",
+  primary: "border-transparent bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:text-white",
+  secondary: "border-black bg-white text-black hover:bg-[var(--lime-hover)] hover:text-black",
+  ghost: "border-transparent text-black hover:bg-black/5 hover:text-black",
+  lime: "border-transparent bg-[var(--lime)] text-black hover:bg-[var(--lime-hover)] hover:text-black",
+  white: "border-transparent bg-white text-black hover:bg-[#f2f2f2] hover:text-black",
 };
 
 const SIZES: Record<ButtonSize, string> = {

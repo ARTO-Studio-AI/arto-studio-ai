@@ -70,16 +70,16 @@ export const CATEGORY_STYLES: Record<Category, { chip: string; ring: string; dot
 
 /* Dificultad: mismo chip, el nivel lo marca el numero de puntos (1 a 4). */
 export const DIFFICULTY_STYLES: Record<Difficulty, { chip: string; label: string; dots: number }> = {
-  beginner: { chip: "bg-zinc-100 text-zinc-700", label: "Beginner", dots: 1 },
-  intermediate: { chip: "bg-zinc-100 text-zinc-700", label: "Intermediate", dots: 2 },
-  advanced: { chip: "bg-zinc-100 text-zinc-700", label: "Advanced", dots: 3 },
-  expert: { chip: "bg-zinc-900 text-white", label: "Expert", dots: 4 },
+  beginner: { chip: "border border-black/25 bg-[var(--lime)] text-black", label: "Beginner", dots: 1 },
+  intermediate: { chip: "border border-black/25 bg-[var(--lime)] text-black", label: "Intermediate", dots: 2 },
+  advanced: { chip: "border border-black/25 bg-[var(--lime)] text-black", label: "Advanced", dots: 3 },
+  expert: { chip: "border border-black bg-black text-white", label: "Expert", dots: 4 },
 };
 
 export const TIER_STYLES: Record<Tier, { chip: string; label: string }> = {
-  free: { chip: "bg-zinc-100 text-zinc-700", label: "Free" },
-  pro: { chip: "bg-zinc-700 text-white", label: "Pro" },
-  enterprise: { chip: "bg-zinc-900 text-white", label: "Enterprise" },
+  free: { chip: "border border-black/25 bg-[var(--lime)] text-black", label: "Free" },
+  pro: { chip: "bg-black text-white", label: "Pro" },
+  enterprise: { chip: "bg-[var(--accent)] text-white", label: "Enterprise" },
 };
 
 // ──────────────────────────────────────────────────────────────────

@@ -1,16 +1,23 @@
 import type { ReactNode } from "react";
 
-/* Badge monocromo con punto de acento. Sin familias de color: el estado
- * lo dice el texto (Live / Soon / Free / Pro), no el verde o el ambar. */
+/* Badge de la marca ASAI v2.0 (11 nov 2026). El estado lo dice el texto (Live / Soon / Free /
+ * Pro), no el color. Letra negra sobre blanco o lima; letra blanca sobre negro y azul.
+ *   live     blanco, borde negro, punto azul
+ *   soon     lima, borde negro suave
+ *   tier     lima, borde negro suave
+ *   neutral  lima, sin borde
+ *   inverse  negro con letra blanca y punto lima (Pro)
+ *   accent   azul con letra blanca */
 
-export type BadgeTone = "live" | "soon" | "tier" | "neutral" | "inverse";
+export type BadgeTone = "live" | "soon" | "tier" | "neutral" | "inverse" | "accent";
 
 const TONES: Record<BadgeTone, { wrap: string; dot: string }> = {
-  live: { wrap: "border-zinc-300 bg-white text-zinc-900", dot: "bg-[var(--accent)]" },
-  soon: { wrap: "border-zinc-200 bg-zinc-50 text-zinc-500", dot: "bg-zinc-300" },
-  tier: { wrap: "border-zinc-200 bg-zinc-100 text-zinc-700", dot: "bg-zinc-400" },
-  neutral: { wrap: "border-transparent bg-zinc-100 text-zinc-600", dot: "" },
-  inverse: { wrap: "border-zinc-900 bg-zinc-900 text-white", dot: "bg-[var(--accent)]" },
+  live: { wrap: "border-black bg-white text-black", dot: "bg-[var(--accent)]" },
+  soon: { wrap: "border-black/25 bg-[var(--lime-hover)] text-black", dot: "bg-black/40" },
+  tier: { wrap: "border-black/25 bg-[var(--lime)] text-black", dot: "bg-black" },
+  neutral: { wrap: "border-transparent bg-[var(--lime-hover)] text-black", dot: "" },
+  inverse: { wrap: "border-black bg-black text-white", dot: "bg-[var(--lime)]" },
+  accent: { wrap: "border-[var(--accent)] bg-[var(--accent)] text-white", dot: "bg-white" },
 };
 
 interface Props {
