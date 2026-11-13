@@ -74,7 +74,7 @@ function Sidebar({ email, active }: { email: string; active: AdminNavId | null }
           title={collapsed ? "Admin · Resumen" : undefined}
           className={`flex items-center gap-2 rounded-md ${FOCUS} ${collapsed ? "justify-center" : ""}`}
         >
-          <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={58} height={20} className={collapsed ? "h-3.5 w-auto" : "h-5 w-auto"} />
+          <Image src={collapsed ? "/brand/asai/simbolo-negro.svg" : "/brand/asai/logo-negro.svg"} alt="ARTO Studio AI" width={collapsed ? 28 : 120} height={collapsed ? 28 : 23} className={collapsed ? "h-6 w-auto" : "h-5 w-auto"} unoptimized />
           <span className={collapsed ? "sr-only" : "text-eyebrow text-zinc-500"}>Admin</span>
         </Link>
         {!collapsed && (
@@ -155,7 +155,7 @@ function MobileNav({ email, active }: { email: string; active: AdminNavId | null
     <>
       <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/95 px-4 backdrop-blur-sm md:hidden">
         <Link href="/admin" className={`flex items-center gap-2 rounded-md ${FOCUS}`}>
-          <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={58} height={20} className="h-5 w-auto" />
+          <Image src="/brand/asai/logo-negro.svg" alt="ARTO Studio AI" width={120} height={23} className="h-5 w-auto" unoptimized />
           <span className="text-eyebrow text-zinc-500">Admin</span>
         </Link>
         <Link

@@ -166,6 +166,11 @@ function medir() {
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: ancho, height: 900 } });
+// Para revisar /admin en local: CONTRASTE_COOKIE="nombre=valor" agrega esa cookie de sesion.
+if (process.env.CONTRASTE_COOKIE) {
+  const [name, ...rest] = process.env.CONTRASTE_COOKIE.split("=");
+  await ctx.addCookies([{ name, value: rest.join("="), url: base }]);
+}
 // Sin aviso de cookies encima de la pagina: el visitante ya eligio "solo esenciales"
 // (formato de src/lib/consent.ts; si sube CONSENT_VERSION, se cambia aqui).
 await ctx.addCookies([{ name: "asai_consent", value: "essential.v3-2026-10-22", url: base }]);
@@ -177,7 +182,8 @@ let totalSinMedir = 0;
 const porPagina = [];
 for (const loc of locales) {
   for (const r of rutas) {
-    const url = `${base}/${loc}${r === "/" ? "" : r}`;
+    // --locales=- revisa rutas sin idioma (/admin, /studio, /welcome).
+    const url = loc === "-" ? `${base}${r}` : `${base}/${loc}${r === "/" ? "" : r}`;
     let res;
     try {
       res = await page.goto(url, { waitUntil: "networkidle", timeout: 45000 });

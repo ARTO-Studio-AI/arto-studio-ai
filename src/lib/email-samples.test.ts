@@ -19,7 +19,7 @@ describe("sampleEmail", () => {
         expect(m.html.startsWith("<!doctype html>")).toBe(true);
         expect(m.html.trim().endsWith("</html>")).toBe(true);
         expect(m.html).not.toMatch(/\{\{|\}\}/);
-        expect(m.html).toContain(`/email/header-${lang}.png`);
+        expect(m.html).toContain(`/email/header-v2-${lang}.png`);
         if (k.id.startsWith("auth_")) expect(m.html).toContain("admin@ejemplo.com");
       });
     }

@@ -113,8 +113,8 @@ describe("no quedan colores de la marca vieja en los componentes base (fase 1)",
   });
 });
 
-// Fase 3: en todo src/ ya no queda la marca vieja. Unica excepcion: la plantilla de correo
-// (src/lib/email-templates/), que es area de correo y cambia en su propio PR con revision de Fable.
+// Fase 3: en todo src/ ya no queda la marca vieja. Desde el 13 nov tambien los correos
+// (src/lib/email-templates/) y el banner nuevo (header-v2-*.png).
 describe("no quedan colores de la marca vieja en src (fase 3)", () => {
   it("sin #ff4d00, #c93800, #121936, #42d7b9 ni tokens viejos", () => {
     const root = join(__dirname, "..");
@@ -123,7 +123,7 @@ describe("no quedan colores de la marca vieja en src (fase 3)", () => {
       for (const name of readdirSync(dir)) {
         const p = join(dir, name);
         if (statSync(p).isDirectory()) {
-          if (!p.includes("email-templates")) visit(p);
+          visit(p);
         } else if (/\.(tsx?|css)$/.test(p) && !p.endsWith("contraste-tokens.test.ts")) files.push(p);
       }
     };
@@ -132,6 +132,15 @@ describe("no quedan colores de la marca vieja en src (fase 3)", () => {
       /#ff4d00|#c93800|#121936|#42d7b9|var\(--(indigo|aqua|paper|sand|accent-soft)\b/i.test(readFileSync(f, "utf8")),
     );
     expect(bad).toEqual([]);
+  });
+
+  it("los correos usan el banner v2 y nunca letra blanca sobre lima", () => {
+    const dir = join(__dirname, "email-templates");
+    for (const name of readdirSync(dir).filter((n) => n.endsWith(".ts") && !n.includes(".test."))) {
+      const src = readFileSync(join(dir, name), "utf8");
+      expect(src, name).not.toMatch(/"\/email\/header-(es|en)\.png"|\/email\/header-\$\{opts\.lang\}\.png/);
+      expect(src, name).not.toMatch(/background:\$\{C\.(lime|paper)\};color:\$\{C\.white\}/);
+    }
   });
 });
 

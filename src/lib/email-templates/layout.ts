@@ -1,12 +1,12 @@
 import { SITE_URL } from "@/lib/site-url";
 
-/* Plantilla base de los correos. v1 (2026-10-07): papel calido, tarjeta blanca, acento
+/* Plantilla base de los correos. v3 (2026-11-13): marca ASAI v2.0, ver C y D21. v1 (2026-10-07): papel calido, tarjeta blanca, acento
  * naranja, titulares pesados, citas en serif y etiquetas en mayusculas. v2 (2026-10-20,
  * pedido de Victor: «que tenga mas diseno, con los ajustes del branding»): la tarjeta abre
  * con el banner del canal (logotipo «arto Studio AI», la linea «Prompts, skills y agentes ·
  * para el mundo creativo» y cuatro personajes en las esquinas), que Victor pidio poner en
  * todos los correos porque le recuerda a la gente que es el producto. Imagen en ES y EN:
- * public/email/header-es.png y header-en.png (1200x500, se ve a 600x250).
+ * public/email/header-es.png y header-en.png (1200x500, se ve a 600x250). v3 los reemplaza por header-v2-*.
  *
  * HTML de tablas con estilos en linea: es lo unico que respetan Gmail, Outlook y Apple
  * Mail. Las fuentes de marca se piden con fallback seguro (los clientes que no las cargan
@@ -16,14 +16,20 @@ import { SITE_URL } from "@/lib/site-url";
  * `hero()` con un personaje y, si lista cosas, `checks()` o `tile()`. */
 
 export const C = {
-  paper: "#f4f2ee",
+  /* Marca ASAI v2.0 (13 nov 2026, D21): fondo lima, tarjeta blanca, letra negra, azul ultramar
+   * como color de letra y rosa fosforo solo de marcatexto con letra negra. Nunca azul sobre
+   * negro ni letra blanca sobre lima. */
+  paper: "#daf700",
+  lime: "#daf700",
+  limeSoft: "#eef6b8",
+  pink: "#ff3fa4",
   white: "#ffffff",
-  ink: "#18181b",
-  ink2: "#52525b",
-  ink3: "#a1a1aa",
+  ink: "#000000",
+  ink2: "#3d4500",
+  ink3: "#5a6600",
   line: "#e4e4e7",
-  accent: "#ff4d00",
-  accentSoft: "#fff1ea",
+  accent: "#1e00ff",
+  accentSoft: "#eef6b8",
   ok: "#16a34a",
   warn: "#d97706",
   bad: "#dc2626",
@@ -47,15 +53,17 @@ export const CHARACTERS = {
 } as const;
 export type Character = keyof typeof CHARACTERS;
 
-/** Banner de cabecera (1200x500, a 600x250 en el correo). */
-export const HEADER = { es: "/email/header-es.png", en: "/email/header-en.png", w: 600, h: 250 };
+/** Banner de cabecera v2.0 (1200x500, a 600x250 en el correo). Nombre nuevo para que Gmail no sirva
+ * el banner viejo de su cache; los archivos header-es/en.png se quedan para correos ya enviados. */
+export const HEADER = { es: "/email/header-v2-es.png", en: "/email/header-v2-en.png", w: 600, h: 250 };
 
 export function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/* Misma escala que el sitio (D21, Victor 12 nov): azul 7 o mas, negro de 5 a 6.9, rojo abajo de 5. */
 export function scoreColor(n: number): string {
-  return n >= 7 ? C.ok : n >= 5 ? C.warn : C.bad;
+  return n >= 7 ? C.accent : n >= 5 ? C.ink : C.bad;
 }
 
 export function eyebrow(text: string, color: string = C.ink2): string {
@@ -63,9 +71,10 @@ export function eyebrow(text: string, color: string = C.ink2): string {
 }
 
 export function button(label: string, href: string, variant: "dark" | "light" | "accent" = "dark"): string {
-  const bg = variant === "dark" ? C.ink : variant === "accent" ? C.accent : C.white;
-  const fg = variant === "light" ? C.ink : C.white;
-  const border = variant === "light" ? C.line : bg;
+  /* accent es el boton lima: siempre letra negra (regla de Victor: nunca blanco sobre lima). */
+  const bg = variant === "dark" ? C.ink : variant === "accent" ? C.lime : C.white;
+  const fg = variant === "dark" ? C.white : C.ink;
+  const border = variant === "light" ? C.line : variant === "accent" ? C.ink : bg;
   return `<a href="${esc(href)}" style="display:inline-block;background:${bg};color:${fg};border:1px solid ${border};border-radius:999px;padding:13px 22px;font-family:${F.meta};font-size:14px;font-weight:600;text-decoration:none;margin:0 8px 8px 0;">${esc(label)}</a>`;
 }
 
@@ -77,7 +86,7 @@ export function character(name: Character, height: number, alt = ""): string {
 }
 
 /**
- * Cabecera del cuerpo: etiqueta, titular con la palabra clave en Cormorant naranja,
+ * Cabecera del cuerpo: etiqueta en azul, titular con la palabra clave en Cormorant sobre marcatexto rosa,
  * personaje a la derecha e introduccion debajo. Todo el texto llega ya sin escapar.
  */
 export function hero(opts: { eyebrow: string; title: string; accent: string; intro?: string; character?: Character }): string {
@@ -90,12 +99,12 @@ export function hero(opts: { eyebrow: string; title: string; accent: string; int
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td valign="top">
         ${eyebrow(opts.eyebrow, C.accent)}
-        <div class="h1" style="font-family:${F.display};font-size:44px;line-height:48px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${esc(opts.title)} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:52px;letter-spacing:-0.5px;color:${C.accent};">${esc(opts.accent)}</span></div>
+        <div class="h1" style="font-family:${F.display};font-size:44px;line-height:48px;font-weight:800;letter-spacing:-1.5px;color:${C.ink};margin:14px 0 0 0;">${esc(opts.title)} <span style="font-family:${F.serif};font-style:italic;font-weight:600;font-size:52px;letter-spacing:-0.5px;color:${C.ink};background:${C.pink};padding:0 8px;">${esc(opts.accent)}</span></div>
       </td>${art}
     </tr></table>${intro}`;
 }
 
-/** Lista con la casilla naranja de las piezas de la campana. Texto sin escapar. */
+/** Lista con la casilla azul de las piezas de la campana. Texto sin escapar. */
 export function checks(items: string[]): string {
   const rows = items
     .map(
@@ -114,7 +123,7 @@ export function checks(items: string[]): string {
  */
 export function tiles(items: Array<{ character: Character; title: string; body: string; cta: string; href: string }>): string {
   const cell = (t: (typeof items)[number]) => `<div class="tile" style="display:inline-block;vertical-align:top;width:48%;min-width:220px;box-sizing:border-box;margin:0 0 12px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};border-radius:14px;"><tr><td style="padding:20px 20px 18px 20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.limeSoft};border-radius:14px;"><tr><td style="padding:20px 20px 18px 20px;">
         ${character(t.character, 44)}
         <div style="font-family:${F.display};font-size:18px;line-height:23px;font-weight:800;letter-spacing:-0.3px;color:${C.ink};margin-top:14px;">${esc(t.title)}</div>
         <div style="font-family:${F.body};font-size:14px;line-height:21px;color:${C.ink2};margin-top:6px;">${esc(t.body)}</div>
@@ -175,8 +184,8 @@ export function layout({ lang, preheader, body, reason, unsubscribeUrl }: Layout
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};">
   <tr><td align="center" style="padding:28px 12px 36px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
-      <tr><td style="background:#fafafa;border-radius:20px 20px 0 0;border:1px solid ${C.line};border-bottom:0;font-size:0;line-height:0;">
-        <a href="${SITE_URL}/${lang}"><img src="${SITE_URL}${HEADER[lang]}" width="${HEADER.w}" alt="arto Studio AI · ${esc(TAGLINE[lang])}" style="display:block;border:0;width:100%;max-width:${HEADER.w}px;height:auto;border-radius:20px 20px 0 0;"></a>
+      <tr><td style="background:${C.lime};border-radius:20px 20px 0 0;border:1px solid ${C.line};border-bottom:0;font-size:0;line-height:0;">
+        <a href="${SITE_URL}/${lang}"><img src="${SITE_URL}${HEADER[lang]}" width="${HEADER.w}" alt="ARTO Studio AI · ${esc(TAGLINE[lang])}" style="display:block;border:0;width:100%;max-width:${HEADER.w}px;height:auto;border-radius:20px 20px 0 0;"></a>
       </td></tr>
       <tr><td class="card" style="background:${C.white};border-radius:0 0 20px 20px;padding:36px 36px 40px 36px;border:1px solid ${C.line};border-top:1px solid ${C.line};">
         ${body}

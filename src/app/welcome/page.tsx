@@ -86,10 +86,10 @@ export default async function WelcomePage({ searchParams }: Props) {
   const lookup = await lookupSession(session_id);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="asai-site flex min-h-screen flex-col bg-[var(--bg)] text-black">
       <nav className="border-b border-border px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/brand/arto-logo-black.svg" alt="ARTO" width={69} height={24} className="h-6 w-auto" />
+          <Image src="/brand/asai/logo-negro.svg" alt="ARTO Studio AI" width={146} height={28} className="h-6 w-auto" unoptimized />
           <span className="text-sm font-medium tracking-wide text-muted">Creative 24/7</span>
         </Link>
       </nav>
