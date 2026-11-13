@@ -167,7 +167,7 @@ h1 { letter-spacing: -0.035em; }
   --color-amber-600: #92400e;
   --color-amber-700: #92400e;
 }
-.asai-back :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+.asai-back :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):not(:disabled) {
   background-color: #ffffff;
 }
 .asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-\[var\(--dark\)\], .asai-dark) {
