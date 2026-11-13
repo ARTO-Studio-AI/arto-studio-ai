@@ -32,7 +32,7 @@ export default function CopyButton({
           track("prompt_copied", { prompt_id: promptId, prompt_tier: promptTier ?? "free", locale: locale ?? "en" });
         }
       }}
-      className="rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1 text-xs font-medium hover:border-zinc-500"
+      className="rounded-[var(--radius-sm)] bg-white px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-[#f2f2f2]"
     >
       {copied ? labelCopied : labelCopy}
     </button>

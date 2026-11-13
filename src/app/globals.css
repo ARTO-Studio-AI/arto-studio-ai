@@ -188,6 +188,40 @@ h1 { letter-spacing: -0.035em; }
 .asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) .text-zinc-300 {
   color: #e4e4e7;
 }
+/* Recuadros azules: toda letra blanca; el acento de texto y los puntos pasan a blanco; una
+ * insignia azul dentro de un recuadro azul pasa a lima con letra negra (como el mockup). */
+.asai-site .asai-blue,
+.asai-blue {
+  --color-zinc-300: rgba(255, 255, 255, 0.6);
+  --color-zinc-400: #ffffff;
+  --color-zinc-500: #ffffff;
+  --color-zinc-600: #ffffff;
+  --color-zinc-700: #ffffff;
+  --color-zinc-800: #ffffff;
+  --color-zinc-900: #ffffff;
+  --color-zinc-200: rgba(255, 255, 255, 0.3);
+}
+.asai-blue :is(.text-\[var\(--accent\)\], .text-\[var\(--accent-ink\)\], .text-\[var\(--ink-2\)\], .text-\[var\(--ink-3\)\], .text-black, .text-zinc-300):not(:is(.bg-white, .bg-\[var\(--lime\)\]), :is(.bg-white, .bg-\[var\(--lime\)\]) *) {
+  color: #ffffff;
+}
+/* Un menu o tarjeta blanca dentro de un recuadro azul vuelve a la escala de lima. */
+.asai-blue :is(.bg-white, .bg-\[var\(--lime\)\]) {
+  --color-zinc-200: rgba(0, 0, 0, 0.14);
+  --color-zinc-300: rgba(0, 0, 0, 0.28);
+  --color-zinc-400: #5a6600;
+  --color-zinc-500: #4a5400;
+  --color-zinc-600: #3d4500;
+  --color-zinc-700: #262b00;
+  --color-zinc-800: #111111;
+  --color-zinc-900: #000000;
+}
+.asai-blue .bg-\[var\(--accent\)\] {
+  background-color: var(--lime);
+  color: #000000;
+}
+.asai-blue .bg-\[var\(--accent\)\]:hover:not(:disabled) {
+  background-color: var(--lime-hover);
+}
 /* Sobre negro el acento de texto es lima, nunca azul (2.5:1). */
 .asai-site :is(.bg-zinc-900, .bg-zinc-950, .bg-black, .bg-indigo, .bg-indigo-2, .bg-\[var\(--indigo\)\], .bg-\[var\(--dark\)\], .asai-dark) :is(.text-\[var\(--accent\)\], .text-\[var\(--accent-ink\)\], .text-accent, .text-accent-ink) {
   color: var(--lime);
@@ -219,4 +253,10 @@ h1 { letter-spacing: -0.035em; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Video del hero: con movimiento reducido se queda el poster (el corredor). */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+  .hero-poster { display: block; }
 }

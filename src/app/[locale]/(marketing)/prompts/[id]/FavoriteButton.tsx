@@ -26,7 +26,7 @@ export default function FavoriteButton({
     return (
       <a
         href="/login"
-        className="flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-500"
+        className="flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-black/30 px-3 py-1 text-xs font-medium text-black hover:border-black"
       >
         <span aria-hidden>♡</span> {labelSignIn}
       </a>
@@ -62,8 +62,8 @@ export default function FavoriteButton({
         aria-pressed={favorited}
         className={`flex items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-xs font-medium transition disabled:opacity-50 ${
           favorited
-            ? "border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700"
-            : "border-zinc-300 text-zinc-700 hover:border-zinc-500"
+            ? "border-zinc-900 bg-black text-white hover:bg-zinc-700"
+            : "border-black/30 text-black hover:border-black"
         }`}
       >
         <span aria-hidden>{favorited ? "♥" : "♡"}</span>

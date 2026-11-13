@@ -147,41 +147,46 @@ export default async function PricingPage({ params, searchParams }: Props) {
       <div className="mb-12 text-center">
         <h1 className="text-h1 tracking-tight">{t.h1}</h1>
         <span className="accent-rule mx-auto mt-4" />
-        <p className="mx-auto mt-4 max-w-lg text-zinc-600">{t.sub}</p>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-500">{t.value_note}</p>
-        <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-zinc-500">{t.launch_note}</p>
+        <p className="mx-auto mt-4 max-w-lg text-[var(--ink-2)]">{t.sub}</p>
+        <p className="mx-auto mt-4 max-w-xl text-sm text-[var(--ink-2)]">{t.value_note}</p>
+        <p className="mx-auto mt-2 max-w-xl font-mono text-[11px] text-[var(--ink-2)]">{t.launch_note}</p>
       </div>
 
       {promoUnavailable && (
-        <p role="alert" className="mx-auto mb-8 max-w-xl rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-4 py-3 text-center text-sm text-zinc-700">
+        <p role="alert" className="mx-auto mb-8 max-w-xl rounded-[var(--radius-lg)] border border-[var(--line)] bg-white px-4 py-3 text-center text-sm text-black">
           {getDictionary(locale).promo.unavailable}
         </p>
       )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((tier) => (
-          <Card key={tier.key} highlight={tier.highlight} className={`relative flex flex-col ${tier.soon ? "bg-zinc-50" : ""}`}>
+          /* Marca v2.0: Pro es la tarjeta azul destacada (letra blanca, boton blanco, insignia lima). */
+          <Card
+            key={tier.key}
+            tone={tier.highlight ? "blue" : "white"}
+            className={`relative flex flex-col ${tier.highlight ? "shadow-[0_18px_50px_rgba(30,0,255,0.28)] lg:-translate-y-3" : ""}`}
+          >
             {tier.soon && (
-              <Badge tone="soon" className="absolute -top-3 left-4 bg-white">
+              <Badge tone="soon" className="absolute -top-3 left-4">
                 {t.coming_soon}
               </Badge>
             )}
             {tier.highlight && (
-              <Badge tone="inverse" className="absolute -top-3 left-4">
+              <Badge tone="tier" className="absolute -top-3 left-4 border-black">
                 {t.most_popular}
               </Badge>
             )}
             <h2 className="text-lg font-bold">{tier.name}</h2>
-            <p className="mt-0.5 text-sm text-zinc-500">{tier.tagline}</p>
+            <p className="mt-0.5 text-sm text-[var(--ink-2)]">{tier.tagline}</p>
             <div className="mt-4 min-h-[3.25rem]">
               {tier.usd === null ? (
-                <span className="font-mono text-sm text-zinc-500">{t.no_price_yet}</span>
+                <span className="font-mono text-sm text-[var(--ink-2)]">{t.no_price_yet}</span>
               ) : (
                 <PromoPrice copy={tier.key === "pro" ? promoCopy : null} locale={locale}>
                   <span className="font-mono text-3xl font-bold tracking-tight">{tier.price}</span>
-                  <span className="ml-1.5 font-mono text-xs text-zinc-500">{tier.period}</span>
+                  <span className="ml-1.5 font-mono text-xs text-[var(--ink-2)]">{tier.period}</span>
                   {showMxn && tier.usd > 0 && (
-                    <p className="mt-1 font-mono text-[11px] text-zinc-500">
+                    <p className="mt-1 font-mono text-[11px] text-[var(--ink-2)]">
                       {t.mxn_note.replace("{mxn}", mxn(tier.usd))}
                     </p>
                   )}
@@ -191,13 +196,13 @@ export default async function PricingPage({ params, searchParams }: Props) {
             <ul className="mt-6 flex-1 space-y-2">
               {tier.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm">
-                  <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-                  <span className="text-zinc-600">{f}</span>
+                  <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${tier.highlight ? "bg-[var(--lime)]" : "bg-[var(--accent)]"}`} aria-hidden="true" />
+                  <span className={tier.highlight ? "text-white" : "text-[var(--ink-2)]"}>{f}</span>
                 </li>
               ))}
             </ul>
             {tier.key === "pro" ? (
-              <ProCheckoutButton href={tier.ctaHref} locale={locale} signedIn={signedIn} className="mt-6 w-full">
+              <ProCheckoutButton href={tier.ctaHref} locale={locale} signedIn={signedIn} variant="white" className="mt-6 w-full">
                 {tier.cta}
               </ProCheckoutButton>
             ) : (
@@ -210,35 +215,39 @@ export default async function PricingPage({ params, searchParams }: Props) {
       </div>
 
       <div className="mx-auto mt-12 max-w-2xl text-center">
-        <p className="text-xs text-zinc-500">{t.footnote}</p>
+        <p className="text-xs text-[var(--ink-2)]">{t.footnote}</p>
       </div>
 
-      <div className="mt-16 border-t border-zinc-200 pt-16">
+      <div className="mt-16 border-t border-[var(--line)] pt-16">
         <h2 className="text-h2 text-center">{t.compare_h2}</h2>
         <span className="accent-rule mx-auto mb-8 mt-4" />
-        <div className="overflow-x-auto">
+        {/* Tabla en recuadro blanco; la columna Pro (indice 2) va en azul con letra blanca. */}
+        <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--line)] bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 text-left">
-                {t.compare_th.map((h) => (
-                  <th key={h} className="py-3 pr-4 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">
+              <tr className="border-b border-[var(--line)] text-left">
+                {t.compare_th.map((h, i) => (
+                  <th
+                    key={h}
+                    className={`px-4 py-3 font-mono text-[11px] font-medium uppercase tracking-[0.12em] ${i === 2 ? "bg-[var(--accent)] text-white" : "text-[var(--ink-2)]"}`}
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="text-zinc-600">
+            <tbody className="text-[var(--ink-2)]">
               {t.compare_rows.map(([feature, ...tiers]) => (
-                <tr key={feature} className="border-b border-zinc-100">
-                  <td className="py-2.5 pr-4 font-medium text-zinc-900">{feature}</td>
+                <tr key={feature} className="border-b border-[var(--line)] last:border-b-0">
+                  <td className="px-4 py-2.5 font-medium text-black">{feature}</td>
                   {tiers.map((val, i) => (
-                    <td key={i} className="py-2.5 pr-4 font-mono text-xs">
+                    <td key={i} className={`px-4 py-2.5 font-mono text-xs ${i === 1 ? "bg-[var(--accent)] text-white" : ""}`}>
                       {val === "yes" ? (
-                        <span role="img" aria-label={t.compare_yes} className="inline-block h-2 w-2 rounded-full bg-[var(--accent)]" />
+                        <span role="img" aria-label={t.compare_yes} className={`inline-block h-2 w-2 rounded-full ${i === 1 ? "bg-white" : "bg-[var(--accent)]"}`} />
                       ) : val === "no" ? (
-                        <span className="text-zinc-300">&mdash;</span>
+                        <span className={i === 1 ? "text-white" : "text-[var(--ink-3)]"}>&mdash;</span>
                       ) : val === "soon" ? (
-                        <span className="text-zinc-500">{t.compare_soon}</span>
+                        <span className={i === 1 ? "text-white" : "text-[var(--ink-2)]"}>{t.compare_soon}</span>
                       ) : (
                         val
                       )}
@@ -252,17 +261,17 @@ export default async function PricingPage({ params, searchParams }: Props) {
       </div>
 
       {/* FAQ — shared purchase-friction questions, native accordion */}
-      <div className="mt-16 border-t border-zinc-200 pt-16">
+      <div className="mt-16 border-t border-[var(--line)] pt-16">
         <h2 className="text-h2 text-center">{faqDict.faq_h2}</h2>
         <span className="accent-rule mx-auto mb-8 mt-4" />
-        <div className="mx-auto max-w-3xl divide-y divide-zinc-200">
+        <div className="mx-auto max-w-3xl divide-y divide-[var(--line)]">
           {faqDict.faq.map((item) => (
             <details key={item.q} className="group py-4">
-              <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-zinc-900 marker:content-none">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-black marker:content-none">
                 {item.q}
-                <span className="text-zinc-500 transition group-open:rotate-45">+</span>
+                <span className="text-[var(--ink-2)] transition group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-zinc-600">{item.a}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--ink-2)]">{item.a}</p>
             </details>
           ))}
         </div>

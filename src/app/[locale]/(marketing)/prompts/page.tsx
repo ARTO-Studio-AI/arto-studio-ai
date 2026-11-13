@@ -49,8 +49,8 @@ const AI_GROUP_LIST: AiGroup[] = ["text","image","video","music","voice","any"];
 /* Pildoras de filtro (H-70, D28): solo la activa va rellena; las demas en contorno. En celular
  * miden 44 px de alto para el dedo; desde sm vuelven a su tamano compacto. */
 const PILL = "inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1 text-xs sm:min-h-0";
-const PILL_ACTIVE = `${PILL} bg-zinc-900 font-semibold text-white`;
-const PILL_OUTLINE = `${PILL} border border-zinc-300 bg-white text-zinc-700 hover:border-zinc-900`;
+const PILL_ACTIVE = `${PILL} bg-black font-semibold text-white`;
+const PILL_OUTLINE = `${PILL} border border-black/30 bg-white text-black hover:border-black`;
 
 interface SearchParams {
   category?: string;
@@ -156,7 +156,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-h1">{dict.catalog}</h1>
-          <p className="mt-1 font-mono text-sm text-zinc-500">
+          <p className="mt-1 font-mono text-sm text-[var(--ink-2)]">
             {total.toLocaleString()} {total === 1 ? "prompt" : "prompts"} · {dict.page_label(page, totalPages || 1)}
           </p>
         </div>
@@ -164,7 +164,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         {!signedIn && (
           <Link
             href={`/${locale}/login?next=${encodeURIComponent(`/${locale}/prompts`)}`}
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 transition hover:border-zinc-900"
+            className="inline-flex items-center gap-2 rounded-full border border-black/30 bg-white px-3 py-1.5 text-xs font-medium text-black transition hover:border-black"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />
             {locale === "es" ? "Crea tu cuenta gratis para abrir los prompts" : "Create your free account to open the prompts"}
@@ -182,14 +182,14 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
       <div className="mt-4"><SmartSearch lang={lang} /></div>
 
-      <div className="mt-4 space-y-3 rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 text-sm">
+      <div className="mt-4 space-y-3 rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-4 text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-zinc-500">{dict.category}</span>
+          <span className="w-24 shrink-0 text-[var(--ink-2)]">{dict.category}</span>
           {CATEGORIES.map((v) => {
             const active = sp.category === v;
             const style = CATEGORY_STYLES[v];
             const next = qs({ category: active ? "" : v, page: "1" });
-            const cls = active ? PILL_ACTIVE : `${PILL} ${style.chip} hover:bg-zinc-200`;
+            const cls = active ? PILL_ACTIVE : `${PILL} ${style.chip} hover:bg-[var(--lime)]`;
             return (
               <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
@@ -200,12 +200,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-zinc-500">{dict.ai_tool}</span>
+          <span className="w-24 shrink-0 text-[var(--ink-2)]">{dict.ai_tool}</span>
           {AI_GROUP_LIST.map((v) => {
             const active = sp.group === v;
             const meta = AI_GROUPS[v];
             const next = qs({ group: active ? "" : v, page: "1" });
-            const cls = active ? PILL_ACTIVE : `${PILL} ${meta.chip} hover:bg-zinc-100`;
+            const cls = active ? PILL_ACTIVE : `${PILL} ${meta.chip} hover:bg-[var(--lime)]`;
             return (
               <Link key={v} href={next} className={cls} aria-current={active ? "true" : undefined}>
                 {active && <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" aria-hidden="true" />}
@@ -216,7 +216,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-zinc-500">{dict.difficulty}</span>
+          <span className="w-24 shrink-0 text-[var(--ink-2)]">{dict.difficulty}</span>
           {DIFFICULTIES.map((v) => {
             const active = sp.difficulty === v;
             const next = qs({ difficulty: active ? "" : v, page: "1" });
@@ -228,7 +228,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                 ) : (
                   <span className="flex items-center gap-0.5" aria-hidden="true">
                     {[1, 2, 3, 4].map((i) => (
-                      <span key={i} className={`h-1.5 w-1.5 rounded-full ${i <= dots ? "bg-zinc-700" : "bg-zinc-300"}`} />
+                      <span key={i} className={`h-1.5 w-1.5 rounded-full ${i <= dots ? "bg-black" : "bg-black/20"}`} />
                     ))}
                   </span>
                 )}
@@ -239,7 +239,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-24 shrink-0 text-zinc-500">{dict.tier}</span>
+          <span className="w-24 shrink-0 text-[var(--ink-2)]">{dict.tier}</span>
           {TIERS.map((v) => {
             const active = sp.tier === v;
             const style = TIER_STYLES[v];
@@ -256,7 +256,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
         {(sp.category || sp.difficulty || sp.tier || sp.group || sp.q) && (
           <div>
-            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="inline-flex min-h-[44px] items-center text-xs text-zinc-500 underline sm:min-h-0">
+            <Link href={qs({ category: "", difficulty: "", tier: "", group: "", q: "", page: "1" })} className="inline-flex min-h-[44px] items-center text-xs text-[var(--ink-2)] underline sm:min-h-0">
               {dict.clear_filters}
             </Link>
           </div>
@@ -264,7 +264,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       </div>
 
       {prompts.length === 0 ? (
-        <p className="mt-12 text-zinc-500">{dict.no_match}</p>
+        <p className="mt-12 text-[var(--ink-2)]">{dict.no_match}</p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {prompts.map((p) => {
@@ -279,12 +279,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               <li key={p.id}>
                 <Link
                   href={`/${locale}/prompts/${p.id}`}
-                  className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] border border-zinc-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-[var(--shadow-md)]"
+                  className="group relative block h-full overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-4 transition hover:-translate-y-0.5 hover:border-black hover:shadow-[var(--shadow-md)]"
                   title={locked ? proDict.card_locked_title : undefined}
                   data-locked={locked ? "true" : undefined}
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-zinc-500">{p.id}</span>
+                    <span className="font-mono text-[var(--ink-2)]">{p.id}</span>
                     <div className="flex items-center gap-1.5">
                       {p.is_featured && <span title="Editor's pick" className="text-[var(--accent)]" aria-label="Featured">★</span>}
                       <Badge tone={p.tier === "free" ? "tier" : "inverse"} dot={locked ? false : undefined}>
@@ -304,7 +304,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     </span>
                   </div>
                   {locked && (
-                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 group-hover:text-zinc-900">
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--ink-2)] group-hover:text-[var(--accent)]">
                       <LockIcon className="h-3 w-3" />
                       {proDict.card_locked}
                     </p>
@@ -320,12 +320,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         <nav className="mt-10 flex items-center justify-between text-sm">
           <Link
             href={qs({ page: String(Math.max(1, page - 1)) })}
-            className={`rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1.5 ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-zinc-900"}`}
+            className={`rounded-[var(--radius-sm)] border border-black/30 px-3 py-1.5 ${page === 1 ? "pointer-events-none opacity-40" : "hover:border-black"}`}
           >{dict.previous}</Link>
-          <span className="text-zinc-500">{dict.page_label(page, totalPages)}</span>
+          <span className="text-[var(--ink-2)]">{dict.page_label(page, totalPages)}</span>
           <Link
             href={qs({ page: String(Math.min(totalPages, page + 1)) })}
-            className={`rounded-[var(--radius-sm)] border border-zinc-300 px-3 py-1.5 ${page >= totalPages ? "pointer-events-none opacity-40" : "hover:border-zinc-900"}`}
+            className={`rounded-[var(--radius-sm)] border border-black/30 px-3 py-1.5 ${page >= totalPages ? "pointer-events-none opacity-40" : "hover:border-black"}`}
           >{dict.next}</Link>
         </nav>
       )}

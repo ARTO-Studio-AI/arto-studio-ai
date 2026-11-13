@@ -17,18 +17,21 @@ export default function ProCheckoutButton({
   locale,
   signedIn,
   className = "",
+  variant = "primary",
   children,
 }: {
   href: string;
   locale: Locale;
   signedIn: boolean;
   className?: string;
+  /** "white" dentro de la tarjeta azul de Pro (marca v2.0). */
+  variant?: "primary" | "white";
   children: ReactNode;
 }) {
   return (
     <a
       href={href}
-      className={buttonClass("primary", "md", className)}
+      className={buttonClass(variant, "md", className)}
       onClick={() => {
         track("checkout_started", { plan: "pro", price_usd: 9, locale, signed_in: signedIn });
         const promo = currentPromo();
