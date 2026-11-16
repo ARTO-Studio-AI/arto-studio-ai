@@ -698,7 +698,7 @@
           "es": "En ChatGPT entrega el storyboard y el proyecto de animación; el video se hace en Claude Code.",
           "en": "In ChatGPT it delivers the storyboard and the animation project; the video is rendered in Claude Code."
         },
-        "version": "1.0"
+        "version": "1.0.1"
       }
     }
   ]
