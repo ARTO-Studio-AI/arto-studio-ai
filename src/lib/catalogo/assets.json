@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T10:50:18.238Z",
+  "generatedAt": "2026-11-16T08:07:38.258Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -108,8 +108,8 @@
       "sha256": "bc4c292d0829200f8a54ec5348c8bd93b8a872a89dfee5316bc08c757111a8e9"
     },
     "arto-anima": {
-      "bytes": 690272,
-      "sha256": "3f368a2649306cdaf8651c895d2897d5115a38fa4e616d4dd50d42d0bb904031"
+      "bytes": 693836,
+      "sha256": "1d60dfe814d95d2d7b107b352037f22c51ff0d4f4cf2610add4e7a2da256846d"
     },
     "arto-edit-bundle-1": {
       "bytes": 2566629,
