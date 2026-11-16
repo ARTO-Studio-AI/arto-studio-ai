@@ -66,3 +66,9 @@ export const MODS: readonly Mod[] = ALL_MODS.filter((m) => m.status !== "hidden"
 export function formatModDate(iso: string, locale: Locale): string {
   return new Date(`${iso}T12:00:00Z`).toLocaleDateString(locale === "es" ? "es-MX" : "en-US", { day: "numeric", month: "long", timeZone: "UTC" });
 }
+
+/** Si la fecha de salida de un mod en «muy pronto» ya paso (16 nov 2026: /mods decia «Sale el
+ * 9 de noviembre» una semana despues). La pagina deja de prometer el dia y dice «Muy pronto». */
+export function releasePassed(iso: string, now: Date = new Date()): boolean {
+  return now.toISOString().slice(0, 10) > iso;
+}

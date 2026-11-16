@@ -6,7 +6,7 @@ import { Badge, Card } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCatalog } from "@/lib/catalogo/efectivo";
-import { formatModDate } from "@/lib/mods";
+import { formatModDate, releasePassed } from "@/lib/mods";
 import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
@@ -51,7 +51,11 @@ export default async function ModsPage({ params }: Props) {
                   <h2 className="text-lg font-bold">{mod.name}</h2>
                 </div>
                 <Badge tone={mod.status === "published" ? "live" : "soon"}>
-                  {mod.status === "published" ? t.status_published : `${t.status_upcoming} ${formatModDate(mod.releaseDate, locale)}`}
+                  {mod.status === "published"
+                    ? t.status_published
+                    : releasePassed(mod.releaseDate)
+                      ? t.status_soon
+                      : `${t.status_upcoming} ${formatModDate(mod.releaseDate, locale)}`}
                 </Badge>
               </div>
               <p className="mt-3 font-medium text-zinc-800">{c.tagline}</p>
