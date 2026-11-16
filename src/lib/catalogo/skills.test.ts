@@ -27,8 +27,8 @@ const EB_SLUGS = [
 describe("catalogo real", () => {
   it("el bundle sigue igual: 9 skills publicados en su orden, su categoria primero, el bundle publicado", () => {
     expect(real.PUBLIC_SKILLS.filter((s) => s.category === "edicion-de-video").map((s) => s.slug)).toEqual(EB_SLUGS);
-    expect(real.ALL_SKILLS.filter((s) => s.slug !== "arto-anima").every((s) => s.status === "published")).toBe(true);
-    expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia-y-negocio"]);
+    expect(real.ALL_SKILLS.every((s) => s.status === "published")).toBe(true);
+    expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video", "graficos-animados", "estrategia-y-negocio"]);
     expect(real.getCategory("edicion-de-video")?.access).toBe("edit-bundle-1");
     expect(real.getDownloadItem("arto-edit-bundle-1")).toEqual({
       slug: "arto-edit-bundle-1",
@@ -54,14 +54,14 @@ describe("catalogo real", () => {
     }
   });
 
-  // Pedido de la Bitacora del 6 nov: ARTO Anima sube oculto, en su categoria con la regla cuenta.
-  it("ARTO Anima entra oculto, con paquete y demo, en Graficos animados con la regla cuenta", () => {
+  // ARTO Anima subio oculto el 9 nov (Bitacora del 6 nov). Victor dijo «publicar» el 16 nov 2026.
+  it("ARTO Anima esta publicado, con paquete y demo, en Graficos animados con la regla cuenta", () => {
     const anima = real.ALL_SKILLS.find((s) => s.slug === "arto-anima");
-    expect(anima?.status).toBe("hidden");
+    expect(anima?.status).toBe("published");
     expect(anima?.category).toBe("graficos-animados");
     expect(real.getCategory("graficos-animados")?.access).toBe("cuenta");
-    expect(real.getSkill("arto-anima")).toBeNull();
-    expect(real.getDownloadItem("arto-anima")).toBeNull();
+    expect(real.getSkill("arto-anima")?.slug).toBe("arto-anima");
+    expect(real.getDownloadItem("arto-anima")).toMatchObject({ slug: "arto-anima", access: "cuenta", pagePath: "/skills/arto-anima" });
     expect(real.packageAvailable("arto-anima")).toBe(true);
     expect(real.demoOf("arto-anima").video).toBe("/skills/demos/arto-anima.mp4");
     // Regla 16: video, poster y al menos una imagen de ejemplo mas (2 imagenes en total).
@@ -144,8 +144,8 @@ describe("estados", () => {
     const m = await withCatalog();
     expect(m.getDownloadItem("arto-pro")).toMatchObject({ file: "arto-pro.skill", access: "pro", pagePath: "/skills/arto-pro" });
     const cats = m.publicCategories();
-    expect(cats.map((c) => c.category.slug)).toEqual(["edicion-de-video", "estrategia-y-negocio", "estrategia"]);
-    expect(cats[2].skills.map((s) => s.slug)).toEqual(["arto-pronto", "arto-pro"]);
+    expect(cats.map((c) => c.category.slug)).toEqual(["edicion-de-video", "graficos-animados", "estrategia-y-negocio", "estrategia"]);
+    expect(cats[3].skills.map((s) => s.slug)).toEqual(["arto-pronto", "arto-pro"]);
   });
 });
 
