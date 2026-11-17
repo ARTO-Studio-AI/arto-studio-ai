@@ -12,7 +12,7 @@ export default function ReviewCard({ review, locale }: { review: Review; locale:
       href={review.href}
       className="group grid gap-6 rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-5 shadow-[var(--shadow-sm)] transition-colors hover:border-black sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center sm:gap-8 sm:p-6"
     >
-      <div className="relative w-full max-w-[200px] overflow-hidden rounded-[var(--radius-md)] border-2 border-black bg-black sm:max-w-none">
+      <div className="relative w-full max-w-[140px] overflow-hidden rounded-[var(--radius-md)] border-2 border-black bg-black sm:max-w-none">
         <Image
           src={review.poster.src}
           alt=""
