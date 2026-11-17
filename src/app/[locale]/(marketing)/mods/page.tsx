@@ -7,6 +7,8 @@ import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCatalog } from "@/lib/catalogo/efectivo";
 import { formatModDate, releasePassed } from "@/lib/mods";
+import ReviewCard from "@/components/ReviewCard";
+import { REVIEWS, REVIEW_LABELS } from "@/lib/revisiones";
 import { localeOf, pageMetadata } from "@/lib/seo";
 
 interface Props {
@@ -39,6 +41,18 @@ export default async function ModsPage({ params }: Props) {
         <p className="mt-4 max-w-xl text-lg text-zinc-600">{t.hero_body}</p>
         <p className="mt-2 font-mono text-xs text-zinc-500">{t.hero_access}</p>
       </div>
+
+      {/* Revisiones publicas (17 nov 2026): herramientas de otras empresas con su revision en
+        * artostudio.ai. Van antes de los mods de Claude Code porque son lo mas reciente. */}
+      {REVIEWS.length > 0 && (
+        <div className="mb-12 grid gap-4">
+          <p className="text-eyebrow text-[var(--ink-2)]">{REVIEW_LABELS[locale].h2}</p>
+          <p className="max-w-xl text-[var(--ink-2)]">{REVIEW_LABELS[locale].intro}</p>
+          {REVIEWS.map((r) => (
+            <ReviewCard key={r.slug} review={r} locale={locale} />
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-4">
         {mods.map((mod) => {
