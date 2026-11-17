@@ -20,6 +20,8 @@ import BlogCover from "@/components/BlogCover";
 import { HOME_V2 } from "./home-v2-copy";
 import { PROOF_PROJECTS } from "./work/projects";
 import HomeSearch from "./HomeSearch";
+import ReviewCard from "@/components/ReviewCard";
+import { REVIEWS, REVIEW_LABELS } from "@/lib/revisiones";
 
 /* Each vertical maps to the catalog filter on /prompts. The code stays as
  * the display label, category is the DB enum used in the query. The human
@@ -316,6 +318,20 @@ export default async function HomePage({ params }: Props) {
           />
         </div>
       </section>
+
+      {/* LO ULTIMO QUE REVISAMOS (Victor, 17 nov 2026): la revision publica mas reciente, con
+        * enlace a /mods para ver todas. Va despues de los productos y antes de la seleccion. */}
+      {REVIEWS.length > 0 && (
+        <section className="border-t border-[var(--line)] py-16">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <SectionHead eyebrow={REVIEW_LABELS[locale].eyebrow} title={REVIEW_LABELS[locale].h2} />
+            <Link href={lp("/mods")} className="whitespace-nowrap text-sm text-[var(--ink-2)] hover:text-[var(--accent)]">
+              {locale === "es" ? "Ver todos los mods →" : "See all mods →"}
+            </Link>
+          </div>
+          <ReviewCard review={REVIEWS[0]} locale={locale} />
+        </section>
+      )}
 
       {/* FEATURED PROMPTS — live from Supabase */}
       {featured.length > 0 && (
