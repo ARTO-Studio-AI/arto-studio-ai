@@ -22,6 +22,34 @@ export interface Mod {
   author: string;
   license: string;
   copy: Record<Locale, { tagline: string; what: string; checked: string[] }>;
+  /** Paquete descargable (18 nov 2026, D37). Opcional: un mod sin paquete solo tiene ficha.
+   * El archivo vive en private/mods/<file> y solo sale por /api/mod-downloads, que compara la
+   * huella antes de entregarlo. */
+  package?: ModPackage;
+}
+
+export interface ModPackage {
+  /** Nombre dentro de private/mods. Solo letras, numeros, puntos y guiones; termina en .zip. */
+  file: string;
+  bytes: number;
+  sha256: string;
+}
+
+const PACKAGE_FILE_RE = /^[a-z0-9][a-z0-9.-]*\.zip$/;
+
+function isPackage(v: unknown): v is ModPackage {
+  const p = v as ModPackage | null;
+  return (
+    !!p &&
+    typeof p === "object" &&
+    typeof p.file === "string" &&
+    PACKAGE_FILE_RE.test(p.file) &&
+    !p.file.includes("..") &&
+    Number.isInteger(p.bytes) &&
+    p.bytes > 0 &&
+    typeof p.sha256 === "string" &&
+    /^[0-9a-f]{64}$/.test(p.sha256)
+  );
 }
 
 const isStr = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0;
@@ -44,6 +72,7 @@ export function parseMod(raw: unknown): Mod {
   if (!isStr(m.author)) throw bad("author");
   if (!isStr(m.license)) throw bad("license");
   if (!m.copy || !isCopy(m.copy.es) || !isCopy(m.copy.en)) throw bad("copy");
+  if (m.package !== undefined && !isPackage(m.package)) throw bad("package");
   return m;
 }
 

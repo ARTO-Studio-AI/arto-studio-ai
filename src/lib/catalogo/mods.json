@@ -4,9 +4,9 @@
       "code": "MOD01",
       "slug": "auto-handoff",
       "name": "auto-handoff",
-      "status": "coming_soon",
+      "status": "published",
       "releaseDate": "2026-11-09",
-      "version": "0.8.6-asai",
+      "version": "0.8.6-asai.2",
       "author": "Alex Hillman",
       "license": "MIT",
       "copy": {
@@ -30,6 +30,11 @@
             "Installation guide in Spanish and English"
           ]
         }
+      },
+      "package": {
+        "file": "auto-handoff.zip",
+        "bytes": 60945,
+        "sha256": "88cd536bdeaaa6205dc0f975a36b560c235880919456bec5edf085e1b6445300"
       }
     }
   ]

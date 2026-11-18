@@ -55,6 +55,11 @@ const nextConfig: NextConfig = {
     /* ARTO Edit Bundle #1 (Victor, 27 oct 2026): los .skill y el .zip viven fuera de public/ y solo los lee
      * la ruta de descarga, que revisa sesion y la regla de fecha o Pro. */
     "/api/skill-downloads/[slug]": ["./private/skills/**"],
+    /* MOD01 en Pro (18 nov 2026, D37): el zip del mod solo lo lee su ruta de descarga. */
+    "/api/mod-downloads/[slug]": ["./private/mods/**"],
+    /* Paginas de detalle de los mods (18 nov 2026): el texto vive en src/content/mods/*.md. */
+    "/[locale]/mods/[slug]": ["./src/content/mods/**"],
+    "/sitemap.xml": ["./src/content/mods/**"],
   },
   images: {
     remotePatterns: [

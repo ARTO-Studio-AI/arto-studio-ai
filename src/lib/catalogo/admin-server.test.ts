@@ -38,7 +38,7 @@ describe("estado", () => {
   });
 
   it("mismo estado: no escribe nada", async () => {
-    expect(await setCatalogStatus({ kind: "mod", slug: "auto-handoff", status: "coming_soon", actor: "v" })).toMatchObject({ changed: false });
+    expect(await setCatalogStatus({ kind: "mod", slug: "auto-handoff", status: "published", actor: "v" })).toMatchObject({ changed: false });
     expect(fake.db.catalog_status_log).toHaveLength(0);
   });
 

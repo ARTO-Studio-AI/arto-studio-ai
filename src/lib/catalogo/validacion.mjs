@@ -273,6 +273,13 @@ export function validateMod(raw) {
     if (!c || !isStr(c.tagline) || !isStr(c.what)) errors.push(`copy.${loc}: tagline y what`);
     if (!c || !Array.isArray(c.checked) || c.checked.length === 0 || !c.checked.every(isStr)) errors.push(`copy.${loc}.checked: lista de lo revisado`);
   }
+  if (m.package !== undefined) {
+    const p = m.package;
+    const ok =
+      p && typeof p === "object" && typeof p.file === "string" && /^[a-z0-9][a-z0-9.-]*\.zip$/.test(p.file) && !p.file.includes("..") &&
+      Number.isInteger(p.bytes) && p.bytes > 0 && typeof p.sha256 === "string" && /^[0-9a-f]{64}$/.test(p.sha256);
+    if (!ok) errors.push("package: { file: <slug>.zip, bytes, sha256 } completo");
+  }
   errors.push(...copyProblems(m.copy ?? {}, "copy"));
   return errors;
 }
