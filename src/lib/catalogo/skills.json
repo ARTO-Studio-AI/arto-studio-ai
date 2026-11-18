@@ -700,6 +700,100 @@
         },
         "version": "1.0.1"
       }
+    },
+    {
+      "slug": "arto-brief-creativo",
+      "status": "hidden",
+      "ficha": {
+        "slug": "arto-brief-creativo",
+        "order": 3,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "Brief Creativo",
+          "en": "Creative Brief"
+        },
+        "tagline": {
+          "es": "Lo que dijo tu cliente, en un brief de una página que firma antes de que abras un archivo.",
+          "en": "What your client said, in a one-page brief they sign before you open a file."
+        },
+        "what": {
+          "es": "Toma el audio de WhatsApp, la llamada o tus notas y lo ordena como lo ordena un estratega: el problema de negocio en una frase, a quién le habla, qué tiene que pensar o hacer esa persona y una sola idea. Si el encargo trae dos o tres ideas, te lo dice y elige una. Te entrega la tabla de lo que la pieza no es, los obligatorios, los entregables contados, las fechas y quién aprueba, más las preguntas que el cliente no ha contestado y el mensaje para pedirle la firma.",
+          "en": "It takes the voice note, the call or your notes and organizes them the way a strategist would: the business problem in one sentence, who it speaks to, what that person should think or do, and a single idea. If the request carries two or three ideas, it tells you and picks one. You get a table of what the piece is not, the must-haves, counted deliverables, dates and who approves, plus the questions your client hasn't answered and the message to ask for sign-off."
+        },
+        "you_say": {
+          "es": [
+            "Hazme el brief con lo que me dijo el cliente",
+            "El cliente me mandó un audio, pásalo a brief",
+            "Quiero que el cliente firme antes de empezar"
+          ],
+          "en": [
+            "Write a creative brief from this call",
+            "Turn these client notes into a brief",
+            "One-page brief for client sign-off"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT"
+          ],
+          "en": [
+            "Claude or ChatGPT"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
+        },
+        "version": "1.0"
+      }
+    },
+    {
+      "slug": "arto-llamada-a-propuesta",
+      "status": "hidden",
+      "ficha": {
+        "slug": "arto-llamada-a-propuesta",
+        "order": 4,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "De la Llamada a la Propuesta",
+          "en": "From Call to Proposal"
+        },
+        "tagline": {
+          "es": "Tu llamada con el prospecto, convertida en una propuesta de una página que mandas hoy.",
+          "en": "Your prospect call, turned into a one-page proposal you send today."
+        },
+        "what": {
+          "es": "Toma la transcripción o tus notas de la llamada y arma una propuesta que sí se lee: lo que entendiste de su problema con sus propias palabras, lo que propones en tres pasos, lo que recibe y cuándo, una opción recomendada y una alternativa con tus precios, lo que no incluye, vigencia de 15 días y el siguiente paso con fecha. Te deja el mensaje para mandarla y el seguimiento para tres días después. Si ya usaste Cotización Creativa, pega tu resultado y de ahí salen los precios.",
+          "en": "It takes the transcript or your call notes and builds a proposal people actually read: what you understood about their problem in their own words, what you propose in three steps, what they get and when, a recommended option and an alternative with your prices, what's not included, a 15-day validity and the next step with a date. It also writes the message to send it and the follow-up for three days later. If you already used Creative Quote, paste your result and the prices come from there."
+        },
+        "you_say": {
+          "es": [
+            "Acabo de salir de una llamada con un prospecto, hazme la propuesta",
+            "Mis propuestas son muy largas y nadie las lee",
+            "Arma la propuesta con lo que platicamos"
+          ],
+          "en": [
+            "Turn this sales call into a proposal",
+            "One-page proposal from my call notes",
+            "Write the follow-up for my proposal"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT",
+            "La transcripción o tus notas de la llamada"
+          ],
+          "en": [
+            "Claude or ChatGPT",
+            "The transcript or your call notes"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
+        },
+        "version": "1.0"
+      }
     }
   ]
 }
