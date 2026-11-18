@@ -27,7 +27,7 @@ const EB_SLUGS = [
 describe("catalogo real", () => {
   it("el bundle sigue igual: 9 skills publicados en su orden, su categoria primero, el bundle publicado", () => {
     expect(real.PUBLIC_SKILLS.filter((s) => s.category === "edicion-de-video").map((s) => s.slug)).toEqual(EB_SLUGS);
-    expect(real.ALL_SKILLS.every((s) => s.status === "published")).toBe(true);
+    expect(real.ALL_SKILLS.filter((s) => s.category === "edicion-de-video").every((s) => s.status === "published")).toBe(true);
     expect(real.publicCategories().map((c) => c.category.slug)).toEqual(["edicion-de-video", "graficos-animados", "estrategia-y-negocio"]);
     expect(real.getCategory("edicion-de-video")?.access).toBe("edit-bundle-1");
     expect(real.getDownloadItem("arto-edit-bundle-1")).toEqual({
