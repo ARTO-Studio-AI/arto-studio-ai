@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
  * del repo (src/content/mods/*.md), copiado de la pagina publica aprobada en Notion.
  *
  * Soporta: encabezados #, ##, ###; parrafos; listas con - y 1.; tablas con |; bloques ```;
- * linea ---; y en linea **negrita**, `codigo`, <b>, <code>, enlaces [texto](https://...).
+ * linea ---; y en linea **negrita**, `codigo`, <b>, <i>, <code>, enlaces [texto](https://...).
  * Todo se arma como elementos de React, asi que cualquier otro HTML sale escapado como texto.
  * Solo se enlazan URLs http(s) o rutas internas que empiezan con "/". */
 
@@ -80,12 +80,12 @@ export function parseBlocks(md: string): Block[] {
 
 function safeHref(url: string): string | null {
   if (/^https?:\/\/[^\s]+$/i.test(url)) return url;
-  if (/^\/[^/\s][^\s]*$/.test(url) || url === "/") return url;
+  if (/^\/[^/\\\s][^\s\\]*$/.test(url) || url === "/") return url;
   return null;
 }
 
 /* Tokens en linea. Se recorren en orden; lo que no es token queda como texto (escapado por React). */
-const INLINE = /<b>([\s\S]*?)<\/b>|<code>([\s\S]*?)<\/code>|\*\*([\s\S]+?)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)/g;
+const INLINE = /<b>([\s\S]*?)<\/b>|<code>([\s\S]*?)<\/code>|\*\*([\s\S]+?)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)|<i>([\s\S]*?)<\/i>/g;
 
 export function inline(text: string, keyPrefix = "i"): ReactNode[] {
   const out: ReactNode[] = [];
@@ -95,7 +95,8 @@ export function inline(text: string, keyPrefix = "i"): ReactNode[] {
   for (const m of clean.matchAll(INLINE)) {
     if (m.index! > last) out.push(clean.slice(last, m.index));
     const k = `${keyPrefix}-${n++}`;
-    if (m[1] !== undefined || m[3] !== undefined) out.push(<strong key={k}>{inline(m[1] ?? m[3], k)}</strong>);
+    if (m[7] !== undefined) out.push(<em key={k}>{inline(m[7], k)}</em>);
+    else if (m[1] !== undefined || m[3] !== undefined) out.push(<strong key={k}>{inline(m[1] ?? m[3], k)}</strong>);
     else if (m[2] !== undefined || m[4] !== undefined)
       out.push(
         <code key={k} className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[0.9em] text-zinc-800">
@@ -121,7 +122,7 @@ export function inline(text: string, keyPrefix = "i"): ReactNode[] {
 
 /** Texto plano de un fragmento con marcas (para comparar encabezados o sacar el titulo). */
 export function plain(text: string): string {
-  return text.replace(/<\/?(b|code)>/g, "").replace(/\*\*|`/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
+  return text.replace(/<\/?(b|code|i)>/g, "").replace(/\*\*|`/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
 }
 
 interface RenderOptions {

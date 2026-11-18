@@ -276,7 +276,7 @@ export class EffectiveCatalog {
       file: mod.package.file,
       bytes: mod.package.bytes,
       sha256: mod.package.sha256,
-      downloadName: `${mod.slug} - ASAI - V${mod.version}.zip`,
+      downloadName: `asai-mods ${mod.slug} ${mod.version}.zip`,
       pagePath: `/mods/${mod.slug}`,
       access: "pro",
     };

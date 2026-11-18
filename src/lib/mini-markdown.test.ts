@@ -31,4 +31,13 @@ describe("paginas de mods", () => {
     expect(getModPage("../etc", "es")).toBeNull();
     expect(getModPage("no-existe", "es")).toBeNull();
   });
+
+  it("pinta <i> como cursiva y no enlaza rutas con barra invertida", () => {
+    const md = "Un <i>aviso</i> y [raro](/\\\\evil.com) y [bien](/es/pricing)";
+    const html = renderToStaticMarkup(createElement(MiniMarkdown, { blocks: parseBlocks(md) }));
+    expect(html).toContain("<em>aviso</em>");
+    expect(html).not.toContain("&lt;i&gt;");
+    expect(html).not.toContain("evil.com\"");
+    expect(html).toContain('href="/es/pricing"');
+  });
 });

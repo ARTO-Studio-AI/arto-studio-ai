@@ -111,7 +111,7 @@ describe("Pro", () => {
       const res = await req("auto-handoff", { asai_consent: "all.v3-2026-10-22" });
       expect(res.status).toBe(200);
       expect(res.headers.get("content-type")).toBe("application/zip");
-      expect(res.headers.get("content-disposition")).toContain('filename="auto-handoff - ASAI - V0.8.6-asai.2.zip"');
+      expect(res.headers.get("content-disposition")).toContain('filename="asai-mods auto-handoff 0.8.6-asai.2.zip"');
       expect(res.headers.get("cache-control")).toContain("no-store");
       expect(res.headers.get("x-content-type-options")).toBe("nosniff");
       expect(String(readFile.mock.calls[0][0])).toMatch(/private[/\\]mods[/\\]auto-handoff\.zip$/);
