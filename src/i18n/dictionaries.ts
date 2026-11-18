@@ -498,6 +498,11 @@ export const DICTIONARIES = {
       newsletter_body: "One email per new mod. Nothing else.",
       newsletter_cta: "Notify me",
       back_link: "← See all plans",
+      details_link: "See the guide and the review",
+      download_cta: "Download the package",
+      download_note: "Included in the Pro plan. If you are not signed in, we ask you to sign in first.",
+      download_pricing: "See plans",
+      back_to_mods: "← All mods",
     },
     agents: {
       badge: "Coming soon",
@@ -1080,6 +1085,11 @@ export const DICTIONARIES = {
       newsletter_body: "Un correo por cada mod nuevo. Nada más.",
       newsletter_cta: "Avísame",
       back_link: "← Ver todos los planes",
+      details_link: "Ver la guía y la revisión",
+      download_cta: "Descargar el paquete",
+      download_note: "Incluido en el plan Pro. Si no has entrado a tu cuenta, te pedimos entrar primero.",
+      download_pricing: "Ver planes",
+      back_to_mods: "← Todos los mods",
     },
     agents: {
       badge: "Pronto",

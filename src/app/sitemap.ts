@@ -6,6 +6,7 @@ import { localizedPath, siteUrl } from "@/lib/seo";
 import { getCatalog } from "@/lib/catalogo/efectivo";
 import { EDIT_BUNDLE_PAGE } from "@/lib/edit-bundle/catalog";
 import { getAllTutorials } from "@/lib/tutorials";
+import { getModPage } from "@/lib/mod-pages";
 
 const SITE_URL = siteUrl();
 
@@ -31,7 +32,7 @@ function localizedEntry(locale: Locale, path: string) {
   return { url: `${SITE_URL}${localizedPath(locale, path)}`, alternates: { languages } };
 }
 
-const marketingPaths = (publishedSkills: readonly string[]) => [
+const marketingPaths = (publishedSkills: readonly string[], modPages: readonly string[] = []) => [
   { path: "/", changeFrequency: "weekly" as ChangeFreq, priority: 1.0 },
   { path: "/pricing", changeFrequency: "monthly" as ChangeFreq, priority: 0.9 },
   { path: "/roast", changeFrequency: "monthly" as ChangeFreq, priority: 0.8 },
@@ -41,6 +42,8 @@ const marketingPaths = (publishedSkills: readonly string[]) => [
   // Estado efectivo: manifiesto + /admin/skills, incluidos los subidos por admin.
   ...publishedSkills.map((slug) => ({ path: `/skills/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.7 })),
   { path: "/mods", changeFrequency: "weekly" as ChangeFreq, priority: 0.7 },
+  // Paginas de detalle de los mods publicados (18 nov 2026).
+  ...modPages.map((slug) => ({ path: `/mods/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.6 })),
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/prompts", changeFrequency: "daily" as ChangeFreq, priority: 0.9 },
@@ -55,8 +58,10 @@ const marketingPaths = (publishedSkills: readonly string[]) => [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const published = (await getCatalog()).skills.filter((s) => s.status === "published").map((s) => s.slug);
-  const paths = marketingPaths(published);
+  const catalog = await getCatalog();
+  const published = catalog.skills.filter((s) => s.status === "published").map((s) => s.slug);
+  const modPages = catalog.mods.filter((m) => m.status === "published" && getModPage(m.slug, DEFAULT_LOCALE)).map((m) => m.slug);
+  const paths = marketingPaths(published, modPages);
 
   // Marketing pages: cross-product of LOCALES × paths.
   const localized: SitemapEntry[] = LOCALES.flatMap((loc) =>

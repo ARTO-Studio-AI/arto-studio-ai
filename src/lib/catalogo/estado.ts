@@ -86,6 +86,17 @@ export type EffectiveSkill = CatalogSkill & Layered & { pkg: PackageRef | null }
 export type EffectiveBundle = CatalogBundle & Layered & { pkg: PackageRef | null };
 export type EffectiveMod = Mod & Layered & { file: PackageRef | null };
 
+/** Descarga de un mod del repo: archivo en private/mods con su huella. */
+export interface ModDownloadItem {
+  slug: string;
+  file: string;
+  bytes: number;
+  sha256: string;
+  downloadName: string;
+  pagePath: string;
+  access: AccessPolicy;
+}
+
 /** Descarga de un skill subido por admin: sale de Storage con URL firmada. */
 export type EffectiveDownloadItem = DownloadItem & { storagePath?: string };
 
@@ -252,6 +263,28 @@ export class EffectiveCatalog {
   packageAvailable(slug: string): boolean {
     const owner = this.skills.find((s) => s.slug === slug) ?? this.bundles.find((b) => b.slug === slug);
     return Boolean(owner?.pkg);
+  }
+
+  /** Descarga de un mod (18 nov 2026, D37: MOD01 en Pro). Solo mods del repo, publicados y con
+   * paquete declarado en mods.json. Los subidos por /admin no se descargan todavia: su regla no
+   * esta decidida (docs/ADDING_A_SKILL.md, seccion 3). La regla es siempre "pro". */
+  getModDownload(slug: string): ModDownloadItem | null {
+    const mod = this.mods.find((m) => m.slug === slug && m.status === "published" && m.source === "repo");
+    if (!mod?.package) return null;
+    return {
+      slug: mod.slug,
+      file: mod.package.file,
+      bytes: mod.package.bytes,
+      sha256: mod.package.sha256,
+      downloadName: `asai-mods ${mod.slug} ${mod.version}.zip`,
+      pagePath: `/mods/${mod.slug}`,
+      access: "pro",
+    };
+  }
+
+  /** Mod visible por slug (published o coming_soon). */
+  getMod(slug: string): EffectiveMod | null {
+    return this.mods.find((m) => m.slug === slug && m.status !== "hidden") ?? null;
   }
 
   /** Los mods que salen en /mods. */

@@ -2,11 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NewsletterForm from "@/components/NewsletterForm";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Button, Card } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getCatalog } from "@/lib/catalogo/efectivo";
 import { formatModDate, releasePassed } from "@/lib/mods";
+import { getModPage } from "@/lib/mod-pages";
 import ReviewCard from "@/components/ReviewCard";
 import { REVIEWS, REVIEW_LABELS } from "@/lib/revisiones";
 import { localeOf, pageMetadata } from "@/lib/seo";
@@ -29,7 +30,8 @@ export default async function ModsPage({ params }: Props) {
   if (!isLocale(localeParam)) notFound();
   const locale = localeParam as Locale;
   const t = getDictionary(locale).mods;
-  const mods = (await getCatalog()).publicMods();
+  const catalog = await getCatalog();
+  const mods = catalog.publicMods();
   const lp = (p: string) => `/${locale}${p.startsWith("/") ? p : "/" + p}`;
 
   return (
@@ -83,6 +85,21 @@ export default async function ModsPage({ params }: Props) {
               <p className="mt-4 font-mono text-xs text-zinc-400">
                 v{mod.version} · {mod.author} · {mod.license}
               </p>
+              {/* Detalle y descarga (18 nov 2026, D37): la guia aprobada y el boton de descarga Pro. */}
+              {(getModPage(mod.slug, locale) || catalog.getModDownload(mod.slug)) && (
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {getModPage(mod.slug, locale) && (
+                    <Button href={lp(`/mods/${mod.slug}`)} variant="secondary" size="sm">
+                      {t.details_link}
+                    </Button>
+                  )}
+                  {catalog.getModDownload(mod.slug) && (
+                    <Button href={`/api/mod-downloads/${mod.slug}?locale=${locale}`} size="sm" prefetch={false}>
+                      {t.download_cta}
+                    </Button>
+                  )}
+                </div>
+              )}
             </Card>
           );
         })}

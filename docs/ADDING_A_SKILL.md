@@ -129,7 +129,9 @@ node scripts/add-mod.mjs "<carpeta del mod>/mod.json" --coming-soon   # sale con
 node scripts/add-mod.mjs --estado <slug> published
 ```
 
-3. Pruebas, build, commit y PR. `/mods` lee el manifiesto con el estado del admin encima. La descarga de mods todavía no existe: el zip subido por el admin se guarda, pero no sale a nadie hasta que Victor decida la regla.
+3. Pruebas, build, commit y PR. `/mods` lee el manifiesto con el estado del admin encima. **Descarga (18 nov 2026, D37: MOD01 en Pro).** Un mod del repo se descarga si está en `published` y su entrada de `mods.json` trae `package: { file, bytes, sha256 }`. El zip va en `private/mods/<file>` (el auditado, sin tocar) y sale solo por `/api/mod-downloads/<slug>` con la regla `pro`: sin sesión pide entrar, cuenta gratis va a /pricing, Pro y Enterprise lo descargan. La ruta compara peso y SHA-256 con `mods.json` antes de entregar; si no coinciden, responde 503. La prueba `src/lib/mods-package.test.ts` falla si el zip del repo no es el declarado. La página de detalle `/mods/<slug>` lee `src/content/mods/<slug>.<es|en>.md` (la página pública aprobada).
+
+El zip subido por el admin se guarda, pero no sale a nadie hasta que Victor decida su regla.
 
 ## 4. Qué revisa Fable antes de publicar
 

@@ -186,8 +186,19 @@ describe("reglas de descarga", () => {
 });
 
 describe("mods", () => {
-  it("MOD01 sigue saliendo como proximo el 9 nov", () => {
-    expect(MODS.map((m) => [m.code, m.status, m.releaseDate])).toEqual([["MOD01", "coming_soon", "2026-11-09"]]);
+  it("MOD01 publicado con su paquete (18 nov 2026, D37)", () => {
+    expect(MODS.map((m) => [m.code, m.status, m.version])).toEqual([["MOD01", "published", "0.8.6-asai.2"]]);
+    expect(MODS[0].package?.file).toBe("auto-handoff.zip");
+  });
+
+  it("el paquete es opcional pero, si viene, completo y sin rutas", () => {
+    const m = structuredClone(ALL_MODS[0]);
+    const { package: _pkg, ...sin } = m;
+    void _pkg;
+    expect(parseMods({ mods: [sin] })[0].package).toBeUndefined();
+    for (const bad of [{ file: "../x.zip", bytes: 1, sha256: "a".repeat(64) }, { file: "x.zip", bytes: 0, sha256: "a".repeat(64) }, { file: "x.zip", bytes: 1, sha256: "zz" }, { file: "x.tar", bytes: 1, sha256: "a".repeat(64) }]) {
+      expect(() => parseMods({ mods: [{ ...m, package: bad }] })).toThrow(/package/);
+    }
   });
 
   it("hidden no sale en /mods y los repetidos truenan", () => {
