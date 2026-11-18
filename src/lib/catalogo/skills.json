@@ -703,7 +703,7 @@
     },
     {
       "slug": "arto-brief-creativo",
-      "status": "hidden",
+      "status": "published",
       "ficha": {
         "slug": "arto-brief-creativo",
         "order": 3,
@@ -746,12 +746,16 @@
           "es": "unos 5 minutos de conversación",
           "en": "about 5 minutes of conversation"
         },
-        "version": "1.0"
+        "version": "1.0",
+        "chatgpt_note": {
+          "es": "Lo probamos en Claude. En ChatGPT todavía no lo probamos.",
+          "en": "Tested in Claude. Not yet tested in ChatGPT."
+        }
       }
     },
     {
       "slug": "arto-llamada-a-propuesta",
-      "status": "hidden",
+      "status": "published",
       "ficha": {
         "slug": "arto-llamada-a-propuesta",
         "order": 4,
@@ -794,7 +798,11 @@
           "es": "unos 5 minutos de conversación",
           "en": "about 5 minutes of conversation"
         },
-        "version": "1.0"
+        "version": "1.0",
+        "chatgpt_note": {
+          "es": "Lo probamos en Claude. En ChatGPT todavía no lo probamos.",
+          "en": "Tested in Claude. Not yet tested in ChatGPT."
+        }
       }
     }
   ]
