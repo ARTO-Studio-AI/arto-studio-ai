@@ -82,12 +82,18 @@ export function parseFrontmatter(text) {
 
 /** Revisa el SKILL.md: frontmatter con name (= slug de la ficha) y description. */
 /** @param {string} text @param {unknown} slug @returns {string[]} */
+/** Limite de Claude para description en el frontmatter de SKILL.md. */
+export const MAX_DESCRIPTION = 1024;
+
 export function skillMdProblems(text, slug) {
   const fm = parseFrontmatter(text);
   if (!fm) return ["SKILL.md sin frontmatter (--- name / description ---)"];
   const out = [];
   if (!isStr(fm.name)) out.push("SKILL.md: falta name en el frontmatter");
   if (!isStr(fm.description)) out.push("SKILL.md: falta description en el frontmatter");
+  // Claude rechaza al subir un SKILL.md con description de mas de 1024 caracteres (18 nov 2026).
+  if (isStr(fm.description) && [...fm.description].length > MAX_DESCRIPTION)
+    out.push(`SKILL.md: description tiene ${[...fm.description].length} caracteres (maximo ${MAX_DESCRIPTION}; Claude no deja subirlo)`);
   if (isStr(fm.name) && isStr(slug) && fm.name !== slug) out.push(`SKILL.md: name «${fm.name}» no coincide con el slug de la ficha «${slug}»`);
   return out;
 }

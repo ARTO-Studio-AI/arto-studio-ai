@@ -282,6 +282,22 @@ describe("validacion compartida con /admin", () => {
     expect(lib.LIMITS).toBe(shared.LIMITS);
   });
 
+  it("rechaza una description de mas de 1024 caracteres, como Claude al subirlo (18 nov 2026)", () => {
+    const md = (n: number) => `---\nname: arto-prueba\ndescription: "${"a".repeat(n)}"\n---\n\n# Prueba\n`;
+    expect(shared.skillMdProblems(md(1024), "arto-prueba")).toEqual([]);
+    expect(shared.skillMdProblems(md(1025), "arto-prueba").some((e: string) => e.includes("1025 caracteres"))).toBe(true);
+  });
+
+  it("los paquetes publicados en private/skills caben en el limite de description", () => {
+    for (const s of realCatalog.skills) {
+      const pkg = path.join("private/skills", `${s.slug}.skill`);
+      if (!existsSync(pkg)) continue;
+      const md = shared.zipReadText(readFileSync(pkg), `${s.slug}/SKILL.md`);
+      if (md === null) continue;
+      expect(shared.skillMdProblems(md, s.slug), s.slug).toEqual([]);
+    }
+  });
+
   it("un skill bien armado pasa, sin comprimir y con deflate", () => {
     expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba"), categories: CATS })).toEqual([]);
     expect(shared.validateSkillUpload({ ficha: ficha(), pkg: skillPackage("arto-prueba", { deflate: true }), categories: CATS })).toEqual([]);
