@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T11:32:28.266Z",
+  "generatedAt": "2026-11-18T17:41:19.713Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -112,12 +112,12 @@
       "sha256": "1d60dfe814d95d2d7b107b352037f22c51ff0d4f4cf2610add4e7a2da256846d"
     },
     "arto-brief-creativo": {
-      "bytes": 6336,
-      "sha256": "31e89a2a83dbcf0978832f70803ed83f0b0ab3da9bd60fe037cae4122310fced"
+      "bytes": 6292,
+      "sha256": "418c1e075ab042af765c53499a36a14b72d6c17fcffcf7d1befeff20723074e7"
     },
     "arto-llamada-a-propuesta": {
-      "bytes": 5768,
-      "sha256": "21f47a292dc626e1cf982656b8bb4070ccc05fdfc5d137588cb761c1bac3161e"
+      "bytes": 5732,
+      "sha256": "6c91c7a10689dbd725dce434b85c1e7989b3c53fc4ff66708b834bb1cb4e2743"
     },
     "arto-edit-bundle-1": {
       "bytes": 2566629,
