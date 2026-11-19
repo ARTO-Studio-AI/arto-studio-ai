@@ -339,3 +339,12 @@ siguiente sesión.
 | **Registro** | Cada cambio queda en `promotion_changes` (quién, cuándo, de qué a qué) y se ve en la misma página. PostHog: `promo_bar_shown`, `promo_modal_shown`, `promo_cta_clicked` y `promo_expired_seen` llevan `promo_id` |
 | **Qué NO hacer** | No crear, editar ni borrar cupones o precios desde el código. No prender una promo con cupón sin pasar por la verificación (la base también lo impide: `coupon_verified_at` obligatorio si está prendida). No decidir el descuento en el navegador. No borrar filas de `promotions`: se apagan |
 | **Dónde** | `src/lib/promos/` (tipos y validación, elección, estado con caché de 60 s, verificación en Stripe, escrituras del admin), `src/lib/promo-server.ts` (cookie y decisión del checkout), `src/app/api/promo/route.ts`, `src/app/api/stripe/checkout/pro/route.ts`, `src/app/admin/promociones/`, `src/app/api/admin/promociones/`, `src/components/promo/`, `supabase/migrations/0022_promotions.sql` |
+
+### Páginas de mods revisados: una sola plantilla, la de Project NOMAD
+
+| | |
+|---|---|
+| **Quién** | Victor, 2026-11-19, al ver publicada la página de REA (PR #144): «el diseño es diferente y las páginas de los mods tienen que tener consistencia». Implementó Code en `feat/rea-plantilla-nomad` |
+| **Qué se decidió** | Toda revisión pública de un mod de terceros usa el diseño de la página de Project NOMAD (artostudio.ai/mods/project-nomad/): cabecera lima con migas, eyebrow, título con la palabra clave en marcatexto rosa, lead, meta, dos botones (repositorio oficial y pedir la ficha técnica) y el video vertical 9:16 a la derecha; cuerpo blanco con secciones a la izquierda (veredicto en panel negro, fallas en tarjetas con insignia negra y punto lima) y la ficha rápida lima fija a la derecha. El orden de una revisión es revisar, publicar y luego hacer el video explicativo, que se pone en la cabecera como en NOMAD |
+| **Dónde** | `src/app/[locale]/(marketing)/mods/revisiones/[slug]/page.tsx` (plantilla), `src/lib/revisiones.ts` (texto por sección y `media.video` cuando haya video) |
+| **Qué NO hacer** | No armar una revisión nueva con otro diseño ni con componentes sueltos: se agrega como entrada de `REVIEWS` con `page`. Sin video, la cabecera lleva el recuadro negro con el nombre en lima; cuando el video exista se llena `media.video` y no se cambia la URL |

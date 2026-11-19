@@ -1,15 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui";
 import { isLocale, LOCALES, type Locale } from "@/i18n/config";
 import { buildMetadata, clampDescription, localeOf, withBrand } from "@/lib/seo";
-import { getReviewPage, REVIEW_LABELS, REVIEWS, type FindingLevel } from "@/lib/revisiones";
+import { getReviewPage, REVIEW_LABELS, REVIEWS, type ReviewSection } from "@/lib/revisiones";
 
-/* Revision publica que vive en creative (19 nov 2026, REA). Mismo orden que la de Project NOMAD en
- * artostudio.ai: que es, recomendacion, lo que encontramos, como instalarlo, limites, ficha rapida.
- * El texto sale de src/lib/revisiones.ts. Marca v2.0: fondo lima, tarjetas blancas, paneles negros
- * con letra lima o blanca, boton azul con letra blanca. Sobre lima la letra nunca es blanca. */
+/* Pagina de un mod revisado (19 nov 2026). Plantilla unica: la misma de Project NOMAD en
+ * artostudio.ai/mods/project-nomad/, para que todas las paginas de mods se vean igual (Victor).
+ *   Cabecera lima: migas, eyebrow, titulo con la palabra clave en marcatexto rosa (letra negra),
+ *   lead, meta, botones (azul con letra blanca y blanco con borde negro) y, a la derecha, el video
+ *   vertical 9:16 con borde negro. Sin video, recuadro negro con el nombre en lima.
+ *   Cuerpo blanco: secciones a la izquierda (veredicto en panel negro, fallas en tarjetas con
+ *   insignia negra y punto lima) y la ficha rapida lima fija a la derecha.
+ * Sobre lima la letra nunca es blanca. El texto sale de src/lib/revisiones.ts. */
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -32,22 +35,83 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: review.href,
     title: withBrand(page.metaTitle),
     description: clampDescription(page.metaDescription),
+    ogImage: page.media.video?.poster,
   });
 }
 
-function LevelChip({ level, label }: { level: FindingLevel; label: string }) {
-  /* Medio: negro con letra lima. Bajo: blanco con borde y letra negra. */
-  const cls = level === "medio" ? "bg-black text-[var(--lime)] border-black" : "bg-white text-black border-black";
-  return <span className={`inline-flex rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] ${cls}`}>{label}</span>;
+const H2 = "text-[clamp(1.5rem,2.8vw,2rem)] font-extrabold leading-[1.08] tracking-[-0.03em]";
+const BTN = "inline-flex items-center justify-center rounded-[var(--radius-sm)] border px-[18px] py-3 text-[15px] font-semibold leading-tight transition-colors";
+const BTN_PRIMARY = `${BTN} border-transparent bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)] hover:text-white`;
+const BTN_SECONDARY = `${BTN} border-black bg-white text-black hover:bg-[var(--lime-hover)] hover:text-black`;
+
+function Head({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <>
+      <p className="text-eyebrow text-[var(--ink-2)]">{eyebrow}</p>
+      <h2 className={H2}>{title}</h2>
+      <span className="accent-rule" />
+    </>
+  );
 }
 
-function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+function Section({ s, mailto }: { s: ReviewSection; mailto: string }) {
+  if (s.kind === "verdict") {
+    return (
+      <section className="asai-dark grid gap-2.5 rounded-[var(--radius-lg)] bg-black p-7 text-white">
+        <p className="text-eyebrow text-[var(--lime)]">{s.eyebrow}</p>
+        <strong className="block text-[clamp(1.25rem,2.4vw,1.6rem)] font-extrabold leading-[1.2] tracking-[-0.02em]">{s.strong}</strong>
+        <p>{s.body}</p>
+      </section>
+    );
+  }
+  const List = s.kind === "list" && s.ordered ? "ol" : "ul";
   return (
-    <section className="border-t border-[var(--line)] py-12">
-      <p className="text-eyebrow text-[var(--ink-2)]">{eyebrow}</p>
-      <h2 className="text-h2 mt-2">{title}</h2>
-      <span className="accent-rule mt-4" />
-      <div className="mt-6">{children}</div>
+    <section className="grid gap-3">
+      <Head eyebrow={s.eyebrow} title={s.title} />
+      {s.kind === "text" && s.paragraphs.map((t) => <p key={t} className="max-w-[62ch]">{t}</p>)}
+      {s.kind === "flags" && (
+        <>
+          <p className="max-w-[62ch]">{s.intro}</p>
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            {s.flags.map((f) => (
+              <div key={f.title} className="grid content-start gap-2 rounded-[var(--radius-lg)] border border-black/30 bg-white p-[22px]">
+                <span className="inline-flex items-center gap-1.5 justify-self-start rounded-full bg-black px-2.5 py-0.5 font-mono text-[10.5px] uppercase leading-[18px] tracking-[0.08em] text-white">
+                  <span className="size-1.5 rounded-full bg-[var(--lime)]" aria-hidden />
+                  {f.badge}
+                </span>
+                <h3 className="text-[19px] font-extrabold leading-[1.2] tracking-[-0.03em]">{f.title}</h3>
+                <p className="text-[15px]">{f.body}</p>
+              </div>
+            ))}
+          </div>
+          {s.more && s.more.length > 0 && (
+            <>
+              {s.moreLabel && <p>{s.moreLabel}</p>}
+              <ul className="grid max-w-[62ch] list-disc gap-2 pl-[22px] marker:font-bold marker:text-[var(--accent)]">
+                {s.more.map((t) => <li key={t}>{t}</li>)}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+      {s.kind === "list" && (
+        <>
+          {s.intro && <p className="max-w-[62ch]">{s.intro}</p>}
+          <List className={`grid max-w-[62ch] gap-2 pl-[22px] marker:font-bold marker:text-[var(--accent)] ${s.ordered ? "list-decimal" : "list-disc"}`}>
+            {s.items.map((t) => <li key={t} className="break-words">{t}</li>)}
+          </List>
+          {s.outro?.map((t) => <p key={t} className="max-w-[62ch] break-words">{t}</p>)}
+          {s.askNote && (
+            <p className="max-w-[62ch]">
+              {s.askNote}{" "}
+              <a href={mailto} className="underline decoration-[var(--accent)] underline-offset-[3px]">
+                {CONTACT}
+              </a>
+              .
+            </p>
+          )}
+        </>
+      )}
     </section>
   );
 }
@@ -59,132 +123,88 @@ export default async function ReviewPage({ params }: Props) {
   const review = getReviewPage(slug);
   const p = review?.page?.[locale];
   if (!review || !p) notFound();
-  const l = REVIEW_LABELS[locale];
   const lp = (path: string) => `/${locale}${path}`;
   const mailto = `mailto:${CONTACT}?subject=${encodeURIComponent(`${p.askLabel}: ${review.name} ${review.version}`)}`;
+  const actions = (
+    <>
+      <a href={p.repoUrl} target="_blank" rel="noopener noreferrer" className={BTN_PRIMARY}>
+        {p.repoLabel}
+      </a>
+      <a href={mailto} className={BTN_SECONDARY}>
+        {p.askLabel}
+      </a>
+    </>
+  );
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
-      <Link href={lp("/mods")} className="text-sm text-[var(--ink-2)] hover:text-black">
-        {p.back}
-      </Link>
-
-      <header className="mt-6">
-        <p className="text-eyebrow text-[var(--ink-2)]">{l.eyebrow} · Creative</p>
-        <h1 className="text-h1 mt-3">{p.h1}</h1>
-        <span className="accent-rule mt-4" />
-        <p className="mt-5 max-w-[60ch] text-lg text-[var(--ink-2)]">{p.lead}</p>
-        <p className="mt-4 font-mono text-xs text-[var(--ink-2)]">{p.meta}</p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button href={p.repoUrl} external size="lg">
-            {p.repoLabel}
-          </Button>
-          <Button href={mailto} external variant="secondary" size="lg">
-            {p.askLabel}
-          </Button>
+    <div className="text-black">
+      {/* Cabecera lima con el video */}
+      <section className="bg-[var(--lime)]">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-16 pt-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-14">
+          <div className="grid min-w-0 gap-5">
+            <p className="font-mono text-[13px] text-[var(--ink-2)]">
+              <Link href={lp("/")} className="hover:text-black hover:underline">
+                ← {p.crumbs.home}
+              </Link>{" "}
+              /{" "}
+              <Link href={lp("/mods")} className="hover:text-black hover:underline">
+                {p.crumbs.mods}
+              </Link>
+            </p>
+            <p className="text-eyebrow text-[var(--ink-2)]">{REVIEW_LABELS[locale].eyebrow} · Creative</p>
+            <h1 className="text-balance text-[clamp(2.3rem,5.4vw,4.2rem)] font-extrabold leading-[1.02] tracking-[-0.035em]">
+              {p.h1} <span className="serif-accent">{p.h1Key}</span>
+            </h1>
+            <p className="max-w-[46ch] text-lg leading-relaxed">{p.lead}</p>
+            <p className="font-mono text-[12.5px] text-[var(--ink-2)]">{p.meta}</p>
+            <div className="flex flex-wrap gap-2.5">{actions}</div>
+          </div>
+          <figure className="grid justify-items-center gap-2.5">
+            {p.media.video ? (
+              <video
+                controls
+                preload="metadata"
+                playsInline
+                poster={p.media.video.poster}
+                className="block aspect-[9/16] w-full max-w-[340px] rounded-[var(--radius-lg)] border-2 border-black bg-black"
+              >
+                <source src={p.media.video.src} type="video/mp4" />
+              </video>
+            ) : (
+              <div className="flex aspect-[9/16] w-full max-w-[280px] flex-col justify-between rounded-[var(--radius-lg)] border-2 border-black bg-black p-6 lg:max-w-[340px]">
+                <span className="text-eyebrow text-[var(--lime)]">{REVIEW_LABELS[locale].eyebrow}</span>
+                <span className="text-6xl font-extrabold leading-none tracking-tight text-[var(--lime)]">{review.name}</span>
+                <span className="font-mono text-xs text-[var(--lime)]">{p.media.tag}</span>
+              </div>
+            )}
+            <figcaption className="text-center font-mono text-xs text-[var(--ink-2)]">{p.media.caption}</figcaption>
+          </figure>
         </div>
-      </header>
+      </section>
 
-      <div className="mt-12">
-        <Section eyebrow={p.what.eyebrow} title={p.what.title}>
-          <div className="grid gap-4 text-[17px] leading-relaxed">
-            {p.what.paragraphs.map((t) => (
-              <p key={t}>{t}</p>
+      {/* Cuerpo blanco con la ficha rapida a la derecha */}
+      <div className="bg-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-14 px-6 pb-[72px] pt-14 text-base leading-relaxed lg:grid-cols-[minmax(0,1fr)_300px]">
+          <article className="grid min-w-0 gap-10">
+            {p.sections.map((s, i) => (
+              <Section key={i} s={s} mailto={mailto} />
             ))}
-          </div>
-        </Section>
-
-        {/* Recomendacion en panel negro: letra blanca y lima sobre negro. */}
-        <section className="asai-dark my-4 rounded-[var(--radius-lg)] bg-black p-6 text-white sm:p-8">
-          <p className="text-eyebrow text-[var(--lime)]">{p.recommendation.eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl">{p.recommendation.title}</h2>
-          <ul className="mt-5 grid gap-2 text-[17px]">
-            {p.recommendation.items.map((t) => (
-              <li key={t} className="flex gap-3">
-                <span className="text-[var(--lime)]">✓</span>
-                <span>{t}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-5 max-w-[60ch] text-[15px] text-white/85">{p.recommendation.note}</p>
-        </section>
-
-        <Section eyebrow={p.found.eyebrow} title={p.found.title}>
-          <p className="max-w-[60ch] text-[17px]">{p.found.intro}</p>
-          <ul className="mt-5 grid gap-2.5">
-            {p.found.good.map((t) => (
-              <li key={t} className="flex gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-4 text-[15px]">
-                <span className="font-bold text-[var(--accent-ink)]">✓</span>
-                <span>{t}</span>
-              </li>
-            ))}
-          </ul>
-          <h3 className="mt-10 text-xl font-extrabold">{p.found.findingsTitle}</h3>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {p.found.findings.map((f) => (
-              <div key={f.title} className="rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-5">
-                <LevelChip level={f.level} label={p.levels[f.level]} />
-                <h4 className="mt-3 font-bold">{f.title}</h4>
-                <p className="mt-1.5 text-[15px] text-[var(--ink-2)]">{f.body}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        <Section eyebrow={p.install.eyebrow} title={p.install.title}>
-          <ol className="grid gap-3">
-            {p.install.steps.map((t, i) => (
-              <li key={t} className="flex gap-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-white p-4 text-[15px]">
-                <span className="font-mono text-sm font-bold text-[var(--accent-ink)]">{i + 1}</span>
-                <span className="min-w-0 break-words">{t}</span>
-              </li>
-            ))}
-          </ol>
-          <h3 className="mt-8 font-bold">{p.install.uninstallTitle}</h3>
-          <p className="mt-1.5 break-words text-[15px]">{p.install.uninstall}</p>
-          <p className="mt-6 max-w-[60ch] text-[15px] text-[var(--ink-2)]">
-            {p.install.askNote}{" "}
-            <a href={mailto} className="font-semibold text-[var(--accent-ink)] underline underline-offset-2">
-              {CONTACT}
-            </a>
-            .
-          </p>
-        </Section>
-
-        <Section eyebrow={p.limits.eyebrow} title={p.limits.title}>
-          <ul className="grid list-disc gap-2 pl-5 text-[15px]">
-            {p.limits.items.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
-          </ul>
-          <p className="mt-5 font-semibold">{p.limits.next}</p>
-        </Section>
-
-        <section className="rounded-[var(--radius-lg)] border-2 border-black bg-white p-6 sm:p-8">
-          <h2 className="text-xl font-extrabold">{p.facts.title}</h2>
-          <dl className="mt-4 grid gap-0 text-[15px]">
-            {p.facts.rows.map(([k, v]) => (
-              <div key={k} className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-t border-[var(--line)] py-2.5 first:border-t-0">
-                <dt className="text-[var(--ink-2)]">{k}</dt>
-                <dd className="font-semibold">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button href={p.repoUrl} external>
-              {p.repoLabel}
-            </Button>
-            <Button href={mailto} external variant="secondary">
-              {p.askLabel}
-            </Button>
-          </div>
-        </section>
-
-        <p className="mt-8 font-mono text-xs leading-relaxed text-[var(--ink-2)]">{p.disclaimer}</p>
-        <div className="mt-8 text-center">
-          <Link href={lp("/mods")} className="text-sm text-[var(--ink-2)] hover:text-black">
-            {p.back}
-          </Link>
+          </article>
+          <aside className="grid gap-3.5 lg:sticky lg:top-24">
+            <div className="grid gap-3.5 rounded-[var(--radius-lg)] bg-[var(--lime)] p-[22px]">
+              <p className="text-eyebrow text-[var(--ink-2)]">{p.facts.title}</p>
+              <dl className="grid gap-2.5">
+                {p.facts.rows.map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-2)]">{k}</dt>
+                    <dd className="mt-0.5 break-words text-[15px] font-semibold">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="grid gap-2.5">{actions}</div>
+            </div>
+            <p className="font-mono text-xs text-[var(--ink-3)]">{p.disclaimer}</p>
+          </aside>
         </div>
       </div>
     </div>
