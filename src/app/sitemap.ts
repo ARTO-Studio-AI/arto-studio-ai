@@ -7,6 +7,7 @@ import { getCatalog } from "@/lib/catalogo/efectivo";
 import { EDIT_BUNDLE_PAGE } from "@/lib/edit-bundle/catalog";
 import { getAllTutorials } from "@/lib/tutorials";
 import { getModPage } from "@/lib/mod-pages";
+import { getReviewPage, REVIEWS } from "@/lib/revisiones";
 
 const SITE_URL = siteUrl();
 
@@ -44,6 +45,8 @@ const marketingPaths = (publishedSkills: readonly string[], modPages: readonly s
   { path: "/mods", changeFrequency: "weekly" as ChangeFreq, priority: 0.7 },
   // Paginas de detalle de los mods publicados (18 nov 2026).
   ...modPages.map((slug) => ({ path: `/mods/${slug}`, changeFrequency: "monthly" as ChangeFreq, priority: 0.6 })),
+  // Revisiones publicas que viven en creative (19 nov 2026, REA).
+  ...REVIEWS.filter((r) => getReviewPage(r.slug)).map((r) => ({ path: r.href, changeFrequency: "monthly" as ChangeFreq, priority: 0.6 })),
   { path: "/agents", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/work", changeFrequency: "monthly" as ChangeFreq, priority: 0.7 },
   { path: "/prompts", changeFrequency: "daily" as ChangeFreq, priority: 0.9 },
