@@ -44,3 +44,12 @@ export function downloadAccess(viewer: Viewer, now: Date = new Date()): Download
 export function priceLabel(now: Date = new Date()): "free" | "pro" {
   return isPromoActive(now) ? "free" : "pro";
 }
+
+/* La descripcion para buscadores y redes de /edit-bundle-1 dice «Gratis hasta el 30 nov» solo mientras dura
+ * la promocion (tarea del 18 nov 2026). Sin esto, el 1 dic seguiria prometiendo la descarga gratis. */
+export function editBundleMetaDescription(
+  t: { meta_description: string; meta_description_promo: string },
+  now: Date = new Date(),
+): string {
+  return isPromoActive(now) ? t.meta_description_promo : t.meta_description;
+}

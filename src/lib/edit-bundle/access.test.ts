@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EDIT_BUNDLE_FREE_UNTIL, downloadAccess, isPromoActive, isProTier, priceLabel, type Viewer } from "./access";
+import { getDictionary } from "@/i18n/dictionaries";
+import { EDIT_BUNDLE_FREE_UNTIL, downloadAccess, editBundleMetaDescription, isPromoActive, isProTier, priceLabel, type Viewer } from "./access";
 
 /* Corte de la promocion del ARTO Edit Bundle #1 (Victor, 27 oct 2026): gratis con cuenta hasta el 30 nov de
  * 2026 inclusive en hora de Ciudad de Mexico (extendida el 6 nov); desde el 1 dic 00:00 CDMX (06:00 UTC), solo Pro. */
@@ -84,5 +85,16 @@ describe("priceLabel", () => {
   it("dice Gratis hasta el 7 nov antes del corte y Pro despues", () => {
     expect(priceLabel(BEFORE)).toBe("free");
     expect(priceLabel(CUTOFF)).toBe("pro");
+  });
+});
+
+describe("editBundleMetaDescription", () => {
+  const dicts = [getDictionary("es").edit_bundle, getDictionary("en").edit_bundle];
+  it("menciona el 30 nov solo durante la promocion", () => {
+    for (const t of dicts) {
+      expect(editBundleMetaDescription(t, new Date("2026-11-23T12:00:00Z"))).toMatch(/30 nov|Nov 30/i);
+      const after = editBundleMetaDescription(t, new Date("2026-12-01T12:00:00Z"));
+      expect(after).not.toMatch(/30 nov|Nov 30|gratis hasta|free until/i);
+    }
   });
 });

@@ -475,6 +475,8 @@ export const DICTIONARIES = {
       ],
       meta_title: "ARTO Edit Bundle #1: 9 skills so Claude edits your videos",
       meta_description:
+        "9 Claude Code skills for vertical video: cuts, captions, text behind you, pop-up cards, headlines, color, zooms, sound and a Director. Included in Pro.",
+      meta_description_promo:
         "9 Claude Code skills for vertical video: cuts, captions, text behind you, pop-up cards, headlines, color, zooms, sound and a Director. Free until Nov 30 with a free account.",
     },
     mods: {
@@ -1062,6 +1064,8 @@ export const DICTIONARIES = {
       ],
       meta_title: "ARTO Edit Bundle #1: 9 skills para que Claude edite tus videos",
       meta_description:
+        "9 skills de Claude Code para video vertical: cortes, subtítulos, letras detrás, recuadros, titulares, color, zooms, sonido y un Director. Incluidos en Pro.",
+      meta_description_promo:
         "9 skills de Claude Code para video vertical: cortes, subtítulos, letras detrás, recuadros, titulares, color, zooms, sonido y un Director. Gratis hasta el 30 nov con cuenta gratis.",
     },
     mods: {

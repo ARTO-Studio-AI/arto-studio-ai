@@ -7,7 +7,7 @@ import SkillCard from "@/components/edit-bundle/SkillCard";
 import { Badge } from "@/components/ui";
 import { isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import { isPromoActive } from "@/lib/edit-bundle/access";
+import { editBundleMetaDescription, isPromoActive } from "@/lib/edit-bundle/access";
 import { getCatalog } from "@/lib/catalogo/efectivo";
 import { EDIT_BUNDLE_CATEGORY, EDIT_BUNDLE_PAGE, EDIT_BUNDLE_SLUG } from "@/lib/edit-bundle/catalog";
 import { getViewer } from "@/lib/edit-bundle/viewer";
@@ -21,8 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: raw } = await params;
   const locale = localeOf(raw);
   const t = getDictionary(locale).edit_bundle;
-  return buildMetadata({ locale, path: EDIT_BUNDLE_PAGE, title: `${t.meta_title} · ARTO Studio AI`, description: t.meta_description });
+  return buildMetadata({ locale, path: EDIT_BUNDLE_PAGE, title: `${t.meta_title} · ARTO Studio AI`, description: editBundleMetaDescription(t, new Date()) });
 }
+
+/* La etiqueta y la descripcion dependen de la hora: sin esto podrian quedar fijas desde el build. */
+export const dynamic = "force-dynamic";
 
 /* Landing del ARTO Edit Bundle #1 (Victor, 27 oct 2026): es el enlace del DM «Comenta EDITA». Hero con el
  * boton principal (crear cuenta y descargar el bundle completo), las 9 tarjetas con su demo,
