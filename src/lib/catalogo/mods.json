@@ -36,6 +36,43 @@
         "bytes": 60945,
         "sha256": "88cd536bdeaaa6205dc0f975a36b560c235880919456bec5edf085e1b6445300"
       }
+    },
+    {
+      "code": "MOD02",
+      "slug": "blast-radius",
+      "name": "blast-radius",
+      "status": "hidden",
+      "releaseDate": "2026-11-25",
+      "version": "0.1.0-asai.1",
+      "author": "Claude Code DevRel (Anthropic)",
+      "license": "Apache-2.0",
+      "copy": {
+        "es": {
+          "tagline": "Antes de que Claude corra un comando de terminal peligroso, lo detiene y te enseña qué cambiaría.",
+          "what": "Cuando Claude va a borrar una carpeta, descartar cambios de git, forzar un push o tocar una base de datos, el mod detiene el comando, mide qué cambiaría y te deja elegir Proceder o Cancelar. Instalas la copia que revisamos, con nuestro ajuste. Revisado, listo, como red de seguridad y no como candado.",
+          "checked": [
+            "Código leído completo en una versión fija, con huellas SHA-256",
+            "Qué ejecuta, qué lee y qué sale de tu equipo",
+            "Prueba en vivo con permisos en modo bypass",
+            "Guía de instalación en español"
+          ]
+        },
+        "en": {
+          "tagline": "Before Claude runs a risky shell command, it holds it and shows you what it would change.",
+          "what": "When Claude is about to delete a folder, throw away git changes, force a push or touch a database, the mod holds the command, measures what it would change and lets you choose Proceed or Cancel. You install the copy we reviewed, with our adjustment. Reviewed, ready, as a safety net and not as a lock.",
+          "checked": [
+            "Full code read at a pinned version, with SHA-256 checksums",
+            "What it runs, what it reads and what leaves your machine",
+            "Live test with permissions in bypass mode",
+            "Installation guide in Spanish and English"
+          ]
+        }
+      },
+      "package": {
+        "file": "blast-radius.zip",
+        "bytes": 31755,
+        "sha256": "10faf87d8aec4b48457dd476216b29212542348da40bb638daeb2fe4e3060bd4"
+      }
     }
   ]
 }

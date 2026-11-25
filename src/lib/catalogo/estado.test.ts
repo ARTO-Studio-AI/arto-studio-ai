@@ -125,7 +125,7 @@ describe("subidos por admin (catalog_items)", () => {
     const base = structuredClone(ALL_MODS[0]) as unknown as Record<string, unknown>;
     delete base.status;
     const mod = (slug: string, code: string): UploadedRow => ({ kind: "mod", slug, ficha: { ...base, slug, code }, storage_path: null, bytes: null, sha256: null, uploaded_by: "v", updated_at: at });
-    const c = buildCatalog(state([ov("mod", "mod-nuevo", "coming_soon")], [mod("mod-nuevo", "MOD02"), mod("mod-oculto", "MOD03"), mod("otro-slug", "MOD01")]));
+    const c = buildCatalog(state([ov("mod", "mod-nuevo", "coming_soon")], [mod("mod-nuevo", "MOD90"), mod("mod-oculto", "MOD91"), mod("otro-slug", "MOD01")]));
     expect(c.publicMods().map((m) => m.slug)).toEqual(["auto-handoff", "mod-nuevo"]);
     expect(c.find("mod", "mod-oculto")?.status).toBe("hidden");
     expect(c.find("mod", "otro-slug")).toBeNull();

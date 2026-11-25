@@ -116,7 +116,7 @@ describe("subir un skill", () => {
 describe("subir un mod", () => {
   const base = () => {
     const m = structuredClone(ALL_MODS[0]) as unknown as Record<string, unknown>;
-    return { ...m, code: "MOD02", slug: "mod-nuevo" };
+    return { ...m, code: "MOD90", slug: "mod-nuevo" };
   };
 
   it("entra oculto y el estado no se guarda en la ficha", async () => {
@@ -130,6 +130,6 @@ describe("subir un mod", () => {
     await rejects(uploadMod({ mod: { ...base(), code: "MOD01" }, file: null, actor: "v" }), 409, /repo/);
     await rejects(uploadMod({ mod: { ...base(), slug: "auto-handoff" }, file: null, actor: "v" }), 409, /repo/);
     await uploadMod({ mod: base(), file: null, actor: "v" });
-    await rejects(uploadMod({ mod: { ...base(), slug: "otro-mod" }, file: null, actor: "v" }), 409, /MOD02/);
+    await rejects(uploadMod({ mod: { ...base(), slug: "otro-mod" }, file: null, actor: "v" }), 409, /MOD90/);
   });
 });

@@ -262,10 +262,10 @@ describe("mods", () => {
   });
 
   it("un mod nuevo entra oculto y no puede robar un codigo", () => {
-    const nuevo = { ...mod01, code: "MOD02", slug: "otro-mod" };
+    const nuevo = { ...mod01, code: "MOD90", slug: "otro-mod" };
     const r = upsertMod(realMods, nuevo);
     expect(r.status).toBe("hidden");
-    expect(r.manifest.mods).toHaveLength(2);
+    expect(r.manifest.mods).toHaveLength(realMods.mods.length + 1);
     expect(() => upsertMod(realMods, { ...nuevo, code: "MOD01" })).toThrow(/ya es de «auto-handoff»/);
   });
 });
