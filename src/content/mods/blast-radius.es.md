@@ -21,7 +21,7 @@ Lo que instalas es nuestro ajuste, <code>blast-radius-asai</code>: el código de
 
 ## Para qué te sirve
 
-- <b>Trabajas con permisos en modo bypass.</b> En ese modo Claude no te pide permiso antes de cada comando. En nuestra prueba, blast-radius fue la única barrera que vimos funcionar ahí: detuvo <code>rm -rf build</code>, <code>git reset --hard</code>, <code>git push --force origin main</code> y <code>git clean -fd</code>, y al presionar Cancelar todo quedó intacto.
+- <b>Trabajas con permisos en modo bypass.</b> En ese modo Claude no te pide permiso antes de cada comando. En nuestra primera prueba, con el original, blast-radius fue la única barrera que vimos funcionar ahí: detuvo <code>rm -rf build</code>, <code>git reset --hard</code>, <code>git push --force origin main</code> y <code>git clean -fd</code>, y al presionar Cancelar todo quedó intacto.
 - <b>Decidir viendo lo que se pierde.</b> El recuadro lista los archivos que se borrarían, los cambios sin guardar que se descartarían, los commits del remoto que un force push tiraría o las rutas sin seguimiento que <code>git clean</code> quitaría.
 - <b>Comandos escondidos dentro de otros.</b> El original no revisa lo que va dentro de <code>bash -c</code>, <code>eval</code>, <code>xargs</code> o <code>timeout</code>. Nuestro ajuste sí: en la prueba en vivo con el ajuste, <code>bash -c 'rm -rf build'</code> se detuvo.
 - <b>Bases de datos y despliegue.</b> El ajuste suma comandos que el original no conoce, entre ellos el reset de base de Supabase, <code>psql</code> con <code>drop</code> o <code>truncate</code>, <code>vercel env rm</code>, <code>drizzle-kit push</code> y <code>git branch -D</code>. La lista completa está en <code>CAMBIOS-ASAI.md</code>.
@@ -40,7 +40,7 @@ Nuestro veredicto lo dice en una frase: <b>como red de seguridad, no como candad
 - <b>Una Mac.</b> Lo probamos en vivo en Mac, con Claude Code 2.1.308.
 - <b>La app de escritorio de Claude con Claude Code 2.1.287 o más.</b> La app traía 2.1.308 en nuestra revisión. La instalación la hace Claude desde una sesión de Claude Code. En nuestra revisión, el <code>claude</code> de la Terminal estaba en 2.1.77 y no cargaba el mod.
 - <b>Alguien frente a la pantalla.</b> El mod espera a que presiones un botón. En una tarea programada, una rutina, <code>/loop</code> o una sesión sin pantalla, nuestro ajuste rechaza el comando al instante y le pide a Claude que te avise. Eso frena la corrida, así que no lo instales en una máquina que trabaja sola.
-- <b>bash, git, find y du.</b> Son las herramientas con las que mide; la Mac ya las trae.
+- <b>bash, git, find y du.</b> Son las herramientas con las que mide; el autor las pide instaladas.
 
 ## Instalación desde Claude Code
 
@@ -153,8 +153,8 @@ Un mod corre código en tu computadora, dentro de tus sesiones de Claude. Por es
 <b>Qué revisamos, en concreto:</b>
 
 - Leímos línea a línea el código de una <b>versión exacta</b> (el commit <code>569c528</code>, una foto fija del código en GitHub).
-- Red: ninguna. No lee variables de entorno ni escribe archivos. Lee solo lo que necesita para contar archivos.
-- Procesos que lanza para medir: <code>sleep</code> (para esperar tu respuesta), <code>find</code>, <code>du</code>, comandos de solo lectura de git (<code>git status</code>, <code>git diff --shortstat</code>, <code>git clean -n</code>, <code>git log</code>) y, para migraciones, el comando de estado de cada herramienta. Las rutas van como argumentos, así que nada en ellas se ejecuta.
+- Red: ninguna. No escribe archivos y lee solo lo que necesita para contar archivos. El código del autor no lee variables de entorno; nuestro ajuste lee una sola, <code>BLAST_RADIUS_ASAI</code>, el interruptor que lo apaga.
+- Procesos que lanza para medir: <code>sleep</code> (para esperar tu respuesta), <code>bash -c</code> con un guion fijo que recibe las rutas como argumentos, <code>find</code>, <code>du</code>, comandos de solo lectura de git (<code>git status</code>, <code>git diff --shortstat</code>, <code>git clean -n</code>, <code>git rev-parse</code>, <code>git log</code>) y, para migraciones, el comando de estado de cada herramienta. Las rutas van como argumentos, así que nada en ellas se ejecuta.
 - Si algo falla mientras mide o espera, rechaza el comando.
 - El validador de Claude Code (<code>claude plugin validate</code>, versión 2.1.308) aprobó el mod.
 - Anotamos cada hallazgo con su riesgo y su mitigación, y decimos por escrito <b>qué no verificamos.</b> En esta versión: cómo se ve el recuadro en la pestaña Code de la app, el rechazo a los 10 minutos con alguien enfrente que no contesta, el comportamiento con subagentes, las migraciones en vivo, qué tan seguido falla la detección en un día normal de trabajo, la instalación pegando el mensaje dentro de la app en una Mac nueva, Windows, Linux y cualquier versión posterior a la indicada.
@@ -162,7 +162,7 @@ Un mod corre código en tu computadora, dentro de tus sesiones de Claude. Por es
 <b>Qué ajustamos nosotros (y solo esto):</b>
 
 - <b>Comandos envueltos.</b> Revisa lo que va dentro de <code>bash -c</code>, <code>sh -c</code>, <code>zsh -c</code>, <code>eval</code>, <code>xargs</code>, <code>timeout</code> y otros envoltorios, y lo que corre dentro de <code>docker exec</code> o <code>ssh</code>.
-- <b>Comandos de bases de datos y despliegue</b> que el original no conoce: Supabase, <code>psql</code> con <code>drop</code> o <code>truncate</code>, Vercel, <code>drizzle-kit push</code>, <code>git branch -D</code>, <code>git stash drop</code> y otros.
+- <b>Comandos de bases de datos y despliegue</b> que el original no conoce: Supabase, <code>psql</code> con <code>drop</code> o <code>truncate</code>, Vercel, <code>drizzle-kit push</code>, <code>git branch -D</code>, <code>git stash drop</code> y otros. También detiene <code>psql</code> o <code>mysql</code> cuando el SQL llega por archivo o por un pipe y no se puede leer.
 - <b>Sin nadie enfrente, rechazo al instante</b> en lugar de esperar 10 minutos.
 - <b>Un interruptor</b>: <code>BLAST_RADIUS_ASAI=off</code> lo apaga.
 

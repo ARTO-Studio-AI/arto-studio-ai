@@ -21,7 +21,7 @@ What you install is our adjustment, <code>blast-radius-asai</code>: the author's
 
 ## What it does for you
 
-- <b>You work with permissions in bypass mode.</b> In that mode Claude does not ask before each command. In our test, blast-radius was the only barrier we saw working there: it held <code>rm -rf build</code>, <code>git reset --hard</code>, <code>git push --force origin main</code> and <code>git clean -fd</code>, and after Cancel everything was untouched.
+- <b>You work with permissions in bypass mode.</b> In that mode Claude does not ask before each command. In our first test, with the original, blast-radius was the only barrier we saw working there: it held <code>rm -rf build</code>, <code>git reset --hard</code>, <code>git push --force origin main</code> and <code>git clean -fd</code>, and after Cancel everything was untouched.
 - <b>Deciding with the loss in front of you.</b> The box lists the files that would be deleted, the uncommitted changes that would be thrown away, the remote commits a force push would drop or the untracked paths <code>git clean</code> would remove.
 - <b>Commands hidden inside other commands.</b> The original does not look inside <code>bash -c</code>, <code>eval</code>, <code>xargs</code> or <code>timeout</code>. Our adjustment does: in the live test with the adjustment, <code>bash -c 'rm -rf build'</code> was held.
 - <b>Databases and deploys.</b> The adjustment adds commands the original does not know, among them the Supabase database reset, <code>psql</code> with <code>drop</code> or <code>truncate</code>, <code>vercel env rm</code>, <code>drizzle-kit push</code> and <code>git branch -D</code>. The full list is in <code>CAMBIOS-ASAI.md</code>.
@@ -40,7 +40,7 @@ Our verdict says it in one phrase: <b>as a safety net, not as a lock.</b> In pra
 - <b>A Mac.</b> We tested it live on a Mac, with Claude Code 2.1.308.
 - <b>The Claude desktop app with Claude Code 2.1.287 or later.</b> The app shipped 2.1.308 during our review. Claude does the installation from a Claude Code session. In our review, the Terminal's <code>claude</code> was on 2.1.77 and did not load the mod.
 - <b>Someone at the screen.</b> The mod waits for you to press a button. In a scheduled task, a routine, <code>/loop</code> or a headless session, our adjustment refuses the command at once and asks Claude to tell you. That stops the run, so do not install it on a machine that works on its own.
-- <b>bash, git, find and du.</b> These are the tools it measures with; a Mac already has them.
+- <b>bash, git, find and du.</b> These are the tools it measures with; the author asks for them to be installed.
 
 ## Installation from Claude Code
 
@@ -153,8 +153,8 @@ A mod runs code on your computer, inside your Claude sessions. That's why we don
 <b>What we checked, specifically:</b>
 
 - We read the code of an <b>exact version</b> line by line (commit <code>569c528</code>, a fixed snapshot of the code on GitHub).
-- Network: none. It reads no environment variables and writes no files. It reads only what it needs to count files.
-- Processes it starts to measure: <code>sleep</code> (to wait for your answer), <code>find</code>, <code>du</code>, read-only git commands (<code>git status</code>, <code>git diff --shortstat</code>, <code>git clean -n</code>, <code>git log</code>) and, for migrations, each tool's status command. Paths go in as arguments, so nothing in them runs.
+- Network: none. It writes no files and reads only what it needs to count files. The author's code reads no environment variables; our adjustment reads exactly one, <code>BLAST_RADIUS_ASAI</code>, the switch that turns it off.
+- Processes it starts to measure: <code>sleep</code> (to wait for your answer), <code>bash -c</code> with a fixed script that gets the paths as arguments, <code>find</code>, <code>du</code>, read-only git commands (<code>git status</code>, <code>git diff --shortstat</code>, <code>git clean -n</code>, <code>git rev-parse</code>, <code>git log</code>) and, for migrations, each tool's status command. Paths go in as arguments, so nothing in them runs.
 - If something fails while it measures or waits, it refuses the command.
 - Claude Code's validator (<code>claude plugin validate</code>, version 2.1.308) passed the mod.
 - We wrote down every finding with its risk and mitigation, and we state in writing <b>what we did not verify.</b> For this version: how the box looks in the app's Code tab, the refusal after 10 minutes with someone present who doesn't answer, behavior with subagents, migrations live, how often detection misses on a normal working day, installation by pasting the message into the app on a new Mac, Windows, Linux and any version after the one shown.
@@ -162,7 +162,7 @@ A mod runs code on your computer, inside your Claude sessions. That's why we don
 <b>What we adjusted (and only this):</b>
 
 - <b>Wrapped commands.</b> It looks inside <code>bash -c</code>, <code>sh -c</code>, <code>zsh -c</code>, <code>eval</code>, <code>xargs</code>, <code>timeout</code> and other wrappers, and at what runs inside <code>docker exec</code> or <code>ssh</code>.
-- <b>Database and deploy commands</b> the original doesn't know: Supabase, <code>psql</code> with <code>drop</code> or <code>truncate</code>, Vercel, <code>drizzle-kit push</code>, <code>git branch -D</code>, <code>git stash drop</code> and others.
+- <b>Database and deploy commands</b> the original doesn't know: Supabase, <code>psql</code> with <code>drop</code> or <code>truncate</code>, Vercel, <code>drizzle-kit push</code>, <code>git branch -D</code>, <code>git stash drop</code> and others. It also holds <code>psql</code> or <code>mysql</code> when the SQL comes from a file or a pipe and cannot be read.
 - <b>With nobody at the screen, an instant refusal</b> instead of waiting 10 minutes.
 - <b>A switch</b>: <code>BLAST_RADIUS_ASAI=off</code> turns it off.
 
