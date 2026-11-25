@@ -126,7 +126,7 @@ describe("subidos por admin (catalog_items)", () => {
     delete base.status;
     const mod = (slug: string, code: string): UploadedRow => ({ kind: "mod", slug, ficha: { ...base, slug, code }, storage_path: null, bytes: null, sha256: null, uploaded_by: "v", updated_at: at });
     const c = buildCatalog(state([ov("mod", "mod-nuevo", "coming_soon")], [mod("mod-nuevo", "MOD90"), mod("mod-oculto", "MOD91"), mod("otro-slug", "MOD01")]));
-    expect(c.publicMods().map((m) => m.slug)).toEqual(["auto-handoff", "mod-nuevo"]);
+    expect(c.publicMods().map((m) => m.slug)).toEqual(["auto-handoff", "blast-radius", "mod-nuevo"]);
     expect(c.find("mod", "mod-oculto")?.status).toBe("hidden");
     expect(c.find("mod", "otro-slug")).toBeNull();
     expect(c.issues).toEqual([expect.objectContaining({ kind: "mod", slug: "otro-slug" })]);

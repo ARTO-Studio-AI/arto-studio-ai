@@ -804,6 +804,110 @@
           "en": "Tested in Claude. Not yet tested in ChatGPT."
         }
       }
+    },
+    {
+      "slug": "arto-caso-de-estudio",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-caso-de-estudio",
+        "order": 5,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "Caso de Estudio",
+          "en": "Case Study"
+        },
+        "tagline": {
+          "es": "Tu proyecto terminado, contado en una página: qué decidiste, qué cambió y de dónde sale cada dato.",
+          "en": "Your finished project in one page: what you decided, what changed and where every number comes from."
+        },
+        "what": {
+          "es": "Toma lo que pidió tu cliente, lo que entregaste y lo que pasó después, y lo convierte en un caso de una página para tu portafolio o tu web: el problema en una frase, la decisión clave con lo que descartaste, lo que entregaste contado, el resultado con su fuente y la frase del cliente o el espacio para pedirla. Si faltan resultados, te pregunta antes de escribir, máximo 5 cosas, y nunca inventa cifras. Además te da una publicación de LinkedIn de hasta 150 palabras, el texto de tres láminas para tus presentaciones y el mensaje para pedirle a tu cliente permiso y una frase.",
+          "en": "It takes what your client asked for, what you delivered and what happened next, and turns it into a one-page case for your portfolio or website: the problem in one sentence, the key decision and what you ruled out, what you delivered, counted, the result with its source and the client's quote or a placeholder to ask for it. If results are missing, it asks before writing, 5 questions at most, and never makes up numbers. You also get a LinkedIn post of up to 150 words, copy for three sales slides and the message to ask your client for permission and a quote."
+        },
+        "you_say": {
+          "es": [
+            "Hazme el caso de estudio de este proyecto",
+            "Terminé un proyecto y no sé cómo contarlo en mi portafolio",
+            "Escríbele a mi cliente para pedirle permiso y una frase"
+          ],
+          "en": [
+            "Write a case study for this project",
+            "Turn this project into a portfolio case",
+            "Draft the message asking my client for a quote"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT",
+            "Lo que pidió el cliente, lo que entregaste y lo que cambió después"
+          ],
+          "en": [
+            "Claude or ChatGPT",
+            "What the client asked for, what you delivered and what changed afterwards"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
+        },
+        "version": "1.1",
+        "chatgpt_note": {
+          "es": "Lo probamos en Claude. En ChatGPT todavía no lo probamos.",
+          "en": "Tested in Claude. Not yet tested in ChatGPT."
+        }
+      }
+    },
+    {
+      "slug": "arto-mes-de-contenido",
+      "status": "published",
+      "ficha": {
+        "slug": "arto-mes-de-contenido",
+        "order": 6,
+        "category": "estrategia-y-negocio",
+        "name": {
+          "es": "Mes de Contenido",
+          "en": "Content Month"
+        },
+        "tagline": {
+          "es": "Tu posicionamiento, convertido en un mes de publicaciones que suenan a tu marca.",
+          "en": "Your positioning, turned into a month of posts that sound like your brand."
+        },
+        "what": {
+          "es": "Parte del posicionamiento de tu marca, o de lo que vendes, a quién y contra quién compites, y saca 3 pilares de contenido que tus competidores no pueden publicar igual. Te dice qué temas no tocar este mes y por qué, y arma 12 publicaciones con su gancho, formato, pilar y llamada a la acción, repartidas en 4 semanas según cuántas veces puedes publicar y qué formatos puedes hacer. Te da una tabla para contar a mano, una cosa por semana, sin metas inventadas, y los textos completos de las primeras 3. Sirve para tu marca o para la de un cliente, y se repite cada mes.",
+          "en": "It starts from your brand's positioning, or from what you sell, to whom and against whom, and pulls 3 content pillars your competitors can't post the same way. It tells you which topics to skip this month and why, and builds 12 posts with their hook, format, pillar and call to action, spread over 4 weeks based on how often you can post and which formats you can make. You get a table to count by hand, one thing per week, with no made-up targets, and the full copy for the first 3. It works for your brand or a client's, and you can run it every month."
+        },
+        "you_say": {
+          "es": [
+            "Arma el mes de contenido de mi marca",
+            "Qué publico este mes con mi posicionamiento",
+            "¿Qué publico ahora?"
+          ],
+          "en": [
+            "Plan next month's content for my brand",
+            "What should my client post this month",
+            "Turn my positioning into a content calendar"
+          ]
+        },
+        "needs": {
+          "es": [
+            "Claude o ChatGPT",
+            "Tu posicionamiento, o qué vendes, a quién y contra quién"
+          ],
+          "en": [
+            "Claude or ChatGPT",
+            "Your positioning, or what you sell, to whom and against whom"
+          ]
+        },
+        "time": {
+          "es": "unos 5 minutos de conversación",
+          "en": "about 5 minutes of conversation"
+        },
+        "version": "1.1",
+        "chatgpt_note": {
+          "es": "Lo probamos en Claude. En ChatGPT todavía no lo probamos.",
+          "en": "Tested in Claude. Not yet tested in ChatGPT."
+        }
+      }
     }
   ]
 }

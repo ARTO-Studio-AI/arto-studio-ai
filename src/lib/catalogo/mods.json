@@ -41,7 +41,7 @@
       "code": "MOD02",
       "slug": "blast-radius",
       "name": "blast-radius",
-      "status": "hidden",
+      "status": "published",
       "releaseDate": "2026-11-25",
       "version": "0.1.0-asai.1",
       "author": "Claude Code DevRel (Anthropic)",
