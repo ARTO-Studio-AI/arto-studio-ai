@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T17:41:19.713Z",
+  "generatedAt": "2026-11-25T12:19:27.705Z",
   "demos": {
     "arto-edit-cortes": {
       "mp4": true,
@@ -118,6 +118,14 @@
     "arto-llamada-a-propuesta": {
       "bytes": 5732,
       "sha256": "6c91c7a10689dbd725dce434b85c1e7989b3c53fc4ff66708b834bb1cb4e2743"
+    },
+    "arto-caso-de-estudio": {
+      "bytes": 11842,
+      "sha256": "55e6d1b96ca2174f6b99afcae446546afed05cbb7c43827781b9aae5f6f19bbb"
+    },
+    "arto-mes-de-contenido": {
+      "bytes": 12708,
+      "sha256": "e8b4388a0813f4fa6a076c20d9fda81f9aa3b34e6c6113cd1531ac09468df854"
     },
     "arto-edit-bundle-1": {
       "bytes": 2566629,

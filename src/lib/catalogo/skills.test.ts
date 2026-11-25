@@ -186,9 +186,13 @@ describe("reglas de descarga", () => {
 });
 
 describe("mods", () => {
-  it("MOD01 publicado con su paquete (18 nov 2026, D37)", () => {
-    expect(MODS.map((m) => [m.code, m.status, m.version])).toEqual([["MOD01", "published", "0.8.6-asai.2"]]);
+  it("MOD01 y MOD02 publicados con su paquete (D37; MOD02: Victor, 25 nov 2026)", () => {
+    expect(MODS.map((m) => [m.code, m.status, m.version])).toEqual([
+      ["MOD01", "published", "0.8.6-asai.2"],
+      ["MOD02", "published", "0.1.0-asai.1"],
+    ]);
     expect(MODS[0].package?.file).toBe("auto-handoff.zip");
+    expect(MODS[1].package?.file).toBe("blast-radius.zip");
   });
 
   it("el paquete es opcional pero, si viene, completo y sin rutas", () => {
