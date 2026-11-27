@@ -71,12 +71,14 @@ export const REVIEWS: readonly Review[] = [
     version: "6.9.0",
     reviewedOn: "2026-11-19",
     href: "/mods/revisiones/rea",
+    poster: { src: "/brand/reviews/rea-poster.jpg", w: 720, h: 1280 },
     copy: {
       es: {
         title: "REA: lo que tienes que saber antes de instalarlo",
         body: "Un mod para Claude Code que le da a tu agente herramientas de ingeniería inversa: entiende cómo funciona una app sin tener su código. Es gratis y de código abierto.",
         verdict: "Nuestra recomendación: úsalo solo en software tuyo, de un cliente que te dio permiso por escrito o de código abierto.",
         cta: "Leer la revisión",
+        video: "Video de 67 s",
         tag: "Mod para Claude Code",
       },
       en: {
@@ -84,6 +86,7 @@ export const REVIEWS: readonly Review[] = [
         body: "A Claude Code mod that gives your agent reverse engineering tools: it figures out how an app works without its source code. Free and open source.",
         verdict: "Our recommendation: use it only on your own software, a client's software with written permission, or open source projects.",
         cta: "Read the review",
+        video: "67 s video",
         tag: "Claude Code mod",
       },
     },
@@ -98,7 +101,7 @@ export const REVIEWS: readonly Review[] = [
         repoLabel: "Repositorio oficial",
         repoUrl: "https://github.com/morluto/rea/tree/e91ddc89f98199a900e5bb7b73c7dbb995f72fb1",
         askLabel: "Pedir la ficha técnica",
-        media: { tag: "Mod para Claude Code", caption: "Video explicativo en producción" },
+        media: { tag: "Mod para Claude Code", caption: "Video explicativo de 67 s", video: { src: "/brand/reviews/rea.mp4", poster: "/brand/reviews/rea-poster.jpg" } },
         crumbs: { home: "Inicio", mods: "Mods revisados" },
         sections: [
           {
@@ -192,7 +195,7 @@ export const REVIEWS: readonly Review[] = [
         repoLabel: "Official repository",
         repoUrl: "https://github.com/morluto/rea/tree/e91ddc89f98199a900e5bb7b73c7dbb995f72fb1",
         askLabel: "Request the technical sheet",
-        media: { tag: "Claude Code mod", caption: "Explainer video in production" },
+        media: { tag: "Claude Code mod", caption: "67 s explainer video (in Spanish)", video: { src: "/brand/reviews/rea.mp4", poster: "/brand/reviews/rea-poster.jpg" } },
         crumbs: { home: "Home", mods: "Reviewed mods" },
         sections: [
           {
